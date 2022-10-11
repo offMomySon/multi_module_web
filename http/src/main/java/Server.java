@@ -1,3 +1,4 @@
+import config.DownloadConfig;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -14,6 +15,9 @@ public class Server {
     public Server() {
         try {
             this.serverSocket = new ServerSocket(8080);
+            DownloadConfig instance = DownloadConfig.instance;
+            String s = instance.toString();
+            log.info("S : `{}`", s);
         } catch (IOException e) {
             throw new RuntimeException(MessageFormat.format("fail to active server. Reason : `{0}`",e.getCause()), e);
         }
@@ -25,7 +29,6 @@ public class Server {
             try (Socket socket = serverSocket.accept();
                  ServletRequest servletRequest = ServletRequest.from(socket);
                  ServletResponse servletResponse = ServletResponse.from(socket)) {
-
 
 
                 HttpRequest httpRequest = servletRequest.readHttpRequest();

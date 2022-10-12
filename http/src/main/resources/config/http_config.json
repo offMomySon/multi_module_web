@@ -1,0 +1,56 @@
+{
+  "port": 4000,
+  "welcomePage": "/welcomePage.html",
+
+  "maxConnection": 5,
+  "waitConnection": 5,
+
+  "resource": "/Users/huni1006/Personal_Project/multi_module_web_server/service/src/resources",
+
+  "baseDownloadRate" : {
+    "ip" : "*.*.*.*",
+    "downloadRate": {
+      "period": 1000,
+      "count": 2
+    }
+  },
+  "baseRestrictFileExtension" : {
+    "ip" : "*.*.*.*",
+    "restrictFileExtension": [
+      ".jpg",
+      ".class"
+    ]
+  },
+
+  "specificIpDownloadRate" : [
+    {
+      "ip": "192.168.0.1",
+      "downloadRate": {
+        "period": 2000,
+        "count": 2
+      }
+    },
+    {
+      "ip": "192.168.0.2",
+      "downloadRate": {
+        "period": 1000,
+        "count": 2
+      }
+    }
+  ],
+  "specificIpRestrictFileExtension" : [
+    {
+      "ip": "192.168.0.1",
+      "restrictFileExtension": [
+        ".jpg"
+      ]
+    },
+    {
+      "ip": "192.168.0.2",
+      "restrictFileExtension": [
+        ".class"
+      ]
+    }
+  ]
+}
+

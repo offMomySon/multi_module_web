@@ -1,4 +1,4 @@
-import config.DownloadConfig;
+import config.Config;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -15,7 +15,7 @@ public class Server {
     public Server() {
         try {
             this.serverSocket = new ServerSocket(8080);
-            DownloadConfig instance = DownloadConfig.instance;
+            Config instance = Config.instance;
             String s = instance.toString();
             log.info("S : `{}`", s);
         } catch (IOException e) {

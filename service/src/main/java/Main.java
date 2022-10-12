@@ -29,6 +29,7 @@ public class Main {
             System.out.println(threadPoolExecutor.getActiveCount());
         }
 
+
         System.out.println("Thread pool.");
         while(max > atomicInteger.get()){
             sleep(Duration.ofMillis(500));

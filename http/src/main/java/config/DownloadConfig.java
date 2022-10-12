@@ -15,23 +15,25 @@ public class DownloadConfig {
     private static final String path = "http/src/main/resources/config/download_config.json";
     public static final DownloadConfig instance = create();
 
-    private final String root;
-    private final Set<String> restrictFileExtension;
-    private final DownloadsRate downloadsRate;
-    private final
+    private final String rootFilePath;
+    private final DownloadSetting baseDownloadSetting;
+    private final Set<DownloadSetting> specificIpDownloadSetting;
 
-    private DownloadConfig(String root, DownloadsRate downloadsRate, Set<String> restrictFileExtension) {
-        this.root = root;
-        this.downloadsRate = downloadsRate;
-        this.restrictFileExtension = restrictFileExtension;
+    public DownloadConfig(String rootFilePath, DownloadSetting baseDownloadSetting, Set<DownloadSetting> specificIpDownloadSetting) {
+        this.rootFilePath = rootFilePath;
+        this.baseDownloadSetting = baseDownloadSetting;
+        this.specificIpDownloadSetting = specificIpDownloadSetting;
+
+        log.info("rootFilePath : `{}`", rootFilePath);
+        log.info("baseDownloadSetting : `{}`", baseDownloadSetting);
+        log.info("specificIpDownloadSetting : `{}`", specificIpDownloadSetting);
     }
 
     @JsonCreator
     private static DownloadConfig ofJackSon(@JsonProperty("root") String root,
-                                            @JsonProperty("period") DownloadsRate downloadsRate,
-                                            @JsonProperty("restrictFileExtension") Set<String> restrictFileExtension) {
-
-        return new DownloadConfig(root, downloadsRate, restrictFileExtension);
+                                            @JsonProperty("base") DownloadSetting baseDownloadSetting,
+                                            @JsonProperty("specificIp") Set<DownloadSetting> specificIpDownloadSetting) {
+        return new DownloadConfig(root, baseDownloadSetting, specificIpDownloadSetting);
     }
 
     private static DownloadConfig create() {

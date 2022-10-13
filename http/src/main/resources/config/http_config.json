@@ -7,20 +7,14 @@
 
   "resource": "/Users/huni1006/Personal_Project/multi_module_web_server/service/src/resources",
 
-  "baseDownloadRate" : {
-    "ip" : "*.*.*.*",
-    "downloadRate": {
-      "period": 1000,
-      "count": 2
-    }
+  "downloadRate": {
+    "period": 1000,
+    "count": 2
   },
-  "baseRestrictFileExtension" : {
-    "ip" : "*.*.*.*",
-    "restrictFileExtension": [
-      ".jpg",
-      ".class"
-    ]
-  },
+  "restrictFileExtension": [
+    ".jpg",
+    ".class"
+  ],
 
   "specificIpDownloadRate" : [
     {

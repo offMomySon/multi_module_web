@@ -1,5 +1,7 @@
 import config.HttpConfig;
+import config.IpAddress;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.MessageFormat;
@@ -19,7 +21,7 @@ public class Server {
             String s = instance.toString();
             log.info("S : `{}`", s);
         } catch (IOException e) {
-            throw new RuntimeException(MessageFormat.format("fail to active server. Reason : `{0}`",e.getCause()), e);
+            throw new RuntimeException(MessageFormat.format("fail to active server. Reason : `{0}`", e.getCause()), e);
         }
     }
 
@@ -27,11 +29,12 @@ public class Server {
         log.info("start server. read to connection..");
         while (true) {
             try (Socket socket = serverSocket.accept();
-                 ServletRequest servletRequest = ServletRequest.from(socket);
-                 ServletResponse servletResponse = ServletResponse.from(socket)) {
+                 ServletResponse servletResponse = ServletResponse.from(socket.getOutputStream())) {
+                ServletRequest servletRequest = ServletRequest.from(socket.getInputStream(), (InetSocketAddress) socket.getRemoteSocketAddress());
 
-
-                HttpRequest httpRequest = servletRequest.readHttpRequest();
+                IpAddress remoteAddress = servletRequest.getRemoteAddress();
+                HttpRequest httpRequest = servletRequest.getHttpRequest();
+                log.info("remoteAddress : `{}`", remoteAddress);
                 log.info("http reuqest : `{}`", httpRequest);
 
                 servletResponse.sendResponse("test");

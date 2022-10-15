@@ -1,56 +1,104 @@
 package request;
 
-import java.io.BufferedInputStream;
+import config.IpAddress;
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
-import lombok.NonNull;
+import java.net.SocketAddress;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import util.ValidateUtil;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static util.IoUtils.createBufferedInputStream;
+import static util.ValidateUtil.*;
 
-public class ServletRequest implements Closeable {
+@Slf4j
+public class ServletRequest {
     private static final int BUFFER_SIZE = 8192;
+    private static final int INCREASE_BUFFER_SIZE_FACTOR = 2;
 
-    private final BufferedInputStream bufferedInputStream;
-    private final byte[] BUFFER = new byte[BUFFER_SIZE];
+    private final HttpRequest httpRequest;
+    private final IpAddress remoteAddress;
 
-    private ServletRequest(@NonNull BufferedInputStream bufferedInputStream) {
-        this.bufferedInputStream = bufferedInputStream;
+    public FilePath getPath() {
+        return httpRequest.getPath();
     }
 
-    public static ServletRequest from(Socket socket) {
+    public String getQueryString() {
+        return httpRequest.getQueryString();
+    }
+
+    public String getVersion() {
+        return httpRequest.getVersion();
+    }
+
+    public Set<String> getHeaderKeys() {
+        return httpRequest.getHeaderKeys();
+    }
+
+    public Set<String> getHeaderValue(String key) {
+        return httpRequest.getHeaderValue(key);
+    }
+
+    public String getBody() {
+        return httpRequest.getBody();
+    }
+
+    public HttpRequest getHttpRequest() {
+        return httpRequest;
+    }
+
+    public IpAddress getRemoteAddress() {
+        return remoteAddress;
+    }
+
+    private ServletRequest(HttpRequest httpRequest, IpAddress remoteAddress) {
+        validateNull(httpRequest);
+        validateNull(remoteAddress);
+
+        this.httpRequest = httpRequest;
+        this.remoteAddress = remoteAddress;
+    }
+
+    public static ServletRequest from(InputStream inputStream, InetSocketAddress socketAddress) {
         try {
-            return new ServletRequest(new BufferedInputStream(socket.getInputStream(), BUFFER_SIZE));
+            String request = readRequest(createBufferedInputStream(inputStream));
+
+            HttpRequest httpRequest = HttpRequest.of(request);
+            IpAddress remoteAddress = IpAddress.from(socketAddress);
+
+            return new ServletRequest(httpRequest, remoteAddress);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public HttpRequest readHttpRequest() {
-        try {
-            return HttpRequest.of(readRequest());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+    private static String readRequest(InputStream inputStream) throws IOException {
+        byte[] BUFFER = new byte[BUFFER_SIZE];
+        byte[] readBytes = new byte[BUFFER_SIZE];
+
+        int nextIndex = 0;
+        while (doesNotEndOfStream(inputStream)) {
+            int readLength = inputStream.read(BUFFER, 0, BUFFER_SIZE);
+
+            boolean needIncreaseBuffer = readBytes.length <= nextIndex + readLength;
+            if (needIncreaseBuffer) {
+                byte[] newReadBytes = Arrays.copyOf(readBytes, readBytes.length * INCREASE_BUFFER_SIZE_FACTOR);
+                readBytes = newReadBytes;
+            }
+
+            System.arraycopy(BUFFER, 0, readBytes, nextIndex, readLength);
+            nextIndex += readLength;
         }
+
+        return new String(readBytes, 0, nextIndex, UTF_8);
     }
 
-    private String readRequest() throws IOException {
-        StringBuilder requestBuilder = new StringBuilder();
-        while (doesNotEndOfStream(bufferedInputStream)) {
-            int readLength = bufferedInputStream.read(BUFFER, 0, BUFFER_SIZE);
-            String partOfRequest = new String(BUFFER, 0, readLength, UTF_8);
-
-            requestBuilder.append(partOfRequest);
-        }
-
-        return requestBuilder.toString();
-    }
-
-    private static boolean doesNotEndOfStream(BufferedInputStream bufferedInputStream) throws IOException {
-        return bufferedInputStream.available() != 0;
-    }
-
-    @Override
-    public void close() throws IOException {
-        bufferedInputStream.close();
+    private static boolean doesNotEndOfStream(InputStream inputStream) throws IOException {
+        return inputStream.available() != 0;
     }
 }

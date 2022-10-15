@@ -2,10 +2,8 @@ package config;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.text.MessageFormat;
-import java.util.Objects;
 import java.util.Set;
-import lombok.NonNull;
+import static util.ValidateUtil.validateNull;
 
 public class IpAddressRestrictFileExtension {
     private final IpAddress ipAddress;
@@ -29,11 +27,4 @@ public class IpAddressRestrictFileExtension {
         validateNull(restrictFileExtensions);
         return new IpAddressRestrictFileExtension(ipAddress, restrictFileExtensions);
     }
-
-    private static <T> void validateNull(T value) {
-        if (Objects.isNull(value)) {
-            throw new RuntimeException(MessageFormat.format("value is null. clazz : `{}`", value.getClass()));
-        }
-    }
-
 }

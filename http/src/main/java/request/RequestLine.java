@@ -5,6 +5,8 @@ import java.util.Objects;
 import lombok.Getter;
 import lombok.ToString;
 import org.apache.commons.lang3.StringUtils;
+import util.ValidateUtil;
+import static util.ValidateUtil.*;
 
 @ToString
 @Getter
@@ -21,18 +23,11 @@ public class RequestLine {
     private final String version;
 
     private RequestLine(Method method, FilePath filePath, String query, String version) {
-        if (Objects.isNull(method)) {
-            throw new IllegalArgumentException(MessageFormat.format("method is wrong value : `{}`", method));
-        }
-        if (Objects.isNull(filePath)) {
-            throw new IllegalArgumentException(MessageFormat.format("filePath is wrong value : `{}`", filePath));
-        }
-        if (Objects.isNull(query)) {
-            throw new IllegalArgumentException(MessageFormat.format("query is wrong value : `{}`", query));
-        }
-        if (StringUtils.isEmpty(version) || StringUtils.isBlank(version)) {
-            throw new IllegalArgumentException(MessageFormat.format("version is wrong value : `{}`", version));
-        }
+        validateNull(method);
+        validateNull(filePath);
+        validateNull(method);
+        validate(query);
+        validate(version);
 
         this.method = method;
         this.filePath = filePath;

@@ -3,6 +3,7 @@ package request;
 import java.io.BufferedOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -18,12 +19,8 @@ public class ServletResponse implements Closeable {
         this.bufferedOutputStream = bufferedOutputStream;
     }
 
-    public static ServletResponse from(Socket socket){
-        try {
-            return new ServletResponse(createBufferedOutputStream(socket.getOutputStream()));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public static ServletResponse from(OutputStream outputStream){
+        return new ServletResponse(createBufferedOutputStream(outputStream));
     }
 
     public void sendResponse(String message) {

@@ -10,11 +10,11 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @ToString
-public class DownloadRate {
+public class Rate {
     private final Duration duration;
     private final int count;
 
-    private DownloadRate(Duration duration, int count) {
+    private Rate(Duration duration, int count) {
         if (Objects.isNull(duration) || duration.isNegative() || duration.isZero()) {
             throw new RuntimeException(MessageFormat.format("Duration is invalid value : `{}", duration));
         }
@@ -27,10 +27,10 @@ public class DownloadRate {
     }
 
     @JsonCreator
-    private static DownloadRate ofJackSon(@JsonProperty("period") long period,
-                                          @JsonProperty("count") int count) {
+    private static Rate ofJackSon(@JsonProperty("period") long period,
+                                  @JsonProperty("count") int count) {
         Duration duration = Duration.ofMillis(period);
 
-        return new DownloadRate(duration, count);
+        return new Rate(duration, count);
     }
 }

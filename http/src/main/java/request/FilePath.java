@@ -1,5 +1,6 @@
 package request;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import java.net.URI;
 import java.text.MessageFormat;
 import java.util.ArrayDeque;
@@ -9,21 +10,23 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.ToString;
 import org.apache.commons.lang3.StringUtils;
+import static util.ValidateUtil.validate;
 
 @ToString
 public class FilePath {
     private static final String PREV_FILE_INDICATOR = "..";
     private static final String PATH_SEPARATOR = "/";
+
     private final String value;
 
     private FilePath(String value) {
-        if (StringUtils.isEmpty(value) || StringUtils.isBlank(value)) {
-            throw new IllegalArgumentException(MessageFormat.format("path is illegalArgument. value = `{0}`", value));
-        }
+        validate(value);
         this.value = value;
     }
 
     public static FilePath of(String path) {
+        validate(path);
+
         String normalizedPath = "";
         try {
             normalizedPath = new URI(path).normalize().getPath();
@@ -51,5 +54,11 @@ public class FilePath {
 
         String actualPath = pathStack.stream().collect(Collectors.joining(PATH_SEPARATOR, PATH_SEPARATOR, ""));
         return new FilePath(actualPath);
+    }
+
+    @JsonCreator
+    private static FilePath ofJackSon(String path) {
+        validate(path);
+        return of(path);
     }
 }

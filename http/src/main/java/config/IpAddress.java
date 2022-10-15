@@ -1,11 +1,16 @@
 package config;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.text.MessageFormat;
 import lombok.NonNull;
-import org.apache.commons.lang3.StringUtils;
+import lombok.ToString;
 import org.apache.http.conn.util.InetAddressUtils;
+import static util.ValidateUtil.validate;
+import static util.ValidateUtil.validateNull;
 
+@ToString
 public class IpAddress {
     private final String value;
 
@@ -20,16 +25,18 @@ public class IpAddress {
         this.value = value;
     }
 
+    public static IpAddress from(InetSocketAddress socketAddress){
+        validateNull(socketAddress);
+
+        String hostAddress = socketAddress.getAddress().getHostAddress();
+
+        return new IpAddress(hostAddress);
+    }
+
     @JsonCreator
     private static IpAddress ofJackSon(@NonNull String value) {
         validate(value);
 
         return new IpAddress(value);
-    }
-
-    private static void validate(String value) {
-        if (StringUtils.isEmpty(value) || StringUtils.isBlank(value)) {
-            throw new RuntimeException(MessageFormat.format("value is invalid : `{}`", value));
-        }
     }
 }

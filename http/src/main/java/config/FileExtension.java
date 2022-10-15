@@ -1,9 +1,8 @@
 package config;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import java.text.MessageFormat;
 import java.util.Objects;
-import org.apache.commons.lang3.StringUtils;
+import static util.ValidateUtil.validate;
 
 public class FileExtension {
     private static final String EXTENSION_STARTER = ".";
@@ -26,12 +25,6 @@ public class FileExtension {
         validate(fileExtension);
 
         return new FileExtension(fileExtension);
-    }
-
-    public static void validate(String value) {
-        if (StringUtils.isEmpty(value) || StringUtils.isBlank(value)) {
-            throw new RuntimeException(MessageFormat.format("value is invalid : `{}`", value));
-        }
     }
 
     @Override

@@ -1,17 +1,12 @@
 package request;
 
 import config.IpAddress;
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketAddress;
 import java.util.Arrays;
 import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import util.ValidateUtil;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static util.IoUtils.createBufferedInputStream;
 import static util.ValidateUtil.*;
@@ -24,7 +19,7 @@ public class ServletRequest {
     private final HttpRequest httpRequest;
     private final IpAddress remoteAddress;
 
-    public FilePath getPath() {
+    public Uri getPath() {
         return httpRequest.getPath();
     }
 

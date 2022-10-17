@@ -1,7 +1,11 @@
+import java.io.IOException;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 
 
-class ServerTest {
+class RequestConnectorTest {
 
     public static String getHttpRequest() {
         return "GET / HTTP/1.1\n" +
@@ -25,8 +29,30 @@ class ServerTest {
 
     @Test
     public void test1() {
+        System.out.println("start server. read to connection..");
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(2, 2, 8000, TimeUnit.MILLISECONDS,
+                                                                       new LinkedBlockingQueue<>(2));
 
+        for (int i = 0; i < 5; i++) {
+            System.out.println("i : " + i);
+            int finalI = i;
+            threadPoolExecutor.execute(() -> doRequest(finalI));
 
+            System.out.println("active size : " + threadPoolExecutor.getActiveCount());
+            int size = threadPoolExecutor.getQueue().size();
+            System.out.println("queue size : " + size);
+
+        }
+    }
+
+    private static void doRequest(int count) {
+        System.out.println("count : " + count);
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println("end");
     }
 
 }

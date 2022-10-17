@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 
 
-class RequestConnectorTest {
+class ClientAccepterTest {
 
     public static String getHttpRequest() {
         return "GET / HTTP/1.1\n" +

@@ -1,6 +1,12 @@
+import java.net.Socket;
+import processor.Multiprocessor;
+
 public class App {
     public static void main(String[] args) {
-        RequestConnector requestConnector = new RequestConnector();
-        requestConnector.run();
+        ClientAccepter clientAccepter = new ClientAccepter();
+
+        Socket socket = clientAccepter.accept();
+        Multiprocessor multiprocessor = new Multiprocessor(socket);
+        multiprocessor.process();
     }
 }

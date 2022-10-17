@@ -23,8 +23,8 @@ public class HttpRequest {
     private final Map<String, Set<String>> headers;
     private final String body;
 
-    public FilePath getPath() {
-        return requestLine.getFilePath();
+    public Uri getPath() {
+        return requestLine.getUri();
     }
 
     public String getQueryString() {

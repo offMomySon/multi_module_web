@@ -1,11 +1,8 @@
 package request;
 
 import java.text.MessageFormat;
-import java.util.Objects;
 import lombok.Getter;
 import lombok.ToString;
-import org.apache.commons.lang3.StringUtils;
-import util.ValidateUtil;
 import static util.ValidateUtil.*;
 
 @ToString
@@ -18,19 +15,19 @@ public class RequestLine {
     private static final int MAX_REQUEST_URI_SIZE = 2;
 
     private final Method method;
-    private final FilePath filePath;
+    private final Uri uri;
     private final String query;
     private final String version;
 
-    private RequestLine(Method method, FilePath filePath, String query, String version) {
+    private RequestLine(Method method, Uri uri, String query, String version) {
         validateNull(method);
-        validateNull(filePath);
+        validateNull(uri);
         validateNull(method);
         validate(query);
         validate(version);
 
         this.method = method;
-        this.filePath = filePath;
+        this.uri = uri;
         this.query = query;
         this.version = version;
     }
@@ -53,7 +50,7 @@ public class RequestLine {
 
         Method method = Method.find(requestLineParts[0])
             .orElseThrow(() -> new IllegalArgumentException(MessageFormat.format("일치하는 method 가 존재하지 않습니다. method = `{}`", requestLineParts[0])));
-        FilePath path = FilePath.of(requestUriParts[0]);
+        Uri path = Uri.of(requestUriParts[0]);
         String query = INIT_INFO;
         if (requestUriParts.length == 2) {
             query = requestUriParts[1];

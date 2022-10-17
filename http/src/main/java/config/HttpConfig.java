@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.Set;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import request.FilePath;
+import request.Uri;
 import static util.ValidateUtil.validateNull;
 
 @Slf4j
@@ -18,29 +18,34 @@ public class HttpConfig {
     public static final HttpConfig instance = create();
 
     private final int port;
-    private final FilePath welcomePage;
+    private final Uri welcomePage;
 
+//    private final Connection connection = new Connection( maxConnection, waitConnection, ke);
     private final int maxConnection;
     private final int waitConnection;
+    private final int keepAliveTime;
 
-    private final FilePath resourceRootPath;
+    private final Uri resourceRootPath;
 
     private final Rate baseDownloadRate;
+
     private final Set<FileExtension> baseRestrictFileExtension;
-
     private final Set<IpAddressRate> specificDownloadRate;
-    private final Set<IpAddressRestrictFileExtension> specificRestrictFileExtension;
 
-    public HttpConfig(int port, FilePath welcomePage, int maxConnection, int waitConnection, FilePath resourceRootPath, Rate baseDownloadRate,
+    private final Set<IpAddressRestrictFileExtension> specificRestrictFileExtension;
+    public HttpConfig(int port, Uri welcomePage, int maxConnection, int waitConnection, int keepAliveTime, Uri resourceRootPath, Rate baseDownloadRate,
                       Set<FileExtension> baseRestrictFileExtension, Set<IpAddressRate> specificDownloadRate, Set<IpAddressRestrictFileExtension> specificRestrictFileExtension) {
         if (port == 0 || port < 0) {
             throw new IllegalArgumentException("port is zero or minus");
         }
-        if (maxConnection == 0 || maxConnection < 0){
+        if (maxConnection == 0 || maxConnection < 0) {
             throw new IllegalArgumentException("maxConnection is zero or minus");
         }
-        if(waitConnection == 0 || waitConnection <0){
-            throw new IllegalArgumentException("waitConnection is zero or minux");
+        if (waitConnection == 0 || waitConnection < 0) {
+            throw new IllegalArgumentException("waitConnection is zero or minus");
+        }
+        if (keepAliveTime == 0 || keepAliveTime < 0){
+            throw new IllegalArgumentException("keepAliveTime is zero or minus");
         }
 
         validateNull(welcomePage);
@@ -54,6 +59,7 @@ public class HttpConfig {
         this.welcomePage = welcomePage;
         this.maxConnection = maxConnection;
         this.waitConnection = waitConnection;
+        this.keepAliveTime = keepAliveTime;
         this.resourceRootPath = resourceRootPath;
         this.baseDownloadRate = baseDownloadRate;
         this.baseRestrictFileExtension = baseRestrictFileExtension;
@@ -63,10 +69,11 @@ public class HttpConfig {
 
     @JsonCreator
     private static HttpConfig ofJackSon(@JsonProperty("port") int port,
-                                        @JsonProperty("welcomePage") FilePath welcomePage,
+                                        @JsonProperty("welcomePage") Uri welcomePage,
                                         @JsonProperty("maxConnection") int maxConnection,
                                         @JsonProperty("waitConnection") int waitConnection,
-                                        @JsonProperty("resource") FilePath rootDirectoryPath,
+                                        @JsonProperty("keepAliveTime") int keepAliveTime,
+                                        @JsonProperty("resource") Uri rootDirectoryPath,
                                         @JsonProperty("downloadRate") Rate baseRate,
                                         @JsonProperty("restrictFileExtension") Set<FileExtension> baseRestrictFileExtension,
                                         @JsonProperty("specificIpDownloadRate") Set<IpAddressRate> specificIpDownloadRate,
@@ -78,7 +85,7 @@ public class HttpConfig {
         validateNull(specificIpDownloadRate);
         validateNull(specificIpRestrictFileExtensions);
 
-        return new HttpConfig(port, welcomePage, maxConnection, waitConnection, rootDirectoryPath, baseRate, baseRestrictFileExtension, specificIpDownloadRate,
+        return new HttpConfig(port, welcomePage, maxConnection, waitConnection, keepAliveTime, rootDirectoryPath, baseRate, baseRestrictFileExtension, specificIpDownloadRate,
                               specificIpRestrictFileExtensions);
     }
 
@@ -91,5 +98,43 @@ public class HttpConfig {
         }
     }
 
+    public int getKeepAliveTime() {
+        return keepAliveTime;
+    }
 
+    public int getPort() {
+        return port;
+    }
+
+    public Uri getWelcomePage() {
+        return welcomePage;
+    }
+
+    public int getMaxConnection() {
+        return maxConnection;
+    }
+
+    public int getWaitConnection() {
+        return waitConnection;
+    }
+
+    public Uri getResourceRootPath() {
+        return resourceRootPath;
+    }
+
+    public Rate getBaseDownloadRate() {
+        return baseDownloadRate;
+    }
+
+    public Set<FileExtension> getBaseRestrictFileExtension() {
+        return baseRestrictFileExtension;
+    }
+
+    public Set<IpAddressRate> getSpecificDownloadRate() {
+        return specificDownloadRate;
+    }
+
+    public Set<IpAddressRestrictFileExtension> getSpecificRestrictFileExtension() {
+        return specificRestrictFileExtension;
+    }
 }

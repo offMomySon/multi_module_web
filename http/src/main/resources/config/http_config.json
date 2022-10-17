@@ -1,9 +1,10 @@
 {
-  "port": 4000,
+  "port": 8080,
   "welcomePage": "/welcomePage.html",
 
-  "maxConnection": 5,
-  "waitConnection": 5,
+  "maxConnection": 1,
+  "waitConnection": 2,
+  "keepAliveTime" : 6000,
 
   "resource": "/Users/huni1006/Personal_Project/multi_module_web_server/service/src/resources",
 

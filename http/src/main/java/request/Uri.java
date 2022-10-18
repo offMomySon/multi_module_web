@@ -6,12 +6,14 @@ import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.Objects;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 import static util.ValidateUtil.validate;
 import static util.ValidateUtil.validateNull;
 
+@Slf4j
 @ToString
 public class Uri {
-    private static String[] NOT_ALLOWED_SPECIAL_CHARACTER = new String[]{"\"", "!", "@", "#", "$", "%", "&", "*", "(", ")", "'", "+", ",", "-", ".", ":", ";", "<", "=", ">", "?", "[", "]", "^", "_", "`", "{", "|", "}", "\\"};
+    private static String[] NOT_ALLOWED_SPECIAL_CHARACTER = new String[]{"\"", "!", "@", "#", "$", "%", "&", "*", "(", ")", "'", "+", ",", ":", ";", "<", "=", ">", "?", "[", "]", "^", "`", "{", "|", "}", "\\"};
     private static String QUERY_DELIMITER = "\\?";
 
     private final Path value;
@@ -40,17 +42,12 @@ public class Uri {
         }
     }
 
-    public static Uri of(String _path) {
+    @JsonCreator
+    public static Uri ofJackSon(String _path) {
         validate(_path);
 
         Path path = Paths.get(_path);
         return new Uri(path);
-    }
-
-    @JsonCreator
-    private static Uri ofJackSon(String path) {
-        validate(path);
-        return of(path);
     }
 
     @Override

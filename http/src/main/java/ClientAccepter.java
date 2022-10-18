@@ -24,15 +24,14 @@ public class ClientAccepter {
     }
 
     public Socket accept() {
-        log.info("start server. ready client connection..");
+        log.info("ready client connection..");
         while (true) {
             Socket socket = null;
             try {
                 socket = serverSocket.accept();
                 return socket;
-            } catch (Exception e) {
+            } catch (IOException e) {
                 validateNull(socket);
-
                 try {
                     socket.close();
                 } catch (IOException ex) {

@@ -50,7 +50,7 @@ public class RequestLine {
 
         Method method = Method.find(requestLineParts[0])
             .orElseThrow(() -> new IllegalArgumentException(MessageFormat.format("일치하는 method 가 존재하지 않습니다. method = `{}`", requestLineParts[0])));
-        Uri path = Uri.of(requestUriParts[0]);
+        Uri path = Uri.ofJackSon(requestUriParts[0]);
         String query = INIT_INFO;
         if (requestUriParts.length == 2) {
             query = requestUriParts[1];

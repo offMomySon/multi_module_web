@@ -33,6 +33,7 @@ public class HttpConfig {
     private final Set<IpAddressRate> specificDownloadRate;
 
     private final Set<IpAddressRestrictFileExtension> specificRestrictFileExtension;
+
     public HttpConfig(int port, Uri welcomePage, int maxConnection, int waitConnection, int keepAliveTime, Uri resourceRootPath, Rate baseDownloadRate,
                       Set<FileExtension> baseRestrictFileExtension, Set<IpAddressRate> specificDownloadRate, Set<IpAddressRestrictFileExtension> specificRestrictFileExtension) {
         if (port == 0 || port < 0) {
@@ -65,6 +66,17 @@ public class HttpConfig {
         this.baseRestrictFileExtension = baseRestrictFileExtension;
         this.specificDownloadRate = specificDownloadRate;
         this.specificRestrictFileExtension = specificRestrictFileExtension;
+
+        log.info("port : `{}`", port);
+        log.info("welcomePage : `{}`", welcomePage);
+        log.info("maxConnection : `{}`", maxConnection);
+        log.info("waitConnection : `{}`", waitConnection);
+        log.info("keepAliveTime : `{}`", keepAliveTime);
+        log.info("resourceRootPath : `{}`", resourceRootPath);
+        log.info("baseDownloadRate : `{}`", baseDownloadRate);
+        log.info("baseRestrictFileExtension : `{}`", baseRestrictFileExtension);
+        log.info("specificDownloadRate : `{}`", specificDownloadRate);
+        log.info("specificRestrictFileExtension : `{}`", specificRestrictFileExtension);
     }
 
     @JsonCreator

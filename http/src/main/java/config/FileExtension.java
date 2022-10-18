@@ -2,8 +2,10 @@ package config;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.Objects;
+import lombok.ToString;
 import static util.ValidateUtil.validate;
 
+@ToString
 public class FileExtension {
     private static final String EXTENSION_STARTER = ".";
 

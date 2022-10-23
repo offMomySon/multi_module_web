@@ -25,6 +25,8 @@ public class HttpConfig {
     private final int waitConnection;
     private final int keepAliveTime;
 
+    private final Set<IpAddress> banIpAddresses;
+
     private final Uri resourceRootPath;
 
     private final Rate baseDownloadRate;
@@ -34,8 +36,12 @@ public class HttpConfig {
 
     private final Set<IpAddressRestrictFileExtension> specificRestrictFileExtension;
 
-    public HttpConfig(int port, Uri welcomePage, int maxConnection, int waitConnection, int keepAliveTime, Uri resourceRootPath, Rate baseDownloadRate,
-                      Set<FileExtension> baseRestrictFileExtension, Set<IpAddressRate> specificDownloadRate, Set<IpAddressRestrictFileExtension> specificRestrictFileExtension) {
+    public Set<IpAddress> getBanIpAddresses() {
+        return banIpAddresses;
+    }
+
+    private HttpConfig(int port, Uri welcomePage, int maxConnection, int waitConnection, int keepAliveTime, Set<IpAddress> banIpAddresses, Uri resourceRootPath, Rate baseDownloadRate,
+                       Set<FileExtension> baseRestrictFileExtension, Set<IpAddressRate> specificDownloadRate, Set<IpAddressRestrictFileExtension> specificRestrictFileExtension) {
         if (port == 0 || port < 0) {
             throw new IllegalArgumentException("port is zero or minus");
         }
@@ -52,6 +58,7 @@ public class HttpConfig {
         validateNull(welcomePage);
         validateNull(resourceRootPath);
         validateNull(baseDownloadRate);
+        validateNull(banIpAddresses);
         validateNull(baseRestrictFileExtension);
         validateNull(specificDownloadRate);
         validateNull(specificRestrictFileExtension);
@@ -61,6 +68,7 @@ public class HttpConfig {
         this.maxConnection = maxConnection;
         this.waitConnection = waitConnection;
         this.keepAliveTime = keepAliveTime;
+        this.banIpAddresses = banIpAddresses;
         this.resourceRootPath = resourceRootPath;
         this.baseDownloadRate = baseDownloadRate;
         this.baseRestrictFileExtension = baseRestrictFileExtension;
@@ -85,6 +93,7 @@ public class HttpConfig {
                                         @JsonProperty("maxConnection") int maxConnection,
                                         @JsonProperty("waitConnection") int waitConnection,
                                         @JsonProperty("keepAliveTime") int keepAliveTime,
+                                        @JsonProperty("banIps") Set<IpAddress> banIpAddresses,
                                         @JsonProperty("resource") Uri rootDirectoryPath,
                                         @JsonProperty("downloadRate") Rate baseRate,
                                         @JsonProperty("restrictFileExtension") Set<FileExtension> baseRestrictFileExtension,
@@ -93,12 +102,12 @@ public class HttpConfig {
         validateNull(welcomePage);
         validateNull(rootDirectoryPath);
         validateNull(baseRate);
+        validateNull(banIpAddresses);
         validateNull(baseRestrictFileExtension);
         validateNull(specificIpDownloadRate);
         validateNull(specificIpRestrictFileExtensions);
 
-        return new HttpConfig(port, welcomePage, maxConnection, waitConnection, keepAliveTime, rootDirectoryPath, baseRate, baseRestrictFileExtension, specificIpDownloadRate,
-                              specificIpRestrictFileExtensions);
+        return new HttpConfig(port, welcomePage, maxConnection, waitConnection, keepAliveTime, banIpAddresses, rootDirectoryPath, baseRate, baseRestrictFileExtension, specificIpDownloadRate, specificIpRestrictFileExtensions);
     }
 
     private static HttpConfig create() {

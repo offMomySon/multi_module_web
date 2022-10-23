@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.text.MessageFormat;
+import java.util.Objects;
 import lombok.NonNull;
 import lombok.ToString;
 import org.apache.http.conn.util.InetAddressUtils;
@@ -38,5 +39,18 @@ public class IpAddress {
         validate(value);
 
         return new IpAddress(value);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IpAddress ipAddress = (IpAddress) o;
+        return Objects.equals(value, ipAddress.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value);
     }
 }

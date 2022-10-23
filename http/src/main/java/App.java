@@ -2,6 +2,7 @@ import config.HttpConfig;
 import config.IpAddress;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
@@ -16,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import processor.Executor;
 import request.Uri;
+import response.Responser;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static util.IoUtils.createBufferedOutputStream;
 
@@ -51,89 +53,52 @@ public class App {
                 log.info("ban ip address.");
 
                 String content = "Ban address.";
-                StringBuilder responseBuilder = new StringBuilder();
-                responseBuilder.append("HTTP/1.1 403 Forbidden").append(END_OF_LINE);
-                responseBuilder.append("Content-Length : ").append(content.length()).append(END_OF_LINE);
-                responseBuilder.append("Content-Type: ").append("text/html").append(END_OF_LINE);
-                responseBuilder.append("Date: ").append(new Date()).append(END_OF_LINE);
-                responseBuilder.append(END_OF_LINE);
-                responseBuilder.append(content).append(END_OF_LINE);
-                String response = responseBuilder.toString();
+                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(content.getBytes(UTF_8));
 
-                BufferedOutputStream bufferedOutputStream = createBufferedOutputStream(socket.getOutputStream());
-                bufferedOutputStream.write(response.getBytes(StandardCharsets.UTF_8));
-                bufferedOutputStream.flush();
+                Responser responser = Responser.build()
+                    .contentType(Responser.ContentType.TEXT)
+                    .status(Responser.Status.SERVICE_UNAVAILABLE)
+                    .socketOutputStream(socket.getOutputStream())
+                    .contentInputStream(byteArrayInputStream)
+                    .build();
+
+                responser.send();
                 return;
             }
 
             boolean doesNotLeftThread = threadPoolExecutor.getMaximumPoolSize() == threadPoolExecutor.getActiveCount() && threadPoolExecutor.getQueue().remainingCapacity() == 0;
             if (doesNotLeftThread) {
-
                 String content = "Does not left Thread.";
-                StringBuilder responseBuilder = new StringBuilder();
-                responseBuilder.append("HTTP/1.1 503 Service Unavailable").append(END_OF_LINE);
-                responseBuilder.append("Content-Length : ").append(content.length()).append(END_OF_LINE);
-                responseBuilder.append("Content-Type: ").append("text/html").append(END_OF_LINE);
-                responseBuilder.append("Date: ").append(new Date()).append(END_OF_LINE);
-                responseBuilder.append(END_OF_LINE);
-                responseBuilder.append(content).append(END_OF_LINE);
-                String response = responseBuilder.toString();
+                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(content.getBytes(UTF_8));
 
-                BufferedOutputStream bufferedOutputStream = createBufferedOutputStream(socket.getOutputStream());
-                bufferedOutputStream.write(response.getBytes(StandardCharsets.UTF_8));
-                bufferedOutputStream.flush();
+                Responser responser = Responser.build()
+                    .contentType(Responser.ContentType.TEXT)
+                    .status(Responser.Status.SERVICE_UNAVAILABLE)
+                    .socketOutputStream(socket.getOutputStream())
+                    .contentInputStream(byteArrayInputStream)
+                    .build();
+
+                responser.send();
                 return;
             }
 
 
-
             threadPoolExecutor.execute(()-> {
                 try {
-                    sendContentResponse(socket, contentFinder, uri);
+                    BufferedInputStream contentInputStream = contentFinder.createInputStream(uri.getValue());
+
+                    Responser responser = Responser.build()
+                        .contentType(Responser.ContentType.TEXT)
+                        .status(Responser.Status.OK)
+                        .socketOutputStream(socket.getOutputStream())
+                        .contentInputStream(contentInputStream)
+                        .build();
+
+                    responser.send();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             });
         }
-    }
-
-    private static void sendContentResponse(Socket socket, ContentFinder contentFinder, Uri uri) throws IOException {
-        // how to send dto to another module.
-        BufferedInputStream contentInputStream = contentFinder.createInputStream(uri.getValue());
-
-        byte[] BUFFER = new byte[BUFFER_SIZE];
-        byte[] readBytes = new byte[BUFFER_SIZE];
-
-        int nextIndex = 0;
-        while (doesNotEndOfStream(contentInputStream)) {
-            int readLength = contentInputStream.read(BUFFER, 0, BUFFER_SIZE);
-
-            boolean needIncreaseBuffer = readBytes.length <= nextIndex + readLength;
-            if (needIncreaseBuffer) {
-                byte[] newReadBytes = Arrays.copyOf(readBytes, readBytes.length * INCREASE_BUFFER_SIZE_FACTOR);
-                readBytes = newReadBytes;
-            }
-
-            System.arraycopy(BUFFER, 0, readBytes, nextIndex, readLength);
-            nextIndex += readLength;
-        }
-        String content = new String(readBytes, 0, nextIndex, UTF_8);
-
-        StringBuilder responseBuilder = new StringBuilder();
-        responseBuilder.append("HTTP/1.1 200 OK").append(END_OF_LINE);
-        responseBuilder.append("Content-Length : ").append(content.length()).append(END_OF_LINE);
-        responseBuilder.append("Content-Type: ").append("text/html").append(END_OF_LINE);
-        responseBuilder.append("Date: ").append(new Date()).append(END_OF_LINE);
-        responseBuilder.append(END_OF_LINE);
-        responseBuilder.append(content).append(END_OF_LINE);
-        String response = responseBuilder.toString();
-
-        BufferedOutputStream bufferedOutputStream = createBufferedOutputStream(socket.getOutputStream());
-        bufferedOutputStream.write(response.getBytes(StandardCharsets.UTF_8));
-        bufferedOutputStream.flush();
-    }
-
-    private static boolean doesNotEndOfStream(InputStream inputStream) throws IOException {
-        return inputStream.available() != 0;
     }
 }

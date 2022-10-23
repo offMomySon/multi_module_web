@@ -10,10 +10,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
+import processor.Executor;
+import processor.ExecutorCreator;
 import processor.MultiThreadExecutor;
 import processor.NotThreadExecutor;
 import request.Uri;
 import response.Responser;
+import util.ContentFinder;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 
@@ -24,8 +27,7 @@ public class App {
     private static final int BUFFER_SIZE = 8192;
     private static final int INCREASE_BUFFER_SIZE_FACTOR = 2;
 
-    private static final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(5, 5, 500000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue(10));
-
+    private static final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(5, 5, 500000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(10));
 
     public static void main(String[] args) throws IOException {
         ClientAccepter clientAccepter = new ClientAccepter();
@@ -41,54 +43,10 @@ public class App {
             Uri uri = requestParser.getUri();
             IpAddress remoteAddress = requestParser.getRemoteAddress();
 
-            Set<IpAddress> banIpAddresses = HttpConfig.instance.getBanIpAddresses();
-            boolean isBanIpAddress = banIpAddresses.contains(remoteAddress);
-            if (isBanIpAddress) {
-                log.info("ban ip address.");
+            ExecutorCreator executorCreator = new ExecutorCreator(HttpConfig.instance.getBanIpAddresses(), threadPoolExecutor, socket.getOutputStream(), uri);
+            Executor executor = executorCreator.create(remoteAddress);
 
-                String content = "Ban address.";
-                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(content.getBytes(UTF_8));
-
-                Responser responser = Responser.build()
-                    .contentType(Responser.ContentType.TEXT)
-                    .status(Responser.Status.SERVICE_UNAVAILABLE)
-                    .socketOutputStream(socket.getOutputStream())
-                    .contentInputStream(byteArrayInputStream)
-                    .build();
-
-                NotThreadExecutor notThreadExecutor = new NotThreadExecutor();
-                notThreadExecutor.execute(responser);
-                return;
-            }
-
-            boolean doesNotLeftThread = threadPoolExecutor.getMaximumPoolSize() == threadPoolExecutor.getActiveCount() && threadPoolExecutor.getQueue().remainingCapacity() == 0;
-            if (doesNotLeftThread) {
-                String content = "Does not left Thread.";
-                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(content.getBytes(UTF_8));
-
-                Responser responser = Responser.build()
-                    .contentType(Responser.ContentType.TEXT)
-                    .status(Responser.Status.SERVICE_UNAVAILABLE)
-                    .socketOutputStream(socket.getOutputStream())
-                    .contentInputStream(byteArrayInputStream)
-                    .build();
-
-                NotThreadExecutor notThreadExecutor = new NotThreadExecutor();
-                notThreadExecutor.execute(responser);
-                return;
-            }
-
-            BufferedInputStream contentInputStream = contentFinder.createInputStream(uri.getValue());
-
-            Responser responser = Responser.build()
-                .contentType(Responser.ContentType.TEXT)
-                .status(Responser.Status.OK)
-                .socketOutputStream(socket.getOutputStream())
-                .contentInputStream(contentInputStream)
-                .build();
-
-            MultiThreadExecutor multiThreadExecutor = new MultiThreadExecutor(responser);
-            multiThreadExecutor.execute(responser);
+            executor.execute();
         }
     }
 }

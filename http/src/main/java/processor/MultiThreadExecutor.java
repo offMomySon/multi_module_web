@@ -1,33 +1,44 @@
 package processor;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.io.OutputStream;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
+import request.Uri;
 import response.Responser;
-import util.ValidateUtil;
+import util.ContentFinder;
 import static util.ValidateUtil.*;
 
 @Slf4j
-public class MultiThreadExecutor implements Executor{
-    private final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(5,
-                                                                                 5,
-                                                                                 500000,
-                                                                                 TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(10));
+public class MultiThreadExecutor implements Executor {
+    private static final ContentFinder contentFinder = new ContentFinder();
+    private final ThreadPoolExecutor threadPoolExecutor;
+    private final OutputStream outputStream;
+    private final Uri uri;
 
-    private final Responser responser;
+    public MultiThreadExecutor(ThreadPoolExecutor threadPoolExecutor, OutputStream outputStream, Uri uri) {
+        validateNull(threadPoolExecutor);
+        validateNull(outputStream);
+        validateNull(uri);
 
-    public MultiThreadExecutor(Responser responser) {
-        validateNull(responser);
-        
-        this.responser = responser;
+        this.threadPoolExecutor = threadPoolExecutor;
+        this.outputStream = outputStream;
+        this.uri = uri;
     }
 
-    public void execute(Responser responser) {
-
-        threadPoolExecutor.execute(()-> {
+    public void execute() {
+        threadPoolExecutor.execute(() -> {
             try {
+                BufferedInputStream contentInputStream = contentFinder.createInputStream(uri.getValue());
+
+                Responser responser = Responser.build()
+                    .contentType(Responser.ContentType.TEXT)
+                    .status(Responser.Status.OK)
+                    .socketOutputStream(outputStream)
+                    .contentInputStream(contentInputStream)
+                    .build();
+
                 responser.send();
             } catch (IOException e) {
                 throw new RuntimeException(e);

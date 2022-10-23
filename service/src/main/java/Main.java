@@ -1,45 +1,24 @@
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.time.Duration;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
     public static void main(String[] args) throws InterruptedException, IOException {
-        ServerSocket serverSocket = new ServerSocket(8080);
-        Thread t1 = new Thread(()-> {
-            try {
-                System.out.println("t1 waited.");
-                Socket accept = serverSocket.accept();
-                System.out.println("t1 accepted.");
+        LinkedBlockingQueue linkedBlockingQueue = new LinkedBlockingQueue(10);
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(1, 1, 60000, TimeUnit.MILLISECONDS, linkedBlockingQueue);
 
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+        threadPoolExecutor.execute(()-> sleep(Duration.ofSeconds(10)));
+        threadPoolExecutor.execute(()-> sleep(Duration.ofSeconds(10)));
+        threadPoolExecutor.execute(()-> sleep(Duration.ofSeconds(10)));
+        threadPoolExecutor.execute(()-> sleep(Duration.ofSeconds(10)));
 
-        });
-        Thread t2 = new Thread(()-> {
-            try {
-                System.out.println("t2 waited.");
-                Socket accept = serverSocket.accept();
-                System.out.println("t2 accepted.");
-
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        System.out.println(linkedBlockingQueue.remainingCapacity());
 
 
-        t1.start();
-        t2.start();
 
-        t1.join();
-        t2.join();
 
-        System.out.println("done.");
     }
 
 

@@ -6,6 +6,14 @@
   "waitConnection": 2,
   "keepAliveTime" : 6000,
 
+  "banIps": [
+    "192.168.0.10",
+    "192.168.0.11",
+    "192.168.0.12",
+    "192.168.0.13",
+    "192.168.0.14"
+  ],
+
   "resource": "/Users/huni1006/Personal_Project/multi_module_web_server/service/src/resources",
 
   "downloadRate": {

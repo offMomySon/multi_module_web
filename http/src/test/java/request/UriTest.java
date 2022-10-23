@@ -38,8 +38,8 @@ class UriTest {
     }, delimiter = ',')
     void test1(String _doesNotNormalizedPath, String _normalizedPath) {
         //given
-        Uri uriFromDoesNotNormalizedPath = Uri.ofJackSon(_doesNotNormalizedPath);
-        Uri uriFromNormalizedPath = Uri.ofJackSon(_normalizedPath);
+        Uri uriFromDoesNotNormalizedPath = Uri.from(_doesNotNormalizedPath);
+        Uri uriFromNormalizedPath = Uri.from(_normalizedPath);
 
         //when
         boolean actual = Objects.equals(uriFromDoesNotNormalizedPath, uriFromNormalizedPath);
@@ -73,7 +73,7 @@ class UriTest {
     void test2(String value) {
         //given
         //when
-        Throwable actual = Assertions.catchThrowable(() -> Uri.ofJackSon(value));
+        Throwable actual = Assertions.catchThrowable(() -> Uri.from(value));
 
         //then
         Assertions.assertThat(actual)
@@ -93,7 +93,7 @@ class UriTest {
     void test3(String path) {
         //given
         //when
-        Throwable actual = Assertions.catchThrowable(() -> Uri.ofJackSon(path));
+        Throwable actual = Assertions.catchThrowable(() -> Uri.from(path));
 
         //then
         System.out.println();

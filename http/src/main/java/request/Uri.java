@@ -18,6 +18,10 @@ public class Uri {
 
     private final Path value;
 
+    public Path getValue() {
+        return value;
+    }
+
     private Uri(Path path) {
         validateNull(path);
 
@@ -25,8 +29,6 @@ public class Uri {
 
         String[] splitUri = path.toString().split(QUERY_DELIMITER, 2);
         String uri = splitUri[0];
-
-        validateSpecialCharacter(uri);
 
         this.value = path;
     }
@@ -43,7 +45,11 @@ public class Uri {
     }
 
     @JsonCreator
-    public static Uri ofJackSon(String _path) {
+    private static Uri ofJackson(String _path) {
+        return from(_path);
+    }
+
+    public static Uri from(String _path){
         validate(_path);
 
         Path path = Paths.get(_path);

@@ -14,26 +14,28 @@ import static util.ValidateUtil.validateNull;
 
 @Slf4j
 public class Executor {
-    private final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(HttpConfig.instance.getMaxConnection(),
-                                                                                 HttpConfig.instance.getMaxConnection(),
-                                                                                 HttpConfig.instance.getKeepAliveTime(),
-                                                                                 TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(HttpConfig.instance.getWaitConnection()));
+    private final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(5,
+                                                                                 5,
+                                                                                 500000,
+                                                                                 TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(10));
 
     public void execute(Socket socket, Function<Socket, Runnable> runnableFunction) {
         Runnable runnable = runnableFunction.apply(socket);
 
-        try {
-            threadPoolExecutor.execute(runnable);
-        } catch (RejectedExecutionException e) {
-            try {
-                validateNull(socket);
-
-                log.info("task aborted.. try close socket.");
-                socket.close();
-            } catch (IOException ex) {
-                log.info("socket close fail.. ");
-                throw new RuntimeException(ex);
-            }
-        }
+        runnable.run();
+        return;
+//        try {
+//            threadPoolExecutor.execute(runnable);
+//        } catch (RejectedExecutionException e) {
+//            try {
+//                validateNull(socket);
+//
+//                log.info("task aborted.. try close socket.");
+//                socket.close();
+//            } catch (IOException ex) {
+//                log.info("socket close fail.. ");
+//                throw new RuntimeException(ex);
+//            }
+//        }
     }
 }

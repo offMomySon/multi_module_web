@@ -1,6 +1,7 @@
 package response;
 
 import java.io.BufferedOutputStream;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -9,10 +10,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static util.IoUtils.createBufferedOutputStream;
 import static util.ValidateUtil.validateNull;
 
-public class Responser {
+public class Responser implements Closeable {
     private static final String END_OF_LINE = "\r\n";
     private static final int BUFFER_SIZE = 8192;
-    private static final int INCREASE_BUFFER_SIZE_FACTOR = 2;
     private static final String CONTENT_LENGTH_HEADER = "Content-Length : ";
     private static final String DATE_HEADER = "Date : ";
 
@@ -79,6 +79,7 @@ public class Responser {
     private void setHeader(StringBuilder responseBuilder, String content) {
         responseBuilder.append(status.responseLine).append(END_OF_LINE);
         responseBuilder.append(CONTENT_LENGTH_HEADER).append(content.length()).append(END_OF_LINE);
+        responseBuilder.append(contentType.headerContent).append(END_OF_LINE);
         responseBuilder.append(DATE_HEADER).append(new Date()).append(END_OF_LINE);
         responseBuilder.append(END_OF_LINE);
     }
@@ -90,6 +91,12 @@ public class Responser {
 
     public static Builder build() {
         return new Builder();
+    }
+
+    @Override
+    public void close() throws IOException {
+        socketOutputStream.close();
+
     }
 
     public static class Builder {

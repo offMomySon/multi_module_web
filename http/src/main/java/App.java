@@ -1,25 +1,20 @@
 import config.HttpConfig;
 import config.IpAddress;
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
-import processor.Executor;
+import processor.MultiThreadExecutor;
+import processor.NotThreadExecutor;
 import request.Uri;
 import response.Responser;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static util.IoUtils.createBufferedOutputStream;
 
 
 @Slf4j
@@ -34,7 +29,6 @@ public class App {
 
     public static void main(String[] args) throws IOException {
         ClientAccepter clientAccepter = new ClientAccepter();
-        Executor executor = new Executor();
         ContentFinder contentFinder = new ContentFinder();
 
         // 파싱하는 역할.
@@ -62,7 +56,8 @@ public class App {
                     .contentInputStream(byteArrayInputStream)
                     .build();
 
-                responser.send();
+                NotThreadExecutor notThreadExecutor = new NotThreadExecutor();
+                notThreadExecutor.execute(responser);
                 return;
             }
 
@@ -78,27 +73,22 @@ public class App {
                     .contentInputStream(byteArrayInputStream)
                     .build();
 
-                responser.send();
+                NotThreadExecutor notThreadExecutor = new NotThreadExecutor();
+                notThreadExecutor.execute(responser);
                 return;
             }
 
+            BufferedInputStream contentInputStream = contentFinder.createInputStream(uri.getValue());
 
-            threadPoolExecutor.execute(()-> {
-                try {
-                    BufferedInputStream contentInputStream = contentFinder.createInputStream(uri.getValue());
+            Responser responser = Responser.build()
+                .contentType(Responser.ContentType.TEXT)
+                .status(Responser.Status.OK)
+                .socketOutputStream(socket.getOutputStream())
+                .contentInputStream(contentInputStream)
+                .build();
 
-                    Responser responser = Responser.build()
-                        .contentType(Responser.ContentType.TEXT)
-                        .status(Responser.Status.OK)
-                        .socketOutputStream(socket.getOutputStream())
-                        .contentInputStream(contentInputStream)
-                        .build();
-
-                    responser.send();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+            MultiThreadExecutor multiThreadExecutor = new MultiThreadExecutor(responser);
+            multiThreadExecutor.execute(responser);
         }
     }
 }

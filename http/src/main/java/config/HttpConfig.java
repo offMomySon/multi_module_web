@@ -124,6 +124,7 @@ public class HttpConfig {
     }
 
     public int getPort() {
+        log.info("getPort()");
         return port;
     }
 

@@ -5,20 +5,23 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class Main {
-    public static void main(String[] args) throws InterruptedException, IOException {
+    public static void main2(String[] args) throws InterruptedException, IOException {
         LinkedBlockingQueue linkedBlockingQueue = new LinkedBlockingQueue(10);
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(1, 1, 60000, TimeUnit.MILLISECONDS, linkedBlockingQueue);
 
-        threadPoolExecutor.execute(()-> sleep(Duration.ofSeconds(10)));
-        threadPoolExecutor.execute(()-> sleep(Duration.ofSeconds(10)));
-        threadPoolExecutor.execute(()-> sleep(Duration.ofSeconds(10)));
-        threadPoolExecutor.execute(()-> sleep(Duration.ofSeconds(10)));
+        threadPoolExecutor.execute(() -> sleep(Duration.ofSeconds(10)));
+        threadPoolExecutor.execute(() -> sleep(Duration.ofSeconds(10)));
+        threadPoolExecutor.execute(() -> sleep(Duration.ofSeconds(10)));
+        threadPoolExecutor.execute(() -> sleep(Duration.ofSeconds(10)));
 
         System.out.println(linkedBlockingQueue.remainingCapacity());
 
+    }
 
+    public static void main(String[] args) {
+        App app = new App();
 
-
+        app.run();
     }
 
 

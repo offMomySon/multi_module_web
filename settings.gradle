@@ -2,4 +2,10 @@ rootProject.name = 'multi_module_web_server'
 
 include 'service'
 include 'http'
+include 'protocalDecode'
+include 'filter'
+include 'requestMapper'
+include 'dataPersistence'
+include 'protocalEncoder'
+include 'persistence'
 

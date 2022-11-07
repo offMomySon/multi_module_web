@@ -15,9 +15,11 @@ import static util.ValidateUtil.validateNull;
 public class ClientAccepter {
     private final ServerSocket serverSocket;
 
-    public ClientAccepter() {
+    public ClientAccepter(int port) {
+        log.info("port : {}", port);
+
         try {
-            this.serverSocket = new ServerSocket(HttpConfig.instance.getPort());
+            this.serverSocket = new ServerSocket(port);
         } catch (IOException e) {
             throw new RuntimeException(MessageFormat.format("fail to active server. Reason : `{0}`", e.getCause()), e);
         }

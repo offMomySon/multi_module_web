@@ -9,6 +9,16 @@ repositories {
     mavenCentral()
 }
 
+dependencies {
+    implementation project(':protocolDecode')
+    implementation project(':protocolEncoder')
+    implementation project(':filter')
+    implementation project(':requestMapper')
+    implementation project(':persistence')
+
+    implementation project(':http')
+}
+
 subprojects {
     apply plugin: 'java'
 

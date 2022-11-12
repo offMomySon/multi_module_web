@@ -115,7 +115,6 @@ public class HttpConfig {
     private static HttpConfig create() {
         InputStream resourceAsStream = HttpConfig.class.getResourceAsStream(PATH);
         URL resource = HttpConfig.class.getResource(PATH);
-        System.out.println(resource);
 
         ObjectMapper objectMapper = new ObjectMapper();
         try {

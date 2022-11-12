@@ -4,11 +4,9 @@ import java.io.BufferedOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import util.IoUtils;
-import static util.IoUtils.createBufferedOutputStream;
+import static io.IoUtils.createBufferedOutputStream;
 
 public class ServletResponse implements Closeable {
     private static final String END_OF_LINE = "\r\n";

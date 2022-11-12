@@ -3,24 +3,25 @@ package config;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.Set;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import request.Uri;
-import static util.ValidateUtil.validateNull;
+import static validate.ValidateUtil.validateNull;
 
 @Slf4j
 @ToString
 public class HttpConfig {
-    private static final String path = "http/src/main/resources/config/http_config.json";
+    private static final String PATH = "/config/http_config.json";
     public static final HttpConfig instance = create();
 
     private final int port;
     private final Uri welcomePage;
 
-//    private final Connection connection = new Connection( maxConnection, waitConnection, ke);
+    //    private final Connection connection = new Connection( maxConnection, waitConnection, ke);
     private final int maxConnection;
     private final int waitConnection;
     private final int keepAliveTime;
@@ -51,7 +52,7 @@ public class HttpConfig {
         if (waitConnection == 0 || waitConnection < 0) {
             throw new IllegalArgumentException("waitConnection is zero or minus");
         }
-        if (keepAliveTime == 0 || keepAliveTime < 0){
+        if (keepAliveTime == 0 || keepAliveTime < 0) {
             throw new IllegalArgumentException("keepAliveTime is zero or minus");
         }
 
@@ -107,13 +108,18 @@ public class HttpConfig {
         validateNull(specificIpDownloadRate);
         validateNull(specificIpRestrictFileExtensions);
 
-        return new HttpConfig(port, welcomePage, maxConnection, waitConnection, keepAliveTime, banIpAddresses, rootDirectoryPath, baseRate, baseRestrictFileExtension, specificIpDownloadRate, specificIpRestrictFileExtensions);
+        return new HttpConfig(port, welcomePage, maxConnection, waitConnection, keepAliveTime, banIpAddresses, rootDirectoryPath, baseRate, baseRestrictFileExtension, specificIpDownloadRate,
+                              specificIpRestrictFileExtensions);
     }
 
     private static HttpConfig create() {
+        InputStream resourceAsStream = HttpConfig.class.getResourceAsStream(PATH);
+        URL resource = HttpConfig.class.getResource(PATH);
+        System.out.println(resource);
+
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            return objectMapper.readValue(new File(path), HttpConfig.class);
+            return objectMapper.readValue(resourceAsStream, HttpConfig.class);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -124,7 +130,6 @@ public class HttpConfig {
     }
 
     public int getPort() {
-        log.info("getPort()");
         return port;
     }
 

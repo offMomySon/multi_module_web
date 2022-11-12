@@ -1,4 +1,4 @@
-package util;
+package validate;
 
 import java.text.MessageFormat;
 import java.util.Objects;
@@ -11,9 +11,10 @@ public class ValidateUtil {
         }
     }
 
-    public static <T> void validateNull(T value) {
+    public static <T> T validateNull(T value) {
         if (Objects.isNull(value)) {
             throw new RuntimeException(MessageFormat.format("value is null. clazz : `{}`", value.getClass()));
         }
+        return value;
     }
 }

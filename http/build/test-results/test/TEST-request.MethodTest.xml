@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="request.MethodTest" tests="30" skipped="0" failures="0" errors="0" timestamp="2022-11-12T03:50:19" hostname="huni1006ui-MacBookPro-2.local" time="0.066">
+  <properties/>
+  <testcase name="[1] notExistGET" classname="request.MethodTest" time="0.046"/>
+  <testcase name="[2] GETNotExist" classname="request.MethodTest" time="0.0"/>
+  <testcase name="[3] notExistPOST" classname="request.MethodTest" time="0.001"/>
+  <testcase name="[4] POSTNotExist" classname="request.MethodTest" time="0.0"/>
+  <testcase name="[5] notExistPUT" classname="request.MethodTest" time="0.0"/>
+  <testcase name="[6] PUTNotExist" classname="request.MethodTest" time="0.0"/>
+  <testcase name="[7] notExistPATCH" classname="request.MethodTest" time="0.0"/>
+  <testcase name="[8] PATCHNotExist" classname="request.MethodTest" time="0.0"/>
+  <testcase name="[9] notExistDELETE" classname="request.MethodTest" time="0.0"/>
+  <testcase name="[10] DELETENotExist" classname="request.MethodTest" time="0.001"/>
+  <testcase name="[1] GET" classname="request.MethodTest" time="0.0"/>
+  <testcase name="[2] gET" classname="request.MethodTest" time="0.0"/>
+  <testcase name="[3] geT" classname="request.MethodTest" time="0.001"/>
+  <testcase name="[4] POST" classname="request.MethodTest" time="0.001"/>
+  <testcase name="[5] POSt" classname="request.MethodTest" time="0.0"/>
+  <testcase name="[6] POst" classname="request.MethodTest" time="0.0"/>
+  <testcase name="[7] POsT" classname="request.MethodTest" time="0.0"/>
+  <testcase name="[8] PUT" classname="request.MethodTest" time="0.0"/>
+  <testcase name="[9] puT" classname="request.MethodTest" time="0.0"/>
+  <testcase name="[10] PuT" classname="request.MethodTest" time="0.0"/>
+  <testcase name="[11] Put" classname="request.MethodTest" time="0.0"/>
+  <testcase name="[12] PATCH" classname="request.MethodTest" time="0.0"/>
+  <testcase name="[13] PAtCH" classname="request.MethodTest" time="0.0"/>
+  <testcase name="[14] PAtcH" classname="request.MethodTest" time="0.001"/>
+  <testcase name="[15] PAtch" classname="request.MethodTest" time="0.0"/>
+  <testcase name="[16] PaTcH" classname="request.MethodTest" time="0.001"/>
+  <testcase name="[17] DELETE" classname="request.MethodTest" time="0.0"/>
+  <testcase name="[18] DELEtE" classname="request.MethodTest" time="0.0"/>
+  <testcase name="[19] DELete" classname="request.MethodTest" time="0.0"/>
+  <testcase name="[20] DelETe" classname="request.MethodTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

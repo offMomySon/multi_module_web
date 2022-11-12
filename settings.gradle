@@ -6,4 +6,5 @@ include 'protocolEncoder'
 include 'filter'
 include 'requestMapper'
 include 'persistence'
+include 'util'
 

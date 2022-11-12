@@ -3,17 +3,15 @@ package request;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.MessageFormat;
 import java.util.Objects;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import static util.ValidateUtil.validate;
-import static util.ValidateUtil.validateNull;
+import static validate.ValidateUtil.validate;
+import static validate.ValidateUtil.validateNull;
 
 @Slf4j
 @ToString
 public class Uri {
-    private static String[] NOT_ALLOWED_SPECIAL_CHARACTER = new String[]{"\"", "!", "@", "#", "$", "%", "&", "*", "(", ")", "'", "+", ",", ":", ";", "<", "=", ">", "?", "[", "]", "^", "`", "{", "|", "}", "\\"};
     private static String QUERY_DELIMITER = "\\?";
 
     private final Path value;
@@ -33,19 +31,9 @@ public class Uri {
         this.value = path;
     }
 
-    private static void validateSpecialCharacter(String uri) {
-        for (int index = 0; index < NOT_ALLOWED_SPECIAL_CHARACTER.length; index++) {
-            String specialCharacter = NOT_ALLOWED_SPECIAL_CHARACTER[index];
-
-            boolean hasSpecialCharacter = uri.contains(specialCharacter);
-            if(hasSpecialCharacter){
-                throw new RuntimeException(MessageFormat.format("It must not contain special characters. contained : {0}", specialCharacter));
-            }
-        }
-    }
-
     @JsonCreator
     private static Uri ofJackson(String _path) {
+        log.info("[jihun] path : {}", _path);
         return from(_path);
     }
 

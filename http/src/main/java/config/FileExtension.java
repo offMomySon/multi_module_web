@@ -3,7 +3,7 @@ package config;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.Objects;
 import lombok.ToString;
-import static util.ValidateUtil.validate;
+import static validate.ValidateUtil.validate;
 
 @ToString
 public class FileExtension {

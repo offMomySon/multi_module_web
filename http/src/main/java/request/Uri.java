@@ -33,7 +33,6 @@ public class Uri {
 
     @JsonCreator
     private static Uri ofJackson(String _path) {
-        log.info("[jihun] path : {}", _path);
         return from(_path);
     }
 

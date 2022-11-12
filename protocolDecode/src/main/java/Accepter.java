@@ -1,21 +1,15 @@
-import config.HttpConfig;
-import config.IpAddress;
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.MessageFormat;
 import lombok.extern.slf4j.Slf4j;
-import request.HttpRequest;
-import request.ServletRequest;
-import request.ServletResponse;
-import static util.ValidateUtil.validateNull;
+import httpUtils.ValidateUtil;
 
 @Slf4j
-public class ClientAccepter {
+public class Accepter {
     private final ServerSocket serverSocket;
 
-    public ClientAccepter(int port) {
+    public Accepter(int port) {
         log.info("port : {}", port);
 
         try {
@@ -25,21 +19,21 @@ public class ClientAccepter {
         }
     }
 
-    public Socket accept() {
+    public Socket waitAccept() {
         log.info("ready client connection..");
         while (true) {
             Socket socket = null;
             try {
                 socket = serverSocket.accept();
                 return socket;
-            } catch (IOException e) {
-                validateNull(socket);
+            } catch (IOException acceptFail) {
+                ValidateUtil.validateNull(socket);
                 try {
                     socket.close();
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
+                } catch (IOException closeFail) {
+                    throw new RuntimeException(closeFail);
                 }
-                throw new RuntimeException(e);
+                throw new RuntimeException(acceptFail);
             }
         }
     }

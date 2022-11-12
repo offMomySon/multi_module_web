@@ -19,6 +19,8 @@ dependencies {
     implementation project(':http')
 }
 
+jar.enabled(true)
+
 subprojects {
     apply plugin: 'java'
 

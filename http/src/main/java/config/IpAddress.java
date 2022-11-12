@@ -2,14 +2,13 @@ package config;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.text.MessageFormat;
 import java.util.Objects;
 import lombok.NonNull;
 import lombok.ToString;
 import org.apache.http.conn.util.InetAddressUtils;
-import static util.ValidateUtil.validate;
-import static util.ValidateUtil.validateNull;
+import static validate.ValidateUtil.validate;
+import static validate.ValidateUtil.validateNull;
 
 @ToString
 public class IpAddress {

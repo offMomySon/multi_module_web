@@ -1,0 +1,7 @@
+{
+  "port": 8080,
+  "corePoolSize" : 5,
+  "maximumPoolSize" : 5,
+  "keepAliveTime" : 500000
+}
+

@@ -3,7 +3,8 @@ package request;
 import java.text.MessageFormat;
 import lombok.Getter;
 import lombok.ToString;
-import static util.ValidateUtil.*;
+import static validate.ValidateUtil.validate;
+import static validate.ValidateUtil.validateNull;
 
 @ToString
 @Getter

@@ -4,16 +4,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import request.Uri;
-import util.ValidateUtil;
-import static util.IoUtils.creatBufferedReader;
+import static io.IoUtils.creatBufferedReader;
+import static validate.ValidateUtil.validateNull;
 
 public class RequestParser {
     private final Uri uri;
     private final IpAddress remoteAddress;
 
     private RequestParser(Uri uri, IpAddress remoteAddress) {
-        ValidateUtil.validateNull(uri);
-        ValidateUtil.validateNull(remoteAddress);
+        validateNull(uri);
+        validateNull(remoteAddress);
 
         this.uri = uri;
         this.remoteAddress = remoteAddress;

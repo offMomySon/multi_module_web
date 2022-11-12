@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Set;
 import lombok.ToString;
-import static util.ValidateUtil.validateNull;
+import static validate.ValidateUtil.validateNull;
 
 @ToString
 public class IpAddressRestrictFileExtension {

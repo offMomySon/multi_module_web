@@ -7,9 +7,9 @@ import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
+import static io.IoUtils.createBufferedInputStream;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static util.IoUtils.createBufferedInputStream;
-import static util.ValidateUtil.*;
+import static validate.ValidateUtil.validateNull;
 
 @Slf4j
 public class ServletRequest {

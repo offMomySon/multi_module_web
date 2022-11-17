@@ -1,5 +1,6 @@
 //package request;
 //
+//import java.io.FilterOutputStream;
 //import java.util.Objects;
 //import org.assertj.core.api.Assertions;
 //import org.junit.jupiter.api.DisplayName;
@@ -66,6 +67,7 @@
 //        "/path1/../path2/../path3",
 //        "/path1/../path2/../path3/path4",
 //        "/path1/../path2/../path3/path4/path5",
+//        "/path1/../path2/../path3/path4/path5?queryWithSpecialCharacter=test",
 //        "/path1/../path2/../path3/path4/path5?queryWithSpecialCharacter=`",
 //        "/path1/../path2/../path3/path4/path5?queryWithSpecialCharacter=`~!",
 //        "/path1/../path2/../path3/path4/path5?queryWithSpecialCharacter=\"!@#$%&*()'+,-.:;<=>?[]^_`{|}\\"
@@ -96,7 +98,6 @@
 //        Throwable actual = Assertions.catchThrowable(() -> Uri.from(path));
 //
 //        //then
-//        System.out.println();
 //        Assertions.assertThat(actual)
 //            .isInstanceOf(RuntimeException.class);
 //    }

@@ -1,3 +1,5 @@
+package accept;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -6,10 +8,10 @@ import lombok.extern.slf4j.Slf4j;
 import validate.ValidateUtil;
 
 @Slf4j
-public class Accepter {
+public class RequestAcceptor {
     private final ServerSocket serverSocket;
 
-    public Accepter(int port) {
+    public RequestAcceptor(int port) {
         log.info("port : {}", port);
 
         try {

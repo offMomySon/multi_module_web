@@ -16,6 +16,7 @@ public class Config {
     private final Integer maxConnection;
     private final Integer waitConnection;
     private final Long keepAliveTime;
+    private final Integer port;
 
     public Integer getMaxConnection() {
         return maxConnection;
@@ -29,28 +30,36 @@ public class Config {
         return keepAliveTime;
     }
 
-    private Config(Integer maxConnection, Integer waitConnection, Long keepAliveTime) {
+    public Integer getPort() {
+        return port;
+    }
+
+    private Config(Integer maxConnection, Integer waitConnection, Long keepAliveTime, Integer port) {
         this.maxConnection = validateNull(maxConnection);
         this.waitConnection = validateNull(waitConnection);
         this.keepAliveTime = validateNull(keepAliveTime);
+        this.port = validateNull(port);
 
         log.info("maxConnection : `{}`", maxConnection);
         log.info("waitConnection : `{}`", waitConnection);
         log.info("keepAliveTime : `{}`", keepAliveTime);
+        log.info("port : `{}`", port);
     }
 
     @JsonCreator
     private static Config ofJackSon(@JsonProperty("maxConnection") Integer maxConnection,
                                     @JsonProperty("waitConnection") Integer waitConnection,
-                                    @JsonProperty("keepAliveTime") Long keepAliveTime) {
+                                    @JsonProperty("keepAliveTime") Long keepAliveTime,
+                                    @JsonProperty("port") Integer port) {
         validateNull(maxConnection);
         validateNull(waitConnection);
         validateNull(keepAliveTime);
+        validateNull(port);
 
-        return new Config(maxConnection, waitConnection, keepAliveTime);
+        return new Config(maxConnection, waitConnection, keepAliveTime, port);
     }
 
-    private static Config create(){
+    private static Config create() {
         InputStream resourceInputStream = Config.class.getResourceAsStream(PATH);
         try {
             ObjectMapper objectMapper = new ObjectMapper();

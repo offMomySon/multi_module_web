@@ -5,7 +5,7 @@ import structure.HttpHeader;
 import structure.RequestURI;
 import static validate.ValidateUtil.validateNull;
 
-public class DeleteRequest implements Request{
+public class DeleteRequest implements Request {
     private final RequestURI requestURI;
     private final HttpHeader httpHeader;
     private final HttpBody httpBody;

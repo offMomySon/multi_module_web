@@ -1,11 +1,7 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.stream.Collectors;
-import request.GetRequest;
 import request.Request;
-import request.PostRequest;
-import structure.HttpBody;
 import structure.Method;
 import structure.RequestURI;
 import static io.IoUtils.creatBufferedReader;

@@ -13,7 +13,6 @@ import request.GetRequest;
 import request.PostRequest;
 import request.PutRequest;
 import request.Request;
-import validate.ValidateUtil;
 import static validate.ValidateUtil.validateNull;
 
 public enum Method {

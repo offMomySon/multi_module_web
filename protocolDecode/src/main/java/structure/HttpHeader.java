@@ -14,11 +14,12 @@ import static validate.ValidateUtil.validateNull;
 public class HttpHeader {
     private static final String HEADER_LINE_DELIMITER = ":";
     private static final String HEADER_VALUE_DELIMITER = ",";
+    private static final String CONTENT_LENGTH_KEY = "Content-Length";
 
     private final Map<String, Set<String>> headers;
 
-    public boolean isExistKey(String key){
-        return headers.containsKey(key);
+    public int getContentLength() {
+        return Integer.parseInt(getHeaderValue(CONTENT_LENGTH_KEY).stream().collect(Collectors.toUnmodifiableList()).get(0));
     }
 
     public Set<String> getHeaderKeys() {

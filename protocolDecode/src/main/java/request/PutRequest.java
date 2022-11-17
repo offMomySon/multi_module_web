@@ -1,18 +1,18 @@
 package request;
 
+import structure.HttpBody;
 import structure.HttpHeader;
-import structure.Method;
 import structure.RequestURI;
 import static validate.ValidateUtil.validateNull;
 
-public class ReadRequest implements Request {
-    private final Method method;
+public class PutRequest implements Request {
     private final RequestURI requestURI;
     private final HttpHeader httpHeader;
+    private final HttpBody httpBody;
 
-    public ReadRequest(Method method, RequestURI requestURI, HttpHeader httpHeader) {
-        this.method = validateNull(method);
+    public PutRequest(RequestURI requestURI, HttpHeader httpHeader, HttpBody httpBody) {
         this.requestURI = validateNull(requestURI);
         this.httpHeader = validateNull(httpHeader);
+        this.httpBody = validateNull(httpBody);
     }
 }

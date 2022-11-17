@@ -5,6 +5,7 @@ import java.net.Socket;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import request.Request;
 
 
 public class App {
@@ -17,7 +18,7 @@ public class App {
             Socket socket = REQUEST_ACCEPTER.waitAccept();
 
             try {
-                protocolDecoder.decode(socket.getInputStream());
+                Request decode = protocolDecoder.decode(socket.getInputStream());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

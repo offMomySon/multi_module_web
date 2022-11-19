@@ -1,4 +1,4 @@
-package response;
+package encoder;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;

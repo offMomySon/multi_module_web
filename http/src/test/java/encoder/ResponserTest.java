@@ -1,4 +1,4 @@
-package response;
+package encoder;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;

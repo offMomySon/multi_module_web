@@ -10,9 +10,6 @@ repositories {
 }
 
 dependencies {
-    implementation project(':protocolDecode')
-    implementation project(':protocolEncoder')
-    implementation project(':filter')
     implementation project(':requestMapper')
     implementation project(':persistence')
 

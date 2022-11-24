@@ -4,7 +4,6 @@ public enum ContentType {
     TEXT("Content-Type: text/html"),
     JPG("Content-Type: image/jpeg");
 
-
     private final String headerContent;
 
     ContentType(String headerContent) {

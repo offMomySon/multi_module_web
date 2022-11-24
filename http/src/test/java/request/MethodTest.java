@@ -1,11 +1,10 @@
 package request;
 
-import java.util.Optional;
+import dto.Method;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import static org.junit.jupiter.api.Assertions.*;
 
 class MethodTest {
 
@@ -25,14 +24,15 @@ class MethodTest {
     })
     void test(String sMethod){
         //given
-        Optional<Method> method = Method.find(sMethod);
 
         //when
-        boolean actual = method.isEmpty();
+        Throwable actual = Assertions.catchThrowable(() -> {
+            Method.find(sMethod);
+        });
 
         //then
         Assertions.assertThat(actual)
-            .isTrue();
+            .isNotNull();
     }
 
     @ParameterizedTest
@@ -46,12 +46,11 @@ class MethodTest {
     })
     void test1(String sMethod){
         //given
-        Optional<Method> method = Method.find(sMethod);
         //when
-        boolean actual = method.isPresent();
+        Method actual = Method.find(sMethod);
 
         //then
         Assertions.assertThat(actual)
-            .isTrue();
+            .isNotNull();
     }
 }

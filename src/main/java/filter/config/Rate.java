@@ -1,4 +1,4 @@
-package config;
+package filter.config;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

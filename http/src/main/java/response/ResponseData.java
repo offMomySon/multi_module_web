@@ -1,5 +1,7 @@
-package dto;
+package response;
 
+import dto.ContentType;
+import dto.Status;
 import java.io.InputStream;
 import static validate.ValidateUtil.validateNull;
 

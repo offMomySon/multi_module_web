@@ -1,4 +1,4 @@
-package encoder;
+package response.generator;
 
 import dto.ContentType;
 import dto.Status;

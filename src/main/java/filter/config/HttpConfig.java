@@ -1,4 +1,4 @@
-package config;
+package filter.config;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -20,11 +20,6 @@ public class HttpConfig {
 
     private final int port;
     private final Uri welcomePage;
-
-    //    private final Connection connection = new Connection( maxConnection, waitConnection, ke);
-    private final int maxConnection;
-    private final int waitConnection;
-    private final int keepAliveTime;
 
     private final Set<IpAddress> banIpAddresses;
 
@@ -66,9 +61,6 @@ public class HttpConfig {
 
         this.port = port;
         this.welcomePage = welcomePage;
-        this.maxConnection = maxConnection;
-        this.waitConnection = waitConnection;
-        this.keepAliveTime = keepAliveTime;
         this.banIpAddresses = banIpAddresses;
         this.resourceRootPath = resourceRootPath;
         this.baseDownloadRate = baseDownloadRate;
@@ -124,10 +116,6 @@ public class HttpConfig {
         }
     }
 
-    public int getKeepAliveTime() {
-        return keepAliveTime;
-    }
-
     public int getPort() {
         return port;
     }
@@ -136,13 +124,6 @@ public class HttpConfig {
         return welcomePage;
     }
 
-    public int getMaxConnection() {
-        return maxConnection;
-    }
-
-    public int getWaitConnection() {
-        return waitConnection;
-    }
 
     public Uri getResourceRootPath() {
         return resourceRootPath;

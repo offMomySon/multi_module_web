@@ -1,4 +1,4 @@
-package encoder;
+package response.generator;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;

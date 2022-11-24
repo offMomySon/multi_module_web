@@ -3,6 +3,7 @@ package encoder;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
+import response.generator.Responser;
 
 class ResponserTest {
 

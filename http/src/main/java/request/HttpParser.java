@@ -1,16 +1,29 @@
+package request;
+
+import dto.HttpBody;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import request.Request;
-import structure.Method;
-import structure.RequestURI;
+import dto.RequestURI;
+import dto.Method;
+import validate.ValidateUtil;
 import static io.IoUtils.creatBufferedReader;
 import static validate.ValidateUtil.validateNull;
 
-public class ProtocolDecoder {
+public class HttpParser {
     private static final String REQUEST_LINE_DELIMITER = " ";
 
-    public Request decode(InputStream requestInputStream) {
+    private final Method method;
+    private final RequestURI requestURI;
+    private final HttpBody httpBody;
+
+    private HttpParser(Method method, RequestURI requestURI, HttpBody httpBody) {
+        this.method = ValidateUtil.validateNull(method);
+        this.requestURI = ValidateUtil.validateNull(requestURI);
+        this.httpBody = ValidateUtil.validateNull(httpBody);
+    }
+
+    public HttpParser parse(InputStream requestInputStream) {
         validateNull(requestInputStream);
         BufferedReader requestBufferedStream = creatBufferedReader(requestInputStream);
 
@@ -25,7 +38,8 @@ public class ProtocolDecoder {
 
         Method method = Method.find(requestLineElements[0]);
         RequestURI requestURI = RequestURI.from(requestLineElements[1]);
+        HttpBody httpBody = HttpBody.from(requestInputStream);
 
-        return method.createRequest(requestURI, requestInputStream);
+        return new HttpParser(method, requestURI, httpBody);
     }
 }

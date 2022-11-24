@@ -1,4 +1,4 @@
-package structure;
+package dto;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,13 +14,8 @@ import static validate.ValidateUtil.validateNull;
 public class HttpHeader {
     private static final String HEADER_LINE_DELIMITER = ":";
     private static final String HEADER_VALUE_DELIMITER = ",";
-    private static final String CONTENT_LENGTH_KEY = "Content-Length";
 
     private final Map<String, Set<String>> headers;
-
-    public int getContentLength() {
-        return Integer.parseInt(getHeaderValue(CONTENT_LENGTH_KEY).stream().collect(Collectors.toUnmodifiableList()).get(0));
-    }
 
     public Set<String> getHeaderKeys() {
         return headers.keySet().stream().collect(Collectors.toUnmodifiableSet());

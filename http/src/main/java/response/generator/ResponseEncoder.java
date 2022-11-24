@@ -1,9 +1,8 @@
-package encoder;
+package response.generator;
 
 import dto.ContentType;
 import dto.Status;
 import java.io.InputStream;
-import validate.ValidateUtil;
 import static validate.ValidateUtil.*;
 
 public abstract class ResponseEncoder {

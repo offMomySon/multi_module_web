@@ -3,14 +3,11 @@ package request;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.net.URLCodec;
 import static validate.ValidateUtil.validate;
 import static validate.ValidateUtil.validateNull;
 
@@ -41,7 +38,7 @@ public class Uri {
         return from(_path);
     }
 
-    public static Uri from(String _path){
+    public static Uri from(String _path) {
         validate(_path);
 
         try {

@@ -1,11 +1,11 @@
 package request;
 
 import dto.HttpBody;
+import dto.Method;
+import dto.RequestURI;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import dto.RequestURI;
-import dto.Method;
 import validate.ValidateUtil;
 import static io.IoUtils.creatBufferedReader;
 import static validate.ValidateUtil.validateNull;

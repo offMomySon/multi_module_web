@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import static io.IoUtils.createBufferedInputStream;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-class HttpResponserCreatorTest {
+class HttpResponseSenderCreatorTest {
 
     @DisplayName("입력한 content 에 대한 response 를 생성합니다.")
     @Test

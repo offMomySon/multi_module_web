@@ -33,7 +33,7 @@ public class HttpResponseMessageCreator {
 
     public byte[] generateHeader() {
         StringBuilder headerBuilder = new StringBuilder();
-        headerBuilder.append(status.getResponseLine()).append(END_OF_LINE);
+        headerBuilder.append(status.getStatusLine()).append(END_OF_LINE);
         headerBuilder.append(DATE_FORMAT.format(new Date())).append(END_OF_LINE);
         headerBuilder.append(CONTENT_LENGTH_MESSAGE).append(contentLength).append(END_OF_LINE);
         headerBuilder.append(contentType.getHeaderContent()).append(END_OF_LINE);

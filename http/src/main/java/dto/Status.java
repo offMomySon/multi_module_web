@@ -11,7 +11,7 @@ public enum Status {
         this.responseLine = responseLine;
     }
 
-    public String getResponseLine() {
+    public String getStatusLine() {
         return responseLine;
     }
 

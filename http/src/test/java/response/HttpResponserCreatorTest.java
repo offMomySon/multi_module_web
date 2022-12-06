@@ -1,12 +1,11 @@
 package response;
 
 import dto.ContentType;
-import dto.Status;
+import dto.ResponseStatus;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import static io.IoUtils.createBufferedInputStream;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 class HttpResponserCreatorTest {
@@ -15,7 +14,7 @@ class HttpResponserCreatorTest {
     @Test
     void test() {
         //given
-        Status status = Status.OK;
+        ResponseStatus responseStatus = ResponseStatus.OK;
         ContentType contentType = ContentType.TEXT;
         InputStream inputStream = new ByteArrayInputStream("teste".getBytes(UTF_8));
 

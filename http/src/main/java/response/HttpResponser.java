@@ -7,20 +7,18 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import static io.IoUtils.createBufferedInputStream;
 import static io.IoUtils.createBufferedOutputStream;
 import static io.IoUtils.createBufferedWriter;
-import static validate.ValidateUtil.validate;
 import static validate.ValidateUtil.validateNull;
 
 public class HttpResponser {
     private static final String END_OF_LINE = "\r\n";
     private static final String KEY_VALUE_DELIMITER = ":";
-    private static final String VALUE_DELIMITER = ";";
+    private static final String VALUE_DELIMITER = ", ";
 
     private final byte[] BUFFER = new byte[8192];
     private final BufferedWriter bufferedWriter;
@@ -43,9 +41,8 @@ public class HttpResponser {
                 bufferedWriter.write(responseStatus.getStatusLine());
             }
 
-            if (Objects.nonNull(headers)){
-                String header = generateHeader(headers);
-                bufferedWriter.write(header);
+            if (Objects.nonNull(headers)) {
+                bufferedWriter.write(generateHeaderMessage(headers));
             }
 
             bufferedWriter.write(END_OF_LINE);
@@ -63,21 +60,13 @@ public class HttpResponser {
         }
     }
 
-    private String generateHeader(Map<String, Set<String>> headers) {
+    private String generateHeaderMessage(Map<String, Set<String>> headers) {
         StringBuilder headerBuilder = new StringBuilder();
 
         for (String key : headers.keySet()) {
-            headerBuilder.append(key).append(KEY_VALUE_DELIMITER);
+            String value = String.join(VALUE_DELIMITER, headers.get(key));
 
-            Iterator<String> iterator = headers.get(key).iterator();
-            while (iterator.hasNext()) {
-                headerBuilder.append(iterator.next());
-
-                if (iterator.hasNext()) {
-                    headerBuilder.append(VALUE_DELIMITER);
-                }
-            }
-            headerBuilder.append(END_OF_LINE);
+            headerBuilder.append(key).append(KEY_VALUE_DELIMITER).append(value).append(END_OF_LINE);
         }
 
         return headerBuilder.toString();

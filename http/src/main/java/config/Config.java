@@ -11,6 +11,7 @@ import static validate.ValidateUtil.*;
 @Slf4j
 public class Config {
     private static final String PATH = "/config.json";
+
     public static final Config INSTANCE = create();
 
     private final Integer maxConnection;

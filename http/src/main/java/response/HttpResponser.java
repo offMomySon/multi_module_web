@@ -25,7 +25,7 @@ public class HttpResponser {
     private final BufferedOutputStream bufferedOutputStream;
 
     private String statusLine;
-    private Map<String, Set<String>> headers;
+    private String headers;
     private BufferedInputStream bodyInputStream;
 
     public HttpResponser(OutputStream outputStream) {
@@ -43,7 +43,7 @@ public class HttpResponser {
             }
 
             if (Objects.nonNull(headers)) {
-                String header = generateHeaderMessage(this.headers);
+                String header = this.headers + END_OF_LINE;
                 bufferedWriter.write(header);
             }
 
@@ -63,24 +63,12 @@ public class HttpResponser {
         }
     }
 
-    private String generateHeaderMessage(Map<String, Set<String>> headers) {
-        StringBuilder headerBuilder = new StringBuilder();
-
-        for (String key : headers.keySet()) {
-            String value = String.join(VALUE_DELIMITER, headers.get(key));
-
-            headerBuilder.append(key).append(KEY_VALUE_DELIMITER).append(value).append(END_OF_LINE);
-        }
-
-        return headerBuilder.toString();
-    }
-
     public HttpResponser responseStatus(String statusLine) {
         this.statusLine = statusLine;
         return this;
     }
 
-    public HttpResponser header(Map<String, Set<String>> headers) {
+    public HttpResponser header(String headers) {
         this.headers = headers;
         return this;
     }

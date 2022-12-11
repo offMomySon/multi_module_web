@@ -1,6 +1,5 @@
 package response;
 
-import dto.ResponseStatus;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
@@ -13,6 +12,7 @@ import java.util.Set;
 import static io.IoUtils.createBufferedInputStream;
 import static io.IoUtils.createBufferedOutputStream;
 import static io.IoUtils.createBufferedWriter;
+import static validate.ValidateUtil.isValid;
 import static validate.ValidateUtil.validateNull;
 
 public class HttpResponser {
@@ -24,7 +24,7 @@ public class HttpResponser {
     private final BufferedWriter bufferedWriter;
     private final BufferedOutputStream bufferedOutputStream;
 
-    private ResponseStatus responseStatus;
+    private String statusLine;
     private Map<String, Set<String>> headers;
     private BufferedInputStream bodyInputStream;
 
@@ -37,15 +37,18 @@ public class HttpResponser {
 
     public void send() {
         try {
-            if (Objects.nonNull(responseStatus)) {
-                bufferedWriter.write(responseStatus.getStatusLine());
+            if (isValid(statusLine)) {
+                String statusLine = this.statusLine + END_OF_LINE;
+                bufferedWriter.write(statusLine);
             }
 
             if (Objects.nonNull(headers)) {
-                bufferedWriter.write(generateHeaderMessage(headers));
+                String header = generateHeaderMessage(this.headers);
+                bufferedWriter.write(header);
             }
 
             bufferedWriter.write(END_OF_LINE);
+            bufferedWriter.flush();
 
             if (Objects.nonNull(bodyInputStream)) {
                 while (bodyInputStream.available() != 0) {
@@ -72,20 +75,22 @@ public class HttpResponser {
         return headerBuilder.toString();
     }
 
-    public HttpResponser responseStatus(ResponseStatus responseStatus) {
-        validateNull(responseStatus);
-        this.responseStatus = responseStatus;
+    public HttpResponser responseStatus(String statusLine) {
+        this.statusLine = statusLine;
         return this;
     }
 
     public HttpResponser header(Map<String, Set<String>> headers) {
-        validateNull(headers);
         this.headers = headers;
         return this;
     }
 
     public HttpResponser body(InputStream bodyInputStream) {
-        validateNull(bodyInputStream);
+        if (Objects.isNull(bodyInputStream)) {
+            this.bodyInputStream = null;
+            return this;
+        }
+
         this.bodyInputStream = createBufferedInputStream(bodyInputStream);
         return this;
     }

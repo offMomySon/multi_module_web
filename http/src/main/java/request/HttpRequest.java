@@ -10,20 +10,20 @@ import validate.ValidateUtil;
 import static io.IoUtils.creatBufferedReader;
 import static validate.ValidateUtil.validateNull;
 
-public class HttpParser {
+public class HttpRequest {
     private static final String REQUEST_LINE_DELIMITER = " ";
 
     private final Method method;
     private final RequestURI requestURI;
     private final HttpBody httpBody;
 
-    private HttpParser(Method method, RequestURI requestURI, HttpBody httpBody) {
+    private HttpRequest(Method method, RequestURI requestURI, HttpBody httpBody) {
         this.method = ValidateUtil.validateNull(method);
         this.requestURI = ValidateUtil.validateNull(requestURI);
         this.httpBody = ValidateUtil.validateNull(httpBody);
     }
 
-    public HttpParser parse(InputStream requestInputStream) {
+    public static HttpRequest parse(InputStream requestInputStream) {
         validateNull(requestInputStream);
         BufferedReader requestBufferedStream = creatBufferedReader(requestInputStream);
 
@@ -40,6 +40,6 @@ public class HttpParser {
         RequestURI requestURI = RequestURI.from(requestLineElements[1]);
         HttpBody httpBody = HttpBody.from(requestInputStream);
 
-        return new HttpParser(method, requestURI, httpBody);
+        return new HttpRequest(method, requestURI, httpBody);
     }
 }

@@ -38,13 +38,11 @@ public class HttpResponser {
     public void send() {
         try {
             if (isValid(statusLine)) {
-                String statusLine = this.statusLine + END_OF_LINE;
                 bufferedWriter.write(statusLine);
             }
 
             if (Objects.nonNull(headers)) {
-                String header = this.headers + END_OF_LINE;
-                bufferedWriter.write(header);
+                bufferedWriter.write(headers);
             }
 
             bufferedWriter.write(END_OF_LINE);

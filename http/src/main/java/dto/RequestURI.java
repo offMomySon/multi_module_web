@@ -5,8 +5,10 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
+import lombok.ToString;
 import static validate.ValidateUtil.validateNull;
 
+@ToString
 public class RequestURI {
     private final Path value;
 

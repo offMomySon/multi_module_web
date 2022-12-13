@@ -22,7 +22,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 // 이떄 예상 출력을 만들기 위해서는 테스트 코드에서 생성하는 방법과, 테스트시트에 수작업으로 미리 만들어두는 방법이 있을것 같다.
 // 첫번째 방법은 HttpResonser 의 역할을 하는 코드를 테스트 코드에서 다시 만드는것이기 때문에 테스트 의미가 없어진다. 왜냐하면 똑같은 로직의 코드의 결과를 비교하는 것이기 때문이다.
 // 그렇다면 두번째 방법은, 비록 수작업이 필요하기 때문에 많은 시간이 소요되지만, HttpResonser 의 코드 동작결과를 목표로하는 결과와 매핑시키는 것이기 때문에 유효하다.
-class HttpResponserTest {
+class HttpResponseTest {
     private static final String END_OF_LINE = "\r\n";
 
     private static final byte[] BUFFER = new byte[8192];
@@ -35,14 +35,14 @@ class HttpResponserTest {
         ByteArrayInputStream bodyInputStream = new ByteArrayInputStream(resourceBytes);
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        HttpResponser httpResponser = new HttpResponser(outputStream);
-        httpResponser
+        HttpResponse httpResponse = new HttpResponse(outputStream);
+        httpResponse
             .responseStatus(responseLine)
             .header(header)
             .body(bodyInputStream);
 
         // when
-        httpResponser.send();
+        httpResponse.send();
         byte[] actual = outputStream.toByteArray();
 
         // then
@@ -58,14 +58,14 @@ class HttpResponserTest {
         ByteArrayInputStream bodyInputStream = Objects.isNull(resourceBytes) || resourceBytes.length == 0 ? null : new ByteArrayInputStream(resourceBytes);
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        HttpResponser httpResponser = new HttpResponser(outputStream);
-        httpResponser
+        HttpResponse httpResponse = new HttpResponse(outputStream);
+        httpResponse
             .responseStatus(responseLine)
             .header(header)
             .body(bodyInputStream);
 
         // when
-        httpResponser.send();
+        httpResponse.send();
         byte[] actual = outputStream.toByteArray();
 
         // then
@@ -81,14 +81,14 @@ class HttpResponserTest {
         ByteArrayInputStream bodyInputStream = new ByteArrayInputStream(resourceBytes);
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        HttpResponser httpResponser = new HttpResponser(outputStream);
-        httpResponser
+        HttpResponse httpResponse = new HttpResponse(outputStream);
+        httpResponse
             .responseStatus(responseLine)
             .header(header)
             .body(bodyInputStream);
 
         // when
-        httpResponser.send();
+        httpResponse.send();
         byte[] actual = outputStream.toByteArray();
 
         // then
@@ -153,7 +153,7 @@ class HttpResponserTest {
     }
 
     private static byte[] getResource(String path) {
-        InputStream resourceAsStream = HttpResponserTest.class.getResourceAsStream(path);
+        InputStream resourceAsStream = HttpResponseTest.class.getResourceAsStream(path);
         try {
             return resourceAsStream.readAllBytes();
         } catch (IOException e) {

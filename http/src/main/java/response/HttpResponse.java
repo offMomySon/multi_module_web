@@ -13,7 +13,7 @@ import static io.IoUtils.createBufferedWriter;
 import static validate.ValidateUtil.isValid;
 import static validate.ValidateUtil.validateNull;
 
-public class HttpResponser {
+public class HttpResponse {
     private static final String END_OF_LINE = "\r\n";
 
     private final byte[] BUFFER = new byte[8192];
@@ -24,7 +24,7 @@ public class HttpResponser {
     private String headers;
     private BufferedInputStream bodyInputStream;
 
-    public HttpResponser(OutputStream outputStream) {
+    public HttpResponse(OutputStream outputStream) {
         validateNull(outputStream);
 
         this.bufferedWriter = createBufferedWriter(outputStream);
@@ -57,17 +57,17 @@ public class HttpResponser {
         }
     }
 
-    public HttpResponser responseStatus(String statusLine) {
+    public HttpResponse responseStatus(String statusLine) {
         this.statusLine = statusLine;
         return this;
     }
 
-    public HttpResponser header(String headers) {
+    public HttpResponse header(String headers) {
         this.headers = headers;
         return this;
     }
 
-    public HttpResponser body(InputStream bodyInputStream) {
+    public HttpResponse body(InputStream bodyInputStream) {
         if (Objects.isNull(bodyInputStream)) {
             this.bodyInputStream = null;
             return this;

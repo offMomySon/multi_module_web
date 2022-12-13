@@ -77,7 +77,6 @@ public class HttpRequest {
 
                 header.put(key, values);
             }
-
         } catch (IOException e) {
             throw new RuntimeException("fail to read request buffer.");
         }
@@ -88,5 +87,4 @@ public class HttpRequest {
     private static boolean isEndOfHeader(String headerLine) {
         return headerLine.isEmpty();
     }
-
 }

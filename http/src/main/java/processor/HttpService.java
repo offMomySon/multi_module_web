@@ -9,6 +9,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
+import request.HttpRequest;
 
 /***
  * 역할.
@@ -39,7 +40,10 @@ public class HttpService {
     }
 
     private void doService() {
-        try(Socket socket =serverSocket.accept() ){
+        try (Socket socket = serverSocket.accept()) {
+
+            HttpRequest httpRequest = HttpRequest.parse(socket.getInputStream());
+
         } catch (IOException e) {
             throw new RuntimeException(MessageFormat.format("I/O fail. Reason : `{0}`", e.getCause()));
         }

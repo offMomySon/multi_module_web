@@ -5,13 +5,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.MessageFormat;
 import lombok.extern.slf4j.Slf4j;
 import static validate.ValidateUtil.*;
 
 @Slf4j
 public class Config {
     private static final String PATH = "/config.json";
-
     public static final Config INSTANCE = create();
 
     private final Integer maxConnection;
@@ -66,7 +66,7 @@ public class Config {
             ObjectMapper objectMapper = new ObjectMapper();
             return objectMapper.readValue(resourceInputStream, Config.class);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(MessageFormat.format("fail to create config class. reason `{0}`", e.getCause()), e);
         }
     }
 }

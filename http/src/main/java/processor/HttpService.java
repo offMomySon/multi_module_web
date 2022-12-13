@@ -1,7 +1,9 @@
 package processor;
 
 import config.Config;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.MessageFormat;
@@ -10,6 +12,11 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import request.HttpRequest;
+import response.HttpResponse;
+import response.ResponseStatus;
+import validate.ValidateUtil;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static validate.ValidateUtil.*;
 
 /***
  * 역할.
@@ -33,19 +40,41 @@ public class HttpService {
     }
 
     public Socket start() {
-        log.info("ready client connection..");
-        while (true) {
-            doService();
+        log.info("start server.");
+
+        try{
+            while (true) {
+                log.info("Ready client connection..");
+                Socket socket = serverSocket.accept();
+
+                log.info("load task.");
+                threadPoolExecutor.execute(new Task(socket));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(MessageFormat.format("I/O fail. Reason : `{0}`", e.getCause()));
         }
     }
 
-    private void doService() {
-        try (Socket socket = serverSocket.accept()) {
+    private static class Task implements Runnable {
+        private final Socket socket;
 
-            HttpRequest httpRequest = HttpRequest.parse(socket.getInputStream());
+        public Task(Socket socket) {
+            this.socket = validateNull(socket);
+        }
 
-        } catch (IOException e) {
-            throw new RuntimeException(MessageFormat.format("I/O fail. Reason : `{0}`", e.getCause()));
+        @Override
+        public void run() {
+            try(socket){
+                HttpResponse httpResponse = new HttpResponse(socket.getOutputStream());
+
+                ByteArrayInputStream inputStream = new ByteArrayInputStream("test body message".getBytes(UTF_8));
+
+                httpResponse.header(ResponseStatus.OK.getStatusLine())
+                    .body(inputStream)
+                    .send();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

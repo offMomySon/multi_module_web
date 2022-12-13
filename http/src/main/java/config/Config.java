@@ -41,10 +41,10 @@ public class Config {
         this.keepAliveTime = validateNull(keepAliveTime);
         this.port = validateNull(port);
 
-        log.info("maxConnection : `{}`", maxConnection);
-        log.info("waitConnection : `{}`", waitConnection);
-        log.info("keepAliveTime : `{}`", keepAliveTime);
-        log.info("port : `{}`", port);
+        log.info("maxConnection : `{}`", this.maxConnection);
+        log.info("waitConnection : `{}`", this.waitConnection);
+        log.info("keepAliveTime : `{}`", this.keepAliveTime);
+        log.info("port : `{}`", this.port);
     }
 
     @JsonCreator

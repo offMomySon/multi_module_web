@@ -1,7 +1,5 @@
 package request;
 
-import dto.Method;
-import dto.RequestURI;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,7 +11,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.Getter;
-import org.apache.commons.lang3.StringUtils;
 import static io.IoUtils.creatBufferedReader;
 import static io.IoUtils.createBufferedInputStream;
 import static validate.ValidateUtil.validateNull;

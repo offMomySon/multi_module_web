@@ -1,4 +1,4 @@
-package dto;
+package request;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
@@ -11,6 +11,6 @@ public enum Method {
         return Arrays.stream(values())
             .filter(value -> StringUtils.equalsIgnoreCase(value.name(), name))
             .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException(MessageFormat.format("Not exist method. name = `{}`", name)));
+            .orElseThrow(() -> new IllegalArgumentException(MessageFormat.format("Not exist method. name = `{0}`", name)));
     }
 }

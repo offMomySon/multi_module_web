@@ -1,4 +1,4 @@
-package dto;
+package request;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -26,7 +26,7 @@ public class RequestURI {
             URI uri = new URI(requestUri);
             requestUri = uri.getPath();
         } catch (URISyntaxException e) {
-            throw new RuntimeException(MessageFormat.format("uri syntax 가 올바르지 않습니다. e : `{}`", e));
+            throw new RuntimeException(MessageFormat.format("uri syntax 가 올바르지 않습니다. e : `{0}`", e));
         }
 
         Path path = Paths.get(requestUri);

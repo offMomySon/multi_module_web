@@ -69,8 +69,8 @@ public class HttpRequest {
 
                 String[] splitHeaderLine = headerLine.split(HEADER_KEY_VALUE_DELIMITER, 2);
 
-                String key = splitHeaderLine[0];
-                Set<String> values = Arrays.stream(splitHeaderLine[1].split(HEADER_VALUE_DELIMITER)).collect(Collectors.toUnmodifiableSet());
+                String key = splitHeaderLine[0].trim();
+                Set<String> values = Arrays.stream(splitHeaderLine[1].split(HEADER_VALUE_DELIMITER)).map(String::trim).collect(Collectors.toUnmodifiableSet());
 
                 header.put(key, values);
             }

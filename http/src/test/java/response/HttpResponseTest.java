@@ -37,7 +37,7 @@ class HttpResponseTest {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         HttpResponse httpResponse = new HttpResponse(outputStream);
         httpResponse
-            .responseStatus(responseLine)
+            .status(responseLine)
             .header(header)
             .body(bodyInputStream);
 
@@ -60,7 +60,7 @@ class HttpResponseTest {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         HttpResponse httpResponse = new HttpResponse(outputStream);
         httpResponse
-            .responseStatus(responseLine)
+            .status(responseLine)
             .header(header)
             .body(bodyInputStream);
 
@@ -83,7 +83,7 @@ class HttpResponseTest {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         HttpResponse httpResponse = new HttpResponse(outputStream);
         httpResponse
-            .responseStatus(responseLine)
+            .status(responseLine)
             .header(header)
             .body(bodyInputStream);
 

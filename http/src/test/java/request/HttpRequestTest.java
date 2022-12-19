@@ -52,6 +52,9 @@ class HttpRequestTest {
         HttpRequest httpRequest = HttpRequest.parse(byteArrayInputStream);
         BufferedInputStream bodyInputStream = httpRequest.getBodyInputStream();
 
+        Map<String, Set<String>> header = httpRequest.getHeader();
+        System.out.println(header);
+
         //when
         byte[] readBytes = bodyInputStream.readAllBytes();
         String actual = new String(readBytes);

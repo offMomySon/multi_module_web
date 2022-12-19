@@ -31,15 +31,27 @@ dependencies {
 
 jar.enabled(true)
 
-sourceSets {
-    main {
-        resources {
-            srcDirs += [
-                '../http/src/main/resources',
-            ]
-        }
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    manifest {
+        attributes "Main-Class": "com.main.App"
+    }
+
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
+
+//sourceSets {
+//    main {
+//        resources {
+//            srcDirs += [
+//                '../http/src/main/resources',
+//            ]
+//        }
+//    }
+//}
 
 subprojects {
     apply plugin: 'java'

@@ -14,7 +14,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import vo.HttpResponse;
-import vo.ResponseStatus;
+import vo.HttpStatus;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 // 테스트는 입력에대한 출력과 예상되는 출력의 동일성을 확인하는 과정이다.
@@ -99,15 +99,15 @@ class HttpResponseTest {
 
     private static Stream<Arguments> provideStatusAndHeaderAndBody() {
         return Stream.of(
-            Arguments.of(ResponseStatus.OK.getStatusLine(),
+            Arguments.of(HttpStatus.OK.getStatusMessage(),
                          "content : jpg/image\r\ntestHeader : 11 ; 22\r\n", "test body".getBytes(UTF_8),
                          "HTTP/1.1 200 OK\r\ncontent : jpg/image\r\ntestHeader : 11 ; 22\r\n\r\ntest body"
             ),
-            Arguments.of(ResponseStatus.OK.getStatusLine(),
+            Arguments.of(HttpStatus.OK.getStatusMessage(),
                          "content : jpg/image\r\ncontent-Length : 10\r\ntestHeader : 11 ; 22\r\n", "test body2".getBytes(UTF_8),
                          "HTTP/1.1 200 OK\r\ncontent : jpg/image\r\ncontent-Length : 10\r\ntestHeader : 11 ; 22\r\n\r\ntest body2"
             ),
-            Arguments.of(ResponseStatus.OK.getStatusLine(),
+            Arguments.of(HttpStatus.OK.getStatusMessage(),
                          "content : video/mp4\r\ncontent-Length : 19999\r\ntestHeader : 11 ; 22\r\n", "test body3".getBytes(UTF_8),
                          "HTTP/1.1 200 OK\r\ncontent : video/mp4\r\ncontent-Length : 19999\r\ntestHeader : 11 ; 22\r\n\r\ntest body3")
         );
@@ -115,13 +115,13 @@ class HttpResponseTest {
 
     private static Stream<Arguments> provideHeaderElementsWithNull() {
         return Stream.of(
-            Arguments.of(ResponseStatus.OK.getStatusLine(), "content : sdf\r\ntestHedaer : 11;22\r\n", "".getBytes(UTF_8),
+            Arguments.of(HttpStatus.OK.getStatusMessage(), "content : sdf\r\ntestHedaer : 11;22\r\n", "".getBytes(UTF_8),
                          "HTTP/1.1 200 OK\r\ncontent : sdf\r\ntestHedaer : 11;22\r\n\r\n"),
-            Arguments.of(ResponseStatus.OK.getStatusLine(), "content : sdf\r\n", null,
+            Arguments.of(HttpStatus.OK.getStatusMessage(), "content : sdf\r\n", null,
                          "HTTP/1.1 200 OK\r\ncontent : sdf\r\n\r\n"),
-            Arguments.of(ResponseStatus.OK.getStatusLine(), null, "test body1".getBytes(UTF_8),
+            Arguments.of(HttpStatus.OK.getStatusMessage(), null, "test body1".getBytes(UTF_8),
                          "HTTP/1.1 200 OK\r\n\r\ntest body1"),
-            Arguments.of(ResponseStatus.OK.getStatusLine(), null, null,
+            Arguments.of(HttpStatus.OK.getStatusMessage(), null, null,
                          "HTTP/1.1 200 OK\r\n\r\n"),
             Arguments.of(null, "content : jpg/image\r\ntestHedaer : 11, 22\r\n", "test body1".getBytes(UTF_8),
                          "content : jpg/image\r\ntestHedaer : 11, 22\r\n\r\ntest body1"),
@@ -136,17 +136,17 @@ class HttpResponseTest {
 
     private static Stream<Arguments> provideBinaryFileBytes() {
         return Stream.of(
-            Arguments.of(ResponseStatus.OK.getStatusLine(),
+            Arguments.of(HttpStatus.OK.getStatusMessage(),
                          "content : jpg/image\r\ntestHeader : 11 ; 22\r\n",
                          getResource("/testJPG.jpg"),
                          combine("HTTP/1.1 200 OK\r\ncontent : jpg/image\r\ntestHeader : 11 ; 22\r\n\r\n".getBytes(UTF_8), getResource("/testJPG.jpg"))
             ),
-            Arguments.of(ResponseStatus.OK.getStatusLine(),
+            Arguments.of(HttpStatus.OK.getStatusMessage(),
                          "content : jpg/image\r\ntestHeader : 11 ; 22\r\n",
                          getResource("/testJPG.jpg"),
                          combine("HTTP/1.1 200 OK\r\ncontent : jpg/image\r\ntestHeader : 11 ; 22\r\n\r\n".getBytes(UTF_8), getResource("/testJPG.jpg"))
             ),
-            Arguments.of(ResponseStatus.OK.getStatusLine(),
+            Arguments.of(HttpStatus.OK.getStatusMessage(),
                          "content : jpg/image\r\ntestHeader : 11 ; 22\r\n",
                          getResource("/testJPG.jpg"),
                          combine("HTTP/1.1 200 OK\r\ncontent : jpg/image\r\ntestHeader : 11 ; 22\r\n\r\n".getBytes(UTF_8), getResource("/testJPG.jpg"))

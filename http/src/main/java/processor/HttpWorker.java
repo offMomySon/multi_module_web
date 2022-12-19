@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import vo.HttpMethod;
 import vo.HttpUri;
 import vo.HttpResponse;
-import vo.ResponseStatus;
+import vo.HttpStatus;
 import static io.IoUtils.creatBufferedReader;
 import static io.IoUtils.createBufferedInputStream;
 import static io.IoUtils.createBufferedOutputStream;
@@ -131,7 +131,7 @@ public class HttpWorker implements Runnable {
         try (responseStream; requestStream) {
             // 3. http response send.
             HttpResponse httpResponse = new HttpResponse(responseStream);
-            httpResponse.header(ResponseStatus.OK.getStatusLine())
+            httpResponse.header(HttpStatus.OK.getStatusMessage())
                 .body(new ByteArrayInputStream("test body message\r\n".getBytes(UTF_8)))
                 .send();
         } catch (IOException e) {

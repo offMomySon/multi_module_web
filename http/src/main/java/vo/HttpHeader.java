@@ -18,8 +18,18 @@ public class HttpHeader {
 
     private final Map<String, Set<String>> value;
 
-    public HttpHeader(Map<String, Set<String>> value) {
+    private HttpHeader(Map<String, Set<String>> value) {
         this.value = createFilteredNoneValidAndUnmodifiable(validateNull(value));
+    }
+
+    public Set<String> getKeys() {
+        return value.keySet();
+    }
+
+    public Set<String> getValues(String key) {
+        validate(key);
+
+        return value.get(key);
     }
 
     private static Map<String, Set<String>> createFilteredNoneValidAndUnmodifiable(Map<String, Set<String>> value) {
@@ -40,24 +50,14 @@ public class HttpHeader {
         return Stream.concat(prevValue.stream(), value.stream()).collect(Collectors.toUnmodifiableSet());
     }
 
-    public Set<String> getKeys() {
-        return value.keySet();
-    }
-
-    public Set<String> getValues(String key) {
-        validate(key);
-
-        return value.get(key);
-    }
-
-    public HttpHeader.Builder builder() {
+    public static HttpHeader.Builder builder() {
         return new Builder();
     }
 
-    private static class Builder {
+    public static class Builder {
         private final Map<String, Set<String>> value = new HashMap<>();
 
-        public Builder() {
+        private Builder() {
         }
 
         public Builder append(String headerLine) {

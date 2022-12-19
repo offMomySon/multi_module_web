@@ -8,17 +8,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.SequenceInputStream;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import vo.HttpHeader;
 import vo.HttpMethod;
-import vo.HttpUri;
 import vo.HttpResponse;
 import vo.HttpStatus;
+import vo.HttpUri;
 import static io.IoUtils.creatBufferedReader;
 import static io.IoUtils.createBufferedInputStream;
 import static io.IoUtils.createBufferedOutputStream;
@@ -35,15 +34,34 @@ import static validate.ValidateUtil.validateNull;
 @Slf4j
 public class HttpWorker implements Runnable {
     private static final String REQUEST_LINE_DELIMITER = " ";
-    private static final String HEADER_KEY_VALUE_DELIMITER = ":";
-    private static final String HEADER_VALUE_DELIMITER = ",";
 
     private final BufferedOutputStream responseStream;
 
     private final HttpMethod httpMethod;
     private final HttpUri httpUri;
-    private final Map<String, Set<String>> header;
+    private final HttpHeader httpHeader;
     private final BufferedInputStream requestStream;
+
+    public HttpWorker(OutputStream responseStream, HttpMethod httpMethod, HttpUri httpUri, HttpHeader httpHeader, InputStream requestStream) {
+        this.responseStream = createBufferedOutputStream(validateNull(responseStream));
+
+        this.httpMethod = validateNull(httpMethod);
+        this.httpUri = validateNull(httpUri);
+        this.httpHeader = validateNull(httpHeader);
+        this.requestStream = createBufferedInputStream(validateNull(requestStream));
+    }
+
+    public void run() {
+        try (responseStream; requestStream) {
+            // 3. http response send.
+            HttpResponse httpResponse = new HttpResponse(responseStream);
+            httpResponse.header(HttpStatus.OK.getStatusMessage())
+                .body(new ByteArrayInputStream("test body message\r\n".getBytes(UTF_8)))
+                .send();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public static HttpWorker create(InputStream requestStream, OutputStream responseStream) {
         try {
@@ -57,11 +75,22 @@ public class HttpWorker implements Runnable {
 
             HttpMethod httpMethod = HttpMethod.find(startLineElement[0]);
             HttpUri httpUri = HttpUri.from(startLineElement[1]);
-            Map<String, Set<String>> header = generateHeader(requestReader);
+
+            HttpHeader.Builder httpBuilder = HttpHeader.builder();
+            while (true) {
+                String headerLine = requestReader.readLine();
+
+                if (isEndOfHeader(headerLine)) {
+                    break;
+                }
+
+                httpBuilder.append(headerLine);
+            }
+            HttpHeader httpHeader = httpBuilder.build();
 
             InputStream combinedRequestInputStream = combineInputStream(requestStream, requestReader);
 
-            return new HttpWorker(responseStream, httpMethod, httpUri, header, combinedRequestInputStream);
+            return new HttpWorker(responseStream, httpMethod, httpUri, httpHeader, combinedRequestInputStream);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -71,7 +100,7 @@ public class HttpWorker implements Runnable {
         StringBuilder streamCollector = new StringBuilder();
         char[] buffer = new char[8192];
 
-        while(requestReader.ready()){
+        while (requestReader.ready()) {
             int readLength = requestReader.read(buffer);
             streamCollector.append(buffer, 0, readLength);
         }
@@ -81,61 +110,7 @@ public class HttpWorker implements Runnable {
         return new SequenceInputStream(byteArrayInputStream, requestStream);
     }
 
-    private static Map<String, Set<String>> generateHeader(BufferedReader requestReader) throws IOException {
-        Map<String, Set<String>> header = new HashMap<>();
-        while (true) {
-            String headerLine = requestReader.readLine();
-
-            if (isEndOfHeader(headerLine)) {
-                break;
-            }
-
-            String[] splitHeader = headerLine.split(HEADER_KEY_VALUE_DELIMITER, 2);
-
-            String headerKey = splitHeader[0];
-            Set<String> headerValue = Arrays.stream(splitHeader[1].split(HEADER_VALUE_DELIMITER)).map(String::trim).collect(Collectors.toUnmodifiableSet());
-
-            header.put(headerKey, headerValue);
-        }
-        return header;
-    }
-
     private static boolean isEndOfHeader(String headerLine) {
         return headerLine.isEmpty();
-    }
-
-    public HttpWorker(OutputStream responseStream, HttpMethod httpMethod, HttpUri httpUri, Map<String, Set<String>> header, InputStream requestStream) {
-        this.responseStream = createBufferedOutputStream(validateNull(responseStream));
-
-        this.httpMethod = validateNull(httpMethod);
-        this.httpUri = validateNull(httpUri);
-        this.header = createNewHeader(validateNull(header));
-        this.requestStream = createBufferedInputStream(validateNull(requestStream));
-    }
-
-    private static Map<String, Set<String>> createNewHeader(Map<String, Set<String>> header) {
-        return header.entrySet().stream()
-            .filter(e -> Objects.nonNull(e.getKey()))
-            .map(HttpWorker::createEntryMapExcludeNullValue)
-            .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    private static Map.Entry<String, Set<String>> createEntryMapExcludeNullValue(Map.Entry<String, Set<String>> e) {
-        String key = e.getKey();
-        Set<String> values = e.getValue().stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableSet());
-
-        return Map.entry(key, values);
-    }
-
-    public void run() {
-        try (responseStream; requestStream) {
-            // 3. http response send.
-            HttpResponse httpResponse = new HttpResponse(responseStream);
-            httpResponse.header(HttpStatus.OK.getStatusMessage())
-                .body(new ByteArrayInputStream("test body message\r\n".getBytes(UTF_8)))
-                .send();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 }

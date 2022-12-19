@@ -1,17 +1,23 @@
 package vo;
 
 public enum HttpStatus {
-    FORBIDDEN("403 Forbidden"),
-    SERVICE_UNAVAILABLE("503 Service Unavailable"),
-    OK("200 OK");
+    FORBIDDEN("403", "Forbidden"),
+    SERVICE_UNAVAILABLE("503", "Service Unavailable"),
+    OK("200", "OK");
 
-    private final String statusMessage;
+    private final String code;
+    private final String message;
 
-    HttpStatus(String statusMessage) {
-        this.statusMessage = statusMessage;
+    HttpStatus(String code, String message) {
+        this.code = code;
+        this.message = message;
     }
 
-    public String getStatusMessage() {
-        return statusMessage;
+    public String getCode() {
+        return code;
+    }
+
+    public String getMessage() {
+        return message;
     }
 }

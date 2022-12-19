@@ -3,80 +3,131 @@ package vo;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
+import validate.ValidateUtil;
 import static io.IoUtils.createBufferedInputStream;
 import static io.IoUtils.createBufferedOutputStream;
 import static io.IoUtils.createBufferedWriter;
-import static validate.ValidateUtil.isValid;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static validate.ValidateUtil.validate;
 import static validate.ValidateUtil.validateNull;
 
 public class HttpResponse {
+    private static final String START_LINE_DELIMITER = " ";
     private static final String END_OF_LINE = "\r\n";
 
     private final byte[] BUFFER = new byte[8192];
-    private final BufferedWriter bufferedWriter;
-    private final BufferedOutputStream bufferedOutputStream;
+    private final BufferedWriter responseWriter;
+    private final BufferedOutputStream responseOutputStream;
 
-    private String statusLine;
-    private String headers;
-    private BufferedInputStream bodyInputStream;
+    private String httpVersion;
+    private String status;
+    private String statusMessage;
+    private HttpHeader httpHeader;
+    private BufferedInputStream sourceInputStream;
 
-    public HttpResponse(OutputStream outputStream) {
-        validateNull(outputStream);
+    public HttpResponse(String httpVersion, String status, String statusMessage, HttpHeader httpHeader, InputStream sourceInputStream, OutputStream responseOutputStream) {
+        this.httpVersion = validate(httpVersion);
+        this.status = validate(status);
+        this.statusMessage = validate(statusMessage);
+        this.httpHeader = validateNull(httpHeader);
+        this.sourceInputStream = createBufferedInputStream(validateNull(sourceInputStream));
 
-        this.bufferedWriter = createBufferedWriter(outputStream);
-        this.bufferedOutputStream = createBufferedOutputStream(outputStream);
+        validateNull(responseOutputStream);
+        this.responseWriter = createBufferedWriter(responseOutputStream);
+        this.responseOutputStream = createBufferedOutputStream(responseOutputStream);
     }
 
     public void send() {
         try {
-            if (isValid(statusLine)) {
-                bufferedWriter.write(statusLine);
-            }
+            responseWriter.write(httpVersion);
+            responseWriter.write(START_LINE_DELIMITER);
+            responseWriter.write(status);
+            responseWriter.write(START_LINE_DELIMITER);
+            responseWriter.write(statusMessage);
+            responseWriter.write(END_OF_LINE);
 
-            if (Objects.nonNull(headers)) {
-                bufferedWriter.write(headers);
-            }
+            responseWriter.write(httpHeader.generateHeaderMessage());
+            responseWriter.write(END_OF_LINE);
+            responseWriter.flush();
 
-            bufferedWriter.write(END_OF_LINE);
-            bufferedWriter.flush();
-
-            if (Objects.nonNull(bodyInputStream)) {
-                while (bodyInputStream.available() != 0) {
-                    int read = bodyInputStream.read(BUFFER);
-                    bufferedOutputStream.write(BUFFER, 0, read);
+            if (Objects.nonNull(sourceInputStream)) {
+                while (sourceInputStream.available() != 0) {
+                    int read = sourceInputStream.read(BUFFER);
+                    responseOutputStream.write(BUFFER, 0, read);
                 }
             }
 
-            bufferedOutputStream.flush();
+            responseOutputStream.flush();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public HttpResponse status(String statusLine) {
-        this.statusLine = statusLine;
-        return this;
+
+    public static HttpResponse.Builder builder(){
+        return new Builder();
     }
 
-    public HttpResponse header(String headers) {
-        this.headers = headers;
-        return this;
-    }
+    public static class Builder {
+        private String httpVersion;
+        private String status;
+        private String statusMessage;
+        private HttpHeader httpHeader;
+        private InputStream sourceInputStream;
 
-    public HttpResponse body(InputStream bodyInputStream) {
-        if (Objects.isNull(bodyInputStream)) {
-            this.bodyInputStream = null;
+        private OutputStream responseOutputStream;
+
+        private Builder() {
+        }
+
+        public Builder httpVersion(String httpVersion) {
+            validate(httpVersion);
+            this.httpVersion = httpVersion;
             return this;
         }
 
-        this.bodyInputStream = createBufferedInputStream(bodyInputStream);
-        return this;
+        public Builder status(String status) {
+            validate(status);
+            this.status = status;
+            return this;
+        }
+
+        public Builder statusMessage(String statusMessage) {
+            validate(statusMessage);
+            this.statusMessage = statusMessage;
+            return this;
+        }
+
+        public Builder httpHeader(HttpHeader httpHeader) {
+            validateNull(httpHeader);
+            this.httpHeader = httpHeader;
+            return this;
+        }
+
+        public Builder sourceInputStream(InputStream sourceInputStream) {
+            if (Objects.isNull(sourceInputStream)) {
+                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream("".getBytes(UTF_8));
+                this.sourceInputStream = byteArrayInputStream;
+                return this;
+            }
+
+            this.sourceInputStream = sourceInputStream;
+            return this;
+        }
+
+        public Builder responseOutputStream(OutputStream responseOutputStream){
+            validateNull(responseOutputStream);
+            this.responseOutputStream = responseOutputStream;
+            return this;
+        }
+
+        public HttpResponse build() {
+            return new HttpResponse(this.httpVersion, this.status, this.statusMessage, this.httpHeader, this.sourceInputStream, this.responseOutputStream);
+        }
     }
 }

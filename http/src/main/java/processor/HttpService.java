@@ -41,7 +41,7 @@ public class HttpService {
                 Socket socket = serverSocket.accept();
 
                 log.info("load worker to thread.");
-                threadPoolExecutor.execute(HttpWorker.create(socket.getInputStream(), socket.getOutputStream());
+                threadPoolExecutor.execute(HttpWorker.create(socket.getInputStream(), socket.getOutputStream()));
             } catch (IOException e) {
                 throw new RuntimeException(MessageFormat.format("I/O fail. Reason : `{0}`", e.getCause()));
             }

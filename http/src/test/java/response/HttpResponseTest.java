@@ -13,6 +13,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import vo.HttpResponse;
+import vo.ResponseStatus;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 // 테스트는 입력에대한 출력과 예상되는 출력의 동일성을 확인하는 과정이다.

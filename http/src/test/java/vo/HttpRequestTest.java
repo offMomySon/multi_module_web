@@ -1,4 +1,4 @@
-package request;
+package vo;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;

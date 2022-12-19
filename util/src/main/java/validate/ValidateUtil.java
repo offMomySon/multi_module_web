@@ -12,10 +12,11 @@ public class ValidateUtil {
         return true;
     }
 
-    public static void validate(String value) {
+    public static String validate(String value) {
         if (StringUtils.isEmpty(value) || StringUtils.isBlank(value)) {
             throw new RuntimeException(MessageFormat.format("value is invalid : `{}`", value));
         }
+        return value;
     }
 
     public static <T> T validateNull(T value) {

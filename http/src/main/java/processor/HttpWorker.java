@@ -50,10 +50,10 @@ public class HttpWorker implements Runnable {
     public void run() {
         try (responseStream; requestStream) {
             // 3. http response send.
-            HttpResponse httpResponse = new HttpResponse(responseStream);
-            httpResponse.header(HttpStatus.OK.getStatusMessage())
-                .body(new ByteArrayInputStream("test body message\r\n".getBytes(UTF_8)))
-                .send();
+//            HttpResponse httpResponse = new HttpResponse(responseStream);
+//            httpResponse.header(HttpStatus.OK.getStatusMessage())
+//                .body(new ByteArrayInputStream("test body message\r\n".getBytes(UTF_8)))
+//                .send();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

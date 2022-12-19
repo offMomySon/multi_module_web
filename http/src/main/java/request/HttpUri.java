@@ -9,17 +9,17 @@ import lombok.ToString;
 import static validate.ValidateUtil.validateNull;
 
 @ToString
-public class RequestURI {
+public class HttpUri {
     private final Path value;
 
-    private RequestURI(Path value) {
+    private HttpUri(Path value) {
         validateNull(value);
         value = value.normalize();
 
         this.value = value;
     }
 
-    public static RequestURI from(String requestUri) {
+    public static HttpUri from(String requestUri) {
         validateNull(requestUri);
 
         try {
@@ -31,6 +31,6 @@ public class RequestURI {
 
         Path path = Paths.get(requestUri);
 
-        return new RequestURI(path);
+        return new HttpUri(path);
     }
 }

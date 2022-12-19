@@ -15,6 +15,7 @@ import static validate.ValidateUtil.validateNull;
 public class HttpHeader {
     private static final String HEADER_KEY_VALUE_DELIMITER = ":";
     private static final String HEADER_VALUE_DELIMITER = ",";
+    private static final String END_OF_LINE = "\r\n";
 
     private final Map<String, Set<String>> value;
 
@@ -30,6 +31,24 @@ public class HttpHeader {
         validate(key);
 
         return value.get(key);
+    }
+
+    public String generateHeaderMessage() {
+        return value.entrySet().stream()
+            .map(HttpHeader::generateHeaderLineMessage)
+            .collect(Collectors.joining(END_OF_LINE));
+    }
+
+    private static String generateHeaderLineMessage(Map.Entry<String, Set<String>> headerEntry) {
+        String key = headerEntry.getKey();
+        String values = String.join(HEADER_VALUE_DELIMITER, headerEntry.getValue());
+
+        StringBuilder headerLineMessageBuilder = new StringBuilder();
+        headerLineMessageBuilder.append(key);
+        headerLineMessageBuilder.append(HEADER_KEY_VALUE_DELIMITER);
+        headerLineMessageBuilder.append(values);
+
+        return headerLineMessageBuilder.toString();
     }
 
     private static Map<String, Set<String>> createFilteredNoneValidAndUnmodifiable(Map<String, Set<String>> value) {

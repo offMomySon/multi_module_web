@@ -22,18 +22,18 @@ public class HttpRequest {
     private static final String HEADER_VALUE_DELIMITER = ",";
     private static final String END_OF_LINE = "\r\n";
 
-    private final Method method;
-    private final RequestURI requestURI;
+    private final HttpMethod httpMethod;
+    private final HttpUri httpUri;
     private final Map<String, Set<String>> header;
     private final BufferedInputStream bodyInputStream;
 
-    private HttpRequest(Method method, RequestURI requestURI, Map<String, Set<String>> header, InputStream inputStream) {
+    private HttpRequest(HttpMethod httpMethod, HttpUri httpUri, Map<String, Set<String>> header, InputStream inputStream) {
         Map<String, Set<String>> newHeader = validateNull(header).entrySet().stream()
             .map(e -> Map.entry(e.getKey(), e.getValue().stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableSet())))
             .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        this.method = validateNull(method);
-        this.requestURI = validateNull(requestURI);
+        this.httpMethod = validateNull(httpMethod);
+        this.httpUri = validateNull(httpUri);
         this.header = newHeader;
         this.bodyInputStream = createBufferedInputStream(validateNull(inputStream));
     }
@@ -50,11 +50,11 @@ public class HttpRequest {
             throw new RuntimeException("fail to read request buffer.");
         }
 
-        Method method = Method.find(requestLineElements[0]);
-        RequestURI requestURI = RequestURI.from(requestLineElements[1]);
+        HttpMethod httpMethod = HttpMethod.find(requestLineElements[0]);
+        HttpUri httpUri = HttpUri.from(requestLineElements[1]);
         Map<String, Set<String>> header = parseHeader(reader);
 
-        return new HttpRequest(method, requestURI, header, requestInputStream);
+        return new HttpRequest(httpMethod, httpUri, header, requestInputStream);
     }
 
     private static Map<String, Set<String>> parseHeader(BufferedReader reader) {

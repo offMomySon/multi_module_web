@@ -15,8 +15,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import request.Method;
-import request.RequestURI;
+import request.HttpMethod;
+import request.HttpUri;
 import response.HttpResponse;
 import response.ResponseStatus;
 import static io.IoUtils.creatBufferedReader;
@@ -40,8 +40,8 @@ public class HttpWorker implements Runnable {
 
     private final BufferedOutputStream responseStream;
 
-    private final Method method;
-    private final RequestURI requestURI;
+    private final HttpMethod httpMethod;
+    private final HttpUri httpUri;
     private final Map<String, Set<String>> header;
     private final BufferedInputStream requestStream;
 
@@ -55,13 +55,13 @@ public class HttpWorker implements Runnable {
             String startLine = requestReader.readLine();
             String[] startLineElement = startLine.split(REQUEST_LINE_DELIMITER, 3);
 
-            Method method = Method.find(startLineElement[0]);
-            RequestURI requestURI = RequestURI.from(startLineElement[1]);
+            HttpMethod httpMethod = HttpMethod.find(startLineElement[0]);
+            HttpUri httpUri = HttpUri.from(startLineElement[1]);
             Map<String, Set<String>> header = generateHeader(requestReader);
 
             InputStream combinedRequestInputStream = combineInputStream(requestStream, requestReader);
 
-            return new HttpWorker(responseStream, method, requestURI, header, combinedRequestInputStream);
+            return new HttpWorker(responseStream, httpMethod, httpUri, header, combinedRequestInputStream);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -104,11 +104,11 @@ public class HttpWorker implements Runnable {
         return headerLine.isEmpty();
     }
 
-    public HttpWorker(OutputStream responseStream, Method method, RequestURI requestURI, Map<String, Set<String>> header, InputStream requestStream) {
+    public HttpWorker(OutputStream responseStream, HttpMethod httpMethod, HttpUri httpUri, Map<String, Set<String>> header, InputStream requestStream) {
         this.responseStream = createBufferedOutputStream(validateNull(responseStream));
 
-        this.method = validateNull(method);
-        this.requestURI = validateNull(requestURI);
+        this.httpMethod = validateNull(httpMethod);
+        this.httpUri = validateNull(httpUri);
         this.header = createNewHeader(validateNull(header));
         this.requestStream = createBufferedInputStream(validateNull(requestStream));
     }

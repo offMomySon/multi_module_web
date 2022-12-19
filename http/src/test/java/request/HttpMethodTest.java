@@ -7,7 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 @Disabled
-class MethodTest {
+class HttpMethodTest {
 
     @ParameterizedTest
     @DisplayName("일치하는 method 가 존재하지 않으면 empty value 를 반환합니다.")
@@ -28,7 +28,7 @@ class MethodTest {
 
         //when
         Throwable actual = Assertions.catchThrowable(() -> {
-            Method.find(sMethod);
+            HttpMethod.find(sMethod);
         });
 
         //then
@@ -48,7 +48,7 @@ class MethodTest {
     void test1(String sMethod){
         //given
         //when
-        Method actual = Method.find(sMethod);
+        HttpMethod actual = HttpMethod.find(sMethod);
 
         //then
         Assertions.assertThat(actual)

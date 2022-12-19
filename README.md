@@ -1,4 +1,4 @@
-# App module
+# com.main.App module
 
 ```
 모듈들

@@ -3,6 +3,7 @@ package config;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.MessageFormat;
@@ -63,8 +64,8 @@ public class Config {
     private static Config create() {
         InputStream resourceInputStream = Config.class.getResourceAsStream(PATH);
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.readValue(resourceInputStream, Config.class);
+            JsonMapper jsonMapper = new JsonMapper();
+            return jsonMapper.readValue(resourceInputStream, Config.class);
         } catch (IOException e) {
             throw new RuntimeException(MessageFormat.format("fail to create config class. reason `{0}`", e.getCause()), e);
         }

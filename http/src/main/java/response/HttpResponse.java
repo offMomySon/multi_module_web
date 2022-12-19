@@ -57,7 +57,7 @@ public class HttpResponse {
         }
     }
 
-    public HttpResponse responseStatus(String statusLine) {
+    public HttpResponse status(String statusLine) {
         this.statusLine = statusLine;
         return this;
     }

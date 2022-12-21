@@ -1,4 +1,4 @@
-package mapper.marker;
+package marker;
 
 
 import java.lang.annotation.ElementType;
@@ -8,6 +8,5 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface PathVariable {
-    String value();
+public @interface RequestBody {
 }

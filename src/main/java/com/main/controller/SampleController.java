@@ -1,12 +1,14 @@
 package com.main.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import mapper.marker.Controller;
 import mapper.marker.PathVariable;
 import mapper.marker.RequestMapping;
 import mapper.marker.RequestParam;
 import vo.HttpMethod;
 
 @Slf4j
+@Controller
 @RequestMapping("/{paymentPath}/payletter/{payMethod}")
 public class SampleController {
 

@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
+import java.util.Objects;
 import lombok.ToString;
 import static validate.ValidateUtil.validateNull;
 
@@ -32,5 +33,18 @@ public class HttpUri {
         Path path = Paths.get(requestUri);
 
         return new HttpUri(path);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        HttpUri httpUri = (HttpUri) o;
+        return value.equals(httpUri.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value);
     }
 }

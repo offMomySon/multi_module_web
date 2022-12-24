@@ -31,16 +31,24 @@ public class MethodIndicator {
             String partOfUrl = splitUrl[length];
             String partOfGivenUrl = splitGivenUrl[length];
 
-            if (partOfUrl.startsWith("{") && partOfUrl.startsWith("}")) {
+            if (isSkipAbleUrl(partOfUrl)) {
                 continue;
             }
 
-            if (!partOfUrl.equalsIgnoreCase(partOfGivenUrl)) {
+            if (doesNotMatchUrl(partOfUrl, partOfGivenUrl)) {
                 return false;
             }
         }
 
         return true;
+    }
+
+    private static boolean doesNotMatchUrl(String partOfUrl, String partOfGivenUrl) {
+        return !partOfUrl.equalsIgnoreCase(partOfGivenUrl);
+    }
+
+    private static boolean isSkipAbleUrl(String partOfUrl) {
+        return partOfUrl.startsWith("{") && partOfUrl.startsWith("}");
     }
 
     public String getHttpUrl() {

@@ -35,12 +35,16 @@ public class MethodIndicator {
                 continue;
             }
 
-            if(!partOfUrl.equalsIgnoreCase(partOfGivenUrl)){
+            if (!partOfUrl.equalsIgnoreCase(partOfGivenUrl)) {
                 return false;
             }
         }
 
         return true;
+    }
+
+    public String getHttpUrl() {
+        return this.httpUrl;
     }
 
     @Override

@@ -7,12 +7,40 @@ import vo.HttpMethod;
 
 @ToString
 public class MethodIndicator {
-    private final String httpUri;
+    private final String httpUrl;
     private final HttpMethod httpMethod;
 
-    public MethodIndicator(String httpUri, HttpMethod httpMethod) {
-        this.httpUri = ValidateUtil.validateNull(httpUri);
+    public MethodIndicator(String httpUrl, HttpMethod httpMethod) {
+        this.httpUrl = ValidateUtil.validateNull(httpUrl);
         this.httpMethod = ValidateUtil.validateNull(httpMethod);
+    }
+
+    public boolean isMatch(MethodIndicator givenIndicator) {
+        if (this.httpMethod != givenIndicator.httpMethod) {
+            return false;
+        }
+
+        String[] splitUrl = this.httpUrl.split("/");
+        String[] splitGivenUrl = givenIndicator.httpUrl.split("/");
+
+        if (splitUrl.length != splitGivenUrl.length) {
+            return false;
+        }
+
+        for (int length = 0; length < splitUrl.length; length++) {
+            String partOfUrl = splitUrl[length];
+            String partOfGivenUrl = splitGivenUrl[length];
+
+            if (partOfUrl.startsWith("{") && partOfUrl.startsWith("}")) {
+                continue;
+            }
+
+            if(!partOfUrl.equalsIgnoreCase(partOfGivenUrl)){
+                return false;
+            }
+        }
+
+        return true;
     }
 
     @Override
@@ -20,11 +48,11 @@ public class MethodIndicator {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MethodIndicator that = (MethodIndicator) o;
-        return Objects.equals(httpUri, that.httpUri) && httpMethod == that.httpMethod;
+        return Objects.equals(httpUrl, that.httpUrl) && httpMethod == that.httpMethod;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(httpUri, httpMethod);
+        return Objects.hash(httpUrl, httpMethod);
     }
 }

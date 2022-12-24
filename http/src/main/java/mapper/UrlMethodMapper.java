@@ -3,6 +3,7 @@ package mapper;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -29,8 +30,19 @@ public class UrlMethodMapper {
         this.values = createUnmodifiableUrlMethodMapper(values);
     }
 
+    public Method findMethod(MethodIndicator methodIndicator) {
+        return values.entrySet().stream()
+            .filter(es -> es.getKey().isMatch(methodIndicator))
+            .map(Map.Entry::getValue)
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException(
+                MessageFormat.format("Does not exist, match url. given url : ", methodIndicator.getHttpUrl()))
+            );
+    }
+
     /**
      * read resource, at specified package.
+     *
      * @param _clazz
      * @param packageName
      * @return

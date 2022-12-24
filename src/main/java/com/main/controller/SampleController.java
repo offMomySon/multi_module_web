@@ -9,7 +9,7 @@ import vo.HttpMethod;
 
 @Slf4j
 @Controller
-@RequestMapping("/{paymentPath}/payletter/{payMethod}")
+@RequestMapping(value = "/{paymentPath}/payletter/{payMethod}")
 public class SampleController {
 
     @RequestMapping(value = "/{pathParam}")
@@ -23,6 +23,12 @@ public class SampleController {
         log.info("id : `{}`, _age : `{}`");
         return id + _age;
     }
+
+    @RequestMapping(value = "/best", method = HttpMethod.GET)
+    public String testMethod2(@RequestParam("test") ResponseDate ds){
+        return "result";
+    }
+
 
     @RequestMapping(value = "/test/sambple", method = HttpMethod.POST)
     public ResponseDate<String> testMethod2() {

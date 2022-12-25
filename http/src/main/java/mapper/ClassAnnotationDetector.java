@@ -8,7 +8,11 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import lombok.extern.slf4j.Slf4j;
+import validate.ValidateUtil;
+import static validate.ValidateUtil.validate;
 
+@Slf4j
 public class ClassAnnotationDetector {
     private final Class<?> clazz;
 
@@ -25,9 +29,7 @@ public class ClassAnnotationDetector {
             .anyMatch(classAnnotation -> isAnnotationType(classAnnotation, annotation));
     }
 
-
-
-    public Set<Method> findAnnotatedMethods(Class<?> annotation) {
+    public Set<Method> findMethod(Class<?> annotation) {
         if (Objects.isNull(annotation) || !annotation.isAnnotation()) {
             return Collections.emptySet();
         }
@@ -46,14 +48,6 @@ public class ClassAnnotationDetector {
         return Collections.unmodifiableSet(methods);
     }
 
-    private static boolean isAnnotationType(Annotation annotation, Class<?> annotationClazz) {
-        if (Objects.isNull(annotation) || Objects.isNull(annotationClazz)) {
-            return false;
-        }
-
-        return annotation.annotationType() == annotationClazz;
-    }
-
     public <T> Optional<T> findAnnotationOnClass(Class<T> annotationClass) {
         if (Objects.isNull(annotationClass) || !annotationClass.isAnnotation()) {
             return Optional.empty();
@@ -61,7 +55,33 @@ public class ClassAnnotationDetector {
 
         return Arrays.stream(clazz.getAnnotations())
             .filter(annotation -> isAnnotationType(annotation, annotationClass))
-            .map(annotation -> (T)annotation)
+            .map(annotation -> (T) annotation)
             .findFirst();
+    }
+
+    public Optional<Annotation> findAnnotationOnMethod(String _method, Class<?> annotationClass) {
+        validate(_method);
+        if (Objects.isNull(annotationClass) || !annotationClass.isAnnotation()) {
+            return Optional.empty();
+        }
+
+        Method method;
+        try {
+            method = clazz.getDeclaredMethod(_method);
+        } catch (NoSuchMethodException e) {
+            log.info("Does not have method. class = {}, input method = {}", clazz, _method);
+            return Optional.empty();
+        }
+
+        return Arrays.stream(method.getAnnotations())
+            .filter(annotation -> isAnnotationType(annotation, annotationClass))
+            .findAny();
+    }
+
+    private static boolean isAnnotationType(Annotation annotation, Class<?> annotationClazz) {
+        if (Objects.isNull(annotation) || Objects.isNull(annotationClazz)) {
+            return false;
+        }
+        return annotation.annotationType() == annotationClazz;
     }
 }

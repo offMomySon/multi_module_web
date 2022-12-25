@@ -77,7 +77,6 @@ public class UrlMethodMapper {
             Set<String> controllerUrls = optionalControllerUrls.get();
 
             for (Method method : detector.findMethod(RequestMapping.class)) {
-                log.info("method : {}", method.getName());
                 Optional<RequestMapping> optionalRequestMappingMethod = detector.findAnnotationOnMethod(method, RequestMapping.class);
 
                 if (optionalRequestMappingMethod.isEmpty()) {
@@ -153,46 +152,5 @@ public class UrlMethodMapper {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("class not found.");
         }
-    }
-
-    private static Set<Class> filterControllerClass(List<Class> allClasses) {
-        return allClasses.stream()
-            .filter(c -> Arrays.stream(c.getAnnotations()).anyMatch(a -> a instanceof Controller))
-            .collect(Collectors.toUnmodifiableSet());
-    }
-
-    private static Set<String> getControllerUrls(Class clazz) {
-        return Arrays.stream(clazz.getAnnotations())
-            .filter(a -> a instanceof RequestMapping)
-            .flatMap(a -> Arrays.stream(((RequestMapping) a).value()))
-            .collect(Collectors.toUnmodifiableSet());
-    }
-
-    private static Set<Method> filterRequestMappingMethod(Method[] methods) {
-        return Arrays.stream(methods)
-            .filter(method -> Arrays.stream(method.getAnnotations()).anyMatch(a -> a instanceof RequestMapping))
-            .collect(Collectors.toUnmodifiableSet());
-    }
-
-    private static Set<String> getRequestUrl(Method method) {
-        return Arrays.stream(method.getAnnotations())
-            .filter(a -> a.annotationType() == RequestMapping.class)
-            .map(a -> (RequestMapping) a)
-            .flatMap(r -> Stream.of(r.value()))
-            .collect(Collectors.toUnmodifiableSet());
-    }
-
-    private static Set<String> combineUrls(Set<String> controllerUrls, Set<String> httpUrl) {
-        return controllerUrls.stream()
-            .flatMap(cu -> httpUrl.stream().map(hu -> cu + hu))
-            .collect(Collectors.toUnmodifiableSet());
-    }
-
-    private static Set<HttpMethod> getHttpMethod(Method method) {
-        return Arrays.stream(method.getAnnotations())
-            .filter(a -> a instanceof RequestMapping)
-            .map(a -> (RequestMapping) a)
-            .flatMap(r -> Stream.of(r.method()))
-            .collect(Collectors.toUnmodifiableSet());
     }
 }

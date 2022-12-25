@@ -12,20 +12,20 @@ import vo.HttpMethod;
 //      /request/genericPath
 //      /request/{anotherPathVariable}
 @ToString
-public class MethodIndicator {
+public class TaskIndicator {
     private final String httpUrl;
     private final HttpMethod httpMethod;
 
-    public MethodIndicator(String httpUrl, HttpMethod httpMethod) {
+    public TaskIndicator(String httpUrl, HttpMethod httpMethod) {
         this.httpUrl = ValidateUtil.validateNull(httpUrl);
         this.httpMethod = ValidateUtil.validateNull(httpMethod);
     }
 
-    public MethodIndicator prevAppendUrl(String httpUrl){
-        return new MethodIndicator(httpUrl + this.httpUrl, this.httpMethod);
+    public TaskIndicator prevAppendUrl(String httpUrl){
+        return new TaskIndicator(httpUrl + this.httpUrl, this.httpMethod);
     }
 
-    public boolean isMatch(MethodIndicator givenIndicator) {
+    public boolean isMatch(TaskIndicator givenIndicator) {
         if (this.httpMethod != givenIndicator.httpMethod) {
             return false;
         }
@@ -69,7 +69,7 @@ public class MethodIndicator {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        MethodIndicator that = (MethodIndicator) o;
+        TaskIndicator that = (TaskIndicator) o;
         return Objects.equals(httpUrl, that.httpUrl) && httpMethod == that.httpMethod;
     }
 

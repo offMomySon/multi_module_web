@@ -73,7 +73,7 @@ public class UrlMethodMapper {
 
             Set<String> controllerUrls = optionalControllerUrls.get();
 
-            for (Method method : detector.findAnnotatedMethods(RequestMapping.class)) {
+            for (Method method : detector.findMethod(RequestMapping.class)) {
                 Set<String> httpUrl = getRequestUrl(method);
                 Set<String> combinedUrl = combineUrls(controllerUrls, httpUrl);
 

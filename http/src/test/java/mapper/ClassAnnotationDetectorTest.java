@@ -1,5 +1,6 @@
 package mapper;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
@@ -22,7 +23,7 @@ class ClassAnnotationDetectorTest {
         );
     }
 
-    @DisplayName("class 에 설정된 annotation 존재 여부를 확인한다.")
+    @DisplayName("class 가 가진 annotation 중에서 특정 어노테이션을 가지고 있는지 확인한다.")
     @ParameterizedTest
     @MethodSource("provideAnnotation")
     void test(Class<?> testAnnotation, boolean expect) throws Exception {
@@ -37,25 +38,7 @@ class ClassAnnotationDetectorTest {
         Assertions.assertThat(actual).isEqualTo(expect);
     }
 
-    @DisplayName("특정 어노테이션에 해당하는 method 를 가져온다.")
-    @Test
-    void test1() {
-        //given
-        Class<TestClass> testClass = TestClass.class;
-        ClassAnnotationDetector classAnnotationDetector = new ClassAnnotationDetector(testClass);
-
-        Class<TestAnnotation> annotationClass = TestAnnotation.class;
-
-        Set<Method> expect = Set.of(TestClass.getExistTestAnnotationMethod());
-
-        //when
-        Set<Method> methods = classAnnotationDetector.findAnnotatedMethods(annotationClass);
-
-        //then
-        Assertions.assertThat(methods).isEqualTo(expect);
-    }
-
-    @DisplayName("annotation 존재 여부를 확인시, annotation class 가 아니면 false 를 반환합니다.")
+    @DisplayName("class 가 가진 annotation 조회시 , annotation class 가 아니면 false 를 반환합니다.")
     @Test
     void test2() throws Exception {
         //given
@@ -69,8 +52,39 @@ class ClassAnnotationDetectorTest {
         Assertions.assertThat(actual).isFalse();
     }
 
-    //    있는 경우없는 경우 테케.
-    @DisplayName("특정 어노테이션을 조회합니다.")
+    @DisplayName("class 의 method 중에서 특정 annotation 을 가진 methods 를 가져온다.")
+    @Test
+    void test1() {
+        //given
+        Class<TestClass> testClass = TestClass.class;
+        ClassAnnotationDetector classAnnotationDetector = new ClassAnnotationDetector(testClass);
+
+        Class<TestAnnotation> annotationClass = TestAnnotation.class;
+
+        Set<Method> expect = Set.of(TestClass.getExistTestAnnotationMethod());
+
+        //when
+        Set<Method> methods = classAnnotationDetector.findMethod(annotationClass);
+
+        //then
+        Assertions.assertThat(methods).isEqualTo(expect);
+    }
+
+    @DisplayName("class 의 method 중에서 특정 annotation 을 가진 method 조회시, annotation class 가 아니면 비어있는 정보를 줍니다.")
+    @Test
+    void test() throws Exception {
+        //given
+        Class<TestClass> testClazz = TestClass.class;
+        ClassAnnotationDetector classAnnotationDetector = new ClassAnnotationDetector(testClazz);
+
+        //when
+        Set<Method> actual = classAnnotationDetector.findMethod(testClazz);
+
+        //then
+        Assertions.assertThat(actual).isEmpty();
+    }
+
+    @DisplayName("class 가 가진 annotation 중에서 특정 annotation 찾습니다.")
     @Test
     void test3() throws Exception {
         //given
@@ -85,21 +99,81 @@ class ClassAnnotationDetectorTest {
         Assertions.assertThat(annotationOptional).isPresent();
     }
 
+    @DisplayName("class 가 가진 annotation 중에서 특정 annotation 을 찾을때, annotation class 를 넘기지 않으면 empty 를 반환합니다.")
+    @Test
+    void test4() throws Exception {
+        //given
+        Class<TestClass> testClazz = TestClass.class;
+        ClassAnnotationDetector classAnnotationDetector = new ClassAnnotationDetector(testClazz);
+
+        //when
+        Optional<TestClass> actual = classAnnotationDetector.findAnnotationOnClass(testClazz);
+
+        //then
+        Assertions.assertThat(actual).isEmpty();
+    }
+
+    @DisplayName("class 의 method 가 가진 annotation 중에서 특정 annotation 을 찾습니다.")
+    @Test
+    void test5() throws Exception {
+        //given
+        Class<TestClass> testClazz = TestClass.class;
+        ClassAnnotationDetector classAnnotationDetector = new ClassAnnotationDetector(testClazz);
+
+        // TODO 중복 어노테이션 처리는 어떻게?
+        //when
+        Optional<Annotation> optionalAnnotation = classAnnotationDetector.findAnnotationOnMethod(TestClass.getExistTestAnnotationMethodName(), TestAnnotation.class);
+
+        //then
+        Assertions.assertThat(optionalAnnotation).isPresent();
+    }
+
+    @DisplayName("class 의 method 가 가진 annotation 중에서 특정 annotation 을 찾을떄, 인자가 annotation class 가 아니면 emtpy 를 반환합니다.")
+    @Test
+    void test6() throws Exception {
+        //given
+        Class<TestClass> testClazz = TestClass.class;
+        ClassAnnotationDetector classAnnotationDetector = new ClassAnnotationDetector(testClazz);
+
+        //when
+        Optional<Annotation> optionalAnnotation = classAnnotationDetector.findAnnotationOnMethod(TestClass.getExistTestAnnotationMethodName(), testClazz);
+
+        //then
+        Assertions.assertThat(optionalAnnotation).isEmpty();
+    }
+
+    @DisplayName("class 의 method 가 가진 annotation 중에서 특정 annotation 을 찾을떄, 인자가 존재하지 않는 method 이면 empty 를 반환합니다.")
+    @Test
+    void test7() throws Exception {
+        //given
+        Class<TestClass> testClazz = TestClass.class;
+        ClassAnnotationDetector classAnnotationDetector = new ClassAnnotationDetector(testClazz);
+
+        //when
+        Optional<Annotation> optionalAnnotation = classAnnotationDetector.findAnnotationOnMethod(TestClass.getDoesNotExistTestAnnotationMethodName(), testClazz);
+
+        //then
+        Assertions.assertThat(optionalAnnotation).isEmpty();
+    }
+
     @TestAnnotation
     public static class TestClass {
-
-        public void absentTestAnnotationMethod() {
-
-        }
-
         @TestAnnotation
         public void existTestAnnotationMethod() {
 
         }
 
+        public static String getDoesNotExistTestAnnotationMethodName(){
+            return "doesNotExistTestAnnotationMethod";
+        }
+
+        public static String getExistTestAnnotationMethodName(){
+            return "existTestAnnotationMethod";
+        }
+
         public static Method getExistTestAnnotationMethod() {
             try {
-                return TestClass.class.getDeclaredMethod("existTestAnnotationMethod");
+                return TestClass.class.getDeclaredMethod(getExistTestAnnotationMethodName());
             } catch (NoSuchMethodException e) {
                 throw new RuntimeException(e);
             }

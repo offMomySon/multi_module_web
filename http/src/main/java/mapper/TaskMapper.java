@@ -25,6 +25,8 @@ import static validate.ValidateUtil.validateNull;
 // TODO MethodIndicator 에 task 포함.
 // TODO Task 생성방법을 따로 때어내는게 좋지 않을까?
 // TODO Method 를 한번더 감쌀 수 있지 않을까?
+// TODO 수직적인 요소들을 뽑아보자.
+// TODO ClassAnnotationDetector 를 한번더 수직적으로 뽑아보자.
 @Slf4j
 public class TaskMapper {
     private final Map<TaskIndicator, Method> values;

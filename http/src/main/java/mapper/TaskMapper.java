@@ -13,38 +13,39 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import mapper.marker.Controller;
 import mapper.marker.RequestMapping;
 import vo.HttpMethod;
 import static validate.ValidateUtil.validateNull;
 
+// TODO MethodIndicator 에 task 포함.
+// TODO Task 생성방법을 따로 때어내는게 좋지 않을까?
+// TODO Method 를 한번더 감쌀 수 있지 않을까?
 @Slf4j
-public class UrlMethodMapper {
-    private final Map<MethodIndicator, Method> values;
+public class TaskMapper {
+    private final Map<TaskIndicator, Method> values;
 
-    private UrlMethodMapper(Map<MethodIndicator, Method> values) {
+    private TaskMapper(Map<TaskIndicator, Method> values) {
         validateNull(values);
 
         this.values = createUnmodifiableUrlMethodMapper(values);
     }
 
-    public Method findMethod(MethodIndicator methodIndicator) {
+    public Method findMethod(TaskIndicator taskIndicator) {
         return values.entrySet().stream()
-            .filter(es -> es.getKey().isMatch(methodIndicator))
+            .filter(es -> es.getKey().isMatch(taskIndicator))
             .map(Map.Entry::getValue)
             .findFirst()
             .orElseThrow(() -> new RuntimeException(
-                MessageFormat.format("Does not exist, match url. given url : ", methodIndicator.getHttpUrl()))
+                MessageFormat.format("Does not exist, match url. given url : ", taskIndicator.getHttpUrl()))
             );
     }
 
-    public static UrlMethodMapper create(Class _clazz, String packageName) {
+    public static TaskMapper create(Class _clazz, String packageName) {
         BufferedReader resourceReader = new BufferedReader(
             new InputStreamReader(Objects.requireNonNull(
                 _clazz.getResourceAsStream("/" + packageName.replaceAll("[.]", "/")))
@@ -56,7 +57,7 @@ public class UrlMethodMapper {
             .filter(isClass())
             .map(parseClassName())
             .map(generatePackageClassName(packageName))
-            .map(UrlMethodMapper::getClass)
+            .map(TaskMapper::getClass)
             .map(ClassAnnotationDetector::new)
             .collect(Collectors.toUnmodifiableList());
 
@@ -64,7 +65,7 @@ public class UrlMethodMapper {
             .filter(a -> a.isAnnotatedOnClass(Controller.class))
             .collect(Collectors.toUnmodifiableSet());
 
-        Map<MethodIndicator, Method> totalMethodMapper = new HashMap<>();
+        Map<TaskIndicator, Method> totalMethodMapper = new HashMap<>();
         for (ClassAnnotationDetector detector : controllerDetector) {
             Optional<Set<String>> optionalControllerUrls = detector.findAnnotationOnClass(RequestMapping.class)
                 .map(RequestMapping::value)
@@ -88,12 +89,12 @@ public class UrlMethodMapper {
                 List<String> taskUrls = Arrays.stream(requestMapping.value()).collect(Collectors.toUnmodifiableList());
                 List<HttpMethod> taskHttpMethods = Arrays.stream(requestMapping.method()).collect(Collectors.toUnmodifiableList());
 
-                Set<MethodIndicator> methodIndicators = createMethodIndicator(taskUrls, taskHttpMethods);
+                Set<TaskIndicator> taskIndicators = createMethodIndicator(taskUrls, taskHttpMethods);
 
-                Set<MethodIndicator> fullUrlMethodIndicators = prevAppendUrlToMethodIndicators(controllerUrls, methodIndicators);
+                Set<TaskIndicator> fullUrlTaskIndicators = prevAppendUrlToMethodIndicators(controllerUrls, taskIndicators);
 
-                Map<MethodIndicator, Method> methodMapper = fullUrlMethodIndicators.stream()
-                    .map(methodIndicator -> Map.entry(methodIndicator, method))
+                Map<TaskIndicator, Method> methodMapper = fullUrlTaskIndicators.stream()
+                    .map(taskIndicator -> Map.entry(taskIndicator, method))
                     .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (it1, it2) -> it1));
 
                 totalMethodMapper.putAll(methodMapper);
@@ -102,31 +103,31 @@ public class UrlMethodMapper {
 
         totalMethodMapper.forEach((key, value) -> log.info("key : {}, value : {}", key, value));
 
-        return new UrlMethodMapper(totalMethodMapper);
+        return new TaskMapper(totalMethodMapper);
     }
 
-    private static Set<MethodIndicator> prevAppendUrlToMethodIndicators(Set<String> urls, Set<MethodIndicator> methodIndicators) {
-        Set<MethodIndicator> newMethodIndicators = new HashSet<>();
+    private static Set<TaskIndicator> prevAppendUrlToMethodIndicators(Set<String> urls, Set<TaskIndicator> taskIndicators) {
+        Set<TaskIndicator> newTaskIndicators = new HashSet<>();
         for (String url : urls) {
-            for (MethodIndicator methodIndicator : methodIndicators) {
-                newMethodIndicators.add(methodIndicator.prevAppendUrl(url));
+            for (TaskIndicator taskIndicator : taskIndicators) {
+                newTaskIndicators.add(taskIndicator.prevAppendUrl(url));
             }
         }
-        return Collections.unmodifiableSet(newMethodIndicators);
+        return Collections.unmodifiableSet(newTaskIndicators);
     }
 
-    private static Set<MethodIndicator> createMethodIndicator(List<String> taskUrls, List<HttpMethod> taskHttpMethods) {
-        Set<MethodIndicator> methodIndicators = new HashSet<>();
+    private static Set<TaskIndicator> createMethodIndicator(List<String> taskUrls, List<HttpMethod> taskHttpMethods) {
+        Set<TaskIndicator> taskIndicators = new HashSet<>();
         for (String taskUrl : taskUrls) {
             for (HttpMethod httpMethod : taskHttpMethods) {
-                methodIndicators.add(new MethodIndicator(taskUrl, httpMethod));
+                taskIndicators.add(new TaskIndicator(taskUrl, httpMethod));
             }
         }
 
-        return Collections.unmodifiableSet(methodIndicators);
+        return Collections.unmodifiableSet(taskIndicators);
     }
 
-    private static Map<MethodIndicator, Method> createUnmodifiableUrlMethodMapper(Map<MethodIndicator, Method> values) {
+    private static Map<TaskIndicator, Method> createUnmodifiableUrlMethodMapper(Map<TaskIndicator, Method> values) {
         return values.entrySet().stream()
             .filter(Objects::nonNull)
             .filter(es -> Objects.nonNull(es.getValue()))

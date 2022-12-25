@@ -9,8 +9,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
-import validate.ValidateUtil;
-import static validate.ValidateUtil.validate;
+import static validate.ValidateUtil.validateNull;
 
 @Slf4j
 public class ClassAnnotationDetector {
@@ -59,22 +58,21 @@ public class ClassAnnotationDetector {
             .findFirst();
     }
 
-    public Optional<Annotation> findAnnotationOnMethod(String _method, Class<?> annotationClass) {
-        validate(_method);
-        if (Objects.isNull(annotationClass) || !annotationClass.isAnnotation()) {
+    public <T> Optional<T> findAnnotationOnMethod(Method findMethod, Class<T> findAnnotationClass) {
+        validateNull(findMethod);
+        if (Objects.isNull(findAnnotationClass) || !findAnnotationClass.isAnnotation()) {
             return Optional.empty();
         }
 
-        Method method;
-        try {
-            method = clazz.getDeclaredMethod(_method);
-        } catch (NoSuchMethodException e) {
-            log.info("Does not have method. class = {}, input method = {}", clazz, _method);
+        Optional<Method> optionalFoundMethod = Arrays.stream(clazz.getDeclaredMethods()).filter(declaredMethod -> declaredMethod.equals(findMethod)).findAny();
+        if (optionalFoundMethod.isEmpty()) {
             return Optional.empty();
         }
+        Method foundMethod = optionalFoundMethod.get();
 
-        return Arrays.stream(method.getAnnotations())
-            .filter(annotation -> isAnnotationType(annotation, annotationClass))
+        return Arrays.stream(foundMethod.getAnnotations())
+            .filter(annotation -> isAnnotationType(annotation, findAnnotationClass))
+            .map(annotation -> (T) annotation)
             .findAny();
     }
 

@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -40,32 +41,39 @@ public class UrlMethodMapper {
             );
     }
 
-    /**
-     * read resource, at specified package.
-     *
-     * @param _clazz
-     * @param packageName
-     * @return
-     */
     public static UrlMethodMapper create(Class _clazz, String packageName) {
-        BufferedReader resourceReader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(_clazz.getResourceAsStream("/" + packageName.replaceAll("[.]", "/")))));
+        BufferedReader resourceReader = new BufferedReader(
+            new InputStreamReader(Objects.requireNonNull(
+                _clazz.getResourceAsStream("/" + packageName.replaceAll("[.]", "/")))
+            )
+        );
 
-        List<Class> allClasses = resourceReader.lines()
+        List<ClassAnnotationDetector> allClasses = resourceReader.lines()
             .peek(l -> log.info("line : {}", l))
             .filter(isClass())
             .map(parseClassName())
             .map(generatePackageClassName(packageName))
             .map(UrlMethodMapper::getClass)
+            .map(ClassAnnotationDetector::new)
             .collect(Collectors.toUnmodifiableList());
 
-        Set<Class> controllerClasses = filterControllerClass(allClasses);
+        Set<ClassAnnotationDetector> controllerDetector = allClasses.stream()
+            .filter(a -> a.isAnnotatedOnClass(Controller.class))
+            .collect(Collectors.toUnmodifiableSet());
 
         Map<MethodIndicator, Method> urlMethodMapper = new HashMap<>();
-        for (Class clazz : controllerClasses) {
-            Set<String> controllerUrls = getControllerUrls(clazz);
+        for (ClassAnnotationDetector detector : controllerDetector) {
+            Optional<Set<String>> optionalControllerUrls = detector.findAnnotationOnClass(RequestMapping.class)
+                .map(RequestMapping::value)
+                .map(Set::of);
 
-            Set<Method> requestMappingMethods = filterRequestMappingMethod(clazz.getDeclaredMethods());
-            for (Method method : requestMappingMethods) {
+            if (optionalControllerUrls.isEmpty()) {
+                continue;
+            }
+
+            Set<String> controllerUrls = optionalControllerUrls.get();
+
+            for (Method method : detector.findAnnotatedMethods(RequestMapping.class)) {
                 Set<String> httpUrl = getRequestUrl(method);
                 Set<String> combinedUrl = combineUrls(controllerUrls, httpUrl);
 
@@ -88,6 +96,55 @@ public class UrlMethodMapper {
 
         return new UrlMethodMapper(urlMethodMapper);
     }
+
+//    /**
+//     * read resource, at specified package.
+//     *
+//     * @param _clazz
+//     * @param packageName
+//     * @return
+//     */
+//    public static UrlMethodMapper create(Class _clazz, String packageName) {
+//        BufferedReader resourceReader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(_clazz.getResourceAsStream("/" + packageName.replaceAll("[.]", "/")))));
+//
+//        List<Class> allClasses = resourceReader.lines()
+//            .peek(l -> log.info("line : {}", l))
+//            .filter(isClass())
+//            .map(parseClassName())
+//            .map(generatePackageClassName(packageName))
+//            .map(UrlMethodMapper::getClass)
+//            .collect(Collectors.toUnmodifiableList());
+//
+//        Set<Class> controllerClasses = filterControllerClass(allClasses);
+//
+//        Map<MethodIndicator, Method> urlMethodMapper = new HashMap<>();
+//        for (Class clazz : controllerClasses) {
+//            Set<String> controllerUrls = getControllerUrls(clazz);
+//
+//            Set<Method> requestMappingMethods = filterRequestMappingMethod(clazz.getDeclaredMethods());
+//            for (Method method : requestMappingMethods) {
+//                Set<String> httpUrl = getRequestUrl(method);
+//                Set<String> combinedUrl = combineUrls(controllerUrls, httpUrl);
+//
+//                log.info("method : {}", method);
+//                Arrays.stream(method.getParameterAnnotations()).forEach(a -> log.info("param : {}", a));
+//
+//                Set<HttpMethod> httpMethods = getHttpMethod(method);
+//
+//                Set<MethodIndicator> methodIndicators = combinedUrl.stream()
+//                    .flatMap(url -> httpMethods.stream().map(hm -> new MethodIndicator(url, hm)))
+//                    .collect(Collectors.toUnmodifiableSet());
+//
+//                for (MethodIndicator methodIndicator : methodIndicators) {
+//                    urlMethodMapper.put(methodIndicator, method);
+//                }
+//            }
+//        }
+//
+//        urlMethodMapper.forEach((key, value) -> log.info("key : {}, value : {}", key, value));
+//
+//        return new UrlMethodMapper(urlMethodMapper);
+//    }
 
     private static Map<MethodIndicator, Method> createUnmodifiableUrlMethodMapper(Map<MethodIndicator, Method> values) {
         return values.entrySet().stream()
@@ -117,9 +174,9 @@ public class UrlMethodMapper {
         }
     }
 
-    private static Set<String> combineUrls(Set<String> controllerUrls, Set<String> httpUrl) {
-        return controllerUrls.stream()
-            .flatMap(cu -> httpUrl.stream().map(hu -> cu + hu))
+    private static Set<Class> filterControllerClass(List<Class> allClasses) {
+        return allClasses.stream()
+            .filter(c -> Arrays.stream(c.getAnnotations()).anyMatch(a -> a instanceof Controller))
             .collect(Collectors.toUnmodifiableSet());
     }
 
@@ -138,9 +195,15 @@ public class UrlMethodMapper {
 
     private static Set<String> getRequestUrl(Method method) {
         return Arrays.stream(method.getAnnotations())
-            .filter(a -> a instanceof RequestMapping)
+            .filter(a-> a.annotationType() == RequestMapping.class)
             .map(a -> (RequestMapping) a)
             .flatMap(r -> Stream.of(r.value()))
+            .collect(Collectors.toUnmodifiableSet());
+    }
+
+    private static Set<String> combineUrls(Set<String> controllerUrls, Set<String> httpUrl) {
+        return controllerUrls.stream()
+            .flatMap(cu -> httpUrl.stream().map(hu -> cu + hu))
             .collect(Collectors.toUnmodifiableSet());
     }
 
@@ -149,12 +212,6 @@ public class UrlMethodMapper {
             .filter(a -> a instanceof RequestMapping)
             .map(a -> (RequestMapping) a)
             .flatMap(r -> Stream.of(r.method()))
-            .collect(Collectors.toUnmodifiableSet());
-    }
-
-    private static Set<Class> filterControllerClass(List<Class> allClasses) {
-        return allClasses.stream()
-            .filter(c -> Arrays.stream(c.getAnnotations()).anyMatch(a -> a instanceof Controller))
             .collect(Collectors.toUnmodifiableSet());
     }
 }

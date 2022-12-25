@@ -5,12 +5,15 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -61,7 +64,7 @@ public class UrlMethodMapper {
             .filter(a -> a.isAnnotatedOnClass(Controller.class))
             .collect(Collectors.toUnmodifiableSet());
 
-        Map<MethodIndicator, Method> urlMethodMapper = new HashMap<>();
+        Map<MethodIndicator, Method> totalMethodMapper = new HashMap<>();
         for (ClassAnnotationDetector detector : controllerDetector) {
             Optional<Set<String>> optionalControllerUrls = detector.findAnnotationOnClass(RequestMapping.class)
                 .map(RequestMapping::value)
@@ -74,77 +77,55 @@ public class UrlMethodMapper {
             Set<String> controllerUrls = optionalControllerUrls.get();
 
             for (Method method : detector.findMethod(RequestMapping.class)) {
-                Set<String> httpUrl = getRequestUrl(method);
-                Set<String> combinedUrl = combineUrls(controllerUrls, httpUrl);
+                log.info("method : {}", method.getName());
+                Optional<RequestMapping> optionalRequestMappingMethod = detector.findAnnotationOnMethod(method, RequestMapping.class);
 
-                log.info("method : {}", method);
-                Arrays.stream(method.getParameterAnnotations()).forEach(a -> log.info("param : {}", a));
-
-                Set<HttpMethod> httpMethods = getHttpMethod(method);
-
-                Set<MethodIndicator> methodIndicators = combinedUrl.stream()
-                    .flatMap(url -> httpMethods.stream().map(hm -> new MethodIndicator(url, hm)))
-                    .collect(Collectors.toUnmodifiableSet());
-
-                for (MethodIndicator methodIndicator : methodIndicators) {
-                    urlMethodMapper.put(methodIndicator, method);
+                if (optionalRequestMappingMethod.isEmpty()) {
+                    continue;
                 }
+
+                RequestMapping requestMapping = optionalRequestMappingMethod.get();
+
+                List<String> taskUrls = Arrays.stream(requestMapping.value()).collect(Collectors.toUnmodifiableList());
+                List<HttpMethod> taskHttpMethods = Arrays.stream(requestMapping.method()).collect(Collectors.toUnmodifiableList());
+
+                Set<MethodIndicator> methodIndicators = createMethodIndicator(taskUrls, taskHttpMethods);
+
+                Set<MethodIndicator> fullUrlMethodIndicators = prevAppendUrlToMethodIndicators(controllerUrls, methodIndicators);
+
+                Map<MethodIndicator, Method> methodMapper = fullUrlMethodIndicators.stream()
+                    .map(methodIndicator -> Map.entry(methodIndicator, method))
+                    .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (it1, it2) -> it1));
+
+                totalMethodMapper.putAll(methodMapper);
             }
         }
 
-        urlMethodMapper.forEach((key, value) -> log.info("key : {}, value : {}", key, value));
+        totalMethodMapper.forEach((key, value) -> log.info("key : {}, value : {}", key, value));
 
-        return new UrlMethodMapper(urlMethodMapper);
+        return new UrlMethodMapper(totalMethodMapper);
     }
 
-//    /**
-//     * read resource, at specified package.
-//     *
-//     * @param _clazz
-//     * @param packageName
-//     * @return
-//     */
-//    public static UrlMethodMapper create(Class _clazz, String packageName) {
-//        BufferedReader resourceReader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(_clazz.getResourceAsStream("/" + packageName.replaceAll("[.]", "/")))));
-//
-//        List<Class> allClasses = resourceReader.lines()
-//            .peek(l -> log.info("line : {}", l))
-//            .filter(isClass())
-//            .map(parseClassName())
-//            .map(generatePackageClassName(packageName))
-//            .map(UrlMethodMapper::getClass)
-//            .collect(Collectors.toUnmodifiableList());
-//
-//        Set<Class> controllerClasses = filterControllerClass(allClasses);
-//
-//        Map<MethodIndicator, Method> urlMethodMapper = new HashMap<>();
-//        for (Class clazz : controllerClasses) {
-//            Set<String> controllerUrls = getControllerUrls(clazz);
-//
-//            Set<Method> requestMappingMethods = filterRequestMappingMethod(clazz.getDeclaredMethods());
-//            for (Method method : requestMappingMethods) {
-//                Set<String> httpUrl = getRequestUrl(method);
-//                Set<String> combinedUrl = combineUrls(controllerUrls, httpUrl);
-//
-//                log.info("method : {}", method);
-//                Arrays.stream(method.getParameterAnnotations()).forEach(a -> log.info("param : {}", a));
-//
-//                Set<HttpMethod> httpMethods = getHttpMethod(method);
-//
-//                Set<MethodIndicator> methodIndicators = combinedUrl.stream()
-//                    .flatMap(url -> httpMethods.stream().map(hm -> new MethodIndicator(url, hm)))
-//                    .collect(Collectors.toUnmodifiableSet());
-//
-//                for (MethodIndicator methodIndicator : methodIndicators) {
-//                    urlMethodMapper.put(methodIndicator, method);
-//                }
-//            }
-//        }
-//
-//        urlMethodMapper.forEach((key, value) -> log.info("key : {}, value : {}", key, value));
-//
-//        return new UrlMethodMapper(urlMethodMapper);
-//    }
+    private static Set<MethodIndicator> prevAppendUrlToMethodIndicators(Set<String> urls, Set<MethodIndicator> methodIndicators) {
+        Set<MethodIndicator> newMethodIndicators = new HashSet<>();
+        for (String url : urls) {
+            for (MethodIndicator methodIndicator : methodIndicators) {
+                newMethodIndicators.add(methodIndicator.prevAppendUrl(url));
+            }
+        }
+        return Collections.unmodifiableSet(newMethodIndicators);
+    }
+
+    private static Set<MethodIndicator> createMethodIndicator(List<String> taskUrls, List<HttpMethod> taskHttpMethods) {
+        Set<MethodIndicator> methodIndicators = new HashSet<>();
+        for (String taskUrl : taskUrls) {
+            for (HttpMethod httpMethod : taskHttpMethods) {
+                methodIndicators.add(new MethodIndicator(taskUrl, httpMethod));
+            }
+        }
+
+        return Collections.unmodifiableSet(methodIndicators);
+    }
 
     private static Map<MethodIndicator, Method> createUnmodifiableUrlMethodMapper(Map<MethodIndicator, Method> values) {
         return values.entrySet().stream()
@@ -195,7 +176,7 @@ public class UrlMethodMapper {
 
     private static Set<String> getRequestUrl(Method method) {
         return Arrays.stream(method.getAnnotations())
-            .filter(a-> a.annotationType() == RequestMapping.class)
+            .filter(a -> a.annotationType() == RequestMapping.class)
             .map(a -> (RequestMapping) a)
             .flatMap(r -> Stream.of(r.value()))
             .collect(Collectors.toUnmodifiableSet());

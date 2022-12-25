@@ -5,6 +5,12 @@ import lombok.ToString;
 import validate.ValidateUtil;
 import vo.HttpMethod;
 
+// TODO methodIndicator 간의 중복제거를 어떻게 할 것인가?
+// annotation 을 통해서 생성된 methodIndicator 의 중복제거 고려가 필요합니다.
+// e.g)
+//      /request/{pathVariable}
+//      /request/genericPath
+//      /request/{anotherPathVariable}
 @ToString
 public class MethodIndicator {
     private final String httpUrl;
@@ -13,6 +19,10 @@ public class MethodIndicator {
     public MethodIndicator(String httpUrl, HttpMethod httpMethod) {
         this.httpUrl = ValidateUtil.validateNull(httpUrl);
         this.httpMethod = ValidateUtil.validateNull(httpMethod);
+    }
+
+    public MethodIndicator prevAppendUrl(String httpUrl){
+        return new MethodIndicator(httpUrl + this.httpUrl, this.httpMethod);
     }
 
     public boolean isMatch(MethodIndicator givenIndicator) {

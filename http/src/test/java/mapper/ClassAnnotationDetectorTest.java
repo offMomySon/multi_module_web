@@ -1,6 +1,5 @@
 package mapper;
 
-import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
@@ -122,10 +121,10 @@ class ClassAnnotationDetectorTest {
 
         // TODO 중복 어노테이션 처리는 어떻게?
         //when
-        Optional<Annotation> optionalAnnotation = classAnnotationDetector.findAnnotationOnMethod(TestClass.getExistTestAnnotationMethodName(), TestAnnotation.class);
+        Optional<TestAnnotation> actual = classAnnotationDetector.findAnnotationOnMethod(TestClass.getExistTestAnnotationMethod(), TestAnnotation.class);
 
         //then
-        Assertions.assertThat(optionalAnnotation).isPresent();
+        Assertions.assertThat(actual).isPresent();
     }
 
     @DisplayName("class 의 method 가 가진 annotation 중에서 특정 annotation 을 찾을떄, 인자가 annotation class 가 아니면 emtpy 를 반환합니다.")
@@ -136,10 +135,10 @@ class ClassAnnotationDetectorTest {
         ClassAnnotationDetector classAnnotationDetector = new ClassAnnotationDetector(testClazz);
 
         //when
-        Optional<Annotation> optionalAnnotation = classAnnotationDetector.findAnnotationOnMethod(TestClass.getExistTestAnnotationMethodName(), testClazz);
+        Optional<TestClass> actual = classAnnotationDetector.findAnnotationOnMethod(TestClass.getExistTestAnnotationMethod(), testClazz);
 
         //then
-        Assertions.assertThat(optionalAnnotation).isEmpty();
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @DisplayName("class 의 method 가 가진 annotation 중에서 특정 annotation 을 찾을떄, 인자가 존재하지 않는 method 이면 empty 를 반환합니다.")
@@ -150,10 +149,10 @@ class ClassAnnotationDetectorTest {
         ClassAnnotationDetector classAnnotationDetector = new ClassAnnotationDetector(testClazz);
 
         //when
-        Optional<Annotation> optionalAnnotation = classAnnotationDetector.findAnnotationOnMethod(TestClass.getDoesNotExistTestAnnotationMethodName(), testClazz);
+        Optional<TestClass> actual = classAnnotationDetector.findAnnotationOnMethod(TestAnotherClass.getAnotherMethod(), testClazz);
 
         //then
-        Assertions.assertThat(optionalAnnotation).isEmpty();
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @TestAnnotation
@@ -163,17 +162,25 @@ class ClassAnnotationDetectorTest {
 
         }
 
-        public static String getDoesNotExistTestAnnotationMethodName(){
-            return "doesNotExistTestAnnotationMethod";
-        }
-
-        public static String getExistTestAnnotationMethodName(){
-            return "existTestAnnotationMethod";
-        }
-
         public static Method getExistTestAnnotationMethod() {
             try {
-                return TestClass.class.getDeclaredMethod(getExistTestAnnotationMethodName());
+                return TestClass.class.getDeclaredMethod("existTestAnnotationMethod");
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    @TestAnnotation
+    public static class TestAnotherClass {
+        @TestAnnotation
+        public void existTestAnnotationMethod() {
+
+        }
+
+        public static Method getAnotherMethod() {
+            try {
+                return TestClass.class.getDeclaredMethod("existTestAnnotationMethod");
             } catch (NoSuchMethodException e) {
                 throw new RuntimeException(e);
             }
@@ -187,10 +194,4 @@ class ClassAnnotationDetectorTest {
     @Retention(RetentionPolicy.RUNTIME)
     public @interface UnUsedTestAnnotation {
     }
-
-//    class, method
-//      controller, requestMapping, -> annotation 찾기.
-//    @DisplayName("class 에 설정된 annotation 존재 여부를 확인한다.")
-//    @DisplayName("class 의 method 가")
-
 }

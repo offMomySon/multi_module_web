@@ -25,27 +25,27 @@ public class TaskIndicator {
         return new TaskIndicator(httpUrl + this.httpUrl, this.httpMethod);
     }
 
-    public boolean isMatch(TaskIndicator givenIndicator) {
-        if (this.httpMethod != givenIndicator.httpMethod) {
+    public boolean isMatch(TaskIndicator otherIndicator) {
+        if (this.httpMethod != otherIndicator.httpMethod) {
             return false;
         }
 
         String[] splitUrl = this.httpUrl.split("/");
-        String[] splitGivenUrl = givenIndicator.httpUrl.split("/");
+        String[] splitOtherUrl = otherIndicator.httpUrl.split("/");
 
-        if (splitUrl.length != splitGivenUrl.length) {
+        if (splitUrl.length != splitOtherUrl.length) {
             return false;
         }
 
         for (int length = 0; length < splitUrl.length; length++) {
             String partOfUrl = splitUrl[length];
-            String partOfGivenUrl = splitGivenUrl[length];
+            String partOfOtherUrl = splitOtherUrl[length];
 
             if (isSkipAbleUrl(partOfUrl)) {
                 continue;
             }
 
-            if (doesNotMatchUrl(partOfUrl, partOfGivenUrl)) {
+            if (doesNotMatchUrl(partOfUrl, partOfOtherUrl)) {
                 return false;
             }
         }

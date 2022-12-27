@@ -34,7 +34,6 @@ public class ClassAnnotationDetector {
         }
 
         Set<Method> methods = new HashSet<>();
-
         for (Method method : clazz.getDeclaredMethods()) {
             for (Annotation findAnnotation : method.getAnnotations()) {
                 if (isAnnotationType(findAnnotation, annotation)) {

@@ -1,21 +1,19 @@
 package mapper;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
-public class AnnotatedClass extends AnnotatedElement {
-    private final Class<?> clazz;
+public class AnnotatedMethod extends AnnotatedElement {
+    private final Method method;
 
-    public AnnotatedClass(Class<?> clazz) {
-        if (Objects.isNull(clazz)) {
-            throw new RuntimeException("class is null.");
+    public AnnotatedMethod(Method method) {
+        if (Objects.isNull(method)) {
+            throw new RuntimeException("method is null.");
         }
-
-        this.clazz = clazz;
+        this.method = method;
     }
 
     @Override
@@ -24,9 +22,7 @@ public class AnnotatedClass extends AnnotatedElement {
             return false;
         }
 
-        log.info("anns : {}", Arrays.toString(clazz.getDeclaredAnnotations()));
-
-        return Arrays.stream(clazz.getDeclaredAnnotations())
+        return Arrays.stream(method.getDeclaredAnnotations())
             .anyMatch(annotation -> isAnnotationType(annotation, findAnnotation));
     }
 
@@ -36,9 +32,9 @@ public class AnnotatedClass extends AnnotatedElement {
             return Optional.empty();
         }
 
-        return Arrays.stream(clazz.getDeclaredAnnotations())
+        return Arrays.stream(method.getAnnotations())
             .filter(annotation -> isAnnotationType(annotation, findAnnotation))
-            .map(annotation -> (T) annotation.annotationType())
+            .map(annotation -> (T) annotation)
             .findAny();
     }
 

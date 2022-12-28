@@ -3,6 +3,8 @@ package mapper;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -36,6 +38,16 @@ public class AnnotatedMethod extends AnnotatedElement {
             .filter(annotation -> isAnnotationType(annotation, findAnnotation))
             .map(annotation -> (T) annotation)
             .findAny();
+    }
+
+    @Override
+    public boolean hasSubElement() {
+        return false;
+    }
+
+    @Override
+    public List<AnnotatedElement> findAnnotatedElementOnSubElement(Class<?> findAnnotation) {
+        return Collections.emptyList();
     }
 
     private static boolean isAnnotationType(Annotation annotation, Class<?> annotationClass) {

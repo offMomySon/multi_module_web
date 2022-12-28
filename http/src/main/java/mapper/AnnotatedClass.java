@@ -2,8 +2,10 @@ package mapper;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -40,6 +42,24 @@ public class AnnotatedClass extends AnnotatedElement {
             .filter(annotation -> isAnnotationType(annotation, findAnnotation))
             .map(annotation -> (T) annotation.annotationType())
             .findAny();
+    }
+
+    @Override
+    public boolean hasSubElement() {
+        if (clazz.getDeclaredMethods().length == 0) {
+            return false;
+        }
+        return true;
+    }
+
+    public List<AnnotatedElement> findAnnotatedElementOnSubElement(Class<?> findAnnotation) {
+        List<AnnotatedMethod> annotatedMethods = Arrays.stream(clazz.getDeclaredMethods())
+            .map(AnnotatedMethod::new)
+            .collect(Collectors.toUnmodifiableList());
+
+        return annotatedMethods.stream()
+            .filter(annotatedMethod -> annotatedMethod.isAnnotated(findAnnotation))
+            .collect(Collectors.toUnmodifiableList());
     }
 
     private static boolean isAnnotationType(Annotation annotation, Class<?> annotationClass) {

@@ -5,6 +5,7 @@ import java.text.MessageFormat;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import static validate.ValidateUtil.validateNull;
 
@@ -14,6 +15,7 @@ import static validate.ValidateUtil.validateNull;
 // TODO 수직적인 요소들을 뽑아보자.
 // TODO ClassAnnotationDetector 를 한번더 수직적으로 뽑아보자.
 @Slf4j
+@ToString
 public class TaskMapper {
     private final Map<TaskIndicator, Method> values;
 

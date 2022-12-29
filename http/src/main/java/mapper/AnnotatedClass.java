@@ -16,7 +16,6 @@ public class AnnotatedClass extends AnnotatedElement {
         if (Objects.isNull(clazz)) {
             throw new RuntimeException("class is null.");
         }
-
         this.clazz = clazz;
     }
 
@@ -25,8 +24,6 @@ public class AnnotatedClass extends AnnotatedElement {
         if (Objects.isNull(findAnnotation) || !findAnnotation.isAnnotation()) {
             return false;
         }
-
-        log.info("anns : {}", Arrays.toString(clazz.getDeclaredAnnotations()));
 
         return Arrays.stream(clazz.getDeclaredAnnotations())
             .anyMatch(annotation -> isAnnotationType(annotation, findAnnotation));
@@ -40,7 +37,7 @@ public class AnnotatedClass extends AnnotatedElement {
 
         return Arrays.stream(clazz.getDeclaredAnnotations())
             .filter(annotation -> isAnnotationType(annotation, findAnnotation))
-            .map(annotation -> (T) annotation.annotationType())
+            .map(annotation -> (T) annotation)
             .findAny();
     }
 

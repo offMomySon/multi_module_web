@@ -3,10 +3,10 @@ package mapper;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -41,22 +41,21 @@ public class TaskRegister {
             )
         );
 
-        List<ClassAnnotationDetector> allClasses = resourceReader.lines()
+        List<ElementAnnotationDetector> controllerAnnotatedDetector = resourceReader.lines()
             .peek(l -> log.info("line : {}", l))
             .filter(isClass())
             .map(parseClassName())
             .map(generatePackageClassName(packageName))
             .map(TaskRegister::getClass)
-            .map(ClassAnnotationDetector::new)
+            .map(AnnotatedClass::new)
+            .map(ElementAnnotationDetector::new)
+            .filter(elementAnnotationDetector -> elementAnnotationDetector.isAnnotated(Controller.class))
+            .filter(elementAnnotationDetector -> elementAnnotationDetector.isAnnotated(RequestMapping.class))
             .collect(Collectors.toUnmodifiableList());
 
-        Set<ClassAnnotationDetector> controllerDetector = allClasses.stream()
-            .filter(a -> a.isAnnotatedOnClass(Controller.class))
-            .collect(Collectors.toUnmodifiableSet());
-
         Map<TaskIndicator, Method> totalMethodMapper = new HashMap<>();
-        for (ClassAnnotationDetector detector : controllerDetector) {
-            Optional<Set<String>> optionalControllerUrls = detector.findAnnotationOnClass(RequestMapping.class)
+        for (ElementAnnotationDetector detector : controllerAnnotatedDetector) {
+            Optional<Set<String>> optionalControllerUrls = detector.find(RequestMapping.class)
                 .map(RequestMapping::value)
                 .map(Set::of);
 
@@ -66,25 +65,32 @@ public class TaskRegister {
 
             Set<String> controllerUrls = optionalControllerUrls.get();
 
-            for (Method method : detector.findMethod(RequestMapping.class)) {
-                Optional<RequestMapping> optionalRequestMappingMethod = detector.findAnnotationOnMethod(method, RequestMapping.class);
+            for (AnnotatedElement annotatedMethod : detector.findAnnotatedElementOnSubElement(RequestMapping.class)) {
+                ElementAnnotationDetector methodAnnotationDetector = new ElementAnnotationDetector(annotatedMethod);
 
-                if (optionalRequestMappingMethod.isEmpty()) {
+                Optional<RequestMapping> optionalRequestMapping = methodAnnotationDetector.find(RequestMapping.class);
+
+                if (optionalRequestMapping.isEmpty()) {
                     continue;
                 }
 
-                RequestMapping requestMapping = optionalRequestMappingMethod.get();
+                RequestMapping requestMapping = optionalRequestMapping.get();
 
-                List<String> taskUrls = Arrays.stream(requestMapping.value()).collect(Collectors.toUnmodifiableList());
-                List<HttpMethod> taskHttpMethods = Arrays.stream(requestMapping.method()).collect(Collectors.toUnmodifiableList());
+                List<String> fullTaskUrls = new ArrayList<>();
+                for (String taskUrl : Arrays.stream(requestMapping.value()).collect(Collectors.toUnmodifiableList())) {
+                    for (String controllerUrl : controllerUrls) {
+                        fullTaskUrls.add(controllerUrl + taskUrl);
+                    }
+                }
+                fullTaskUrls = Collections.unmodifiableList(fullTaskUrls);
 
-                Set<TaskIndicator> taskIndicators = createMethodIndicator(taskUrls, taskHttpMethods);
-
-                Set<TaskIndicator> fullUrlTaskIndicators = prevAppendUrlToMethodIndicators(controllerUrls, taskIndicators);
-
-                Map<TaskIndicator, Method> methodMapper = fullUrlTaskIndicators.stream()
-                    .map(taskIndicator -> Map.entry(taskIndicator, method))
-                    .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (it1, it2) -> it1));
+                Map<TaskIndicator, Method> methodMapper = new HashMap<>();
+                for (HttpMethod methodHttpMethod : Arrays.stream(requestMapping.method()).collect(Collectors.toUnmodifiableList())) {
+                    for (String fullTaskUrl : fullTaskUrls) {
+                        methodMapper.put(new TaskIndicator(fullTaskUrl, methodHttpMethod), ((AnnotatedMethod) annotatedMethod).getMethod());
+                    }
+                }
+                methodMapper = Collections.unmodifiableMap(methodMapper);
 
                 totalMethodMapper.putAll(methodMapper);
             }
@@ -95,27 +101,6 @@ public class TaskRegister {
         TaskMapper TaskRegister = new TaskMapper(totalMethodMapper);
 
         return new TaskRegister(TaskRegister);
-    }
-
-    private static Set<TaskIndicator> prevAppendUrlToMethodIndicators(Set<String> urls, Set<TaskIndicator> taskIndicators) {
-        Set<TaskIndicator> newTaskIndicators = new HashSet<>();
-        for (String url : urls) {
-            for (TaskIndicator taskIndicator : taskIndicators) {
-                newTaskIndicators.add(taskIndicator.prevAppendUrl(url));
-            }
-        }
-        return Collections.unmodifiableSet(newTaskIndicators);
-    }
-
-    private static Set<TaskIndicator> createMethodIndicator(List<String> taskUrls, List<HttpMethod> taskHttpMethods) {
-        Set<TaskIndicator> taskIndicators = new HashSet<>();
-        for (String taskUrl : taskUrls) {
-            for (HttpMethod httpMethod : taskHttpMethods) {
-                taskIndicators.add(new TaskIndicator(taskUrl, httpMethod));
-            }
-        }
-
-        return Collections.unmodifiableSet(taskIndicators);
     }
 
     private static Function<String, String> generatePackageClassName(String packageName) {

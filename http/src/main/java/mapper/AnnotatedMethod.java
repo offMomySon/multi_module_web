@@ -11,6 +11,10 @@ import java.util.Optional;
 public class AnnotatedMethod extends AnnotatedElement {
     private final Method method;
 
+    public Method getMethod() {
+        return method;
+    }
+
     public AnnotatedMethod(Method method) {
         if (Objects.isNull(method)) {
             throw new RuntimeException("method is null.");
@@ -34,7 +38,7 @@ public class AnnotatedMethod extends AnnotatedElement {
             return Optional.empty();
         }
 
-        return Arrays.stream(method.getAnnotations())
+        return Arrays.stream(method.getDeclaredAnnotations())
             .filter(annotation -> isAnnotationType(annotation, findAnnotation))
             .map(annotation -> (T) annotation)
             .findAny();

@@ -16,6 +16,10 @@ public class ElementAnnotationDetector {
         this.annotatedElement = annotatedElement;
     }
 
+    public boolean doesNotAnnotated(Class<?> findAnnotationClass){
+        return !isAnnotated(findAnnotationClass);
+    }
+
     public boolean isAnnotated(Class<?> findAnnotationClass) {
         if (Objects.isNull(findAnnotationClass) || !findAnnotationClass.isAnnotation()) {
             return false;
@@ -36,7 +40,7 @@ public class ElementAnnotationDetector {
         return annotatedElement.hasSubElement();
     }
 
-    private boolean doesNotHasSubElement() {
+    public boolean doesNotHasSubElement() {
         return !hasSubElement();
     }
 

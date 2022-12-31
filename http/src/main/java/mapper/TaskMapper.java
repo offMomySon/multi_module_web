@@ -27,7 +27,7 @@ public class TaskMapper {
 
     public Method findMethod(TaskIndicator taskIndicator) {
         return values.entrySet().stream()
-            .filter(es -> es.getKey().isMatch(taskIndicator))
+            .filter(es -> es.getKey().equals(taskIndicator))
             .map(Map.Entry::getValue)
             .findFirst()
             .orElseThrow(() -> new RuntimeException(

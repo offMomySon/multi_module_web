@@ -13,19 +13,24 @@ import vo.HttpMethod;
 //      /request/{anotherPathVariable}
 @ToString
 public class TaskIndicator {
-    private final String httpUrl;
     private final HttpMethod httpMethod;
+    private final String httpUrl;
 
-    public TaskIndicator(String httpUrl, HttpMethod httpMethod) {
-        this.httpUrl = ValidateUtil.validateNull(httpUrl);
+    public TaskIndicator(HttpMethod httpMethod, String httpUrl) {
         this.httpMethod = ValidateUtil.validateNull(httpMethod);
+        this.httpUrl = ValidateUtil.validate(httpUrl);
     }
 
-    public TaskIndicator prevAppendUrl(String httpUrl){
-        return new TaskIndicator(httpUrl + this.httpUrl, this.httpMethod);
+    public String getHttpUrl() {
+        return this.httpUrl;
     }
 
-    public boolean isMatch(TaskIndicator otherIndicator) {
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (other == null || getClass() != other.getClass()) return false;
+        TaskIndicator otherIndicator = (TaskIndicator) other;
+
         if (this.httpMethod != otherIndicator.httpMethod) {
             return false;
         }
@@ -49,32 +54,15 @@ public class TaskIndicator {
                 return false;
             }
         }
-
         return true;
     }
+
 
     private static boolean doesNotMatchUrl(String partOfUrl, String partOfGivenUrl) {
         return !partOfUrl.equalsIgnoreCase(partOfGivenUrl);
     }
 
     private static boolean isSkipAbleUrl(String partOfUrl) {
-        return partOfUrl.startsWith("{") && partOfUrl.startsWith("}");
-    }
-
-    public String getHttpUrl() {
-        return this.httpUrl;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        TaskIndicator that = (TaskIndicator) o;
-        return Objects.equals(httpUrl, that.httpUrl) && httpMethod == that.httpMethod;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(httpUrl, httpMethod);
+        return partOfUrl.startsWith("{") && partOfUrl.endsWith("}");
     }
 }

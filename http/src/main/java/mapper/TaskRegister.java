@@ -87,7 +87,7 @@ public class TaskRegister {
                 Map<TaskIndicator, Method> methodMapper = new HashMap<>();
                 for (HttpMethod methodHttpMethod : Arrays.stream(requestMapping.method()).collect(Collectors.toUnmodifiableList())) {
                     for (String fullTaskUrl : fullTaskUrls) {
-                        methodMapper.put(new TaskIndicator(fullTaskUrl, methodHttpMethod), ((AnnotatedMethod) annotatedMethod).getMethod());
+                        methodMapper.put(new TaskIndicator(methodHttpMethod, fullTaskUrl), ((AnnotatedMethod) annotatedMethod).getMethod());
                     }
                 }
                 methodMapper = Collections.unmodifiableMap(methodMapper);

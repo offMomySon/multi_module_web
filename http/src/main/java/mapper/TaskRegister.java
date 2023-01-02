@@ -1,12 +1,13 @@
 package mapper;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -20,87 +21,81 @@ import mapper.marker.Controller;
 import mapper.marker.RequestMapping;
 import validate.ValidateUtil;
 import vo.HttpMethod;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 //    TODO file scan 으로 class 들을 찾으면 되지않나?
 @Slf4j
 public class TaskRegister {
-    private final TaskMapper taskMapper;
+    private final List<TaskActuator> taskActuators;
 
-    private TaskRegister(TaskMapper taskMapper) {
-        this.taskMapper = ValidateUtil.validateNull(taskMapper);
+    public TaskRegister(List<TaskActuator> taskActuators) {
+        this.taskActuators = taskActuators;
     }
 
-    public TaskMapper getTaskMapper() {
-        return taskMapper;
+    public List<TaskActuator> getTaskActuators() {
+        return taskActuators;
     }
 
     public static TaskRegister registerTaskMapper(Class<?> _clazz, String packageName) {
-        BufferedReader resourceReader = new BufferedReader(
-            new InputStreamReader(Objects.requireNonNull(
-                _clazz.getResourceAsStream("/" + packageName.replaceAll("[.]", "/")))
-            )
-        );
+        ValidateUtil.validateNull(_clazz);
+        ValidateUtil.validate(packageName);
 
-        List<ElementAnnotationDetector> controllerAnnotatedDetector = resourceReader.lines()
-            .peek(l -> log.info("line : {}", l))
-            .filter(isClass())
+        InputStream resourceInputStream = _clazz.getResourceAsStream(packageName);
+        BufferedInputStream bufferedInputStream = new BufferedInputStream(resourceInputStream, 8192);
+        InputStreamReader inputStreamReader = new InputStreamReader(bufferedInputStream, UTF_8);
+        BufferedReader bufferedReader = new BufferedReader(inputStreamReader, 8192);
+
+        Map<Class<?>, Annotations> allClass = bufferedReader.lines()
+            .filter(isClassExtension())
             .map(parseClassName())
             .map(generatePackageClassName(packageName))
             .map(TaskRegister::getClass)
-            .map(AnnotatedClass::new)
-            .map(ElementAnnotationDetector::new)
-            .filter(elementAnnotationDetector -> elementAnnotationDetector.isAnnotated(Controller.class))
-            .filter(elementAnnotationDetector -> elementAnnotationDetector.isAnnotated(RequestMapping.class))
-            .collect(Collectors.toUnmodifiableList());
+            .collect(Collectors.toUnmodifiableMap(Function.identity(), Annotations::from, (curr, prev) -> curr));
 
-        Map<TaskIndicator, Method> totalMethodMapper = new HashMap<>();
-        for (ElementAnnotationDetector detector : controllerAnnotatedDetector) {
-            Optional<Set<String>> optionalControllerUrls = detector.find(RequestMapping.class)
+        Map<Class<?>, Annotations> controllerClasses = allClass.entrySet().stream()
+            .filter(entry -> entry.getValue().find(Controller.class).isPresent())
+            .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (curr, prev) -> curr));
+
+        List<TaskActuator> taskActuators = new ArrayList<>();
+        for (Map.Entry<Class<?>, Annotations> controllerClass : controllerClasses.entrySet()) {
+            Set<String> controllerUrls = controllerClass.getValue().find(RequestMapping.class)
                 .map(RequestMapping::value)
-                .map(Set::of);
+                .map(Set::of)
+                .orElseGet(() -> Set.of("/"));
 
-            if (optionalControllerUrls.isEmpty()) {
-                continue;
-            }
+            Map<Method, Annotations> allMethods = Arrays.stream(controllerClass.getKey().getMethods())
+                .map(method -> Map.entry(method, Annotations.from(method)))
+                .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (curr, prev) -> curr));
 
-            Set<String> controllerUrls = optionalControllerUrls.get();
+            Map<Method, Annotations> requestMappingMethods = allMethods.entrySet().stream()
+                .filter(entry -> entry.getValue().find(RequestMapping.class).isPresent())
+                .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (curr, prev) -> curr));
 
-            for (AnnotatedElement annotatedMethod : detector.findAnnotatedElementOnSubElement(RequestMapping.class)) {
-                ElementAnnotationDetector methodAnnotationDetector = new ElementAnnotationDetector(annotatedMethod);
+            for (Map.Entry<Method, Annotations> requestMappingMethodEntry : requestMappingMethods.entrySet()) {
+                RequestMapping requestMapping = requestMappingMethodEntry.getValue().find(RequestMapping.class)
+                    .orElseThrow(()-> new RuntimeException("not exist requestMapping"));
 
-                Optional<RequestMapping> optionalRequestMapping = methodAnnotationDetector.find(RequestMapping.class);
+                Set<String> fullUrls = controllerUrls.stream()
+                    .flatMap(controllerUrl -> Arrays.stream(requestMapping.value()).map( methodUrl-> controllerUrl + methodUrl) )
+                    .collect(Collectors.toUnmodifiableSet());
 
-                if (optionalRequestMapping.isEmpty()) {
-                    continue;
-                }
+                Map<HttpMethod, Set<String>> methodFullUrls = Arrays.stream(requestMapping.method())
+                    .map(method -> Map.entry(method, fullUrls))
+                    .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (curr, prev) -> curr));
 
-                RequestMapping requestMapping = optionalRequestMapping.get();
+                List<TaskIndicator> taskIndicators = methodFullUrls.entrySet().stream()
+                    .flatMap(entry -> entry.getValue().stream().map(url -> new TaskIndicator(entry.getKey(), url)))
+                    .collect(Collectors.toUnmodifiableList());
 
-                List<String> fullTaskUrls = new ArrayList<>();
-                for (String taskUrl : Arrays.stream(requestMapping.value()).collect(Collectors.toUnmodifiableList())) {
-                    for (String controllerUrl : controllerUrls) {
-                        fullTaskUrls.add(controllerUrl + taskUrl);
-                    }
-                }
-                fullTaskUrls = Collections.unmodifiableList(fullTaskUrls);
+                List<TaskActuator> methodTaskActuators = taskIndicators.stream()
+                    .map(taskIndicator -> new TaskActuator(taskIndicator, requestMappingMethodEntry.getKey()))
+                    .collect(Collectors.toUnmodifiableList());
 
-                Map<TaskIndicator, Method> methodMapper = new HashMap<>();
-                for (HttpMethod methodHttpMethod : Arrays.stream(requestMapping.method()).collect(Collectors.toUnmodifiableList())) {
-                    for (String fullTaskUrl : fullTaskUrls) {
-                        methodMapper.put(new TaskIndicator(methodHttpMethod, fullTaskUrl), ((AnnotatedMethod) annotatedMethod).getMethod());
-                    }
-                }
-                methodMapper = Collections.unmodifiableMap(methodMapper);
-
-                totalMethodMapper.putAll(methodMapper);
+                taskActuators.addAll(methodTaskActuators);
             }
         }
 
-        totalMethodMapper.forEach((key, value) -> log.info("key : {}, value : {}", key, value));
-
-        TaskMapper TaskRegister = new TaskMapper(totalMethodMapper);
-
-        return new TaskRegister(TaskRegister);
+        return null;
     }
 
     private static Function<String, String> generatePackageClassName(String packageName) {
@@ -111,7 +106,7 @@ public class TaskRegister {
         return className -> className.substring(0, className.lastIndexOf('.'));
     }
 
-    private static Predicate<String> isClass() {
+    private static Predicate<String> isClassExtension() {
         return resource -> resource.endsWith(".class");
     }
 
@@ -121,5 +116,13 @@ public class TaskRegister {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("class not found.");
         }
+    }
+
+    private static boolean isContainAny(Class<?> clazz, Class<?>... annotationClazzs) {
+        Annotations classAnnotations = Annotations.from(clazz);
+
+        return Arrays.stream(annotationClazzs)
+            .map(classAnnotations::find)
+            .anyMatch(Optional::isPresent);
     }
 }

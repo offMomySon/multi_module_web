@@ -9,7 +9,7 @@ import vo.HttpMethod;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RequestMapping {
-    String[] value() default {};
+    String[] value() default {"/"};
 
-    HttpMethod[] method() default {};
+    HttpMethod[] method() default {HttpMethod.GET};
 }

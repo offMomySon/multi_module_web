@@ -1,5 +1,6 @@
 package mapper;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -39,6 +40,33 @@ class TaskIndicatorTest {
         Assertions.assertThat(actual).isTrue();
     }
 
+    @DisplayName("")
+    @Test
+    void test() throws Exception {
+        //given
+        String s = Optional.of("hello world.")
+            .map(h -> h+ "test")
+            .map(h-> h + "dept1")
+            .map(h-> h + "dept2")
+            .map(h -> h + "hello world.")
+            .orElseThrow(()-> new RuntimeException("dsafsd"));
+
+        System.out.println(s);
+
+        String data = null;
+        String s1 = Optional.ofNullable(data).orElseGet(()->"sdfdas");
+        System.out.println(s1);
+
+        Optional<Object> empty = Optional.empty();
+        System.out.println(empty);
+
+        //when
+
+        //then
+
+    }
+
+
     @DisplayName("http method 가 일치하고, url 이 일치하지 않으면 false 을 반환합니다.")
     @ParameterizedTest
     @MethodSource("provideDiffUrl")
@@ -60,7 +88,7 @@ class TaskIndicatorTest {
             Arguments.of("/test/depth1", "/test/depth1"),
             Arguments.of("/test/depth1/depth2", "/test/depth1/depth2"),
             Arguments.of("/test/depth1/depth2/depth3", "/test/depth1/depth2/depth3"),
-            Arguments.of("/test/depth1/depth2/depth4", "/test/depth1/depth2/depth4")
+            Arguments.of("/test/depth1/depth2/depth3/depth4", "/test/depth1/depth2/depth3/depth4")
         );
     }
 

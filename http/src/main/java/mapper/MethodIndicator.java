@@ -1,6 +1,5 @@
 package mapper;
 
-import java.util.Objects;
 import lombok.ToString;
 import validate.ValidateUtil;
 import vo.HttpMethod;
@@ -12,11 +11,11 @@ import vo.HttpMethod;
 //      /request/genericPath
 //      /request/{anotherPathVariable}
 @ToString
-public class TaskIndicator {
+public class MethodIndicator {
     private final HttpMethod httpMethod;
     private final String httpUrl;
 
-    public TaskIndicator(HttpMethod httpMethod, String httpUrl) {
+    public MethodIndicator(HttpMethod httpMethod, String httpUrl) {
         this.httpMethod = ValidateUtil.validateNull(httpMethod);
         this.httpUrl = ValidateUtil.validate(httpUrl);
     }
@@ -29,7 +28,7 @@ public class TaskIndicator {
     public boolean equals(Object other) {
         if (this == other) return true;
         if (other == null || getClass() != other.getClass()) return false;
-        TaskIndicator otherIndicator = (TaskIndicator) other;
+        MethodIndicator otherIndicator = (MethodIndicator) other;
 
         if (this.httpMethod != otherIndicator.httpMethod) {
             return false;

@@ -12,7 +12,7 @@ public class AnnotationUtils {
         return find(clazz.getAnnotations(), annotationClazz);
     }
 
-    public static <T> Optional<T> find(Method method, Class<T> annotationClazz){
+    public static <T> Optional<T> find(Method method, Class<T> annotationClazz) {
         return find(method.getAnnotations(), annotationClazz);
     }
 

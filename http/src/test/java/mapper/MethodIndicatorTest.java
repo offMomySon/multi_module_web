@@ -10,16 +10,16 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import vo.HttpMethod;
 
-class TaskIndicatorTest {
+class MethodIndicatorTest {
     @DisplayName("http method 가 다르면 false 를 반환합니다.")
     @Test
     void test1() throws Exception {
         //given
-        TaskIndicator taskIndicator = new TaskIndicator(HttpMethod.GET, "/test");
-        TaskIndicator otherIndicator = new TaskIndicator(HttpMethod.POST, "/test");
+        MethodIndicator methodIndicator = new MethodIndicator(HttpMethod.GET, "/test");
+        MethodIndicator otherIndicator = new MethodIndicator(HttpMethod.POST, "/test");
 
         //when
-        boolean actual = taskIndicator.equals(otherIndicator);
+        boolean actual = methodIndicator.equals(otherIndicator);
 
         //then
         Assertions.assertThat(actual).isFalse();
@@ -30,11 +30,11 @@ class TaskIndicatorTest {
     @MethodSource("provideEqualUrl")
     void test2(String url, String otherUrl) throws Exception {
         //given
-        TaskIndicator taskIndicator = new TaskIndicator(HttpMethod.GET, url);
-        TaskIndicator otherTaskIndicator = new TaskIndicator(HttpMethod.GET, otherUrl);
+        MethodIndicator methodIndicator = new MethodIndicator(HttpMethod.GET, url);
+        MethodIndicator otherMethodIndicator = new MethodIndicator(HttpMethod.GET, otherUrl);
 
         //when
-        boolean actual = taskIndicator.equals(otherTaskIndicator);
+        boolean actual = methodIndicator.equals(otherMethodIndicator);
 
         //then
         Assertions.assertThat(actual).isTrue();
@@ -72,11 +72,11 @@ class TaskIndicatorTest {
     @MethodSource("provideDiffUrl")
     void test3(String url, String otherUrl) throws Exception {
         //given
-        TaskIndicator taskIndicator = new TaskIndicator(HttpMethod.GET, url);
-        TaskIndicator otherTaskIndicator = new TaskIndicator(HttpMethod.GET, otherUrl);
+        MethodIndicator methodIndicator = new MethodIndicator(HttpMethod.GET, url);
+        MethodIndicator otherMethodIndicator = new MethodIndicator(HttpMethod.GET, otherUrl);
 
         //when
-        boolean actual = taskIndicator.equals(otherTaskIndicator);
+        boolean actual = methodIndicator.equals(otherMethodIndicator);
 
         //then
         Assertions.assertThat(actual).isFalse();

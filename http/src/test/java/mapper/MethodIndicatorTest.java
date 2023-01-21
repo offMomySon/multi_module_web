@@ -1,6 +1,5 @@
 package mapper;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -40,33 +39,6 @@ class MethodIndicatorTest {
         Assertions.assertThat(actual).isTrue();
     }
 
-    @DisplayName("")
-    @Test
-    void test() throws Exception {
-        //given
-        String s = Optional.of("hello world.")
-            .map(h -> h+ "test")
-            .map(h-> h + "dept1")
-            .map(h-> h + "dept2")
-            .map(h -> h + "hello world.")
-            .orElseThrow(()-> new RuntimeException("dsafsd"));
-
-        System.out.println(s);
-
-        String data = null;
-        String s1 = Optional.ofNullable(data).orElseGet(()->"sdfdas");
-        System.out.println(s1);
-
-        Optional<Object> empty = Optional.empty();
-        System.out.println(empty);
-
-        //when
-
-        //then
-
-    }
-
-
     @DisplayName("http method 가 일치하고, url 이 일치하지 않으면 false 을 반환합니다.")
     @ParameterizedTest
     @MethodSource("provideDiffUrl")
@@ -81,6 +53,19 @@ class MethodIndicatorTest {
         //then
         Assertions.assertThat(actual).isFalse();
     }
+
+//    @DisplayName("http method 가 일치하고, url 이 일치하지 않으면 false 을 반환합니다.")
+//    @Test
+//    void test4() throws Exception {
+//        //given
+//        //when
+//        Throwable actual = Assertions.catchThrowable(() -> {
+//            MethodIndicator.from(HttpMethod.GET, "/controllerUrl", "/methodUrl");
+//        });
+//
+//        //then
+//        Assertions.assertThat(actual).isNull();
+//    }
 
     private static Stream<Arguments> provideEqualUrl() {
         return Stream.of(

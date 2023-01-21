@@ -1,5 +1,7 @@
 package mapper;
 
+import java.text.MessageFormat;
+import java.util.Objects;
 import lombok.ToString;
 import validate.ValidateUtil;
 import vo.HttpMethod;
@@ -13,15 +15,37 @@ import vo.HttpMethod;
 @ToString
 public class MethodIndicator {
     private final HttpMethod httpMethod;
-    private final String httpUrl;
+    private final String methodUri;
 
-    public MethodIndicator(HttpMethod httpMethod, String httpUrl) {
+    public MethodIndicator(HttpMethod httpMethod, String methodUri) {
         this.httpMethod = ValidateUtil.validateNull(httpMethod);
-        this.httpUrl = ValidateUtil.validate(httpUrl);
+        this.methodUri = ValidateUtil.validate(methodUri);
     }
 
-    public String getHttpUrl() {
-        return this.httpUrl;
+    public static MethodIndicator from(HttpMethod httpMethod, String controllerUrl, String methodUrl) {
+        if (Objects.isNull(httpMethod)){
+            throw new RuntimeException("httpMethod is null.");
+        }
+        if(Objects.isNull(controllerUrl)){
+            throw new RuntimeException("controllerUrl is null.");
+        }
+        if(Objects.isNull(methodUrl)){
+            throw new RuntimeException("methodUrl is null.");
+        }
+
+        if(controllerUrl.isEmpty() || controllerUrl.isBlank()){
+            throw new RuntimeException(MessageFormat.format("controller url is not valid value : {0}", controllerUrl));
+        }
+        if(methodUrl.isEmpty() || methodUrl.isBlank()){
+            throw new RuntimeException(MessageFormat.format("methodUrl is not valid value : {0}", methodUrl));
+        }
+
+        String methodUri = controllerUrl+methodUrl;
+        return new MethodIndicator(httpMethod, methodUri);
+    }
+
+    public String getMethodUri() {
+        return this.methodUri;
     }
 
     @Override
@@ -34,8 +58,8 @@ public class MethodIndicator {
             return false;
         }
 
-        String[] splitUrl = this.httpUrl.split("/");
-        String[] splitOtherUrl = otherIndicator.httpUrl.split("/");
+        String[] splitUrl = this.methodUri.split("/");
+        String[] splitOtherUrl = otherIndicator.methodUri.split("/");
 
         if (splitUrl.length != splitOtherUrl.length) {
             return false;

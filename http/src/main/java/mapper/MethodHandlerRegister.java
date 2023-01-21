@@ -4,12 +4,18 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import mapper.marker.Controller;
+import mapper.marker.RequestMapping;
+import vo.HttpMethod;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static validate.ValidateUtil.validate;
 import static validate.ValidateUtil.validateNull;
@@ -28,7 +34,6 @@ public class MethodHandlerRegister {
     }
 
     public static MethodHandlerRegister registerTaskMapper(Class<?> _clazz, String packageName) {
-//        1.
         validateNull(_clazz);
         validate(packageName);
 
@@ -48,13 +53,40 @@ public class MethodHandlerRegister {
             .filter(aClass -> AnnotationUtils.find(aClass, Controller.class).isPresent())
             .collect(Collectors.toUnmodifiableList());
 
+        List<MethodHandler> actuators = new ArrayList<>();
+        for (Class<?> clazz : controllerClazzs) {
+            Set<String> controllerUrls = AnnotationUtils.find(clazz, RequestMapping.class)
+                .map(RequestMapping::value)
+                .map(Set::of)
+                .orElseGet(()->Set.of("/"));
 
-        List<MethodHandler> allMethodHandler = controllerClazzs.stream()
-            .map(MethodHandlerCreator::new)
-            .flatMap(methodHandlerCreator -> methodHandlerCreator.generateTaskActuator().stream())
-            .collect(Collectors.toUnmodifiableList());
+            List<Method> methods = Arrays.stream(clazz.getMethods())
+                .filter(method -> AnnotationUtils.find(method, RequestMapping.class).isPresent())
+                .collect(Collectors.toUnmodifiableList());
 
-        return new MethodHandlerRegister(allMethodHandler);
+            for(Method method : methods){
+                RequestMapping requestMapping = AnnotationUtils.find(method, RequestMapping.class)
+                    .orElseThrow(()-> new RuntimeException("request mapping 이 존재하지 않습니다."));
+
+                Set<HttpMethod> methodHttpMethods = Arrays.stream(requestMapping.method()).collect(Collectors.toUnmodifiableSet());
+                Set<String> methodUrls = Arrays.stream(requestMapping.value()).collect(Collectors.toUnmodifiableSet());
+
+                List<MethodIndicator> methodIndicators = new ArrayList<>();
+                for (String controllerUrl : controllerUrls) {
+                    for (String methodUrl : methodUrls) {
+                        for(HttpMethod httpMethod : methodHttpMethods){
+                            MethodIndicator methodIndicator = MethodIndicator.from(httpMethod, controllerUrl, methodUrl);
+                            methodIndicators.add(methodIndicator);
+                        }
+                    }
+                }
+
+                MethodHandler methodHandlers = new MethodHandler(methodIndicators, method);
+                actuators.add(methodHandlers);
+            }
+        }
+
+        return new MethodHandlerRegister(actuators);
     }
 
     private static Function<String, String> generatePackageClassName(String packageName) {

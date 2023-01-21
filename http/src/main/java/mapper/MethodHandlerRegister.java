@@ -53,7 +53,7 @@ public class MethodHandlerRegister {
             .filter(aClass -> AnnotationUtils.find(aClass, Controller.class).isPresent())
             .collect(Collectors.toUnmodifiableList());
 
-        List<MethodHandler> actuators = new ArrayList<>();
+        List<MethodHandler> allMethodHandlers = new ArrayList<>();
         for (Class<?> clazz : controllerClazzs) {
             Set<String> controllerUrls = AnnotationUtils.find(clazz, RequestMapping.class)
                 .map(RequestMapping::value)
@@ -64,29 +64,12 @@ public class MethodHandlerRegister {
                 .filter(method -> AnnotationUtils.find(method, RequestMapping.class).isPresent())
                 .collect(Collectors.toUnmodifiableList());
 
-            for(Method method : methods){
-                RequestMapping requestMapping = AnnotationUtils.find(method, RequestMapping.class)
-                    .orElseThrow(()-> new RuntimeException("request mapping 이 존재하지 않습니다."));
+            List<MethodHandler> methodHandlers = methods.stream().map(method -> MethodHandler.from(controllerUrls, method)).collect(Collectors.toUnmodifiableList());
 
-                Set<HttpMethod> methodHttpMethods = Arrays.stream(requestMapping.method()).collect(Collectors.toUnmodifiableSet());
-                Set<String> methodUrls = Arrays.stream(requestMapping.value()).collect(Collectors.toUnmodifiableSet());
-
-                List<MethodIndicator> methodIndicators = new ArrayList<>();
-                for (String controllerUrl : controllerUrls) {
-                    for (String methodUrl : methodUrls) {
-                        for(HttpMethod httpMethod : methodHttpMethods){
-                            MethodIndicator methodIndicator = MethodIndicator.from(httpMethod, controllerUrl, methodUrl);
-                            methodIndicators.add(methodIndicator);
-                        }
-                    }
-                }
-
-                MethodHandler methodHandlers = new MethodHandler(methodIndicators, method);
-                actuators.add(methodHandlers);
-            }
+            allMethodHandlers.addAll(methodHandlers);
         }
 
-        return new MethodHandlerRegister(actuators);
+        return new MethodHandlerRegister(allMethodHandlers);
     }
 
     private static Function<String, String> generatePackageClassName(String packageName) {

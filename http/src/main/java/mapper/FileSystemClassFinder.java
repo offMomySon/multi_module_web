@@ -53,14 +53,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class FileSystemClassFinder {
     private final Path systemRootPath;
-    private final Path classSerachPath;
+    private final Path classFindPath;
 
     private FileSystemClassFinder(Path systemRootPath, Path classSerachPath) {
         validateEmpty(systemRootPath);
         validateEmpty(classSerachPath);
 
         this.systemRootPath = systemRootPath;
-        this.classSerachPath = classSerachPath;
+        this.classFindPath = classSerachPath;
     }
 
     public static FileSystemClassFinder from(Class<?> _clazz, String classSearchPackage) {
@@ -82,7 +82,7 @@ public class FileSystemClassFinder {
     }
 
     public List<? extends Class<?>> find() {
-        try (Stream<Path> walk = Files.walk(this.classSerachPath)) {
+        try (Stream<Path> walk = Files.walk(this.classFindPath)) {
             List<? extends Class<?>> clazzes = walk
                 .filter(Files::isRegularFile)
                 .peek(regularFile -> log.info("[1] regularFile : {}", regularFile))

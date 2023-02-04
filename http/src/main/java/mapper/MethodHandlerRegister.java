@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import mapper.marker.Controller;
 import mapper.marker.RequestMapping;
-import vo.HttpMethod;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static validate.ValidateUtil.validate;
 import static validate.ValidateUtil.validateNull;
@@ -58,7 +57,7 @@ public class MethodHandlerRegister {
             Set<String> controllerUrls = AnnotationUtils.find(clazz, RequestMapping.class)
                 .map(RequestMapping::value)
                 .map(Set::of)
-                .orElseGet(()->Set.of("/"));
+                .orElseGet(() -> Set.of("/"));
 
             List<Method> methods = Arrays.stream(clazz.getMethods())
                 .filter(method -> AnnotationUtils.find(method, RequestMapping.class).isPresent())

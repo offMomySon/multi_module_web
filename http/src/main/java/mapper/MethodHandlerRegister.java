@@ -32,23 +32,8 @@ public class MethodHandlerRegister {
         return methodHandlers;
     }
 
-    public static MethodHandlerRegister registerTaskMapper(Class<?> _clazz, String packageName) {
-        validateNull(_clazz);
-        validate(packageName);
-
-        InputStream resourceInputStream = _clazz.getResourceAsStream(packageName);
-        BufferedInputStream bufferedInputStream = new BufferedInputStream(resourceInputStream, 8192);
-        InputStreamReader inputStreamReader = new InputStreamReader(bufferedInputStream, UTF_8);
-        BufferedReader bufferedReader = new BufferedReader(inputStreamReader, 8192);
-
-        List<Class<?>> allClazz = bufferedReader.lines()
-            .filter(isClassExtension())
-            .map(parseClassName())
-            .map(generatePackageClassName(packageName))
-            .map(MethodHandlerRegister::getClass)
-            .collect(Collectors.toUnmodifiableList());
-
-        List<Class<?>> controllerClazzs = allClazz.stream()
+    public static MethodHandlerRegister registerTaskMapper(List<? extends Class<?>> classes) {
+        List<Class<?>> controllerClazzs = classes.stream()
             .filter(aClass -> AnnotationUtils.find(aClass, Controller.class).isPresent())
             .collect(Collectors.toUnmodifiableList());
 

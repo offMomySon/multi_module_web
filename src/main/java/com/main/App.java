@@ -13,6 +13,5 @@ public class App {
         FileSystemClassFinder fileSystemClassFinder = FileSystemClassFinder.from(App.class, "com.main");
         List<? extends Class<?>> clazzes = fileSystemClassFinder.find();
 
-
     }
 }

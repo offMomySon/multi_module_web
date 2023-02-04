@@ -50,16 +50,21 @@ import lombok.extern.slf4j.Slf4j;
 //09:00:15.159 [main] INFO mapper.ClassFinder - path : /Users/huni1006/Personal_Project/multi_module_web/build/classes/java/main/com/main/App.class
 //
 //    ClassLoaderA
+
+/**
+ * 역할.
+ * 파일 시스템의 path 하위의 class 들을 찾는 역할.
+ */
 @Slf4j
 public class FileSystemClassFinder {
-    private final Path systemRootPath;
+    private final Path rootPath;
     private final Path classFindPath;
 
-    private FileSystemClassFinder(Path systemRootPath, Path classSerachPath) {
-        validateEmpty(systemRootPath);
+    private FileSystemClassFinder(Path rootPath, Path classSerachPath) {
+        validateEmpty(rootPath);
         validateEmpty(classSerachPath);
 
-        this.systemRootPath = systemRootPath;
+        this.rootPath = rootPath;
         this.classFindPath = classSerachPath;
     }
 
@@ -68,12 +73,12 @@ public class FileSystemClassFinder {
         validateEmpty(classSearchPackage);
 
         try {
-            Path systemRootPath = getSystemRootPath(_clazz);
-            Path classSearchPath = systemRootPath.resolve(classSearchPackage.replace(".", "/"));
+            Path systemRootPath = getRootPath(_clazz);
+            Path classFindPath = systemRootPath.resolve(classSearchPackage.replace(".", "/"));
             log.info("systemRootPath : {}", systemRootPath);
-            log.info("classSearchPath : {}", classSearchPath);
+            log.info("classFindPath : {}", classFindPath);
 
-            return new FileSystemClassFinder(systemRootPath, classSearchPath);
+            return new FileSystemClassFinder(systemRootPath, classFindPath);
         } catch (URISyntaxException e) {
             throw new RuntimeException(MessageFormat.format("uri syntax exception. {}", e.getMessage()));
         } catch (IOException e) {
@@ -83,19 +88,19 @@ public class FileSystemClassFinder {
 
     public List<? extends Class<?>> find() {
         try (Stream<Path> walk = Files.walk(this.classFindPath)) {
-            List<? extends Class<?>> clazzes = walk
+            List<? extends Class<?>> foundClazzes = walk
                 .filter(Files::isRegularFile)
                 .peek(regularFile -> log.info("[1] regularFile : {}", regularFile))
                 .filter(FileSystemClassFinder::hasClassExtension)
                 .peek(classFile -> log.info("[2] classFile : {}", classFile))
-                .map(systemRootPath::relativize)
+                .map(rootPath::relativize)
                 .peek(packagePath -> log.info("[3] packagePath : {}", packagePath))
                 .map(FileSystemClassFinder::convertFullyQualifiedClassName)
                 .peek(className -> log.info("[4] className : {}", className))
                 .map(FileSystemClassFinder::createClass)
                 .collect(Collectors.toUnmodifiableList());
 
-            return clazzes;
+            return foundClazzes;
         } catch (IOException e) {
             throw new RuntimeException(MessageFormat.format("io exception. {}", e.getMessage()));
         }
@@ -119,7 +124,7 @@ public class FileSystemClassFinder {
         return path.getFileName().toString().endsWith(".class");
     }
 
-    private static Path getSystemRootPath(Class<?> clazz) throws IOException, URISyntaxException {
+    private static Path getRootPath(Class<?> clazz) throws IOException, URISyntaxException {
         URI uri = clazz.getResource("").toURI();
         if (isJar(uri)) {
             FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap());

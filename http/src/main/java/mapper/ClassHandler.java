@@ -7,28 +7,35 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
+import mapper.marker.Controller;
 import mapper.marker.RequestMapping;
 
+@ToString
+@Slf4j
 public class ClassHandler {
     private final List<MethodHandler> methodHandlers;
 
-    private ClassHandler(List<MethodHandler> _methodHandlers) {
-        validateEmtpy(_methodHandlers);
-        List<MethodHandler> methodHandlers = _methodHandlers.stream()
+    private ClassHandler(List<MethodHandler> methodHandlers) {
+        validateEmtpy(methodHandlers);
+
+        this.methodHandlers = methodHandlers.stream()
             .filter(methodHandler -> !Objects.isNull(methodHandler))
             .collect(Collectors.toUnmodifiableList());
-
-        this.methodHandlers = methodHandlers;
     }
 
     public static ClassHandler from(Class<?> clazz) {
         validateEmtpy(clazz);
+        AnnotationUtils.find(clazz, Controller.class)
+            .orElseThrow(() -> new RuntimeException("Controller annotation does not exist."));
 
-        Set<String> controllerUrls = AnnotationUtils.find(clazz, RequestMapping.class)
-            .map(RequestMapping::value)
-            .map(Set::of)
-            .orElseGet(() -> Set.of("/"));
+        RequestMapping requestMapping = AnnotationUtils.find(clazz, RequestMapping.class)
+            .orElseThrow(() -> new RuntimeException("RequestMapping annotation does not exist."));
 
+        Set<String> controllerUrls = Arrays.stream(requestMapping.value())
+            .filter(controllerUrl -> !Objects.isNull(controllerUrl))
+            .collect(Collectors.toUnmodifiableSet());
         List<Method> requestMappingMethods = Arrays.stream(clazz.getMethods())
             .filter(method -> AnnotationUtils.find(method, RequestMapping.class).isPresent())
             .collect(Collectors.toUnmodifiableList());
@@ -39,7 +46,6 @@ public class ClassHandler {
 
         return new ClassHandler(methodHandlers);
     }
-
 
     private static <T> T validateEmtpy(T value) {
         if (Objects.isNull(value)) {

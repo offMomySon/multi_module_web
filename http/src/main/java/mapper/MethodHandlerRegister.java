@@ -23,12 +23,12 @@ public class MethodHandlerRegister {
     }
 
     public static MethodHandlerRegister register(List<? extends Class<?>> classes) {
-        List<Class<?>> controllerClazzs = classes.stream()
-            .filter(aClass -> AnnotationUtils.find(aClass, Controller.class).isPresent())
+        List<Class<?>> controllerClasses = classes.stream()
+            .filter(clazz -> AnnotationUtils.find(clazz, Controller.class).isPresent())
             .collect(Collectors.toUnmodifiableList());
 
         List<MethodHandler> allMethodHandlers = new ArrayList<>();
-        for (Class<?> clazz : controllerClazzs) {
+        for (Class<?> clazz : controllerClasses) {
             Set<String> controllerUrls = AnnotationUtils.find(clazz, RequestMapping.class)
                 .map(RequestMapping::value)
                 .map(Set::of)
@@ -44,7 +44,6 @@ public class MethodHandlerRegister {
 
             allMethodHandlers.addAll(methodHandlers);
         }
-
         return new MethodHandlerRegister(allMethodHandlers);
     }
 }

@@ -28,22 +28,23 @@ public class MethodHandler {
     public static MethodHandler from(Set<String> _prefixUrls, Method method) {
         RequestMapping requestMapping = AnnotationUtils.find(method, RequestMapping.class)
             .orElseThrow(() -> new RuntimeException("requestMapping 이 존재하지 않습니다."));
-        Set<String> prefixUrls = _prefixUrls.stream()
-            .filter(prefixUrl -> !Objects.isNull(prefixUrl) && !prefixUrl.isBlank() && !prefixUrl.isEmpty())
-            .collect(Collectors.toUnmodifiableSet());
 
         Set<HttpMethod> httpMethods = Arrays.stream(requestMapping.method())
             .collect(Collectors.toUnmodifiableSet());
+
+        Set<String> prefixUrls = _prefixUrls.stream()
+            .filter(prefixUrl -> !Objects.isNull(prefixUrl) && !prefixUrl.isBlank() && !prefixUrl.isEmpty())
+            .collect(Collectors.toUnmodifiableSet());
         Set<String> methodUrls = Arrays.stream(requestMapping.value())
             .collect(Collectors.toUnmodifiableSet());
-        Set<String> methodUris = combineUrls(prefixUrls,methodUrls);
+        Set<String> appendedMethodUrl = apendUrls(prefixUrls, methodUrls);
 
-        List<MethodIndicator> methodIndicators = createMethodIndicators(httpMethods, methodUris);
+        List<MethodIndicator> methodIndicators = createMethodIndicators(httpMethods, appendedMethodUrl);
 
         return new MethodHandler(methodIndicators, method);
     }
 
-    private static Set<String> combineUrls(Set<String> prefixUrls, Set<String> methodUrls) {
+    private static Set<String> apendUrls(Set<String> prefixUrls, Set<String> methodUrls) {
         return methodUrls.stream()
             .flatMap(methodUrl -> prefixUrls.stream().map(prefixUrl -> prefixUrl + methodUrl))
             .collect(Collectors.toUnmodifiableSet());

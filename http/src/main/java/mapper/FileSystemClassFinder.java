@@ -52,33 +52,43 @@ import lombok.extern.slf4j.Slf4j;
 //    ClassLoaderA
 
 /**
+ * 루틴클래스.
+ *
  * 역할.
- * 파일 시스템의 path 하위의 class 들을 찾는 역할.
+ * 파일 시스템에서 특정 package 하위에 존재하는 class 파일들을 찾는 역할.
+ *
+ * 루틴.
+ * 1. 특정 path 의 하위의 모든 파일을 찾는다.
+ * 2. 일반파일 여부를 확인한다.
+ * 3. .class 확장자를 가지고 있는지 확인한다.
+ * 4. file 시스템과 연관없는 jvm 에서 인식되는 path 로 변환한다.
+ * 5. path 를 fullyQualifiedClassName 으로 변환한다.
+ * 6. fullyQualifiedClassName 를 class 로 변환한다.
  */
 @Slf4j
 public class FileSystemClassFinder {
     private final Path rootPath;
-    private final Path classFindPath;
+    private final Path findPath;
 
-    private FileSystemClassFinder(Path rootPath, Path classSerachPath) {
+    private FileSystemClassFinder(Path rootPath, Path findPath) {
         validateEmpty(rootPath);
-        validateEmpty(classSerachPath);
+        validateEmpty(findPath);
 
         this.rootPath = rootPath;
-        this.classFindPath = classSerachPath;
+        this.findPath = findPath;
     }
 
-    public static FileSystemClassFinder from(Class<?> _clazz, String classSearchPackage) {
+    public static FileSystemClassFinder from(Class<?> _clazz, String findPackage) {
         validateEmpty(_clazz);
-        validateEmpty(classSearchPackage);
+        validateEmpty(findPackage);
 
         try {
-            Path systemRootPath = getRootPath(_clazz);
-            Path classFindPath = systemRootPath.resolve(classSearchPackage.replace(".", "/"));
-            log.info("systemRootPath : {}", systemRootPath);
-            log.info("classFindPath : {}", classFindPath);
+            Path rootPath = getRootPath(_clazz);
+            Path findPath = rootPath.resolve(findPackage.replace(".", "/"));
+            log.info("rootPath : {}", rootPath);
+            log.info("findPath : {}", findPath);
 
-            return new FileSystemClassFinder(systemRootPath, classFindPath);
+            return new FileSystemClassFinder(rootPath, findPath);
         } catch (URISyntaxException e) {
             throw new RuntimeException(MessageFormat.format("uri syntax exception. {}", e.getMessage()));
         } catch (IOException e) {
@@ -87,23 +97,22 @@ public class FileSystemClassFinder {
     }
 
     public List<? extends Class<?>> find() {
-        try (Stream<Path> walk = Files.walk(this.classFindPath)) {
+        try (Stream<Path> walk = Files.walk(this.findPath)) {
             List<? extends Class<?>> foundClazzes = walk
                 .filter(Files::isRegularFile)
-                .peek(regularFile -> log.info("[1] regularFile : {}", regularFile))
                 .filter(FileSystemClassFinder::hasClassExtension)
-                .peek(classFile -> log.info("[2] classFile : {}", classFile))
-                .map(rootPath::relativize)
-                .peek(packagePath -> log.info("[3] packagePath : {}", packagePath))
+                .map(filePath -> extractJvmPath(rootPath, filePath))
                 .map(FileSystemClassFinder::convertFullyQualifiedClassName)
-                .peek(className -> log.info("[4] className : {}", className))
                 .map(FileSystemClassFinder::createClass)
                 .collect(Collectors.toUnmodifiableList());
-
             return foundClazzes;
         } catch (IOException e) {
             throw new RuntimeException(MessageFormat.format("io exception. {}", e.getMessage()));
         }
+    }
+
+    private static Path extractJvmPath(Path rootPath, Path filePath) {
+        return rootPath.relativize(filePath);
     }
 
     private static Class<?> createClass(String className) {
@@ -114,9 +123,9 @@ public class FileSystemClassFinder {
         }
     }
 
-    private static String convertFullyQualifiedClassName(Path packagePath) {
-        return packagePath.toString()
-            .substring(0, packagePath.toString().lastIndexOf(".class"))
+    private static String convertFullyQualifiedClassName(Path filePath) {
+        return filePath.toString()
+            .substring(0, filePath.toString().lastIndexOf(".class"))
             .replace("/", ".");
     }
 
@@ -144,7 +153,7 @@ public class FileSystemClassFinder {
             throw new RuntimeException(MessageFormat.format("value is null. `type`/`value` -> `{0}/`{1}`", value.getClass().getSimpleName(), value));
         }
         if (Objects.equals(value.getClass(), String.class) &&
-            (((String)value).isEmpty() || ((String)value).isBlank())) {
+            (((String) value).isEmpty() || ((String) value).isBlank())) {
             throw new RuntimeException(MessageFormat.format("value is empty. `type`/`value` -> `{0}`/`{1}`", value.getClass().getSimpleName(), value));
         }
 

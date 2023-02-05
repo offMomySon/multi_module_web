@@ -61,9 +61,7 @@ import lombok.extern.slf4j.Slf4j;
  * 1. 특정 path 의 하위의 모든 파일을 찾는다.
  * 2. 일반파일 여부를 확인한다.
  * 3. .class 확장자를 가지고 있는지 확인한다.
- * 4. file 시스템과 연관없는 jvm 에서 인식되는 path 로 변환한다.
- * 5. path 를 fullyQualifiedClassName 으로 변환한다.
- * 6. fullyQualifiedClassName 를 class 로 변환한다.
+ * 4. root path 와 file path 를 가지고 class 를 생성한다.
  */
 @Slf4j
 public class FileSystemClassFinder {
@@ -101,32 +99,12 @@ public class FileSystemClassFinder {
             List<? extends Class<?>> foundClazzes = walk
                 .filter(Files::isRegularFile)
                 .filter(FileSystemClassFinder::hasClassExtension)
-                .map(filePath -> extractJvmPath(rootPath, filePath))
-                .map(FileSystemClassFinder::convertFullyQualifiedClassName)
-                .map(FileSystemClassFinder::createClass)
+                .map(filePath -> PathUtils.createClass(rootPath, filePath))
                 .collect(Collectors.toUnmodifiableList());
             return foundClazzes;
         } catch (IOException e) {
             throw new RuntimeException(MessageFormat.format("io exception. {}", e.getMessage()));
         }
-    }
-
-    private static Path extractJvmPath(Path rootPath, Path filePath) {
-        return rootPath.relativize(filePath);
-    }
-
-    private static Class<?> createClass(String className) {
-        try {
-            return Class.forName(className);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static String convertFullyQualifiedClassName(Path filePath) {
-        return filePath.toString()
-            .substring(0, filePath.toString().lastIndexOf(".class"))
-            .replace("/", ".");
     }
 
     private static boolean hasClassExtension(Path path) {

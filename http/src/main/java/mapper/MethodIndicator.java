@@ -1,8 +1,14 @@
 package mapper;
 
+import java.lang.reflect.Method;
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.ToString;
+import mapper.marker.Controller;
+import mapper.marker.RequestMapping;
 import validate.ValidateUtil;
 import vo.HttpMethod;
 
@@ -29,23 +35,22 @@ public class MethodIndicator {
         if(Objects.isNull(controllerUrl)){
             throw new RuntimeException("controllerUrl is null.");
         }
-        if(Objects.isNull(methodUrl)){
+        if (Objects.isNull(methodUrl)) {
             throw new RuntimeException("methodUrl is null.");
         }
+        if (Objects.isNull(httpMethod)) {
+            throw new RuntimeException("httpMethod is null.");
+        }
 
-        if(controllerUrl.isEmpty() || controllerUrl.isBlank()){
+        if (controllerUrl.isEmpty() || controllerUrl.isBlank()) {
             throw new RuntimeException(MessageFormat.format("controller url is not valid value : {0}", controllerUrl));
         }
-        if(methodUrl.isEmpty() || methodUrl.isBlank()){
+        if (methodUrl.isEmpty() || methodUrl.isBlank()) {
             throw new RuntimeException(MessageFormat.format("methodUrl is not valid value : {0}", methodUrl));
         }
 
-        String methodUri = controllerUrl+methodUrl;
+        String methodUri = controllerUrl + methodUrl;
         return new MethodIndicator(httpMethod, methodUri);
-    }
-
-    public String getMethodUri() {
-        return this.methodUri;
     }
 
     @Override
@@ -87,5 +92,12 @@ public class MethodIndicator {
 
     private static boolean isSkipAbleUrl(String partOfUrl) {
         return partOfUrl.startsWith("{") && partOfUrl.endsWith("}");
+    }
+
+    private static <T> T validateEmpty(T value) {
+        if (Objects.isNull(value)) {
+            throw new RuntimeException(MessageFormat.format("value is null. `type`/`value` - `{0}`/`{1}`", value.getClass().getSimpleName(), value));
+        }
+        return value;
     }
 }

@@ -10,16 +10,17 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.ToString;
+import mapper.marker.Controller;
 import mapper.marker.RequestMapping;
-import org.apache.commons.lang3.ObjectUtils;
 import vo.HttpMethod;
 
 @ToString
 public class MethodHandler {
     private final List<MethodIndicator> methodIndicators;
+    private final Class clazz;
     private final Method method;
 
-    public MethodHandler(List<MethodIndicator> methodIndicators, Method method) {
+    public MethodHandler(List<MethodIndicator> methodIndicators, Class clazz, Method method) {
         if (Objects.isNull(methodIndicators)) {
             throw new RuntimeException("methodIndicator is null.");
         }
@@ -28,45 +29,32 @@ public class MethodHandler {
             .filter(methodIndicator -> !Objects.isNull(methodIndicator))
             .collect(Collectors.toUnmodifiableList());
         this.method = method;
+        this.clazz = clazz;
     }
 
-    public static MethodHandler from(Set<String> prefixUrls, Method method) {
-        validateEmtpy(prefixUrls);
+    public static MethodHandler from(Class clazz, Method method) {
+        validateEmtpy(clazz);
         validateEmtpy(method);
+        AnnotationUtils.find(clazz, Controller.class).orElseThrow(() -> new RuntimeException("controller annotation does not exist."));
 
-        RequestMapping requestMapping = AnnotationUtils.find(method, RequestMapping.class)
-            .orElseThrow(() -> new RuntimeException("requestMapping 이 존재하지 않습니다."));
+        RequestMapping controllerRequestMapping = AnnotationUtils.find(clazz, RequestMapping.class).orElseThrow(() -> new RuntimeException("requestMapping annotation does not exist."));
+        RequestMapping methodRequestMapping = AnnotationUtils.find(method, RequestMapping.class).orElseThrow(() -> new RuntimeException("requestMapping annotation does not exist."));
 
-        Set<HttpMethod> httpMethods = Arrays.stream(requestMapping.method())
+        Set<HttpMethod> methodHttpMethods = Arrays.stream(methodRequestMapping.method())
             .collect(Collectors.toUnmodifiableSet());
+        Set<String> controllerUrls = Arrays.stream(controllerRequestMapping.value()).collect(Collectors.toUnmodifiableSet());
+        Set<String> methodUrls = Arrays.stream(methodRequestMapping.value()).collect(Collectors.toUnmodifiableSet());
 
-        prefixUrls = prefixUrls.stream()
-            .filter(prefixUrl -> !Objects.isNull(prefixUrl) && !prefixUrl.isBlank() && !prefixUrl.isEmpty())
-            .collect(Collectors.toUnmodifiableSet());
-        Set<String> methodUrls = Arrays.stream(requestMapping.value())
-            .collect(Collectors.toUnmodifiableSet());
-        methodUrls = cartesianAppendUrls(prefixUrls, methodUrls);
-
-        List<MethodIndicator> methodIndicators = createMethodIndicators(httpMethods, methodUrls);
-
-        return new MethodHandler(methodIndicators, method);
-    }
-
-    private static Set<String> cartesianAppendUrls(Set<String> prefixUrls, Set<String> methodUrls) {
-        return methodUrls.stream()
-            .flatMap(methodUrl -> prefixUrls.stream().map(prefixUrl -> prefixUrl + methodUrl))
-            .collect(Collectors.toUnmodifiableSet());
-    }
-
-    private static List<MethodIndicator> createMethodIndicators(Set<HttpMethod> httpMethods, Set<String> methodUris) {
         List<MethodIndicator> methodIndicators = new ArrayList<>();
-        for (HttpMethod httpMethod : httpMethods) {
-            for (String methodUri : methodUris) {
-                MethodIndicator methodIndicator = new MethodIndicator(httpMethod, methodUri);
-                methodIndicators.add(methodIndicator);
+        for (HttpMethod httpMethod : methodHttpMethods) {
+            for (String controllerUrl : controllerUrls) {
+                for (String methodUrl : methodUrls) {
+                    methodIndicators.add(MethodIndicator.from(httpMethod, controllerUrl, methodUrl));
+                }
             }
         }
-        return methodIndicators;
+
+        return new MethodHandler(methodIndicators, clazz, method);
     }
 
     public boolean isIndicated(MethodIndicator otherMethodIndicator) {
@@ -79,7 +67,7 @@ public class MethodHandler {
             throw new RuntimeException(MessageFormat.format("value is null. `type`/`value` = `{0}`/`{1}`", value.getClass().getSimpleName(), value));
         }
 
-        if (value instanceof Collection<?>  && ((Collection<?>) value).isEmpty()) {
+        if (value instanceof Collection<?> && ((Collection<?>) value).isEmpty()) {
             throw new RuntimeException(MessageFormat.format("value is empty. `type`/`value` = `{0}`/`{1}`", value.getClass().getSimpleName(), value));
         }
 

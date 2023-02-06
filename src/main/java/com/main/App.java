@@ -25,9 +25,8 @@ public class App {
 
         List<MethodHandler> methodHandlers = new ArrayList<>();
         for (Class<?> clazz : controllerClasses) {
-            Method[] methods = clazz.getMethods();
-            for (Method method : methods) {
-                if(!AnnotationUtils.find(method, RequestMapping.class).isPresent()){
+            for (Method method : clazz.getMethods()) {
+                if (!AnnotationUtils.find(method, RequestMapping.class).isPresent()) {
                     continue;
                 }
 

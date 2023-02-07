@@ -6,12 +6,16 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 import mapper.marker.RequestMapping;
 
 /**
  * 역할
  * methodHandler 를 저장하고 조회하는 역할.
  */
+@ToString
+@Slf4j
 public class MethodHandlerRepository {
     private final List<MethodHandler> methodHandlers;
 
@@ -37,6 +41,9 @@ public class MethodHandlerRepository {
                 methodHandlers.add(methodHandler);
             }
         }
+
+        methodHandlers
+            .forEach(methodHandler -> log.info("methodHandler : {}", methodHandler));
 
         return new MethodHandlerRepository(methodHandlers);
     }

@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import mapper.AnnotationUtils;
 import mapper.FileSystemClassFinder;
 import mapper.MethodHandler;
+import mapper.MethodHandlerRepository;
 import mapper.marker.Controller;
 import mapper.marker.RequestMapping;
 
@@ -23,19 +24,6 @@ public class App {
             .filter(clazz -> AnnotationUtils.find(clazz, RequestMapping.class).isPresent())
             .collect(Collectors.toUnmodifiableList());
 
-        List<MethodHandler> methodHandlers = new ArrayList<>();
-        for (Class<?> clazz : controllerClasses) {
-            for (Method method : clazz.getMethods()) {
-                if (!AnnotationUtils.find(method, RequestMapping.class).isPresent()) {
-                    continue;
-                }
-
-                MethodHandler methodHandler = MethodHandler.from(clazz, method);
-                methodHandlers.add(methodHandler);
-            }
-        }
-
-        methodHandlers
-            .forEach(methodHandler -> log.info("methodHandler : {}", methodHandler));
+        MethodHandlerRepository methodHandlerRepository = MethodHandlerRepository.from(controllerClasses);
     }
 }

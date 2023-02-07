@@ -156,11 +156,11 @@ class MethodHandlerRepositoryTest {
                 .collect(Collectors.toUnmodifiableSet());
 
             return appendedMethodUrls.stream()
-                .flatMap(methodUrl-> methods.stream().map(method -> new MethodIndicator(method, methodUrl)))
+                .flatMap(methodUrl -> methods.stream().map(method -> new MethodIndicator(method, methodUrl)))
                 .collect(Collectors.toUnmodifiableList());
         }
 
-        public static MethodIndicator getDoesNotIndicateTestMethodIndicator(){
+        public static MethodIndicator getDoesNotIndicateTestMethodIndicator() {
             return new MethodIndicator(HttpMethod.GET, "/doesNotIndicate");
         }
 

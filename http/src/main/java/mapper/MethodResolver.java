@@ -61,7 +61,7 @@ public class MethodResolver {
             }
         }
 
-        return new MethodResolver(methodIndicators, clazz, method);
+        return new MethodResolver(clazz, method, methodIndicators);
     }
 
     public boolean isIndicated(MethodIndicator otherMethodIndicator) {

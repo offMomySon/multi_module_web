@@ -24,10 +24,10 @@ import vo.HttpMethod;
 @ToString
 public class MethodResolver {
     private final List<MethodIndicator> methodIndicators;
-    private final Class clazz;
+    private final Class<?> clazz;
     private final Method method;
 
-    public MethodResolver(Class clazz, Method method, List<MethodIndicator> methodIndicators) {
+    public MethodResolver(Class<?> clazz, Method method, List<MethodIndicator> methodIndicators) {
         if (Objects.isNull(methodIndicators)) {
             throw new RuntimeException("methodIndicator is null.");
         }
@@ -39,7 +39,7 @@ public class MethodResolver {
             .collect(Collectors.toUnmodifiableList());
     }
 
-    public static MethodResolver from(Class clazz, Method method) {
+    public static MethodResolver from(Class<?> clazz, Method method) {
         validateEmtpy(clazz);
         validateEmtpy(method);
         AnnotationUtils.find(clazz, Controller.class).orElseThrow(() -> new RuntimeException("controller annotation does not exist."));
@@ -71,7 +71,7 @@ public class MethodResolver {
 
     private static <T> T validateEmtpy(T value) {
         if (Objects.isNull(value)) {
-            throw new RuntimeException(MessageFormat.format("value is null. `type`/`value` = `{0}`/`{1}`", value.getClass().getSimpleName(), value));
+            throw new RuntimeException("value is null.");
         }
 
         if (value instanceof Collection<?> && ((Collection<?>) value).isEmpty()) {

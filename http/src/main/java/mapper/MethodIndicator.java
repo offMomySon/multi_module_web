@@ -28,11 +28,11 @@ public class MethodIndicator {
         this.methodUri = ValidateUtil.validate(methodUri);
     }
 
-    public static MethodIndicator from(HttpMethod httpMethod, String controllerUrl, String methodUrl) {
+    public static MethodIndicator from(HttpMethod httpMethod, String clazzUrl, String methodUrl) {
         if (Objects.isNull(httpMethod)){
             throw new RuntimeException("httpMethod is null.");
         }
-        if(Objects.isNull(controllerUrl)){
+        if(Objects.isNull(clazzUrl)){
             throw new RuntimeException("controllerUrl is null.");
         }
         if (Objects.isNull(methodUrl)) {
@@ -42,14 +42,14 @@ public class MethodIndicator {
             throw new RuntimeException("httpMethod is null.");
         }
 
-        if (controllerUrl.isEmpty() || controllerUrl.isBlank()) {
-            throw new RuntimeException(MessageFormat.format("controller url is not valid value : {0}", controllerUrl));
+        if (clazzUrl.isEmpty() || clazzUrl.isBlank()) {
+            throw new RuntimeException(MessageFormat.format("controller url is not valid value : {0}", clazzUrl));
         }
         if (methodUrl.isEmpty() || methodUrl.isBlank()) {
             throw new RuntimeException(MessageFormat.format("methodUrl is not valid value : {0}", methodUrl));
         }
 
-        String methodUri = controllerUrl + methodUrl;
+        String methodUri = clazzUrl + methodUrl;
         return new MethodIndicator(httpMethod, methodUri);
     }
 

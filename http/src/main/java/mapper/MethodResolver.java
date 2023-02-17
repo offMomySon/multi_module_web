@@ -27,16 +27,16 @@ public class MethodResolver {
     private final Class clazz;
     private final Method method;
 
-    public MethodResolver(List<MethodIndicator> methodIndicators, Class clazz, Method method) {
+    public MethodResolver(Class clazz, Method method, List<MethodIndicator> methodIndicators) {
         if (Objects.isNull(methodIndicators)) {
             throw new RuntimeException("methodIndicator is null.");
         }
 
+        this.method = method;
+        this.clazz = clazz;
         this.methodIndicators = methodIndicators.stream()
             .filter(methodIndicator -> !Objects.isNull(methodIndicator))
             .collect(Collectors.toUnmodifiableList());
-        this.method = method;
-        this.clazz = clazz;
     }
 
     public static MethodResolver from(Class clazz, Method method) {

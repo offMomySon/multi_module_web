@@ -72,7 +72,7 @@ class MethodResolverTest {
         //given
         Class<TestController> clazz = TestController.class;
         Method method = TestController.getAnnotatedMethod();
-        MethodResolver methodResolver = new MethodResolver(methodIndicators, clazz, method);
+        MethodResolver methodResolver = new MethodResolver(clazz, method, methodIndicators);
 
         //when
         boolean actual = methodResolver.isIndicated(findIndicator);

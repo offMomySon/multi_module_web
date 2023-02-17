@@ -6,7 +6,7 @@ import java.nio.file.Paths;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class FileSystemClassFinderTest {
+class FileSystemUtilTest {
 
     @DisplayName("")
     @Test

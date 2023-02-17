@@ -64,19 +64,9 @@ import lombok.extern.slf4j.Slf4j;
  * 4. root path 와 file path 를 가지고 class 를 생성한다.
  */
 @Slf4j
-public class FileSystemClassFinder {
-    private final Path rootPath;
-    private final Path findPath;
+public class FileSystemUtil {
 
-    private FileSystemClassFinder(Path rootPath, Path findPath) {
-        validateEmpty(rootPath);
-        validateEmpty(findPath);
-
-        this.rootPath = rootPath;
-        this.findPath = findPath;
-    }
-
-    public static FileSystemClassFinder from(Class<?> _clazz, String findPackage) {
+    public static List<? extends Class<?>> find(Class<?> _clazz, String findPackage) {
         validateEmpty(_clazz);
         validateEmpty(findPackage);
 
@@ -86,29 +76,19 @@ public class FileSystemClassFinder {
             log.info("rootPath : {}", rootPath);
             log.info("findPath : {}", findPath);
 
-            return new FileSystemClassFinder(rootPath, findPath);
+            try (Stream<Path> walk = Files.walk(findPath)) {
+                List<? extends Class<?>> foundClazzes = walk
+                    .filter(Files::isRegularFile)
+                    .filter(FileSystemUtil::hasClassExtension)
+                    .map(filePath -> PathUtils.createClass(rootPath, filePath))
+                    .collect(Collectors.toUnmodifiableList());
+                return foundClazzes;
+            }
         } catch (URISyntaxException e) {
             throw new RuntimeException(MessageFormat.format("uri syntax exception. {}", e.getMessage()));
         } catch (IOException e) {
             throw new RuntimeException(MessageFormat.format("io exception. {}", e.getMessage()));
         }
-    }
-
-    public List<? extends Class<?>> find() {
-        try (Stream<Path> walk = Files.walk(this.findPath)) {
-            List<? extends Class<?>> foundClazzes = walk
-                .filter(Files::isRegularFile)
-                .filter(FileSystemClassFinder::hasClassExtension)
-                .map(filePath -> PathUtils.createClass(rootPath, filePath))
-                .collect(Collectors.toUnmodifiableList());
-            return foundClazzes;
-        } catch (IOException e) {
-            throw new RuntimeException(MessageFormat.format("io exception. {}", e.getMessage()));
-        }
-    }
-
-    private static boolean hasClassExtension(Path path) {
-        return path.getFileName().toString().endsWith(".class");
     }
 
     private static Path getRootPath(Class<?> clazz) throws IOException, URISyntaxException {
@@ -124,6 +104,10 @@ public class FileSystemClassFinder {
 
     private static boolean isJar(URI uri) {
         return uri.getScheme().equals("jar");
+    }
+
+    private static boolean hasClassExtension(Path path) {
+        return path.getFileName().toString().endsWith(".class");
     }
 
     private static <T> T validateEmpty(T value) {

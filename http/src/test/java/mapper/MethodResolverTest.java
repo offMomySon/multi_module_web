@@ -1,9 +1,7 @@
 package mapper;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -18,7 +16,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import vo.HttpMethod;
 
-class MethodHandlerTest {
+class MethodResolverTest {
 
     @DisplayName("factory method 로 객체를 생성합니다.")
     @Test
@@ -29,7 +27,7 @@ class MethodHandlerTest {
         Method method = TestController.getAnnotatedMethod();
 
         //when
-        Throwable actual = Assertions.catchThrowable(() -> MethodHandler.from(clazz, method));
+        Throwable actual = Assertions.catchThrowable(() -> MethodResolver.from(clazz, method));
 
         //then
         Assertions.assertThat(actual).isNull();
@@ -43,7 +41,7 @@ class MethodHandlerTest {
         Method method = TestController.getNotAnnotatedMethod();
 
         //when
-        Throwable actual = Assertions.catchThrowable(() -> MethodHandler.from(clazz, method));
+        Throwable actual = Assertions.catchThrowable(() -> MethodResolver.from(clazz, method));
 
         //then
         Assertions.assertThat(actual).isNotNull();
@@ -56,11 +54,11 @@ class MethodHandlerTest {
         Class<TestController> clazz = TestController.class;
         Method method = TestController.getAnnotatedMethod();
 
-        MethodHandler methodHandler = MethodHandler.from(clazz, method);
+        MethodResolver methodResolver = MethodResolver.from(clazz, method);
         List<MethodIndicator> methodIndicators = TestController.getMethodIndicators();
 
         //when
-        List<Boolean> actuals = methodIndicators.stream().map(methodHandler::isIndicated).collect(Collectors.toUnmodifiableList());
+        List<Boolean> actuals = methodIndicators.stream().map(methodResolver::isIndicated).collect(Collectors.toUnmodifiableList());
 
         //then
         Assertions.assertThat(actuals)
@@ -74,13 +72,48 @@ class MethodHandlerTest {
         //given
         Class<TestController> clazz = TestController.class;
         Method method = TestController.getAnnotatedMethod();
-        MethodHandler methodHandler = new MethodHandler(methodIndicators, clazz, method);
+        MethodResolver methodResolver = new MethodResolver(methodIndicators, clazz, method);
 
         //when
-        boolean actual = methodHandler.isIndicated(findIndicator);
+        boolean actual = methodResolver.isIndicated(findIndicator);
 
         //then
         Assertions.assertThat(actual).isEqualTo(expect);
+    }
+
+    @DisplayName("method 를 실행합니다.")
+    @Test
+    void test5() throws Exception {
+        //given
+        Class<TestController> clazz = TestController.class;
+        Method method = TestController.getAnnotatedMethod();
+
+        TestController testController = clazz.getConstructor().newInstance();
+
+        Object invoke = method.invoke(testController);
+//        Class<?> returnType = method.getReturnType();
+
+//        String fqclass = "java.lang.String";
+//        Class<?> aClass = Class.forName(fqclass);
+//        Class<MethodHandler> methodHandlerClass = MethodHandler.class;
+
+        System.out.println(invoke.toString());
+
+        //when
+
+        //then
+
+    }
+
+    @DisplayName("method 에 필요한 인자를 받습니다.")
+    @Test
+    void test() throws Exception {
+        //given
+
+        //when
+
+        //then
+
     }
 
     @Controller
@@ -90,12 +123,13 @@ class MethodHandlerTest {
         private static final String methodUrl2 = "/methodUrl2/";
 
         @RequestMapping(method = {HttpMethod.GET, HttpMethod.POST}, value = {methodUrl1, methodUrl2})
-        public void annotatedMethod() {
-
+        public Integer annotatedMethod() {
+            System.out.println("this is annotatedMethod.");
+            return 1;
         }
 
-        public void notAnnotatedMethod() {
-
+        public Integer notAnnotatedMethod() {
+            return 0;
         }
 
         public static Set<String> getControllerUrls() {
@@ -131,7 +165,7 @@ class MethodHandlerTest {
                 .collect(Collectors.toUnmodifiableSet());
 
             return appendedMethodUrls.stream()
-                .flatMap(methodUrl-> methods.stream().map(method -> new MethodIndicator(method, methodUrl)))
+                .flatMap(methodUrl -> methods.stream().map(method -> new MethodIndicator(method, methodUrl)))
                 .collect(Collectors.toUnmodifiableList());
         }
 

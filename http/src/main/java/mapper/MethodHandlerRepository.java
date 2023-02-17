@@ -17,44 +17,44 @@ import mapper.marker.RequestMapping;
 @ToString
 @Slf4j
 public class MethodHandlerRepository {
-    private final List<MethodHandler> methodHandlers;
+    private final List<MethodResolver> methodResolvers;
 
-    public MethodHandlerRepository(List<MethodHandler> methodHandlers) {
-        if (Objects.isNull(methodHandlers)) {
+    public MethodHandlerRepository(List<MethodResolver> methodResolvers) {
+        if (Objects.isNull(methodResolvers)) {
             throw new RuntimeException("methodHandler is not exist.");
         }
 
-        this.methodHandlers = methodHandlers.stream()
-            .filter(methodHandler -> !Objects.isNull(methodHandlers))
+        this.methodResolvers = methodResolvers.stream()
+            .filter(methodResolver -> !Objects.isNull(methodResolvers))
             .collect(Collectors.toUnmodifiableList());
     }
 
     public static MethodHandlerRepository from(List<Class<?>> clazzes) {
-        List<MethodHandler> methodHandlers = new ArrayList<>();
+        List<MethodResolver> methodResolvers = new ArrayList<>();
         for (Class<?> clazz : clazzes) {
             for (Method method : clazz.getMethods()) {
                 if (!AnnotationUtils.find(method, RequestMapping.class).isPresent()) {
                     continue;
                 }
 
-                MethodHandler methodHandler = MethodHandler.from(clazz, method);
-                methodHandlers.add(methodHandler);
+                MethodResolver methodResolver = MethodResolver.from(clazz, method);
+                methodResolvers.add(methodResolver);
             }
         }
 
-        methodHandlers
-            .forEach(methodHandler -> log.info("methodHandler : {}", methodHandler));
+        methodResolvers
+            .forEach(methodResolver -> log.info("methodHandler : {}", methodResolver));
 
-        return new MethodHandlerRepository(methodHandlers);
+        return new MethodHandlerRepository(methodResolvers);
     }
 
-    public Optional<MethodHandler> find(MethodIndicator indicator) {
-        if (Objects.isNull(methodHandlers)) {
+    public Optional<MethodResolver> find(MethodIndicator indicator) {
+        if (Objects.isNull(methodResolvers)) {
             return Optional.empty();
         }
 
-        return methodHandlers.stream()
-            .filter(methodHandler -> methodHandler.isIndicated(indicator))
+        return methodResolvers.stream()
+            .filter(methodResolver -> methodResolver.isIndicated(indicator))
             .findAny();
     }
 }

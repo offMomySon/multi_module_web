@@ -14,13 +14,20 @@ import mapper.marker.Controller;
 import mapper.marker.RequestMapping;
 import vo.HttpMethod;
 
+/**
+ * 역할.
+ * method 를 가져오는 역할.
+ *
+ * handle - 다루다.
+ * -> method 를 가지고 연관된 행위들을 다룬다.
+ */
 @ToString
-public class MethodHandler {
+public class MethodResolver {
     private final List<MethodIndicator> methodIndicators;
     private final Class clazz;
     private final Method method;
 
-    public MethodHandler(List<MethodIndicator> methodIndicators, Class clazz, Method method) {
+    public MethodResolver(List<MethodIndicator> methodIndicators, Class clazz, Method method) {
         if (Objects.isNull(methodIndicators)) {
             throw new RuntimeException("methodIndicator is null.");
         }
@@ -32,7 +39,7 @@ public class MethodHandler {
         this.clazz = clazz;
     }
 
-    public static MethodHandler from(Class clazz, Method method) {
+    public static MethodResolver from(Class clazz, Method method) {
         validateEmtpy(clazz);
         validateEmtpy(method);
         AnnotationUtils.find(clazz, Controller.class).orElseThrow(() -> new RuntimeException("controller annotation does not exist."));
@@ -54,7 +61,7 @@ public class MethodHandler {
             }
         }
 
-        return new MethodHandler(methodIndicators, clazz, method);
+        return new MethodResolver(methodIndicators, clazz, method);
     }
 
     public boolean isIndicated(MethodIndicator otherMethodIndicator) {

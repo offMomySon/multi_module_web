@@ -13,7 +13,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import vo.HttpMethod;
 
-class MethodHandlerRepositoryTest {
+class MethodResolverRepositoryTest {
 
     @DisplayName("MethodHandlerRepository 를 생성합니다.")
     @Test
@@ -63,7 +63,7 @@ class MethodHandlerRepositoryTest {
         List<MethodIndicator> methodIndicators = TestController.getMethodIndicators();
 
         //when
-        Optional<MethodHandler> actual = methodHandlerRepository.find(methodIndicators.get(0));
+        Optional<MethodResolver> actual = methodHandlerRepository.find(methodIndicators.get(0));
 
         //then
         Assertions.assertThat(actual).isPresent();
@@ -78,7 +78,7 @@ class MethodHandlerRepositoryTest {
         MethodIndicator doesNotIndicateTestMethodIndicator = TestController.getDoesNotIndicateTestMethodIndicator();
 
         //when
-        Optional<MethodHandler> actual = repository.find(doesNotIndicateTestMethodIndicator);
+        Optional<MethodResolver> actual = repository.find(doesNotIndicateTestMethodIndicator);
 
         //then
         Assertions.assertThat(actual).isEmpty();
@@ -124,7 +124,7 @@ class MethodHandlerRepositoryTest {
         }
 
         public static Set<String> getControllerUrls() {
-            RequestMapping classRequestMapping = AnnotationUtils.find(MethodHandlerTest.TestController.class, RequestMapping.class)
+            RequestMapping classRequestMapping = AnnotationUtils.find(MethodResolverTest.TestController.class, RequestMapping.class)
                 .orElseThrow(() -> new RuntimeException("annotation not exist."));
 
             return Arrays.stream(classRequestMapping.value()).collect(Collectors.toUnmodifiableSet());
@@ -166,7 +166,7 @@ class MethodHandlerRepositoryTest {
 
         public static Method getNotAnnotatedMethod() {
             try {
-                return MethodHandlerTest.TestController.class.getDeclaredMethod("notAnnotatedMethod");
+                return MethodResolverTest.TestController.class.getDeclaredMethod("notAnnotatedMethod");
             } catch (NoSuchMethodException e) {
                 throw new RuntimeException(e);
             }
@@ -174,7 +174,7 @@ class MethodHandlerRepositoryTest {
 
         public static Method getAnnotatedMethod() {
             try {
-                return MethodHandlerTest.TestController.class.getDeclaredMethod("annotatedMethod");
+                return MethodResolverTest.TestController.class.getDeclaredMethod("annotatedMethod");
             } catch (NoSuchMethodException e) {
                 throw new RuntimeException(e);
             }

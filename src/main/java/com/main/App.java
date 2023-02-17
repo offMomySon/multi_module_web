@@ -11,7 +11,6 @@ import mapper.marker.RequestMapping;
 
 @Slf4j
 public class App {
-
     public static void main(String[] args) {
         FileSystemClassFinder fileSystemClassFinder = FileSystemClassFinder.from(App.class, "com.main");
         List<? extends Class<?>> classes = fileSystemClassFinder.find();

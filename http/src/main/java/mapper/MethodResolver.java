@@ -39,30 +39,36 @@ public class MethodResolver {
             .collect(Collectors.toUnmodifiableList());
     }
 
-    public static MethodResolver from(Class<?> clazz, Method method) {
-        validateEmtpy(clazz);
-        validateEmtpy(method);
-        AnnotationUtils.find(clazz, Controller.class).orElseThrow(() -> new RuntimeException("controller annotation does not exist."));
-
-        RequestMapping controllerRequestMapping = AnnotationUtils.find(clazz, RequestMapping.class).orElseThrow(() -> new RuntimeException("requestMapping annotation does not exist."));
-        RequestMapping methodRequestMapping = AnnotationUtils.find(method, RequestMapping.class).orElseThrow(() -> new RuntimeException("requestMapping annotation does not exist."));
-
-        Set<HttpMethod> methodHttpMethods = Arrays.stream(methodRequestMapping.method())
-            .collect(Collectors.toUnmodifiableSet());
-        Set<String> controllerUrls = Arrays.stream(controllerRequestMapping.value()).collect(Collectors.toUnmodifiableSet());
-        Set<String> methodUrls = Arrays.stream(methodRequestMapping.value()).collect(Collectors.toUnmodifiableSet());
-
-        List<MethodIndicator> methodIndicators = new ArrayList<>();
-        for (HttpMethod httpMethod : methodHttpMethods) {
-            for (String controllerUrl : controllerUrls) {
-                for (String methodUrl : methodUrls) {
-                    methodIndicators.add(MethodIndicator.from(httpMethod, controllerUrl, methodUrl));
-                }
-            }
-        }
-
-        return new MethodResolver(clazz, method, methodIndicators);
+    public MethodResolver(List<MethodIndicator> methodIndicators, Method method) {
+        this.methodIndicators = methodIndicators;
+        this.clazz = null;
+        this.method = method;
     }
+
+    //    public static MethodResolver from(Class<?> clazz, Method method) {
+//        validateEmtpy(clazz);
+//        validateEmtpy(method);
+//        AnnotationUtils.find(clazz, Controller.class).orElseThrow(() -> new RuntimeException("controller annotation does not exist."));
+//
+//        RequestMapping controllerRequestMapping = AnnotationUtils.find(clazz, RequestMapping.class).orElseThrow(() -> new RuntimeException("requestMapping annotation does not exist."));
+//        RequestMapping methodRequestMapping = AnnotationUtils.find(method, RequestMapping.class).orElseThrow(() -> new RuntimeException("requestMapping annotation does not exist."));
+//
+//        Set<HttpMethod> methodHttpMethods = Arrays.stream(methodRequestMapping.method())
+//            .collect(Collectors.toUnmodifiableSet());
+//        Set<String> controllerUrls = Arrays.stream(controllerRequestMapping.value()).collect(Collectors.toUnmodifiableSet());
+//        Set<String> methodUrls = Arrays.stream(methodRequestMapping.value()).collect(Collectors.toUnmodifiableSet());
+//
+//        List<MethodIndicator> methodIndicators = new ArrayList<>();
+//        for (HttpMethod httpMethod : methodHttpMethods) {
+//            for (String controllerUrl : controllerUrls) {
+//                for (String methodUrl : methodUrls) {
+//                    methodIndicators.add(MethodIndicator.from(httpMethod, controllerUrl, methodUrl));
+//                }
+//            }
+//        }
+//
+//        return new MethodResolver(clazz, method, methodIndicators);
+//    }
 
     public boolean isIndicated(MethodIndicator otherMethodIndicator) {
         return methodIndicators.stream()

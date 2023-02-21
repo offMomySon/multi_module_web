@@ -8,6 +8,14 @@ import java.util.Optional;
 
 public class AnnotationUtils {
 
+    public static boolean exist(Class<?> clazz, Class<?> annotationClazz){
+        return find(clazz, annotationClazz).isPresent();
+    }
+
+    public static boolean exist(Method method, Class<?> annotationClazz){
+        return find(method, annotationClazz).isPresent();
+    }
+
     public static <T> Optional<T> find(Class<?> clazz, Class<T> annotationClazz) {
         return find(clazz.getAnnotations(), annotationClazz);
     }

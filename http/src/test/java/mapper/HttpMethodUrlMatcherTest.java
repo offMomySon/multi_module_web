@@ -9,16 +9,16 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import vo.HttpMethod;
 
-class MethodIndicatorTest {
+class HttpMethodUrlMatcherTest {
     @DisplayName("http method 가 다르면 false 를 반환합니다.")
     @Test
     void test1() throws Exception {
         //given
-        MethodIndicator methodIndicator = new MethodIndicator(HttpMethod.GET, "/test");
-        MethodIndicator otherIndicator = new MethodIndicator(HttpMethod.POST, "/test");
+        HttpMethodUrlMatcher httpMethodUrlMatcher = new HttpMethodUrlMatcher(HttpMethod.GET, "/test");
+        HttpMethodUrlMatcher otherIndicator = new HttpMethodUrlMatcher(HttpMethod.POST, "/test");
 
         //when
-        boolean actual = methodIndicator.equals(otherIndicator);
+        boolean actual = httpMethodUrlMatcher.equals(otherIndicator);
 
         //then
         Assertions.assertThat(actual).isFalse();
@@ -29,11 +29,11 @@ class MethodIndicatorTest {
     @MethodSource("provideEqualUrl")
     void test2(String url, String otherUrl) throws Exception {
         //given
-        MethodIndicator methodIndicator = new MethodIndicator(HttpMethod.GET, url);
-        MethodIndicator otherMethodIndicator = new MethodIndicator(HttpMethod.GET, otherUrl);
+        HttpMethodUrlMatcher httpMethodUrlMatcher = new HttpMethodUrlMatcher(HttpMethod.GET, url);
+        HttpMethodUrlMatcher otherHttpMethodUrlMatcher = new HttpMethodUrlMatcher(HttpMethod.GET, otherUrl);
 
         //when
-        boolean actual = methodIndicator.equals(otherMethodIndicator);
+        boolean actual = httpMethodUrlMatcher.equals(otherHttpMethodUrlMatcher);
 
         //then
         Assertions.assertThat(actual).isTrue();
@@ -44,11 +44,11 @@ class MethodIndicatorTest {
     @MethodSource("provideDiffUrl")
     void test3(String url, String otherUrl) throws Exception {
         //given
-        MethodIndicator methodIndicator = new MethodIndicator(HttpMethod.GET, url);
-        MethodIndicator otherMethodIndicator = new MethodIndicator(HttpMethod.GET, otherUrl);
+        HttpMethodUrlMatcher httpMethodUrlMatcher = new HttpMethodUrlMatcher(HttpMethod.GET, url);
+        HttpMethodUrlMatcher otherHttpMethodUrlMatcher = new HttpMethodUrlMatcher(HttpMethod.GET, otherUrl);
 
         //when
-        boolean actual = methodIndicator.equals(otherMethodIndicator);
+        boolean actual = httpMethodUrlMatcher.equals(otherHttpMethodUrlMatcher);
 
         //then
         Assertions.assertThat(actual).isFalse();

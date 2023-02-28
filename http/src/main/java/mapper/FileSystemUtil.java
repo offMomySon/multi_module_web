@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -39,38 +40,40 @@ public class FileSystemUtil {
             throw new RuntimeException("parameter is null.");
         }
 
-        Path rootPath = getRoot(bootClass);
-        Path findPath = rootPath.resolve(findPackage);
+        try {
+            Path rootPath = getRoot(bootClass);
+            Path findPath = rootPath.resolve(findPackage.replace(".", "/"));
+            log.info("rootPath : {}", rootPath);
+            log.info("findPath : {}", findPath);
 
-        try (Stream<Path> pathStream = Files.walk(findPath)) {
-            List<Path> classFilePaths = pathStream
-                .filter(path -> Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS))
-                .filter(FileSystemUtil::hasClassExtension)
-                .collect(Collectors.toUnmodifiableList());
+            try (Stream<Path> pathStream = Files.walk(findPath)) {
+                List<Path> classFilePaths = pathStream
+                    .filter(path -> Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS))
+                    .filter(FileSystemUtil::hasClassExtension)
+                    .collect(Collectors.toUnmodifiableList());
 
-            return classFilePaths.stream()
-                .map(classFilePath -> generateFullyQualifiedClassName(rootPath, classFilePath))
-                .map(FileSystemUtil::getClass)
-                .collect(Collectors.toUnmodifiableList());
+                return classFilePaths.stream()
+                    .map(classFilePath -> generateFullyQualifiedClassName(rootPath, classFilePath))
+                    .map(FileSystemUtil::getClass)
+                    .collect(Collectors.toUnmodifiableList());
+            }
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(MessageFormat.format("uri syntax exception. {}", e.getMessage()));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(MessageFormat.format("io exception. {}", e.getMessage()));
         }
     }
 
-    private static Path getRoot(Class<?> bootClass) {
-        try {
-            URI rootUri = bootClass.getResource("").toURI();
+    private static Path getRoot(Class<?> bootClass) throws IOException, URISyntaxException {
+        URI rootUri = bootClass.getResource("").toURI();
 
-            if (isJarFileSystem(rootUri)) {
-                FileSystem jarFileSystem = FileSystems.newFileSystem(rootUri, Collections.emptyMap());
-                return jarFileSystem.getPath("/");
-            }
-            return Paths.get(rootUri);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (isJarFileSystem(rootUri)) {
+            FileSystem jarFileSystem = FileSystems.newFileSystem(rootUri, Collections.emptyMap());
+            return jarFileSystem.getPath("/");
         }
+
+        rootUri = bootClass.getResource("/").toURI();
+        return Paths.get(rootUri);
     }
 
     private static boolean isJarFileSystem(URI uri) {
@@ -87,7 +90,11 @@ public class FileSystemUtil {
     }
 
     private static String generateFullyQualifiedClassName(Path rootPath, Path classFilePath) {
-        return rootPath.relativize(classFilePath).toString();
+        Path jvmPath = rootPath.relativize(classFilePath);
+
+        return jvmPath.toString()
+            .substring(0, jvmPath.toString().lastIndexOf(".class"))
+            .replace("/", ".");
     }
 
     private static Class<?> getClass(String n) {

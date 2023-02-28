@@ -33,7 +33,7 @@ public class MethodResolverCreator {
         // 가져오는 이유는 메소드를 지정하는데 필요한 url 과 httpmethod 의 정보를 얻기 위해서 입니다.
         List<RequestMappingMethod> requestMappingMethods = classAndMethods.stream()
             .map(classAndMethod -> {
-                RequestMapping classRequestMapping = AnnotationUtils.find(classAndMethod.getClass(), RequestMapping.class).orElseThrow();
+                RequestMapping classRequestMapping = AnnotationUtils.find(classAndMethod.getClazz(), RequestMapping.class).orElseThrow();
                 RequestMapping methodRequestMapping = AnnotationUtils.find(classAndMethod.getMethod(), RequestMapping.class).orElseThrow();
                 Method method = classAndMethod.getMethod();
 

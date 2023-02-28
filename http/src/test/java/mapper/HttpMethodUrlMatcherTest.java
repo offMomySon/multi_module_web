@@ -18,7 +18,7 @@ class HttpMethodUrlMatcherTest {
         HttpMethodUrlMatcher otherIndicator = new HttpMethodUrlMatcher(HttpMethod.POST, "/test");
 
         //when
-        boolean actual = httpMethodUrlMatcher.equals(otherIndicator);
+        boolean actual = httpMethodUrlMatcher.match(otherIndicator);
 
         //then
         Assertions.assertThat(actual).isFalse();

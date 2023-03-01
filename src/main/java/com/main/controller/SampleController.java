@@ -1,6 +1,8 @@
 package com.main.controller;
 
+import com.main.domain.SampleDomain;
 import lombok.extern.slf4j.Slf4j;
+import mapper.marker.Component;
 import mapper.marker.Controller;
 import mapper.marker.PathVariable;
 import mapper.marker.RequestMapping;
@@ -8,9 +10,15 @@ import mapper.marker.RequestParam;
 import vo.HttpMethod;
 
 @Slf4j
+@Component
 @Controller
 @RequestMapping(value = "/basic/{payMethod}")
 public class SampleController {
+    public final SampleDomain sampleDomain;
+
+    public SampleController(SampleDomain sampleDomain) {
+        this.sampleDomain = sampleDomain;
+    }
 
     @RequestMapping(value = "/{pathParam}")
     public String testMethod(@PathVariable(value = "pathParam") String testParam) {

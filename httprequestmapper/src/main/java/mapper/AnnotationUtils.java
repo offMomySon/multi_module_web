@@ -1,6 +1,7 @@
 package mapper;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Objects;
@@ -16,12 +17,20 @@ public class AnnotationUtils {
         return find(method, annotationClazz).isPresent();
     }
 
+    public static boolean exist(Field field, Class<?> annotationClazz){
+        return find(field, annotationClazz).isPresent();
+    }
+
     public static <T> Optional<T> find(Class<?> clazz, Class<T> annotationClazz) {
         return find(clazz.getAnnotations(), annotationClazz);
     }
 
     public static <T> Optional<T> find(Method method, Class<T> annotationClazz) {
         return find(method.getAnnotations(), annotationClazz);
+    }
+
+    public static <T> Optional<T> find(Field field, Class<T> annotationClazz) {
+        return find(field.getAnnotations(), annotationClazz);
     }
 
     private static <T> Optional<T> find(Annotation[] values, Class<T> annotationClazz) {

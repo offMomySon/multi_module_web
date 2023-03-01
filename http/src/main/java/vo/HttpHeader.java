@@ -8,9 +8,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import validate.ValidateUtil;
 import static java.util.Objects.nonNull;
-import static validate.ValidateUtil.isValid;
-import static validate.ValidateUtil.validate;
-import static validate.ValidateUtil.validateNull;
 
 public class HttpHeader {
     private static final String HEADER_KEY_VALUE_DELIMITER = ":";
@@ -20,7 +17,7 @@ public class HttpHeader {
     private final Map<String, Set<String>> value;
 
     private HttpHeader(Map<String, Set<String>> value) {
-        this.value = createFilteredNoneValidAndUnmodifiable(validateNull(value));
+        this.value = createFilteredNoneValidAndUnmodifiable(ValidateUtil.validateNull(value));
     }
 
     public Set<String> getKeys() {
@@ -28,7 +25,7 @@ public class HttpHeader {
     }
 
     public Set<String> getValues(String key) {
-        validate(key);
+        ValidateUtil.validate(key);
 
         return value.get(key);
     }
@@ -53,7 +50,7 @@ public class HttpHeader {
 
     private static Map<String, Set<String>> createFilteredNoneValidAndUnmodifiable(Map<String, Set<String>> value) {
         return value.entrySet().stream()
-            .filter(es -> isValid(es.getKey()))
+            .filter(es -> ValidateUtil.isValid(es.getKey()))
             .filter(es -> nonNull(es.getValue()))
             .map(e -> Map.entry(e.getKey(), createFilteredNoneValidAndUnmodifiable(e.getValue())))
             .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, HttpHeader::merge));
@@ -80,7 +77,7 @@ public class HttpHeader {
         }
 
         public Builder append(String headerLine) {
-            validate(headerLine);
+            ValidateUtil.validate(headerLine);
 
             String[] splitHeader = headerLine.split(HEADER_KEY_VALUE_DELIMITER, 2);
 

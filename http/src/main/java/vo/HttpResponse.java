@@ -1,5 +1,6 @@
 package vo;
 
+import io.IoUtils;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
@@ -9,12 +10,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Objects;
 import validate.ValidateUtil;
-import static io.IoUtils.createBufferedInputStream;
-import static io.IoUtils.createBufferedOutputStream;
-import static io.IoUtils.createBufferedWriter;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static validate.ValidateUtil.validate;
-import static validate.ValidateUtil.validateNull;
 
 public class HttpResponse {
     private static final String START_LINE_DELIMITER = " ";
@@ -31,15 +27,15 @@ public class HttpResponse {
     private BufferedInputStream sourceInputStream;
 
     public HttpResponse(String httpVersion, String status, String statusMessage, HttpHeader httpHeader, InputStream sourceInputStream, OutputStream responseOutputStream) {
-        this.httpVersion = validate(httpVersion);
-        this.status = validate(status);
-        this.statusMessage = validate(statusMessage);
-        this.httpHeader = validateNull(httpHeader);
-        this.sourceInputStream = createBufferedInputStream(validateNull(sourceInputStream));
+        this.httpVersion = ValidateUtil.validate(httpVersion);
+        this.status = ValidateUtil.validate(status);
+        this.statusMessage = ValidateUtil.validate(statusMessage);
+        this.httpHeader = ValidateUtil.validateNull(httpHeader);
+        this.sourceInputStream = IoUtils.createBufferedInputStream(ValidateUtil.validateNull(sourceInputStream));
 
-        validateNull(responseOutputStream);
-        this.responseWriter = createBufferedWriter(responseOutputStream);
-        this.responseOutputStream = createBufferedOutputStream(responseOutputStream);
+        ValidateUtil.validateNull(responseOutputStream);
+        this.responseWriter = IoUtils.createBufferedWriter(responseOutputStream);
+        this.responseOutputStream = IoUtils.createBufferedOutputStream(responseOutputStream);
     }
 
     public void send() {
@@ -86,25 +82,25 @@ public class HttpResponse {
         }
 
         public Builder httpVersion(String httpVersion) {
-            validate(httpVersion);
+            ValidateUtil.validate(httpVersion);
             this.httpVersion = httpVersion;
             return this;
         }
 
         public Builder status(String status) {
-            validate(status);
+            ValidateUtil.validate(status);
             this.status = status;
             return this;
         }
 
         public Builder statusMessage(String statusMessage) {
-            validate(statusMessage);
+            ValidateUtil.validate(statusMessage);
             this.statusMessage = statusMessage;
             return this;
         }
 
         public Builder httpHeader(HttpHeader httpHeader) {
-            validateNull(httpHeader);
+            ValidateUtil.validateNull(httpHeader);
             this.httpHeader = httpHeader;
             return this;
         }
@@ -121,7 +117,7 @@ public class HttpResponse {
         }
 
         public Builder responseOutputStream(OutputStream responseOutputStream){
-            validateNull(responseOutputStream);
+            ValidateUtil.validateNull(responseOutputStream);
             this.responseOutputStream = responseOutputStream;
             return this;
         }

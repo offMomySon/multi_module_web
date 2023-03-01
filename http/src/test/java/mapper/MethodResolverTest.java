@@ -120,7 +120,7 @@
 //        private static final String methodUrl1 = "/methodUrl1/";
 //        private static final String methodUrl2 = "/methodUrl2/";
 //
-//        @RequestMapping(method = {HttpMethod.GET, HttpMethod.POST}, value = {methodUrl1, methodUrl2})
+//        @RequestMapping(method = {vo.HttpMethod.GET, vo.HttpMethod.POST}, value = {methodUrl1, methodUrl2})
 //        public Integer annotatedMethod() {
 //            System.out.println("this is annotatedMethod.");
 //            return 1;
@@ -145,7 +145,7 @@
 //            return Arrays.stream(methodRequestMapping.value()).collect(Collectors.toUnmodifiableSet());
 //        }
 //
-//        public static Set<HttpMethod> getHttpMethod() {
+//        public static Set<vo.HttpMethod> getHttpMethod() {
 //            Method annotatedMethod = getAnnotatedMethod();
 //            RequestMapping methodRequestMapping = AnnotationUtils.find(annotatedMethod, RequestMapping.class)
 //                .orElseThrow(() -> new RuntimeException("annotation not exist."));
@@ -156,7 +156,7 @@
 //        public static List<MethodIndicator> getMethodIndicators() {
 //            Set<String> controllerUrls = getControllerUrls();
 //            Set<String> methodUrls = getMethodUrls();
-//            Set<HttpMethod> methods = getHttpMethod();
+//            Set<vo.HttpMethod> methods = getHttpMethod();
 //
 //            Set<String> appendedMethodUrls = controllerUrls.stream()
 //                .flatMap(controllerUrl -> methodUrls.stream().map(methodUrl -> controllerUrl + methodUrl))
@@ -188,18 +188,18 @@
 //        return Stream.of(
 //            Arguments.of(
 //                List.of(
-//                    new MethodIndicator(HttpMethod.GET, "/methodUri"),
-//                    new MethodIndicator(HttpMethod.GET, "/methodUri")
+//                    new MethodIndicator(vo.HttpMethod.GET, "/methodUri"),
+//                    new MethodIndicator(vo.HttpMethod.GET, "/methodUri")
 //                ),
-//                new MethodIndicator(HttpMethod.GET, "/methodUri"),
+//                new MethodIndicator(vo.HttpMethod.GET, "/methodUri"),
 //                Boolean.TRUE
 //            ),
 //            Arguments.of(
 //                List.of(
-//                    new MethodIndicator(HttpMethod.GET, "/methodUri1"),
-//                    new MethodIndicator(HttpMethod.GET, "/methodUri2")
+//                    new MethodIndicator(vo.HttpMethod.GET, "/methodUri1"),
+//                    new MethodIndicator(vo.HttpMethod.GET, "/methodUri2")
 //                ),
-//                new MethodIndicator(HttpMethod.GET, "/methodUri"),
+//                new MethodIndicator(vo.HttpMethod.GET, "/methodUri"),
 //                Boolean.FALSE
 //            )
 //        );

@@ -27,7 +27,6 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.20'
     annotationProcessor 'org.projectlombok:lombok:1.18.20'
 
-    // https://mvnrepository.com/artifact/com.fasterxml.jackson.datatype/jackson-datatype-jsr310
     implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.13.0'
 }
 
@@ -44,16 +43,6 @@ jar {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
-
-//sourceSets {
-//    main {
-//        resources {
-//            srcDirs += [
-//                '../http/src/main/resources',
-//            ]
-//        }
-//    }
-//}
 
 subprojects {
     apply plugin: 'java'

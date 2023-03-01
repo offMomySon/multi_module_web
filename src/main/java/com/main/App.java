@@ -1,6 +1,9 @@
 package com.main;
 
+import beanContainer.BeanContainerCreator;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import mapper.FileSystemUtil;
 import mapper.MethodResolver;
@@ -16,5 +19,16 @@ public class App {
 
         MethodResolverCreator methodResolverCreator = new MethodResolverCreator();
         MethodResolver methodResolver = methodResolverCreator.create(classes);
+
+        BeanContainerCreator beanContainerCreator = new BeanContainerCreator();
+        try {
+            Map<Class<?>, Object> classObjectMap = beanContainerCreator.create(classes);
+
+            classObjectMap.entrySet().stream()
+                .forEach(e -> log.info("class : `{}`, obj : `{}`", e.getKey(), e.getValue()));
+
+        } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

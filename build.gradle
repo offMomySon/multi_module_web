@@ -10,9 +10,6 @@ repositories {
 }
 
 dependencies {
-    implementation project(':requestMapper')
-    implementation project(':persistence')
-
     implementation project(':http')
     implementation project(':util')
 

@@ -6,10 +6,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import mapper.marker.Controller;
 import mapper.marker.RequestMapping;
+import mapper.marker.Service;
 import vo.HttpMethod;
 
+@Slf4j
 public class MethodResolverCreator {
     public MethodResolver create(List<Class<?>> classes) {
         // 어노테이션 유틸은 클래스 또는 메서드 에 매핑된 어노테이션중, 특정 어노테이션의 존재검사, 찾기 역할을 할 수 있습니다.

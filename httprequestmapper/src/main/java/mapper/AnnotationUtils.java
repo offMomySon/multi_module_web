@@ -1,24 +1,24 @@
 package mapper;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import javax.swing.text.Document;
 
 public class AnnotationUtils {
+    private static final Set<Class<?>> selfReferenceAnnotations = Set.of(Retention.class, Target.class, Document.class);
 
-    public static boolean exist(Class<?> clazz, Class<?> annotationClazz){
+    public static boolean exist(Class<?> clazz, Class<?> annotationClazz) {
         return find(clazz, annotationClazz).isPresent();
     }
 
-    public static boolean exist(Method method, Class<?> annotationClazz){
+    public static boolean exist(Method method, Class<?> annotationClazz) {
         return find(method, annotationClazz).isPresent();
-    }
-
-    public static boolean exist(Field field, Class<?> annotationClazz){
-        return find(field, annotationClazz).isPresent();
     }
 
     public static <T> Optional<T> find(Class<?> clazz, Class<T> annotationClazz) {
@@ -29,19 +29,43 @@ public class AnnotationUtils {
         return find(method.getAnnotations(), annotationClazz);
     }
 
-    public static <T> Optional<T> find(Field field, Class<T> annotationClazz) {
-        return find(field.getAnnotations(), annotationClazz);
-    }
-
-    private static <T> Optional<T> find(Annotation[] values, Class<T> annotationClazz) {
-        if (Objects.isNull(annotationClazz) || !annotationClazz.isAnnotation()) {
+    private static <T> Optional<T> find(Annotation[] annotations, Class<T> findAnnotationClazz) {
+        if (Objects.isNull(annotations) || annotations.length == 0 || !findAnnotationClazz.isAnnotation()) {
             return Optional.empty();
         }
 
-        return Arrays.stream(values)
-            .filter(annotation -> isAnnotationType(annotation, annotationClazz))
-            .map(annotation -> (T) annotation)
+        return Arrays.stream(annotations)
+            .map(annotation -> find(annotation, findAnnotationClazz))
+            .filter(Optional::isPresent)
+            .map(Optional::get)
             .findAny();
+    }
+
+    private static <T> Optional<T> find(Annotation annotation, Class<T> findAnnotationClazz) {
+        if (Objects.isNull(annotation) || !findAnnotationClazz.isAnnotation()) {
+            return Optional.empty();
+        }
+
+        if (selfReferenceAnnotations.contains(annotation.annotationType())) {
+            return Optional.empty();
+        }
+
+        if (isAnnotationType(annotation, findAnnotationClazz)) {
+            return Optional.of((T) annotation);
+        }
+
+        return Arrays.stream(annotation.annotationType().getAnnotations())
+            .filter(AnnotationUtils::doesNotSelfReferenceAnnotation)
+            .map(subAnnotation -> find(subAnnotation, findAnnotationClazz))
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .findAny();
+    }
+
+    private static boolean doesNotSelfReferenceAnnotation(Annotation annotation) {
+        Class<? extends Annotation> aClass = annotation.annotationType();
+
+        return !selfReferenceAnnotations.contains(aClass);
     }
 
     private static boolean isAnnotationType(Annotation annotation, Class<?> annotationClass) {

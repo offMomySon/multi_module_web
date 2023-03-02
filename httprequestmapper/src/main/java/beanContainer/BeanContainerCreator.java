@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import mapper.AnnotationUtils;
@@ -20,7 +19,6 @@ public class BeanContainerCreator {
 
         List<Class<?>> componentClazzs = clazzs.stream()
             .filter(c -> AnnotationUtils.exist(c, Component.class))
-            .peek(c -> log.info("c : {}", c))
             .collect(Collectors.toUnmodifiableList());
 
         for (Class<?> componentClazz : componentClazzs) {
@@ -52,19 +50,15 @@ public class BeanContainerCreator {
         }
 
         // 하위
-        Object[] memberClazzObjects = memberClazzes.stream()
-            .map(getClassObjectFunction(container))
+        Object[] memberObjects = memberClazzes.stream()
+            .map(container::get)
             .toArray();
         Constructor<?> constructor = clazz.getConstructor(memberClazzes.toArray(Class<?>[]::new));
-        Object instance = constructor.newInstance(memberClazzObjects);
+        Object instance = constructor.newInstance(memberObjects);
 
         container.put(clazz, instance);
 
         return container;
-    }
-
-    private static Function<Class<?>, Object> getClassObjectFunction(Map<Class<?>, Object> container) {
-        return cc -> container.get(cc);
     }
 }
 

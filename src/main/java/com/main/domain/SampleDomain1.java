@@ -2,10 +2,9 @@ package com.main.domain;
 
 import com.main.repository.SampleRepository;
 import com.main.service.SampleService2;
-import mapper.marker.Component;
 import mapper.marker.Domain;
 
-@Component
+@Domain
 public class SampleDomain1 {
     public final SampleService2 sampleService2;
     public final SampleRepository sampleRepository;

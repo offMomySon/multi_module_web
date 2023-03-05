@@ -5,13 +5,32 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.swing.text.Document;
 
 public class AnnotationUtils {
     private static final Set<Class<?>> selfReferenceAnnotations = Set.of(Retention.class, Target.class, Document.class);
+
+    public static boolean existAll(Class<?> clazz, Class<?>... _annotationClazzes) {
+        if (Objects.isNull(clazz) || Objects.isNull(_annotationClazzes) || _annotationClazzes.length == 0) {
+            throw new RuntimeException("param is invalid.");
+        }
+
+        List<Class<?>> annotationClazzes = Arrays.stream(_annotationClazzes)
+            .filter(annotationClazz -> !Objects.isNull(annotationClazz))
+            .collect(Collectors.toUnmodifiableList());
+
+        if (annotationClazzes.isEmpty()) {
+            throw new RuntimeException("annoataionClazzes is empty.");
+        }
+
+        return annotationClazzes.stream()
+            .allMatch(annotationClazz -> exist(clazz, annotationClazz));
+    }
 
     public static boolean exist(Class<?> clazz, Class<?> annotationClazz) {
         return find(clazz, annotationClazz).isPresent();

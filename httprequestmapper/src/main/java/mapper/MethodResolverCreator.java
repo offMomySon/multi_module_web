@@ -9,7 +9,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import mapper.marker.Controller;
 import mapper.marker.RequestMapping;
-import mapper.marker.Service;
 import vo.HttpMethod;
 
 @Slf4j
@@ -19,8 +18,7 @@ public class MethodResolverCreator {
         // 가져온 클래스들에서 어노테이션 기반의 필터링을 수행합니다.
         // 대상은 controller, requestMapping 어노테이션 입니다.
         List<Class<?>> controllerClazzs = classes.stream()
-            .filter(clazz -> AnnotationUtils.exist(clazz, Controller.class))
-            .filter(clazz -> AnnotationUtils.exist(clazz, RequestMapping.class))
+            .filter(clazz -> AnnotationUtils.existAll(clazz, Controller.class, RequestMapping.class))
             .collect(Collectors.toUnmodifiableList());
 
         // class 의 methods 를 필터링한다. 필터링 대상읜 requestMapping 어노테이션이다.

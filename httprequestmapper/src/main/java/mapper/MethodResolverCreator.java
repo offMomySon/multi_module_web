@@ -26,8 +26,8 @@ public class MethodResolverCreator {
         //  n 은 class 갯수 * class 의 method 의 개수 입니다.
         // 평탄화를 하는 이유는 차후에 class 와 method 를 동시에 다루어야하기 때문입니다.
         List<ClassAndMethod> classAndMethods = controllerClazzs.stream()
-            .flatMap(c -> filterMethodStream(c, RequestMapping.class)
-                .map(m -> new ClassAndMethod(c, m)))
+            .flatMap(c -> AnnotationUtils.peekMethods(c, RequestMapping.class).stream()
+                .map(m -> new ClassAndMethod(c, m)) )
             .collect(Collectors.toUnmodifiableList());
 
         // class, method 에서 특정 어노테이션을 가져옵니다. 해당 어노테이션은 requestMapping 어노테이션입니다.

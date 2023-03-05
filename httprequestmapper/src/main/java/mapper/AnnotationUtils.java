@@ -32,6 +32,27 @@ public class AnnotationUtils {
             .allMatch(annotationClazz -> exist(clazz, annotationClazz));
     }
 
+    public static List<Method> peekMethods(Class<?> clazz, Class<?>... _annotatedClazz) {
+        if (Objects.isNull(clazz) || Objects.isNull(_annotatedClazz) || _annotatedClazz.length == 0) {
+            throw new RuntimeException("parma is invalid.");
+        }
+
+        List<Class<?>> annotationClazzes = Arrays.stream(_annotatedClazz)
+            .filter(annotationClazz -> !Objects.isNull(annotationClazz))
+            .collect(Collectors.toUnmodifiableList());
+
+        if (annotationClazzes.isEmpty()) {
+            throw new RuntimeException("annoataionClazzes is empty.");
+        }
+
+        Method[] declaredMethods = clazz.getDeclaredMethods();
+
+        return Arrays.stream(declaredMethods)
+            .filter(method -> annotationClazzes.stream()
+                .allMatch(annotationClazz -> exist(method, annotationClazz)))
+            .collect(Collectors.toUnmodifiableList());
+    }
+
     public static boolean exist(Class<?> clazz, Class<?> annotationClazz) {
         return find(clazz, annotationClazz).isPresent();
     }
@@ -41,11 +62,11 @@ public class AnnotationUtils {
     }
 
     public static <T> Optional<T> find(Class<?> clazz, Class<T> annotationClazz) {
-        return find(clazz.getAnnotations(), annotationClazz);
+        return find(clazz.getDeclaredAnnotations(), annotationClazz);
     }
 
     public static <T> Optional<T> find(Method method, Class<T> annotationClazz) {
-        return find(method.getAnnotations(), annotationClazz);
+        return find(method.getDeclaredAnnotations(), annotationClazz);
     }
 
     private static <T> Optional<T> find(Annotation[] annotations, Class<T> findAnnotationClazz) {
@@ -72,6 +93,9 @@ public class AnnotationUtils {
         if (isAnnotationType(annotation, findAnnotationClazz)) {
             return Optional.of((T) annotation);
         }
+
+        System.out.println("find annotation : " + annotation);
+        System.out.println("find findAnnotaionClass : " + findAnnotationClazz);
 
         return Arrays.stream(annotation.annotationType().getAnnotations())
             .filter(AnnotationUtils::doesNotSelfReferenceAnnotation)

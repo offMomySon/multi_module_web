@@ -15,6 +15,10 @@ import javax.swing.text.Document;
 public class AnnotationUtils {
     private static final Set<Class<?>> selfReferenceAnnotations = Set.of(Retention.class, Target.class, Document.class);
 
+    public static boolean doesNotExistAll(Class<?> clazz, Class<?>... _annotationClazzes) {
+        return !existAll(clazz, _annotationClazzes);
+    }
+
     public static boolean existAll(Class<?> clazz, Class<?>... _annotationClazzes) {
         if (Objects.isNull(clazz) || Objects.isNull(_annotationClazzes) || _annotationClazzes.length == 0) {
             throw new RuntimeException("param is invalid.");

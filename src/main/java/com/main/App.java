@@ -7,7 +7,7 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import mapper.FileSystemUtil;
 import mapper.MethodResolver;
-import mapper.MethodResolverCreator;
+import mapper.MethodResolverRegistration;
 
 @Slf4j
 public class App {
@@ -17,8 +17,7 @@ public class App {
         // 가져온 이유는 클래스의 메소드를 객체화 하기 위해서 입니다.
         List<Class<?>> classes = FileSystemUtil.findClass(App.class, "com.main");
 
-        MethodResolverCreator methodResolverCreator = new MethodResolverCreator();
-        MethodResolver methodResolver = methodResolverCreator.create(classes);
+        List<MethodResolver> methodResolvers = MethodResolverRegistration.register(classes);
 
         BeanContainerCreator beanContainerCreator = new BeanContainerCreator();
         try {

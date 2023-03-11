@@ -2,8 +2,10 @@ package mapper;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -18,19 +20,24 @@ public class RequestMappingHttpMethodUrlMethodCreator {
             throw new RuntimeException("value is invalid.");
         }
 
-        RequestMapping clazzRequestMapping = AnnotationUtils.find(clazz, REQUEST_MAPPING_CLASS)
-            .orElseThrow(() -> new RuntimeException("clazz does not have RequestMapping."));
+        Optional<RequestMapping> clazzRequestMapping = AnnotationUtils.find(clazz, REQUEST_MAPPING_CLASS);
         RequestMapping methodRequestMapping = AnnotationUtils.find(method, REQUEST_MAPPING_CLASS)
             .orElseThrow(() -> new RuntimeException("method does not have RequestMapping."));
 
         List<HttpMethod> httpMethods = Arrays.stream(methodRequestMapping.method()).collect(Collectors.toUnmodifiableList());
-        List<String> methodUrls = Arrays.stream(clazzRequestMapping.value())
-            .flatMap(clazzUrl -> Arrays.stream(methodRequestMapping.value())
+        List<String> clazzUrls = clazzRequestMapping
+            .map(c -> Arrays.asList(c.value()))
+            .orElseGet(Collections::emptyList);
+        List<String> methodUrls = Arrays.stream(methodRequestMapping.value())
+            .collect(Collectors.toUnmodifiableList());
+
+        List<String> fullMethodUrls = clazzUrls.stream()
+            .flatMap(clazzUrl -> methodUrls.stream()
                 .map(methodUrl -> clazzUrl + methodUrl))
             .collect(Collectors.toUnmodifiableList());
 
         return httpMethods.stream()
-            .flatMap(httpMethod -> methodUrls.stream().map(methodUrl -> new HttpMethodUrlMethod(httpMethod, methodUrl, method)))
+            .flatMap(httpMethod -> fullMethodUrls.stream().map(methodUrl -> new HttpMethodUrlMethod(httpMethod, methodUrl, method)))
             .collect(Collectors.toUnmodifiableList());
     }
 

@@ -1,0 +1,120 @@
+package mapper;
+
+import java.lang.reflect.Method;
+import java.util.List;
+import mapper.RequestMappingHttpMethodUrlMethodCreator.HttpMethodUrlMethod;
+import mapper.marker.RequestMapping;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import vo.HttpMethod;
+
+class RequestMappingHttpMethodUrlMethodCreatorTest {
+
+    @DisplayName("RequestMapping 이 존재하지 않는 class 를 받으면 exception 이 발생합니다.")
+    @Test
+    void test() throws Exception {
+        //given
+        Class<TestDoesNotAnnotatedClass> clazz = TestDoesNotAnnotatedClass.class;
+        Method method = TestDoesNotAnnotatedClass.getAnnotatedMethod();
+
+        //when
+        Throwable actual = Assertions.catchThrowable(() -> RequestMappingHttpMethodUrlMethodCreator.create(clazz, method));
+
+        //then
+        Assertions.assertThat(actual)
+            .isNotNull();
+    }
+
+    @DisplayName("RequestMapping 이 존재하지 않는 method 를 받으면 exception 이 발생합니다.")
+    @Test
+    void test1() throws Exception {
+        //given
+        Class<TestAnnotatedClass> clazz = TestAnnotatedClass.class;
+        Method method = TestAnnotatedClass.getDoesNotAnnotatedMethod();
+
+        //when
+        Throwable actual = Assertions.catchThrowable(() -> RequestMappingHttpMethodUrlMethodCreator.create(clazz, method));
+
+        //then
+        Assertions.assertThat(actual)
+            .isNotNull();
+    }
+
+    @DisplayName("class 의 RequestMapping urls, method 의 RequestMapping urls, methods 의 카타시안곱 으로 HttpMethodUrlMethod 를 생성합니다.")
+    @Test
+    void test2() throws Exception {
+        //given
+        Class<TestAnnotatedClass> clazz = TestAnnotatedClass.class;
+        Method method = TestAnnotatedClass.getAnnotatedMethod();
+
+        List<HttpMethodUrlMethod> expect = TestAnnotatedClass.getCartesianProduct();
+
+        //when
+        List<HttpMethodUrlMethod> actual = RequestMappingHttpMethodUrlMethodCreator.create(clazz, method);
+
+        //then
+
+        Assertions.assertThat(actual)
+            .containsAll(expect);
+    }
+
+
+    @RequestMapping(value = {"/testclass1", "/testclass2"})
+    private static class TestAnnotatedClass {
+
+        @RequestMapping(value = {"/testMethod1", "/testMethod2"}, method = {HttpMethod.GET, HttpMethod.POST})
+        public void annotatedMethod() {
+        }
+
+        public void notAnnotatedMethod() {
+
+        }
+
+        public static Method getAnnotatedMethod() {
+            try {
+                return TestAnnotatedClass.class.getMethod("annotatedMethod");
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        public static Method getDoesNotAnnotatedMethod() {
+            try {
+                return TestAnnotatedClass.class.getMethod("notAnnotatedMethod");
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        public static List<HttpMethodUrlMethod> getCartesianProduct() {
+            Method annotatedMethod = getAnnotatedMethod();
+            return List.of(
+                new HttpMethodUrlMethod(HttpMethod.GET, "/testclass1" + "/testMethod1", annotatedMethod),
+                new HttpMethodUrlMethod(HttpMethod.GET, "/testclass1" + "/testMethod2", annotatedMethod),
+                new HttpMethodUrlMethod(HttpMethod.GET, "/testclass2" + "/testMethod1", annotatedMethod),
+                new HttpMethodUrlMethod(HttpMethod.GET, "/testclass2" + "/testMethod2", annotatedMethod),
+                new HttpMethodUrlMethod(HttpMethod.POST, "/testclass1" + "/testMethod1", annotatedMethod),
+                new HttpMethodUrlMethod(HttpMethod.POST, "/testclass1" + "/testMethod2", annotatedMethod),
+                new HttpMethodUrlMethod(HttpMethod.POST, "/testclass2" + "/testMethod1", annotatedMethod),
+                new HttpMethodUrlMethod(HttpMethod.POST, "/testclass2" + "/testMethod2", annotatedMethod)
+            );
+        }
+    }
+
+    private static class TestDoesNotAnnotatedClass {
+        @RequestMapping(value = {"/testMethod1", "/testMethod2"}, method = {HttpMethod.GET, HttpMethod.POST})
+        public void annotatedMethod() {
+
+        }
+
+        public static Method getAnnotatedMethod() {
+            try {
+                return TestDoesNotAnnotatedClass.class.getMethod("annotatedMethod");
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+}

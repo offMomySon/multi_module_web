@@ -8,17 +8,18 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import vo.HttpMethod;
 
-class RequestMappingJavaMethodResolverExtractorTest {
+class RequestMappingJavaMethodResolverCreatorTest {
 
     @DisplayName("class 로 부터 HttpMethodUrlMethodResolver 를 추출합니다.")
     @Test
     void test0() throws Exception {
         //given
         Class<?> clazz = DoesNotHaveAnnotatedMethodClass.class;
+        JavaMethodResolverCreator javaMethodResolverCreator = new JavaMethodResolverCreator(clazz);
         List<HttpMethodUrlMatcher> httpMethodUrlMethodResolvers = HaveAnnotatedMethodClass.getHttpMethodUrlMethodResolvers();
 
         //when
-        List<JavaMethodResolver> actuals = RequestMappingHttpMethodUrlMethodResolverExtractor.extract(clazz);
+        List<JavaMethodResolver> actuals = javaMethodResolverCreator.create();
 
         //then
         Assertions.assertThat(actuals)
@@ -37,9 +38,10 @@ class RequestMappingJavaMethodResolverExtractorTest {
     void test1() throws Exception {
         //given
         Class<?> clazz = DoesNotHaveAnnotatedMethodClass.class;
+        JavaMethodResolverCreator javaMethodResolverCreator = new JavaMethodResolverCreator(clazz);
 
         //when
-        List<JavaMethodResolver> actuals = RequestMappingHttpMethodUrlMethodResolverExtractor.extract(clazz);
+        List<JavaMethodResolver> actuals = javaMethodResolverCreator.create();
 
         //then
         Assertions.assertThat(actuals).isEmpty();
@@ -50,9 +52,10 @@ class RequestMappingJavaMethodResolverExtractorTest {
     void test2() throws Exception {
         //given
         Class<?> clazz = HaveAnnotatedMethodClass.class;
+        JavaMethodResolverCreator javaMethodResolverCreator = new JavaMethodResolverCreator(clazz);
 
         //when
-        List<JavaMethodResolver> actuals = RequestMappingHttpMethodUrlMethodResolverExtractor.extract(clazz);
+        List<JavaMethodResolver> actuals = javaMethodResolverCreator.create();
 
         //then
         Assertions.assertThat(actuals).isEmpty();

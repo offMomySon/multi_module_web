@@ -1,12 +1,13 @@
 package com.main;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import mapper.AnnotationUtils;
 import mapper.FileSystemUtil;
 import mapper.JavaMethodResolver;
-import mapper.RequestMappingHttpMethodUrlMethodResolverExtractor;
+import mapper.JavaMethodResolverCreator;
 import mapper.marker.Controller;
 
 @Slf4j
@@ -22,7 +23,9 @@ public class App {
             .collect(Collectors.toUnmodifiableList());
 
         List<JavaMethodResolver> javaMethodResolvers = controllerClazzs.stream()
-            .flatMap(clazz -> RequestMappingHttpMethodUrlMethodResolverExtractor.extract(clazz).stream())
+            .map(JavaMethodResolverCreator::new)
+            .map(JavaMethodResolverCreator::create)
+            .flatMap(Collection::stream)
             .peek(javaMethodResolver -> log.info("methodResolver : `{}`", javaMethodResolver))
             .collect(Collectors.toUnmodifiableList());
 

@@ -12,22 +12,19 @@ public class JavaMethodResolverCreator {
     private final static Class<RequestMapping> REQUEST_MAPPING_CLASS = RequestMapping.class;
 
     private final Class<?> clazz;
+    private final RequestMappingValueExtractor valueExtractor;
 
     public JavaMethodResolverCreator(@NonNull Class<?> clazz) {
         this.clazz = clazz;
+        this.valueExtractor = new RequestMappingValueExtractor(clazz);
     }
 
     public List<JavaMethodResolver> create() {
-        // requestMapping 어노테이션이 존재하는 method 들을 수집한다.
         List<Method> peekMethods = AnnotationUtils.peekMethods(this.clazz, REQUEST_MAPPING_CLASS).stream()
             .collect(Collectors.toUnmodifiableList());
 
-        RequestMappingValueExtractor requestMappingValueExtractor1 = new RequestMappingValueExtractor(this.clazz);
-
         List<RequestMappedMethod> requestMappedMethods = peekMethods.stream()
-            // requestMappinghttpMethodUrlMethodCreator
-            // 모든 문장을 표현한다.
-            .map(requestMappingValueExtractor1::extractRequestMappedMethods)
+            .map(valueExtractor::extractRequestMappedMethods)
             .flatMap(List::stream)
             .collect(Collectors.toUnmodifiableList());
 

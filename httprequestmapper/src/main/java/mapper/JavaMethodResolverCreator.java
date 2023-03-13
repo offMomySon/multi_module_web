@@ -4,7 +4,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.NonNull;
-import mapper.RequestMappingHttpMethodUrlMethodCreator.HttpMethodUrlMethod;
+import mapper.RequestMappingValueExtractor.RequestMappedMethod;
 import mapper.marker.RequestMapping;
 import vo.HttpMethod;
 
@@ -18,19 +18,24 @@ public class JavaMethodResolverCreator {
     }
 
     public List<JavaMethodResolver> create() {
-        List<Method> methods = AnnotationUtils.peekMethods(this.clazz, REQUEST_MAPPING_CLASS).stream()
+        // requestMapping 어노테이션이 존재하는 method 들을 수집한다.
+        List<Method> peekMethods = AnnotationUtils.peekMethods(this.clazz, REQUEST_MAPPING_CLASS).stream()
             .collect(Collectors.toUnmodifiableList());
 
-        List<HttpMethodUrlMethod> httpMethodUrlMethods = methods.stream()
-            .flatMap(method ->
-                         RequestMappingHttpMethodUrlMethodCreator.create(this.clazz, method).stream())
+        RequestMappingValueExtractor requestMappingValueExtractor1 = new RequestMappingValueExtractor(this.clazz);
+
+        List<RequestMappedMethod> requestMappedMethods = peekMethods.stream()
+            // requestMappinghttpMethodUrlMethodCreator
+            // 모든 문장을 표현한다.
+            .map(requestMappingValueExtractor1::extractRequestMappedMethods)
+            .flatMap(List::stream)
             .collect(Collectors.toUnmodifiableList());
 
-        return httpMethodUrlMethods.stream()
-            .map(httpMethodUrlMethod -> {
-                HttpMethod httpMethod = httpMethodUrlMethod.getHttpMethod();
-                String url = httpMethodUrlMethod.getUrl();
-                Method javaMethod = httpMethodUrlMethod.getJavaMethod();
+        return requestMappedMethods.stream()
+            .map(requestMappedMethod -> {
+                HttpMethod httpMethod = requestMappedMethod.getHttpMethod();
+                String url = requestMappedMethod.getUrl();
+                Method javaMethod = requestMappedMethod.getJavaMethod();
 
                 HttpMethodUrlMatcher httpMethodUrlMatcher = new HttpMethodUrlMatcher(httpMethod, url);
 

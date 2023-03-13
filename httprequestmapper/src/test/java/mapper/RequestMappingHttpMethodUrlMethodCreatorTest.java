@@ -2,7 +2,7 @@ package mapper;
 
 import java.lang.reflect.Method;
 import java.util.List;
-import mapper.RequestMappingHttpMethodUrlMethodCreator.HttpMethodUrlMethod;
+import mapper.RequestMappingValueExtractor.RequestMappedMethod;
 import mapper.marker.RequestMapping;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -16,10 +16,11 @@ class RequestMappingHttpMethodUrlMethodCreatorTest {
     void test() throws Exception {
         //given
         Class<TestDoesNotAnnotatedClass> clazz = TestDoesNotAnnotatedClass.class;
+        RequestMappingValueExtractor valueExtractor = new RequestMappingValueExtractor(clazz);
         Method method = TestDoesNotAnnotatedClass.getAnnotatedMethod();
 
         //when
-        Throwable actual = Assertions.catchThrowable(() -> RequestMappingHttpMethodUrlMethodCreator.create(clazz, method));
+        Throwable actual = Assertions.catchThrowable(() -> valueExtractor.extractRequestMappedMethods(method));
 
         //then
         Assertions.assertThat(actual)
@@ -31,10 +32,11 @@ class RequestMappingHttpMethodUrlMethodCreatorTest {
     void test1() throws Exception {
         //given
         Class<TestAnnotatedClass> clazz = TestAnnotatedClass.class;
+        RequestMappingValueExtractor valueExtractor = new RequestMappingValueExtractor(clazz);
         Method method = TestAnnotatedClass.getDoesNotAnnotatedMethod();
 
         //when
-        Throwable actual = Assertions.catchThrowable(() -> RequestMappingHttpMethodUrlMethodCreator.create(clazz, method));
+        Throwable actual = Assertions.catchThrowable(() -> valueExtractor.extractRequestMappedMethods(method));
 
         //then
         Assertions.assertThat(actual)
@@ -46,12 +48,13 @@ class RequestMappingHttpMethodUrlMethodCreatorTest {
     void test2() throws Exception {
         //given
         Class<TestAnnotatedClass> clazz = TestAnnotatedClass.class;
+        RequestMappingValueExtractor valueExtractor = new RequestMappingValueExtractor(clazz);
         Method method = TestAnnotatedClass.getAnnotatedMethod();
 
-        List<HttpMethodUrlMethod> expect = TestAnnotatedClass.getCartesianProduct();
+        List<RequestMappedMethod> expect = TestAnnotatedClass.getCartesianProduct();
 
         //when
-        List<HttpMethodUrlMethod> actual = RequestMappingHttpMethodUrlMethodCreator.create(clazz, method);
+        List<RequestMappedMethod> actual = valueExtractor.extractRequestMappedMethods(method);
 
         //then
 
@@ -87,17 +90,17 @@ class RequestMappingHttpMethodUrlMethodCreatorTest {
             }
         }
 
-        public static List<HttpMethodUrlMethod> getCartesianProduct() {
+        public static List<RequestMappedMethod> getCartesianProduct() {
             Method annotatedMethod = getAnnotatedMethod();
             return List.of(
-                new HttpMethodUrlMethod(HttpMethod.GET, "/testclass1" + "/testMethod1", annotatedMethod),
-                new HttpMethodUrlMethod(HttpMethod.GET, "/testclass1" + "/testMethod2", annotatedMethod),
-                new HttpMethodUrlMethod(HttpMethod.GET, "/testclass2" + "/testMethod1", annotatedMethod),
-                new HttpMethodUrlMethod(HttpMethod.GET, "/testclass2" + "/testMethod2", annotatedMethod),
-                new HttpMethodUrlMethod(HttpMethod.POST, "/testclass1" + "/testMethod1", annotatedMethod),
-                new HttpMethodUrlMethod(HttpMethod.POST, "/testclass1" + "/testMethod2", annotatedMethod),
-                new HttpMethodUrlMethod(HttpMethod.POST, "/testclass2" + "/testMethod1", annotatedMethod),
-                new HttpMethodUrlMethod(HttpMethod.POST, "/testclass2" + "/testMethod2", annotatedMethod)
+                new RequestMappedMethod(HttpMethod.GET, "/testclass1" + "/testMethod1", annotatedMethod),
+                new RequestMappedMethod(HttpMethod.GET, "/testclass1" + "/testMethod2", annotatedMethod),
+                new RequestMappedMethod(HttpMethod.GET, "/testclass2" + "/testMethod1", annotatedMethod),
+                new RequestMappedMethod(HttpMethod.GET, "/testclass2" + "/testMethod2", annotatedMethod),
+                new RequestMappedMethod(HttpMethod.POST, "/testclass1" + "/testMethod1", annotatedMethod),
+                new RequestMappedMethod(HttpMethod.POST, "/testclass1" + "/testMethod2", annotatedMethod),
+                new RequestMappedMethod(HttpMethod.POST, "/testclass2" + "/testMethod1", annotatedMethod),
+                new RequestMappedMethod(HttpMethod.POST, "/testclass2" + "/testMethod2", annotatedMethod)
             );
         }
     }

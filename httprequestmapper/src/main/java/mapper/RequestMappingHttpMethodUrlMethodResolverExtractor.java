@@ -12,7 +12,7 @@ import vo.HttpMethod;
 public class RequestMappingHttpMethodUrlMethodResolverExtractor {
     private final static Class<RequestMapping> REQUEST_MAPPING_CLASS = RequestMapping.class;
 
-    public static List<HttpMethodUrlMethodResolver> extract(Class<?> clazz) {
+    public static List<JavaMethodResolver> extract(Class<?> clazz) {
         if(Objects.isNull(clazz)){
             return Collections.emptyList();
         }
@@ -29,11 +29,11 @@ public class RequestMappingHttpMethodUrlMethodResolverExtractor {
             .map(httpMethodUrlMethod -> {
                 HttpMethod httpMethod = httpMethodUrlMethod.getHttpMethod();
                 String url = httpMethodUrlMethod.getUrl();
-                Method method = httpMethodUrlMethod.getMethod();
+                Method javaMethod = httpMethodUrlMethod.getJavaMethod();
 
                 HttpMethodUrlMatcher httpMethodUrlMatcher = new HttpMethodUrlMatcher(httpMethod, url);
 
-                return new HttpMethodUrlMethodResolver(method, httpMethodUrlMatcher);
+                return new JavaMethodResolver(javaMethod, httpMethodUrlMatcher);
             })
             .collect(Collectors.toUnmodifiableList());
     }

@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import mapper.AnnotationUtils;
 import mapper.FileSystemUtil;
-import mapper.HttpMethodUrlMethodResolver;
+import mapper.JavaMethodResolver;
 import mapper.RequestMappingHttpMethodUrlMethodResolverExtractor;
 import mapper.marker.Controller;
 
@@ -21,9 +21,9 @@ public class App {
             .filter(clazz -> AnnotationUtils.exist(clazz, Controller.class))
             .collect(Collectors.toUnmodifiableList());
 
-        List<HttpMethodUrlMethodResolver> methodResolvers = controllerClazzs.stream()
+        List<JavaMethodResolver> javaMethodResolvers = controllerClazzs.stream()
             .flatMap(clazz -> RequestMappingHttpMethodUrlMethodResolverExtractor.extract(clazz).stream())
-            .peek(methodResolver -> log.info("methodResolver : `{}`", methodResolver))
+            .peek(javaMethodResolver -> log.info("methodResolver : `{}`", javaMethodResolver))
             .collect(Collectors.toUnmodifiableList());
 
 //        BeanContainerCreator beanContainerCreator = new BeanContainerCreator();

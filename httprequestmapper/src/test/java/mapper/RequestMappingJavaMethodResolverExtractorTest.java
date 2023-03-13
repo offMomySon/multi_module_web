@@ -8,7 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import vo.HttpMethod;
 
-class RequestMappingHttpMethodUrlMethodResolverExtractorTest {
+class RequestMappingJavaMethodResolverExtractorTest {
 
     @DisplayName("class 로 부터 HttpMethodUrlMethodResolver 를 추출합니다.")
     @Test
@@ -18,7 +18,7 @@ class RequestMappingHttpMethodUrlMethodResolverExtractorTest {
         List<HttpMethodUrlMatcher> httpMethodUrlMethodResolvers = HaveAnnotatedMethodClass.getHttpMethodUrlMethodResolvers();
 
         //when
-        List<HttpMethodUrlMethodResolver> actuals = RequestMappingHttpMethodUrlMethodResolverExtractor.extract(clazz);
+        List<JavaMethodResolver> actuals = RequestMappingHttpMethodUrlMethodResolverExtractor.extract(clazz);
 
         //then
         Assertions.assertThat(actuals)
@@ -39,7 +39,7 @@ class RequestMappingHttpMethodUrlMethodResolverExtractorTest {
         Class<?> clazz = DoesNotHaveAnnotatedMethodClass.class;
 
         //when
-        List<HttpMethodUrlMethodResolver> actuals = RequestMappingHttpMethodUrlMethodResolverExtractor.extract(clazz);
+        List<JavaMethodResolver> actuals = RequestMappingHttpMethodUrlMethodResolverExtractor.extract(clazz);
 
         //then
         Assertions.assertThat(actuals).isEmpty();
@@ -52,7 +52,7 @@ class RequestMappingHttpMethodUrlMethodResolverExtractorTest {
         Class<?> clazz = HaveAnnotatedMethodClass.class;
 
         //when
-        List<HttpMethodUrlMethodResolver> actuals = RequestMappingHttpMethodUrlMethodResolverExtractor.extract(clazz);
+        List<JavaMethodResolver> actuals = RequestMappingHttpMethodUrlMethodResolverExtractor.extract(clazz);
 
         //then
         Assertions.assertThat(actuals).isEmpty();

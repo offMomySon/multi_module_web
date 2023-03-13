@@ -7,28 +7,28 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 // n 개의 methodResolver 를 1개 처럼 다룬다.
-public class CompositedMethodResolver implements MethodResolver {
-    private final List<MethodResolver> methodResolvers;
+public class CompositedMethodResolver implements MethodResolverIf {
+    private final List<JavaMethodResolver> javaMethodResolvers;
 
-    public CompositedMethodResolver(List<MethodResolver> methodResolvers) {
-        if (Objects.isNull(methodResolvers)) {
+    public CompositedMethodResolver(List<JavaMethodResolver> javaMethodResolvers) {
+        if (Objects.isNull(javaMethodResolvers)) {
             throw new RuntimeException("methodResolvers is null.");
         }
 
-        List<MethodResolver> newMethodResolver = methodResolvers.stream()
+        List<JavaMethodResolver> newJavaMethodResolver = javaMethodResolvers.stream()
             .filter(o -> !Objects.isNull(o))
             .collect(Collectors.toUnmodifiableList());
 
-        if (newMethodResolver.isEmpty()) {
+        if (newJavaMethodResolver.isEmpty()) {
             throw new RuntimeException("newMethodResovler is empty.");
         }
 
-        this.methodResolvers = newMethodResolver;
+        this.javaMethodResolvers = newJavaMethodResolver;
     }
 
     @Override
     public Optional<Method> resolve(Matcher matcher) {
-        return methodResolvers.stream()
+        return javaMethodResolvers.stream()
             .map(methodResolver -> methodResolver.resolve(matcher))
             .filter(Optional::isPresent)
             .map(Optional::get)

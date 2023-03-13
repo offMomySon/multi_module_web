@@ -10,11 +10,11 @@ import lombok.ToString;
  * HttpMethodUrlMatcher 의 매칭여부에 따라 method 를 반환합니다.
  */
 @ToString
-public class HttpMethodUrlMethodResolver implements MethodResolver {
+public class JavaMethodResolver implements MethodResolverIf {
     private final Method method;
     private final HttpMethodUrlMatcher httpMethodUrlMatcher;
 
-    public HttpMethodUrlMethodResolver(Method method, HttpMethodUrlMatcher httpMethodUrlMatcher) {
+    public JavaMethodResolver(Method method, HttpMethodUrlMatcher httpMethodUrlMatcher) {
         if (Objects.isNull(method) || Objects.isNull(httpMethodUrlMatcher)) {
             throw new RuntimeException("parameter is null.");
         }

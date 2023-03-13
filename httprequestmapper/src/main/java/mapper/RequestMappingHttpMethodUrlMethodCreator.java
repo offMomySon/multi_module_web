@@ -46,16 +46,17 @@ public class RequestMappingHttpMethodUrlMethodCreator {
     public static class HttpMethodUrlMethod {
         private final HttpMethod httpMethod;
         private final String url;
-        private final Method method;
+        private final Method javaMethod;
 
-        public HttpMethodUrlMethod(HttpMethod httpMethod, String url, Method method) {
-            if (Objects.isNull(httpMethod) || Objects.isNull(url) || url.isBlank() || url.isBlank()) {
+        public HttpMethodUrlMethod(HttpMethod httpMethod, String url, Method javaMethod) {
+            if (Objects.isNull(httpMethod) || Objects.isNull(javaMethod) ||
+                Objects.isNull(url) || url.isBlank() || url.isBlank()) {
                 throw new RuntimeException("value is invalid.");
             }
 
             this.httpMethod = httpMethod;
             this.url = url;
-            this.method = method;
+            this.javaMethod = javaMethod;
         }
     }
 }

@@ -10,7 +10,7 @@ import vo.HttpMethod;
 
 @Slf4j
 @Controller
-@RequestMapping(value = "/basic/{payMethod}")
+@RequestMapping(value = "/basic")
 public class SampleController {
     public final SampleDomain sampleDomain;
 

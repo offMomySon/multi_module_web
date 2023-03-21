@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import mapper.AnnotationUtils;
 import mapper.FileSystemUtil;
-import mapper.JavaMethodResolver;
+import mapper.HttpPathMatcher;
 import mapper.JavaMethodResolverCreator;
 import mapper.marker.Controller;
 
@@ -22,12 +22,23 @@ public class App {
             .filter(clazz -> AnnotationUtils.exist(clazz, Controller.class))
             .collect(Collectors.toUnmodifiableList());
 
-        List<JavaMethodResolver> javaMethodResolvers = controllerClazzs.stream()
+        List<HttpPathMatcher> javaMethodResolvers = controllerClazzs.stream()
             .map(JavaMethodResolverCreator::new)
             .map(JavaMethodResolverCreator::create)
             .flatMap(Collection::stream)
             .peek(javaMethodResolver -> log.info("methodResolver : `{}`", javaMethodResolver))
             .collect(Collectors.toUnmodifiableList());
+
+//        HttpMethod httpMethod = HttpMethod.GET;
+//        String url = "/basic/test/age";
+//
+//        Optional<Method> optionalMethod = javaMethodResolvers.stream()
+//            .map(httpPathMatcher -> httpPathMatcher.match(httpMethod, url))
+//            .filter(Optional::isPresent)
+//            .findFirst()
+//            .map(Optional::get);
+//
+//        System.out.println(optionalMethod.get());
 
 //        BeanContainerCreator beanContainerCreator = new BeanContainerCreator();
 //        try {

@@ -19,7 +19,7 @@ public class JavaMethodResolverCreator {
         this.valueExtractor = new RequestMappingValueExtractor(clazz);
     }
 
-    public List<JavaMethodResolver> create() {
+    public List<HttpPathMatcher> create() {
         List<Method> peekMethods = AnnotationUtils.peekMethods(this.clazz, REQUEST_MAPPING_CLASS).stream()
             .collect(Collectors.toUnmodifiableList());
 
@@ -34,9 +34,8 @@ public class JavaMethodResolverCreator {
                 String url = requestMappedMethod.getUrl();
                 Method javaMethod = requestMappedMethod.getJavaMethod();
 
-                HttpMethodUrlMatcher httpMethodUrlMatcher = new HttpMethodUrlMatcher(httpMethod, url);
 
-                return new JavaMethodResolver(javaMethod, httpMethodUrlMatcher);
+                return new HttpPathMatcher(httpMethod, url, javaMethod);
             })
             .collect(Collectors.toUnmodifiableList());
     }

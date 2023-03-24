@@ -8,14 +8,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import lombok.Getter;
 import vo.HttpMethod;
 
 public class HttpPathResolver {
     private static final String PATH_DELIMITER = "/";
     private static final String WILD_CARD = "**";
-    private static final String EMPTY_PATTER = "";
+    private static final String EMPTY_PATTERN = "";
+    private static final String PATH_VARIABLE_OPENER = "{";
+    private static final String PATH_VARIABLE_CLOSER = "}";
 
     private final HttpMethod httpMethod;
     private final String url;
@@ -50,7 +51,7 @@ public class HttpPathResolver {
 
         List<String> thisPaths;
         if (Objects.equals(this.url, "/")) {
-            thisPaths = List.of(EMPTY_PATTER);
+            thisPaths = List.of(EMPTY_PATTERN);
         } else {
             List<String> splitThisPath = Arrays.stream(this.url.split(PATH_DELIMITER)).collect(Collectors.toUnmodifiableList());
             thisPaths = splitThisPath.subList(1, splitThisPath.size());
@@ -58,7 +59,7 @@ public class HttpPathResolver {
 
         List<String> requestPaths;
         if (Objects.equals(requestUrl, "/")) {
-            requestPaths = List.of(EMPTY_PATTER);
+            requestPaths = List.of(EMPTY_PATTERN);
         } else {
             List<String> splitRequestPaths = Arrays.stream(requestUrl.split(PATH_DELIMITER)).collect(Collectors.toUnmodifiableList());
             requestPaths = splitRequestPaths.subList(1, splitRequestPaths.size());
@@ -68,23 +69,18 @@ public class HttpPathResolver {
     }
 
     private boolean doMatch(List<String> thisPaths, List<String> requestPaths, int thisIndex, int requestIndex) {
-        boolean finishMatch = thisPaths.size() <= thisIndex && requestPaths.size() <= requestIndex;
+        boolean finishMatch = PathUtils.outOfIndex(thisPaths, thisIndex) && PathUtils.outOfIndex(requestPaths, requestIndex);
         if (finishMatch) {
             return true;
         }
 
-        boolean onlyRemainThisPaths = requestPaths.size() <= requestIndex;
+        boolean onlyRemainThisPaths = PathUtils.outOfIndex(requestPaths, requestIndex);
         if (onlyRemainThisPaths) {
-            boolean doesNotWildCard = !Objects.equals(thisPaths.get(thisIndex), WILD_CARD);
-            if (doesNotWildCard) {
-                return false;
-            }
-
-            boolean onlyRemainWildCard = thisPaths.size() <= thisIndex + 1;
+            boolean onlyRemainWildCard = PathUtils.onlyRemainWildCard(thisPaths, thisIndex);
             return onlyRemainWildCard;
         }
 
-        boolean onlyRemainRequestPaths = thisPaths.size() <= thisIndex;
+        boolean onlyRemainRequestPaths = PathUtils.outOfIndex(thisPaths, thisIndex);
         if (onlyRemainRequestPaths) {
             return false;
         }
@@ -92,56 +88,35 @@ public class HttpPathResolver {
         String thisPath = thisPaths.get(thisIndex);
         String requestPath = requestPaths.get(requestIndex);
         int nextThisIndex = thisIndex + 1;
-        int nextRequestIndex = requestIndex + 1;
 
-        boolean match = Objects.equals(thisPath, requestPath);
+        boolean match = PathUtils.matchPattern(thisPath, requestPath);
         if (match) {
+            int nextRequestIndex = requestIndex + 1;
             return doMatch(thisPaths, requestPaths, nextThisIndex, nextRequestIndex);
         }
 
-        boolean pathVariable = thisPath.startsWith("{") && thisPath.endsWith("}");
+        boolean pathVariable = PathUtils.isPathVariable(thisPath);
         if (pathVariable) {
-            boolean emptyPatternRequestPath = Objects.equals(EMPTY_PATTER, requestPath);
+            boolean emptyPatternRequestPath = PathUtils.emptyPattern(requestPath);
             if (emptyPatternRequestPath) {
                 return false;
             }
+            int nextRequestIndex = requestIndex + 1;
             return doMatch(thisPaths, requestPaths, nextThisIndex, nextRequestIndex);
         }
 
-        boolean doesNotWildCard = !Objects.equals(thisPath, WILD_CARD);
+        boolean doesNotWildCard = PathUtils.doesNotWildCardPattern(thisPath);
         if (doesNotWildCard) {
             return false;
         }
 
-        boolean onlyRemainWildCard = thisPaths.size() <= thisIndex + 1;
+        boolean onlyRemainWildCard = PathUtils.onlyRemainWildCard(thisPaths, thisIndex);
         if (onlyRemainWildCard) {
             return true;
         }
 
-        String nextThisPath = thisPaths.get(nextThisIndex);
-        boolean nextThisPathPathVariable = nextThisPath.startsWith("{") && nextThisPath.endsWith("}");
-        if (nextThisPathPathVariable) {
-            List<Integer> doesNotEmptyPatterRequestPathIndexes = IntStream.range(requestIndex, requestPaths.size())
-                .boxed()
-                .filter(_nextRequestIndex -> {
-                    String nextRequestPath = requestPaths.get(_nextRequestIndex);
-                    boolean emptyPatternRequestPath = Objects.equals(EMPTY_PATTER, nextRequestPath);
-                    return !emptyPatternRequestPath;
-                })
-                .collect(Collectors.toUnmodifiableList());
-
-            return doesNotEmptyPatterRequestPathIndexes.stream()
-                .anyMatch(_nextRequestIndex -> doMatch(thisPaths, requestPaths, nextThisIndex, _nextRequestIndex));
-        }
-
-        List<Integer> nextThisPathMatchNextRequestPathIndexes = IntStream.range(requestIndex, requestPaths.size()).boxed()
-            .filter(_nextRequestIndex -> {
-                String nextRequestPath = requestPaths.get(_nextRequestIndex);
-                return Objects.equals(nextThisPath, nextRequestPath);
-            })
-            .collect(Collectors.toUnmodifiableList());
-
-        return nextThisPathMatchNextRequestPathIndexes.stream()
+        List<Integer> nextRequestIndexes = PathUtils.getBehindeIndexes(requestPaths, requestIndex);
+        return nextRequestIndexes.stream()
             .anyMatch(_nextRequestIndex -> doMatch(thisPaths, requestPaths, nextThisIndex, _nextRequestIndex));
     }
 

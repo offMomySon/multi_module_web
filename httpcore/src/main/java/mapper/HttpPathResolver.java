@@ -13,10 +13,7 @@ import vo.HttpMethod;
 
 public class HttpPathResolver {
     private static final String PATH_DELIMITER = "/";
-    private static final String WILD_CARD = "**";
     private static final String EMPTY_PATTERN = "";
-    private static final String PATH_VARIABLE_OPENER = "{";
-    private static final String PATH_VARIABLE_CLOSER = "}";
 
     private final HttpMethod httpMethod;
     private final String url;
@@ -50,7 +47,7 @@ public class HttpPathResolver {
         requestUrl = Paths.get(requestUrl).normalize().toString();
 
         List<String> thisPaths;
-        if (Objects.equals(this.url, "/")) {
+        if (Objects.equals(this.url, PATH_DELIMITER)) {
             thisPaths = List.of(EMPTY_PATTERN);
         } else {
             List<String> splitThisPath = Arrays.stream(this.url.split(PATH_DELIMITER)).collect(Collectors.toUnmodifiableList());
@@ -58,7 +55,7 @@ public class HttpPathResolver {
         }
 
         List<String> requestPaths;
-        if (Objects.equals(requestUrl, "/")) {
+        if (Objects.equals(requestUrl, PATH_DELIMITER)) {
             requestPaths = List.of(EMPTY_PATTERN);
         } else {
             List<String> splitRequestPaths = Arrays.stream(requestUrl.split(PATH_DELIMITER)).collect(Collectors.toUnmodifiableList());
@@ -73,39 +70,34 @@ public class HttpPathResolver {
         if (finishMatch) {
             return true;
         }
-
         boolean onlyRemainThisPaths = PathUtils.outOfIndex(requestPaths, requestIndex);
         if (onlyRemainThisPaths) {
             boolean onlyRemainWildCard = PathUtils.onlyRemainWildCard(thisPaths, thisIndex);
             return onlyRemainWildCard;
         }
-
         boolean onlyRemainRequestPaths = PathUtils.outOfIndex(thisPaths, thisIndex);
         if (onlyRemainRequestPaths) {
             return false;
         }
 
-        String thisPath = thisPaths.get(thisIndex);
-        String requestPath = requestPaths.get(requestIndex);
-        int nextThisIndex = thisIndex + 1;
+        Path thisPath = new Path(thisPaths.get(thisIndex));
+        Path requestPath = new Path(requestPaths.get(requestIndex));
 
-        boolean match = PathUtils.matchPattern(thisPath, requestPath);
+        boolean match = thisPath.match(requestPath);
         if (match) {
-            int nextRequestIndex = requestIndex + 1;
-            return doMatch(thisPaths, requestPaths, nextThisIndex, nextRequestIndex);
+            return doMatch(thisPaths, requestPaths, thisIndex + 1, requestIndex + 1);
         }
 
-        boolean pathVariable = PathUtils.isPathVariable(thisPath);
+        boolean pathVariable = thisPath.isPathVariable();
         if (pathVariable) {
-            boolean emptyPatternRequestPath = PathUtils.emptyPattern(requestPath);
-            if (emptyPatternRequestPath) {
+            boolean emptyRequestPath = requestPath.isEmpty();
+            if (emptyRequestPath) {
                 return false;
             }
-            int nextRequestIndex = requestIndex + 1;
-            return doMatch(thisPaths, requestPaths, nextThisIndex, nextRequestIndex);
+            return doMatch(thisPaths, requestPaths, thisIndex + 1, requestIndex + 1);
         }
 
-        boolean doesNotWildCard = PathUtils.doesNotWildCardPattern(thisPath);
+        boolean doesNotWildCard = thisPath.doesNotWildCard();
         if (doesNotWildCard) {
             return false;
         }
@@ -115,9 +107,9 @@ public class HttpPathResolver {
             return true;
         }
 
-        List<Integer> nextRequestIndexes = PathUtils.getBehindeIndexes(requestPaths, requestIndex);
+        List<Integer> nextRequestIndexes = PathUtils.getIndexesFromStartToEnd(requestPaths, requestIndex);
         return nextRequestIndexes.stream()
-            .anyMatch(_nextRequestIndex -> doMatch(thisPaths, requestPaths, nextThisIndex, _nextRequestIndex));
+            .anyMatch(_nextRequestIndex -> doMatch(thisPaths, requestPaths, thisIndex + 1, _nextRequestIndex));
     }
 
     @Getter

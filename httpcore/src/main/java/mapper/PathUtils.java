@@ -92,8 +92,8 @@ public class PathUtils {
             .collect(Collectors.toUnmodifiableList());
     }
 
-    public static List<Integer> getBehindeIndexes(List<String> paths, int startIndex) {
-        return IntStream.range(startIndex, paths.size()).boxed().collect(Collectors.toUnmodifiableList());
+    public static List<Integer> getIndexesFromStartToEnd(List<String> paths, int startIndex) {
+        return IntStream.rangeClosed(startIndex, paths.size() - 1).boxed().collect(Collectors.toUnmodifiableList());
     }
 
     public static List<Integer> matchPatternIndexes(String pattern, List<String> paths, int startIndex) {

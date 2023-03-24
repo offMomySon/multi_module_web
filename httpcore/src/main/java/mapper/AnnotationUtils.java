@@ -4,6 +4,7 @@ import java.lang.annotation.Annotation;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
@@ -34,6 +35,13 @@ public class AnnotationUtils {
 
         return annotationClazzes.stream()
             .allMatch(annotationClazz -> exist(clazz, annotationClazz));
+    }
+
+    public static List<Class<?>> peekFieldsType(Class<?> clazz, Class<?> annotationClass){
+        return Arrays.stream(clazz.getDeclaredFields())
+            .map(Field::getType)
+            .filter(typeClass -> AnnotationUtils.exist(typeClass, annotationClass))
+            .collect(Collectors.toUnmodifiableList());
     }
 
     public static List<Method> peekMethods(Class<?> clazz, Class<?>... _annotatedClazz) {

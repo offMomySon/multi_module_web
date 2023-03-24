@@ -70,30 +70,24 @@ public class HttpPathResolver {
     }
 
     private boolean doMatch(List<String> thisPaths, List<String> requestPaths, int thisIndex, int requestIndex, Map<String, String> pathVariables) {
-        boolean finishMatch = PathUtils.outOfIndex(thisPaths, thisIndex) && PathUtils.outOfIndex(requestPaths, requestIndex);
-        if (finishMatch) {
+        if (PathUtils.outOfIndex(thisPaths, thisIndex) && PathUtils.outOfIndex(requestPaths, requestIndex)) {
             return true;
         }
-        boolean onlyRemainThisPaths = PathUtils.outOfIndex(requestPaths, requestIndex);
-        if (onlyRemainThisPaths) {
-            boolean onlyRemainWildCard = PathUtils.onlyRemainWildCard(thisPaths, thisIndex);
-            return onlyRemainWildCard;
+        if (PathUtils.outOfIndex(requestPaths, requestIndex)) {
+            return PathUtils.onlyRemainWildCard(thisPaths, thisIndex);
         }
-        boolean onlyRemainRequestPaths = PathUtils.outOfIndex(thisPaths, thisIndex);
-        if (onlyRemainRequestPaths) {
+        if (PathUtils.outOfIndex(thisPaths, thisIndex)) {
             return false;
         }
 
         Path thisPath = new Path(thisPaths.get(thisIndex));
         Path requestPath = new Path(requestPaths.get(requestIndex));
 
-        boolean match = thisPath.match(requestPath);
-        if (match) {
+        if (thisPath.match(requestPath)) {
             return doMatch(thisPaths, requestPaths, thisIndex + 1, requestIndex + 1, pathVariables);
         }
 
-        boolean pathVariable = thisPath.isPathVariable();
-        if (pathVariable) {
+        if (thisPath.isPathVariable()) {
             boolean emptyRequestPath = requestPath.isEmpty();
             if (emptyRequestPath) {
                 return false;
@@ -112,13 +106,11 @@ public class HttpPathResolver {
             return doMatch;
         }
 
-        boolean doesNotWildCard = thisPath.doesNotWildCard();
-        if (doesNotWildCard) {
+        if (thisPath.doesNotWildCard()) {
             return false;
         }
 
-        boolean onlyRemainWildCard = PathUtils.onlyRemainWildCard(thisPaths, thisIndex);
-        if (onlyRemainWildCard) {
+        if (PathUtils.onlyRemainWildCard(thisPaths, thisIndex)) {
             return true;
         }
 

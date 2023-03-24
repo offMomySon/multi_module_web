@@ -2,7 +2,6 @@ package beanContainer;
 
 import java.lang.reflect.Constructor;
 import java.text.MessageFormat;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -32,10 +31,8 @@ public class BeanContainerCreator {
 
     private static Map<Class<?>, Object> instantiate(Class<?> clazz, Map<Class<?>, Object> container, Set<Class<?>> parentClasses) {
         try {
-            List<Class<?>> instanceMemberClasses = Arrays.stream(clazz.getDeclaredFields())
-                .map(f -> f.getType())
-                .filter(c -> AnnotationUtils.exist(c, Component.class))
-                .collect(Collectors.toUnmodifiableList());
+            List<Class<?>> instanceMemberClasses = AnnotationUtils.peekFieldsType(clazz, Component.class);
+            ComponentClassFieldFilter componentClassFieldFilter = ComponentClassFieldFilter.from(clazz);
 
             //  class 의 instance member class 가 존재하지 않으면 instance 를 생성한다.
             if (instanceMemberClasses.isEmpty()) {
@@ -47,12 +44,8 @@ public class BeanContainerCreator {
 
             parentClasses.add(clazz);
 
-            List<Class<?>> circularReferenceClass = instanceMemberClasses.stream()
-                .filter(parentClasses::contains)
-                .collect(Collectors.toUnmodifiableList());
-
-            boolean hasCircularReferenceClass = !circularReferenceClass.isEmpty();
-            if (hasCircularReferenceClass) {
+            List<Class<?>> circularReferenceClass = componentClassFieldFilter.gatherContainFieldTypes(parentClasses);
+            if (!circularReferenceClass.isEmpty()) {
                 String recursiveClassNames = circularReferenceClass.stream()
                     .map(Class::getSimpleName)
                     .collect(Collectors.joining(",", "[", "]"));
@@ -69,7 +62,6 @@ public class BeanContainerCreator {
             Object[] instanceMemberObjects = instanceMemberClasses.stream().map(container::get).toArray();
             Constructor<?> constructor = clazz.getConstructor(instanceMemberClasses.toArray(Class<?>[]::new));
             Object instance = constructor.newInstance(instanceMemberObjects);
-
             container.put(clazz, instance);
 
             parentClasses.remove(clazz);

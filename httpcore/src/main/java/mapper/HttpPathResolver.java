@@ -3,6 +3,7 @@ package mapper;
 import java.lang.reflect.Method;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -25,25 +26,28 @@ public class HttpPathResolver {
         this.javaMethod = javaMethod;
     }
 
-    public Optional<Method> resolve(HttpMethod requestMethod, String requestUrl) {
+    public Optional<ResolvedMethod> resolveMethod(HttpMethod requestMethod, String requestUrl) {
         if (Objects.isNull(requestUrl)) {
             return Optional.empty();
         }
         if (httpMethod != requestMethod) {
             return Optional.empty();
         }
-        if (doesNotMatch(requestUrl)) {
+
+        Map<String, String> pathVariables = new HashMap<>();
+        if (doesNotMatch(requestUrl, pathVariables)) {
             return Optional.empty();
         }
 
-        return Optional.of(javaMethod);
+        ResolvedMethod resolvedMethod = new ResolvedMethod(javaMethod, pathVariables);
+        return Optional.of(resolvedMethod);
     }
 
-    private boolean doesNotMatch(String requestUrl) {
-        return !match(requestUrl);
+    private boolean doesNotMatch(String requestUrl, Map<String, String> pathVariables) {
+        return !match(requestUrl, pathVariables);
     }
 
-    private boolean match(String requestUrl) {
+    private boolean match(String requestUrl, Map<String, String> pathVariables) {
         requestUrl = Paths.get(requestUrl).normalize().toString();
 
         List<String> thisPaths;
@@ -62,10 +66,10 @@ public class HttpPathResolver {
             requestPaths = splitRequestPaths.subList(1, splitRequestPaths.size());
         }
 
-        return doMatch(thisPaths, requestPaths, 0, 0);
+        return doMatch(thisPaths, requestPaths, 0, 0, pathVariables);
     }
 
-    private boolean doMatch(List<String> thisPaths, List<String> requestPaths, int thisIndex, int requestIndex) {
+    private boolean doMatch(List<String> thisPaths, List<String> requestPaths, int thisIndex, int requestIndex, Map<String, String> pathVariables) {
         boolean finishMatch = PathUtils.outOfIndex(thisPaths, thisIndex) && PathUtils.outOfIndex(requestPaths, requestIndex);
         if (finishMatch) {
             return true;
@@ -85,7 +89,7 @@ public class HttpPathResolver {
 
         boolean match = thisPath.match(requestPath);
         if (match) {
-            return doMatch(thisPaths, requestPaths, thisIndex + 1, requestIndex + 1);
+            return doMatch(thisPaths, requestPaths, thisIndex + 1, requestIndex + 1, pathVariables);
         }
 
         boolean pathVariable = thisPath.isPathVariable();
@@ -94,7 +98,18 @@ public class HttpPathResolver {
             if (emptyRequestPath) {
                 return false;
             }
-            return doMatch(thisPaths, requestPaths, thisIndex + 1, requestIndex + 1);
+
+            String key = thisPath.removeBraces();
+            String value = requestPath.getValue();
+            pathVariables.put(key, value);
+
+            boolean doMatch = doMatch(thisPaths, requestPaths, thisIndex + 1, requestIndex + 1, pathVariables);
+
+            if (!doMatch) {
+                pathVariables.remove(key);
+            }
+
+            return doMatch;
         }
 
         boolean doesNotWildCard = thisPath.doesNotWildCard();
@@ -109,7 +124,7 @@ public class HttpPathResolver {
 
         List<Integer> nextRequestIndexes = PathUtils.getIndexesFromStartToEnd(requestPaths, requestIndex);
         return nextRequestIndexes.stream()
-            .anyMatch(_nextRequestIndex -> doMatch(thisPaths, requestPaths, thisIndex + 1, _nextRequestIndex));
+            .anyMatch(_nextRequestIndex -> doMatch(thisPaths, requestPaths, thisIndex + 1, _nextRequestIndex, pathVariables));
     }
 
     @Getter

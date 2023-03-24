@@ -5,8 +5,8 @@ import java.util.Objects;
 public class Path {
     private static final String WILD_CARD_PATTERN = "**";
     private static final String EMPTY_PATTERN = "";
-    private static final String PATH_VARIABLE_OPENER = "{";
-    private static final String PATH_VARIABLE_CLOSER = "}";
+    private static final char PATH_VARIABLE_OPENER = '{';
+    private static final char PATH_VARIABLE_CLOSER = '}';
 
     private final String value;
 
@@ -34,7 +34,25 @@ public class Path {
     }
 
     public boolean isPathVariable() {
-        return PathUtils.enclosedBy(PATH_VARIABLE_OPENER, PATH_VARIABLE_CLOSER, value);
+        return PathUtils.enclosedBy(String.valueOf(PATH_VARIABLE_OPENER), String.valueOf(PATH_VARIABLE_CLOSER), value);
+    }
+
+    public String removeBraces() {
+        int start = 0;
+        int end = value.length()-1;
+
+        if(value.charAt(start) == PATH_VARIABLE_OPENER){
+            start++;
+        }
+        if(value.charAt(end) == PATH_VARIABLE_CLOSER){
+            end--;
+        }
+
+        return value.substring(start, end+1);
+    }
+
+    public String getValue() {
+        return value;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package mapper;
 
 import java.lang.annotation.Annotation;
+import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
@@ -10,10 +11,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.swing.text.Document;
 
 public class AnnotationUtils {
-    private static final Set<Class<?>> selfReferenceAnnotations = Set.of(Retention.class, Target.class, Document.class);
+    private static final Set<Class<?>> selfReferenceAnnotations = Set.of(Retention.class, Target.class, Documented.class);
 
     public static boolean doesNotExistAll(Class<?> clazz, Class<?>... _annotationClazzes) {
         return !existAll(clazz, _annotationClazzes);
@@ -98,21 +98,11 @@ public class AnnotationUtils {
             return Optional.of((T) annotation);
         }
 
-        System.out.println("find annotation : " + annotation);
-        System.out.println("find findAnnotaionClass : " + findAnnotationClazz);
-
         return Arrays.stream(annotation.annotationType().getAnnotations())
-            .filter(AnnotationUtils::doesNotSelfReferenceAnnotation)
             .map(subAnnotation -> find(subAnnotation, findAnnotationClazz))
             .filter(Optional::isPresent)
             .map(Optional::get)
             .findAny();
-    }
-
-    private static boolean doesNotSelfReferenceAnnotation(Annotation annotation) {
-        Class<? extends Annotation> aClass = annotation.annotationType();
-
-        return !selfReferenceAnnotations.contains(aClass);
     }
 
     private static boolean isAnnotationType(Annotation annotation, Class<?> annotationClass) {

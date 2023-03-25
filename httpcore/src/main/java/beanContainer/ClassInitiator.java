@@ -3,6 +3,7 @@ package beanContainer;
 import java.lang.reflect.Constructor;
 import java.text.MessageFormat;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,6 +31,10 @@ public class ClassInitiator {
         List<Class<?>> instanceMemberClasses = AnnotationUtils.peekFieldsType(clazz, Component.class);
 
         return new ClassInitiator(clazz, instanceMemberClasses, parentClasses);
+    }
+
+    public boolean containMemberClass(Class<?> clazz) {
+        return instanceMemberClasses.contains(clazz);
     }
 
     public Map<Class<?>, Object> loadInstance(Map<Class<?>, Object> container) {
@@ -73,5 +78,43 @@ public class ClassInitiator {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public Map<Class<?>, Object> loadInstance2(Map<Class<?>, Object> container) throws Exception {
+        return doLoadIndstance(new LinkedHashSet<>(), container);
+    }
+
+    private Map<Class<?>, Object> doLoadIndstance(Set<Class<?>> visitClasses, Map<Class<?>, Object> container) throws Exception {
+        boolean alreadyExistInstance = container.containsKey(clazz);
+        if (alreadyExistInstance) {
+            return container;
+        }
+
+        if (visitClasses.contains(clazz)) {
+            String circularPath = visitClasses.stream()
+                .map(Class::getSimpleName)
+                .collect(Collectors.joining("->"));
+            throw new RuntimeException("circular dependency detected. clazz : " + circularPath);
+        }
+
+        visitClasses.add(clazz);
+
+        boolean standAlone = instanceMemberClasses.isEmpty();
+
+        if (!standAlone) {
+            for (Class<?> instanceMemberClasse : instanceMemberClasses) {
+                ClassInitiator classInitiator = ClassInitiator.from(instanceMemberClasse, null);
+                container = classInitiator.doLoadIndstance(visitClasses, container);
+            }
+        }
+
+        List<Object> subClassInstances = instanceMemberClasses.stream().map(container::get).collect(Collectors.toUnmodifiableList());
+        Constructor<?> declaredConstructor = clazz.getDeclaredConstructor(instanceMemberClasses.toArray(Class[]::new));
+        Object instance = declaredConstructor.newInstance(subClassInstances);
+        container.put(clazz, instance);
+
+        visitClasses.remove(clazz);
+
+        return container;
     }
 }

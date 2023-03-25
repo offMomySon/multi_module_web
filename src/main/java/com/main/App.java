@@ -1,17 +1,10 @@
 package com.main;
 
 import beanContainer.BeanContainerCreator;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import mapper.AnnotationUtils;
 import mapper.FileSystemUtil;
-import mapper.HttpPathMatcher;
-import mapper.JavaMethodResolverCreator;
-import mapper.marker.Controller;
 
 @Slf4j
 public class App {

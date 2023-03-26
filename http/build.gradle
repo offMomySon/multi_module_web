@@ -1,6 +1,5 @@
 dependencies {
     implementation project(':util')
-    implementation project(':httprequestmapper')
     implementation project(':httpcore')
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'

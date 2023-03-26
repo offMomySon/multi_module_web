@@ -12,7 +12,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import vo.HttpMethod;
 
-class HttpPathResolverTest {
+class HttpPathMatcherTest {
 
     @DisplayName("http path 와 일치하면 resolve 데이터를 가져옵니다.")
     @ParameterizedTest
@@ -236,10 +236,10 @@ class HttpPathResolverTest {
     })
     void test1(String registerPath, String requestPath, boolean expect) throws Exception {
         //given
-        HttpPathResolver httpPathResolver = new HttpPathResolver(HttpMethod.GET, UrlSegments.from(registerPath), TestClass.class.getDeclaredMethod("method"));
+        HttpPathMatcher httpPathMatcher = new HttpPathMatcher(HttpMethod.GET, UrlSegments.from(registerPath), TestClass.class.getDeclaredMethod("method"));
 
         //when
-        boolean actual = httpPathResolver.resolveMethod(HttpMethod.GET, UrlSegments.from(requestPath)).isPresent();
+        boolean actual = httpPathMatcher.matchMethod(HttpMethod.GET, UrlSegments.from(requestPath)).isPresent();
 
         //then
         Assertions.assertThat(actual).isEqualTo(expect);
@@ -250,10 +250,10 @@ class HttpPathResolverTest {
     @MethodSource("provideResult")
     void test1(String registerPath, String requestPath, Map<String, String> expect) throws Exception {
         //given
-        HttpPathResolver httpPathResolver = new HttpPathResolver(HttpMethod.GET, UrlSegments.from(registerPath), TestClass.class.getDeclaredMethod("method"));
+        HttpPathMatcher httpPathMatcher = new HttpPathMatcher(HttpMethod.GET, UrlSegments.from(registerPath), TestClass.class.getDeclaredMethod("method"));
 
         //when
-        Optional<HttpPathResolver.MatchedMethod> optionalResolvedMethod = httpPathResolver.resolveMethod(HttpMethod.GET, UrlSegments.from(requestPath));
+        Optional<HttpPathMatcher.MatchedMethod> optionalResolvedMethod = httpPathMatcher.matchMethod(HttpMethod.GET, UrlSegments.from(requestPath));
 
         //then
         Assertions.assertThat(optionalResolvedMethod).isPresent();

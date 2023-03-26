@@ -9,14 +9,14 @@ import vo.HttpMethod;
 
 // n 개의 methodResolver 를 1개 처럼 다룬다.
 public class CompositedMethodResolver implements MethodResolverIf {
-    private final List<HttpPathResolver> httpPathResolvers;
+    private final List<HttpPathMatcher> httpPathMatchers;
 
-    public CompositedMethodResolver(List<HttpPathResolver> httpPathResolvers) {
-        if (Objects.isNull(httpPathResolvers)) {
+    public CompositedMethodResolver(List<HttpPathMatcher> httpPathMatchers) {
+        if (Objects.isNull(httpPathMatchers)) {
             throw new RuntimeException("methodResolvers is null.");
         }
 
-        List<HttpPathResolver> newJavaMethodResolver = httpPathResolvers.stream()
+        List<HttpPathMatcher> newJavaMethodResolver = httpPathMatchers.stream()
             .filter(o -> !Objects.isNull(o))
             .collect(Collectors.toUnmodifiableList());
 
@@ -24,13 +24,13 @@ public class CompositedMethodResolver implements MethodResolverIf {
             throw new RuntimeException("newMethodResovler is empty.");
         }
 
-        this.httpPathResolvers = newJavaMethodResolver;
+        this.httpPathMatchers = newJavaMethodResolver;
     }
 
     @Override
-    public Optional<HttpPathResolver.MatchedMethod> resolve(HttpMethod httpMethod, UrlSegments requestSegments) {
-        return httpPathResolvers.stream()
-            .map(methodResolver -> methodResolver.resolveMethod(httpMethod, requestSegments))
+    public Optional<HttpPathMatcher.MatchedMethod> resolve(HttpMethod httpMethod, UrlSegments requestSegments) {
+        return httpPathMatchers.stream()
+            .map(methodResolver -> methodResolver.matchMethod(httpMethod, requestSegments))
             .filter(Optional::isPresent)
             .map(Optional::get)
             .findAny();

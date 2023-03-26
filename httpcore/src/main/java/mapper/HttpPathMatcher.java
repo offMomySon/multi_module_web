@@ -1,7 +1,6 @@
 package mapper;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -17,18 +16,18 @@ import mapper.segment.UrlSegments;
 import mapper.segment.WildCardSement;
 import vo.HttpMethod;
 
-public class HttpPathResolver {
+public class HttpPathMatcher {
     private final HttpMethod httpMethod;
     private final UrlSegments urlSegments;
     private final Method javaMethod;
 
-    public HttpPathResolver(HttpMethod httpMethod, UrlSegments urlSegments, Method javaMethod) {
+    public HttpPathMatcher(HttpMethod httpMethod, UrlSegments urlSegments, Method javaMethod) {
         this.httpMethod = httpMethod;
         this.urlSegments = urlSegments;
         this.javaMethod = javaMethod;
     }
 
-    public Optional<MatchedMethod> resolveMethod(HttpMethod requestMethod, UrlSegments requestUrl) {
+    public Optional<MatchedMethod> matchMethod(HttpMethod requestMethod, UrlSegments requestUrl) {
         if (Objects.isNull(requestUrl)) {
             return Optional.empty();
         }

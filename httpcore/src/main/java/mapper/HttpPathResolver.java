@@ -10,7 +10,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import lombok.Getter;
+import mapper.segment.PathVariableSement;
+import mapper.segment.Segment;
+import mapper.segment.WildCardSement;
 import vo.HttpMethod;
 
 public class HttpPathResolver {
@@ -80,9 +84,8 @@ public class HttpPathResolver {
         }
         boolean onlyRemainThisPath = requestPaths.isEmpty();
         if (onlyRemainThisPath) {
-            String thisPath = thisPaths.get(0);
-            boolean doesNotWildCard = !Objects.equals(thisPath, WILD_CARD_PATTERN);
-            if (doesNotWildCard) {
+            Segment thisPath = Segment.create(thisPaths.get(0));
+            if (!(thisPath instanceof WildCardSement)) {
                 return false;
             }
 
@@ -94,11 +97,48 @@ public class HttpPathResolver {
             return false;
         }
 
-        String thisPath = thisPaths.get(0);
+        Segment thisPath = Segment.create(thisPaths.get(0));
         String requestPath = requestPaths.get(0);
 
-        boolean match = Objects.equals(thisPath, requestPath);
+        boolean match = thisPath.match(requestPath);
         if (match) {
+            if (thisPath instanceof PathVariableSement) {
+                String key = ((PathVariableSement) thisPath).getExtractBraceValue();
+                pathVariables.put(key, requestPath);
+
+                List<String> nextThisPaths = 1 < thisPaths.size() ?
+                    thisPaths.subList(1, thisPaths.size()).stream().filter(s -> !Objects.isNull(s)).collect(Collectors.toUnmodifiableList()) :
+                    Collections.emptyList();
+                List<String> nextRequestPaths = 1 < requestPaths.size() ?
+                    requestPaths.subList(1, requestPaths.size()).stream().filter(s -> !Objects.isNull(s)).collect(Collectors.toUnmodifiableList()) :
+                    Collections.emptyList();
+                boolean doMatch = doMatch(nextThisPaths, nextRequestPaths, pathVariables);
+
+                if (!doMatch) {
+                    pathVariables.remove(key);
+                }
+
+                return doMatch;
+            }
+
+            if (thisPath instanceof WildCardSement) {
+                boolean onlyRemainWildCard = thisPaths.size() == 1;
+                if (onlyRemainWildCard) {
+                    return true;
+                }
+
+                List<Integer> nextRequestIndexes = IntStream.range(0, requestPaths.size()).boxed().collect(Collectors.toUnmodifiableList());
+                return nextRequestIndexes.stream()
+                    .anyMatch(_nextRequestIndex -> {
+                        List<String> nextThisPaths = 1 < thisPaths.size() ?
+                            thisPaths.subList(1, thisPaths.size()).stream().filter(s -> !Objects.isNull(s)).collect(Collectors.toUnmodifiableList()) :
+                            Collections.emptyList();
+                        List<String> nextRequestPaths = _nextRequestIndex < requestPaths.size() ?
+                            requestPaths.subList(_nextRequestIndex, requestPaths.size()).stream().filter(s -> !Objects.isNull(s)).collect(Collectors.toUnmodifiableList()) :
+                            Collections.emptyList();
+                        return doMatch(nextThisPaths, nextRequestPaths, pathVariables);
+                    });
+            }
 
             List<String> nextThisPaths = 1 < thisPaths.size() ?
                 thisPaths.subList(1, thisPaths.size()).stream().filter(s -> !Objects.isNull(s)).collect(Collectors.toUnmodifiableList()) :
@@ -108,53 +148,7 @@ public class HttpPathResolver {
                 Collections.emptyList();
             return doMatch(nextThisPaths, nextRequestPaths, pathVariables);
         }
-
-        boolean pathVariable = thisPath.startsWith(PATH_VARIABLE_OPENER) && thisPath.endsWith(PATH_VARIABLE_CLOSER);
-        if (pathVariable) {
-            boolean emptyRequestPath = requestPath.isEmpty();
-            if (emptyRequestPath) {
-                return false;
-            }
-
-            String key = thisPath.substring(thisPath.indexOf(PATH_VARIABLE_OPENER), thisPath.indexOf(PATH_VARIABLE_CLOSER));
-            pathVariables.put(key, requestPath);
-
-            List<String> nextThisPaths = 1 < thisPaths.size() ?
-                thisPaths.subList(1, thisPaths.size()).stream().filter(s -> !Objects.isNull(s)).collect(Collectors.toUnmodifiableList()) :
-                Collections.emptyList();
-            List<String> nextRequestPaths = 1 < requestPaths.size() ?
-                requestPaths.subList(1, requestPaths.size()).stream().filter(s -> !Objects.isNull(s)).collect(Collectors.toUnmodifiableList()) :
-                Collections.emptyList();
-            boolean doMatch = doMatch(nextThisPaths, nextRequestPaths, pathVariables);
-
-            if (!doMatch) {
-                pathVariables.remove(key);
-            }
-
-            return doMatch;
-        }
-
-        boolean doesNotWildCard = !Objects.equals(thisPath, WILD_CARD_PATTERN);
-        if (doesNotWildCard) {
-            return false;
-        }
-
-        boolean onlyRemainWildCard = thisPaths.size() == 1;
-        if (onlyRemainWildCard) {
-            return true;
-        }
-
-        List<Integer> nextRequestIndexes = PathUtils.getIndexesFromStartToEnd(requestPaths, 0);
-        return nextRequestIndexes.stream()
-            .anyMatch(_nextRequestIndex -> {
-                List<String> nextThisPaths = 1 < thisPaths.size() ?
-                    thisPaths.subList(1, thisPaths.size()).stream().filter(s -> !Objects.isNull(s)).collect(Collectors.toUnmodifiableList()) :
-                    Collections.emptyList();
-                List<String> nextRequestPaths = _nextRequestIndex < requestPaths.size() ?
-                    requestPaths.subList(_nextRequestIndex, requestPaths.size()).stream().filter(s -> !Objects.isNull(s)).collect(Collectors.toUnmodifiableList()) :
-                    Collections.emptyList();
-                return doMatch(nextThisPaths, nextRequestPaths, pathVariables);
-            });
+        return false;
     }
 
     @Getter

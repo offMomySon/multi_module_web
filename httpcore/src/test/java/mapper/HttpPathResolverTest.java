@@ -3,6 +3,7 @@ package mapper;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+import mapper.segment.UrlSegments;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -235,10 +236,10 @@ class HttpPathResolverTest {
     })
     void test1(String registerPath, String requestPath, boolean expect) throws Exception {
         //given
-        HttpPathResolver httpPathResolver = new HttpPathResolver(HttpMethod.GET, registerPath, TestClass.class.getDeclaredMethod("method"));
+        HttpPathResolver httpPathResolver = new HttpPathResolver(HttpMethod.GET, UrlSegments.from(registerPath), TestClass.class.getDeclaredMethod("method"));
 
         //when
-        boolean actual = httpPathResolver.resolveMethod(HttpMethod.GET, requestPath).isPresent();
+        boolean actual = httpPathResolver.resolveMethod(HttpMethod.GET, UrlSegments.from(requestPath)).isPresent();
 
         //then
         Assertions.assertThat(actual).isEqualTo(expect);
@@ -249,10 +250,10 @@ class HttpPathResolverTest {
     @MethodSource("provideResult")
     void test1(String registerPath, String requestPath, Map<String, String> expect) throws Exception {
         //given
-        HttpPathResolver httpPathResolver = new HttpPathResolver(HttpMethod.GET, registerPath, TestClass.class.getDeclaredMethod("method"));
+        HttpPathResolver httpPathResolver = new HttpPathResolver(HttpMethod.GET, UrlSegments.from(registerPath), TestClass.class.getDeclaredMethod("method"));
 
         //when
-        Optional<HttpPathResolver.ResolvedMethod> optionalResolvedMethod = httpPathResolver.resolveMethod(HttpMethod.GET, requestPath);
+        Optional<HttpPathResolver.MatchedMethod> optionalResolvedMethod = httpPathResolver.resolveMethod(HttpMethod.GET, UrlSegments.from(requestPath));
 
         //then
         Assertions.assertThat(optionalResolvedMethod).isPresent();
@@ -285,14 +286,14 @@ class HttpPathResolverTest {
             Arguments.of("/path1/**/path4/{pv1}", "/path1/path2/path3/path4/path5", Map.of("pv1", "path5")),
             Arguments.of("/path1/**/path2/**/{pv1}/path6", "/path1/path2/path3/path4/path5/path6", Map.of("pv1", "path5")),
             Arguments.of("/path1/**/path2/**/{pv1}/path7", "/path1/path2/path3/path4/path5/path6/path7", Map.of("pv1", "path6")),
-            Arguments.of("/path1/**/path3/{pv1}/**/{pv2}/path6", "/path1/path2/path3/path4/path5/path6", Map.of("pv1", "path4","pv2", "path5")),
-            Arguments.of("/path1/**/path3/**/{pv1}/**/{pv2}/path8", "/path1/path2/path3/path4/path5/path6/path7/path8", Map.of("pv1", "path4","pv2", "path7")),
-            Arguments.of("/path1/**/path3/**/{pv1}/**/{pv2}/path9", "/path1/path2/path3/path4/path5/path6/path7/path8/path9", Map.of("pv1", "path4","pv2", "path8")),
-            Arguments.of("/path1/**/path3/**/{pv1}/**/{pv2}/path9", "/path1/path2/path3/path4/path5/path6/path7/path8/path9", Map.of("pv1", "path4","pv2", "path8")),
-            Arguments.of("/path1/{pv1}/**/path3/**/{pv2}/**/{pv3}/path6", "/path1/path2/path3/path4/path5/path6", Map.of("pv1", "path2","pv2", "path4", "pv3", "path5")),
-            Arguments.of("/path1/{pv1}/**/path3/**/{pv2}/**/{pv3}/path7", "/path1/path2/path3/path4/path5/path6/path7", Map.of("pv1", "path2","pv2", "path4", "pv3", "path6")),
-            Arguments.of("/path1/{pv1}/**/{pv2}/**/{pv3}/**/path9", "/path1/path2/path3/path4/path5/path6/path9", Map.of("pv1", "path2","pv2", "path3", "pv3", "path4")),
-            Arguments.of("/path1/**/{pv1}/**/{pv2}/**/{pv3}/**/path9", "/path1/path2/path3/path4/path5/path6/path9", Map.of("pv1", "path2","pv2", "path3", "pv3", "path4")),
+            Arguments.of("/path1/**/path3/{pv1}/**/{pv2}/path6", "/path1/path2/path3/path4/path5/path6", Map.of("pv1", "path4", "pv2", "path5")),
+            Arguments.of("/path1/**/path3/**/{pv1}/**/{pv2}/path8", "/path1/path2/path3/path4/path5/path6/path7/path8", Map.of("pv1", "path4", "pv2", "path7")),
+            Arguments.of("/path1/**/path3/**/{pv1}/**/{pv2}/path9", "/path1/path2/path3/path4/path5/path6/path7/path8/path9", Map.of("pv1", "path4", "pv2", "path8")),
+            Arguments.of("/path1/**/path3/**/{pv1}/**/{pv2}/path9", "/path1/path2/path3/path4/path5/path6/path7/path8/path9", Map.of("pv1", "path4", "pv2", "path8")),
+            Arguments.of("/path1/{pv1}/**/path3/**/{pv2}/**/{pv3}/path6", "/path1/path2/path3/path4/path5/path6", Map.of("pv1", "path2", "pv2", "path4", "pv3", "path5")),
+            Arguments.of("/path1/{pv1}/**/path3/**/{pv2}/**/{pv3}/path7", "/path1/path2/path3/path4/path5/path6/path7", Map.of("pv1", "path2", "pv2", "path4", "pv3", "path6")),
+            Arguments.of("/path1/{pv1}/**/{pv2}/**/{pv3}/**/path9", "/path1/path2/path3/path4/path5/path6/path9", Map.of("pv1", "path2", "pv2", "path3", "pv3", "path4")),
+            Arguments.of("/path1/**/{pv1}/**/{pv2}/**/{pv3}/**/path9", "/path1/path2/path3/path4/path5/path6/path9", Map.of("pv1", "path2", "pv2", "path3", "pv3", "path4")),
             Arguments.of("/{pv1}/**", "/path1/path2", Map.of("pv1", "path1")),
             Arguments.of("/{pv1}/**", "/path1/path2/path3", Map.of("pv1", "path1")),
             Arguments.of("/{pv1}/**/path3", "/path1/path2/path3", Map.of("pv1", "path1")),
@@ -307,7 +308,7 @@ class HttpPathResolverTest {
                                 "pv3", "r3",
                                 "pv4", "r4",
                                 "pv5", "r5"
-                                )
+                         )
             ),
             Arguments.of("/test/{path}/**/{path2}/test2", "/test/value1/1/2/3/4/value2/test2", Map.of("path", "value1", "path2", "value2"))
         );

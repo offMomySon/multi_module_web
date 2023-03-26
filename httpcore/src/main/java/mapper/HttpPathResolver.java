@@ -1,7 +1,6 @@
 package mapper;
 
 import java.lang.reflect.Method;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,27 +13,22 @@ import java.util.stream.IntStream;
 import lombok.Getter;
 import mapper.segment.PathVariableSement;
 import mapper.segment.Segment;
+import mapper.segment.UrlSegments;
 import mapper.segment.WildCardSement;
 import vo.HttpMethod;
 
 public class HttpPathResolver {
-    private static final String PATH_DELIMITER = "/";
-    private static final String EMPTY_PATTERN = "";
-    private static final String PATH_VARIABLE_OPENER = "{";
-    private static final String PATH_VARIABLE_CLOSER = "}";
-    private static final String WILD_CARD_PATTERN = "**";
-
     private final HttpMethod httpMethod;
-    private final String url;
+    private final UrlSegments urlSegments;
     private final Method javaMethod;
 
-    public HttpPathResolver(HttpMethod httpMethod, String url, Method javaMethod) {
+    public HttpPathResolver(HttpMethod httpMethod, UrlSegments urlSegments, Method javaMethod) {
         this.httpMethod = httpMethod;
-        this.url = url;
+        this.urlSegments = urlSegments;
         this.javaMethod = javaMethod;
     }
 
-    public Optional<ResolvedMethod> resolveMethod(HttpMethod requestMethod, String requestUrl) {
+    public Optional<MatchedMethod> resolveMethod(HttpMethod requestMethod, UrlSegments requestUrl) {
         if (Objects.isNull(requestUrl)) {
             return Optional.empty();
         }
@@ -47,34 +41,18 @@ public class HttpPathResolver {
             return Optional.empty();
         }
 
-        ResolvedMethod resolvedMethod = new ResolvedMethod(javaMethod, pathVariables);
-        return Optional.of(resolvedMethod);
+        return Optional.of(new MatchedMethod(javaMethod, pathVariables));
     }
 
-    private boolean doesNotMatch(String requestUrl, Map<String, String> pathVariables) {
+    private boolean doesNotMatch(UrlSegments requestUrl, Map<String, String> pathVariables) {
         return !match(requestUrl, pathVariables);
     }
 
-    private boolean match(String requestUrl, Map<String, String> pathVariables) {
-        requestUrl = Paths.get(requestUrl).normalize().toString();
+    private boolean match(UrlSegments requestUrl, Map<String, String> pathVariables) {
+        List<String> thisSegments = this.urlSegments.getValues();
+        List<String> requestSegments = requestUrl.getValues();
 
-        List<String> thisPaths;
-        if (Objects.equals(this.url, PATH_DELIMITER)) {
-            thisPaths = List.of(EMPTY_PATTERN);
-        } else {
-            List<String> splitThisPath = Arrays.stream(this.url.split(PATH_DELIMITER)).collect(Collectors.toUnmodifiableList());
-            thisPaths = splitThisPath.subList(1, splitThisPath.size());
-        }
-
-        List<String> requestPaths;
-        if (Objects.equals(requestUrl, PATH_DELIMITER)) {
-            requestPaths = List.of(EMPTY_PATTERN);
-        } else {
-            List<String> splitRequestPaths = Arrays.stream(requestUrl.split(PATH_DELIMITER)).collect(Collectors.toUnmodifiableList());
-            requestPaths = splitRequestPaths.subList(1, splitRequestPaths.size());
-        }
-
-        return doMatch(thisPaths, requestPaths, pathVariables);
+        return doMatch(thisSegments, requestSegments, pathVariables);
     }
 
     private boolean doMatch(List<String> thisPaths, List<String> requestPaths, Map<String, String> pathVariables) {
@@ -152,11 +130,11 @@ public class HttpPathResolver {
     }
 
     @Getter
-    public static class ResolvedMethod {
+    public static class MatchedMethod {
         private final Method javaMethod;
         private final Map<String, String> pathVariable;
 
-        public ResolvedMethod(Method javaMethod, Map<String, String> pathVariable) {
+        public MatchedMethod(Method javaMethod, Map<String, String> pathVariable) {
             this.javaMethod = javaMethod;
             this.pathVariable = pathVariable;
         }

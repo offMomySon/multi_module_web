@@ -24,9 +24,13 @@ public class ComponentClassLoader {
         this.clazz = clazz;
     }
 
-    public Map<Class<?>, Object> load(Map<Class<?>, Object> container) throws Exception {
-        Object instantiate = instantiate(clazz, container, new LinkedHashSet<>());
-        container.put(clazz, instantiate);
+    public Map<Class<?>, Object> load(Map<Class<?>, Object> container) {
+        try{
+            Object instantiate = instantiate(clazz, container, new LinkedHashSet<>());
+            container.put(clazz, instantiate);
+        }catch (Exception e){
+            throw new RuntimeException(e);
+        }
 
         return container;
     }
@@ -36,13 +40,14 @@ public class ComponentClassLoader {
             String alreadyVisitedClassesName = alreadyVisitedClasses.stream()
                 .map(Class::getSimpleName)
                 .collect(Collectors.joining(",", "[", "]"));
-            log.info("already visited class. alreadyVisited class : `{}`", alreadyVisitedClassesName);
+            log.info("already visited class. alreadyVisited class : `{}`, current class : `{}`", alreadyVisitedClassesName, clazz.getSimpleName());
             throw new RuntimeException("already visited class. alreadyVisited class : " + alreadyVisitedClassesName);
         }
         alreadyVisitedClasses.add(clazz);
 
         if (container.containsKey(clazz)) {
-            return container;
+            alreadyVisitedClasses.remove(clazz);
+            return container.get(clazz);
         }
 
         Object instance = doInstantiate(clazz, container, alreadyVisitedClasses);

@@ -1,8 +1,8 @@
 package com.main;
 
-import beanContainer.BeanContainerCreator;
-import java.lang.reflect.InvocationTargetException;
+import beanContainer.ComponentClassLoader;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -11,6 +11,7 @@ import mapper.AnnotationUtils;
 import mapper.FileSystemUtil;
 import mapper.HttpPathMatcher;
 import mapper.JavaMethodResolverCreator;
+import mapper.marker.Component;
 import mapper.marker.Controller;
 
 @Slf4j
@@ -21,30 +22,31 @@ public class App {
         // 가져온 이유는 클래스의 메소드를 객체화 하기 위해서 입니다.
         List<Class<?>> classes = FileSystemUtil.findClass(App.class, "com.main");
 
-//        List<Class<?>> controllerClazzs = classes.stream()
-//            .filter(clazz -> AnnotationUtils.exist(clazz, Controller.class))
-//            .collect(Collectors.toUnmodifiableList());
+        List<Class<?>> controllerClazzs = classes.stream()
+            .filter(clazz -> AnnotationUtils.exist(clazz, Controller.class))
+            .collect(Collectors.toUnmodifiableList());
 
-//        List<HttpPathMatcher> javaMethodResolvers = controllerClazzs.stream()
-//            .map(JavaMethodResolverCreator::new)
-//            .map(JavaMethodResolverCreator::create)
-//            .flatMap(Collection::stream)
-//            .peek(javaMethodResolver -> log.info("methodResolver : `{}`", javaMethodResolver))
-//            .collect(Collectors.toUnmodifiableList());
+        List<HttpPathMatcher> httpPathMathcers = controllerClazzs.stream()
+            .map(JavaMethodResolverCreator::new)
+            .map(JavaMethodResolverCreator::create)
+            .flatMap(Collection::stream)
+            .peek(javaMethodResolver -> log.info("methodResolver : `{}`", javaMethodResolver))
+            .collect(Collectors.toUnmodifiableList());
 
-//        HttpMethod httpMethod = HttpMethod.GET;
-//        String url = "/basic/test/age";
-//
-//        Optional<Method> optionalMethod = javaMethodResolvers.stream()
-//            .map(httpPathMatcher -> httpPathMatcher.match(httpMethod, url))
-//            .filter(Optional::isPresent)
-//            .findFirst()
-//            .map(Optional::get);
-//
-//        System.out.println(optionalMethod.get());
+        List<Class<?>> componentClasses = classes.stream()
+            .filter(clazz -> AnnotationUtils.exist(clazz, Component.class))
+            .collect(Collectors.toUnmodifiableList());
 
-        BeanContainerCreator beanContainerCreator = new BeanContainerCreator();
-        Map<Class<?>, Object> classObjectMap = beanContainerCreator.create(classes);
-        classObjectMap.forEach((key, value) -> log.info("class : `{}`, obj : `{}`", key, value));
+        Map<Class<?>, Object> container = new HashMap<>();
+
+        List<ComponentClassLoader> componentClassLoaders = componentClasses.stream()
+            .map(ComponentClassLoader::new)
+            .collect(Collectors.toUnmodifiableList());
+
+        for (ComponentClassLoader classLoader : componentClassLoaders) {
+            container = classLoader.load(container);
+        }
+
+        container.forEach((key, value) -> log.info("class : `{}`, obj : `{}`", key, value));
     }
 }

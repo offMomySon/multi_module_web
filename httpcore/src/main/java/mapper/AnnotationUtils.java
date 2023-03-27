@@ -65,6 +65,11 @@ public class AnnotationUtils {
             .collect(Collectors.toUnmodifiableList());
     }
 
+
+    public static boolean doesNotExist(Class<?> clazz, Class<?> annotationClazz) {
+        return !exist(clazz, annotationClazz);
+    }
+
     public static boolean exist(Class<?> clazz, Class<?> annotationClazz) {
         return find(clazz, annotationClazz).isPresent();
     }

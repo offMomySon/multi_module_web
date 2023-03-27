@@ -25,10 +25,10 @@ public class ComponentClassLoader {
     }
 
     public Map<Class<?>, Object> load(Map<Class<?>, Object> container) {
-        try{
+        try {
             Object instantiate = instantiate(clazz, container, new LinkedHashSet<>());
             container.put(clazz, instantiate);
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
 

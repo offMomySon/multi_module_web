@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import mapper.AnnotationUtils;
-import mapper.marker.Component;
+import marker.Component;
 
 @Slf4j
 public class ComponentClassLoader {

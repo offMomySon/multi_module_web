@@ -2,7 +2,7 @@ package com.main.domain;
 
 import com.main.repository.SampleRepository;
 import com.main.service.SampleService2;
-import mapper.marker.Domain;
+import marker.Domain;
 
 @Domain
 public class SampleDomain1 {

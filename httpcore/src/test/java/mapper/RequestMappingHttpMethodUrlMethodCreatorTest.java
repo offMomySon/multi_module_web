@@ -3,7 +3,7 @@ package mapper;
 import java.lang.reflect.Method;
 import java.util.List;
 import mapper.RequestMappingValueExtractor.RequestMappedMethod;
-import mapper.marker.RequestMapping;
+import marker.RequestMapping;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

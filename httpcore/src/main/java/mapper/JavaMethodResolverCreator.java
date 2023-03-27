@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import mapper.RequestMappingValueExtractor.RequestMappedMethod;
-import mapper.marker.RequestMapping;
+import marker.RequestMapping;
 import vo.HttpMethod;
 
 public class JavaMethodResolverCreator {

@@ -1,7 +1,7 @@
 package com.main.service;
 
 import com.main.repository.SampleRepository;
-import mapper.marker.Service;
+import marker.Service;
 
 @Service
 public class SampleService2 {

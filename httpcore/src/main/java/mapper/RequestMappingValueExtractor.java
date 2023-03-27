@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
-import mapper.marker.RequestMapping;
+import marker.RequestMapping;
 import vo.HttpMethod;
 
 public class RequestMappingValueExtractor {

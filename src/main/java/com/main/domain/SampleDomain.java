@@ -1,7 +1,7 @@
 package com.main.domain;
 
 import com.main.service.SampleService;
-import mapper.marker.Domain;
+import marker.Domain;
 
 @Domain
 public class SampleDomain {

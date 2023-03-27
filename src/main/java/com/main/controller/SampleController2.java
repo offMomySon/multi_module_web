@@ -2,10 +2,10 @@ package com.main.controller;
 
 import com.main.domain.SampleDomain1;
 import lombok.extern.slf4j.Slf4j;
-import mapper.marker.Controller;
-import mapper.marker.PathVariable;
-import mapper.marker.RequestMapping;
-import mapper.marker.RequestParam;
+import marker.Controller;
+import marker.PathVariable;
+import marker.RequestMapping;
+import marker.RequestParam;
 import vo.HttpMethod;
 
 @Slf4j

@@ -11,8 +11,8 @@ import mapper.AnnotationUtils;
 import mapper.FileSystemUtil;
 import mapper.HttpPathMatcher;
 import mapper.JavaMethodResolverCreator;
-import mapper.marker.Component;
-import mapper.marker.Controller;
+import marker.Component;
+import marker.Controller;
 
 @Slf4j
 public class App {

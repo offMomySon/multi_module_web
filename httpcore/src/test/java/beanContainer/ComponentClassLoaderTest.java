@@ -27,6 +27,7 @@ class ComponentClassLoaderTest {
 
         ComponentClassLoader componentClassLoader = new ComponentClassLoader(Controller1.class);
 
+
         //when
         Map<Class<?>, Object> actual = componentClassLoader.load(new HashMap<>());
 

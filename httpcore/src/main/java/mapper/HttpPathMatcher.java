@@ -1,6 +1,8 @@
 package mapper;
 
 import java.lang.reflect.Method;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -12,22 +14,24 @@ import java.util.stream.IntStream;
 import lombok.Getter;
 import mapper.segment.PathVariableSement;
 import mapper.segment.Segment;
-import mapper.segment.UrlSegments;
 import mapper.segment.WildCardSement;
 import vo.HttpMethod;
 
 public class HttpPathMatcher {
+    private static final String PATH_DELIMITER = "/";
+    private static final String EMPTY_PATTERN = "";
+
     private final HttpMethod httpMethod;
-    private final UrlSegments urlSegments;
+    private final String url;
     private final Method javaMethod;
 
-    public HttpPathMatcher(HttpMethod httpMethod, UrlSegments urlSegments, Method javaMethod) {
+    public HttpPathMatcher(HttpMethod httpMethod, String url, Method javaMethod) {
         this.httpMethod = httpMethod;
-        this.urlSegments = urlSegments;
+        this.url = url;
         this.javaMethod = javaMethod;
     }
 
-    public Optional<MatchedMethod> matchMethod(HttpMethod requestMethod, UrlSegments requestUrl) {
+    public Optional<MatchedMethod> matchMethod(HttpMethod requestMethod, String requestUrl) {
         if (Objects.isNull(requestUrl)) {
             return Optional.empty();
         }
@@ -43,15 +47,30 @@ public class HttpPathMatcher {
         return Optional.of(new MatchedMethod(javaMethod, pathVariables));
     }
 
-    private boolean doesNotMatch(UrlSegments requestUrl, Map<String, String> pathVariables) {
+    private boolean doesNotMatch(String requestUrl, Map<String, String> pathVariables) {
         return !match(requestUrl, pathVariables);
     }
 
-    private boolean match(UrlSegments requestUrl, Map<String, String> pathVariables) {
-        List<String> thisSegments = this.urlSegments.getValues();
-        List<String> requestSegments = requestUrl.getValues();
+    private boolean match(String requestUrl, Map<String, String> pathVariables) {
+        requestUrl = Paths.get(requestUrl).normalize().toString();
 
-        return doMatch(thisSegments, requestSegments, pathVariables);
+        List<String> thisPaths;
+        if (Objects.equals(this.url, PATH_DELIMITER)) {
+            thisPaths = List.of(EMPTY_PATTERN);
+        } else {
+            List<String> splitThisPath = Arrays.stream(this.url.split(PATH_DELIMITER)).collect(Collectors.toUnmodifiableList());
+            thisPaths = splitThisPath.subList(1, splitThisPath.size());
+        }
+
+        List<String> requestPaths;
+        if (Objects.equals(requestUrl, PATH_DELIMITER)) {
+            requestPaths = List.of(EMPTY_PATTERN);
+        } else {
+            List<String> splitRequestPaths = Arrays.stream(requestUrl.split(PATH_DELIMITER)).collect(Collectors.toUnmodifiableList());
+            requestPaths = splitRequestPaths.subList(1, splitRequestPaths.size());
+        }
+
+        return doMatch(thisPaths, requestPaths, pathVariables);
     }
 
     private boolean doMatch(List<String> thisPaths, List<String> requestPaths, Map<String, String> pathVariables) {

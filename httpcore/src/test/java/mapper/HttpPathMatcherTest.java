@@ -3,7 +3,6 @@ package mapper;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
-import mapper.segment.UrlSegments;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -236,10 +235,10 @@ class HttpPathMatcherTest {
     })
     void test1(String registerPath, String requestPath, boolean expect) throws Exception {
         //given
-        HttpPathMatcher httpPathMatcher = new HttpPathMatcher(HttpMethod.GET, UrlSegments.from(registerPath), TestClass.class.getDeclaredMethod("method"));
+        HttpPathMatcher httpPathMatcher = new HttpPathMatcher(HttpMethod.GET, registerPath, TestClass.class.getDeclaredMethod("method"));
 
         //when
-        boolean actual = httpPathMatcher.matchMethod(HttpMethod.GET, UrlSegments.from(requestPath)).isPresent();
+        boolean actual = httpPathMatcher.matchMethod(HttpMethod.GET, requestPath).isPresent();
 
         //then
         Assertions.assertThat(actual).isEqualTo(expect);
@@ -250,10 +249,10 @@ class HttpPathMatcherTest {
     @MethodSource("provideResult")
     void test1(String registerPath, String requestPath, Map<String, String> expect) throws Exception {
         //given
-        HttpPathMatcher httpPathMatcher = new HttpPathMatcher(HttpMethod.GET, UrlSegments.from(registerPath), TestClass.class.getDeclaredMethod("method"));
+        HttpPathMatcher httpPathMatcher = new HttpPathMatcher(HttpMethod.GET, registerPath, TestClass.class.getDeclaredMethod("method"));
 
         //when
-        Optional<HttpPathMatcher.MatchedMethod> optionalResolvedMethod = httpPathMatcher.matchMethod(HttpMethod.GET, UrlSegments.from(requestPath));
+        Optional<HttpPathMatcher.MatchedMethod> optionalResolvedMethod = httpPathMatcher.matchMethod(HttpMethod.GET, requestPath);
 
         //then
         Assertions.assertThat(optionalResolvedMethod).isPresent();

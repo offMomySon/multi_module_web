@@ -4,14 +4,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import mapper.segment.UrlSegments;
 import vo.HttpMethod;
 
 // n 개의 methodResolver 를 1개 처럼 다룬다.
-public class CompositedMethodResolver implements MethodResolverIf {
+public class CompositedMethodMatcher implements IfHttpPathMatcher {
     private final List<HttpPathMatcher> httpPathMatchers;
 
-    public CompositedMethodResolver(List<HttpPathMatcher> httpPathMatchers) {
+    public CompositedMethodMatcher(List<HttpPathMatcher> httpPathMatchers) {
         if (Objects.isNull(httpPathMatchers)) {
             throw new RuntimeException("methodResolvers is null.");
         }
@@ -28,9 +27,9 @@ public class CompositedMethodResolver implements MethodResolverIf {
     }
 
     @Override
-    public Optional<HttpPathMatcher.MatchedMethod> resolve(HttpMethod httpMethod, UrlSegments requestSegments) {
+    public Optional<HttpPathMatcher.MatchedMethod> matchMethod(HttpMethod httpMethod, String requestUrl) {
         return httpPathMatchers.stream()
-            .map(methodResolver -> methodResolver.matchMethod(httpMethod, requestSegments))
+            .map(methodResolver -> methodResolver.matchMethod(httpMethod, requestUrl))
             .filter(Optional::isPresent)
             .map(Optional::get)
             .findAny();

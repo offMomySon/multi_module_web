@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import lombok.NonNull;
 import mapper.RequestMappingValueExtractor.RequestMappedMethod;
 import mapper.marker.RequestMapping;
-import mapper.segment.UrlSegments;
 import vo.HttpMethod;
 
 public class JavaMethodResolverCreator {
@@ -32,11 +31,10 @@ public class JavaMethodResolverCreator {
         return requestMappedMethods.stream()
             .map(requestMappedMethod -> {
                 HttpMethod httpMethod = requestMappedMethod.getHttpMethod();
-                UrlSegments urlSegments = UrlSegments.from(requestMappedMethod.getUrl());
+                String requestUrl = requestMappedMethod.getUrl();
                 Method javaMethod = requestMappedMethod.getJavaMethod();
 
-
-                return new HttpPathMatcher(httpMethod, urlSegments, javaMethod);
+                return new HttpPathMatcher(httpMethod, requestUrl, javaMethod);
             })
             .collect(Collectors.toUnmodifiableList());
     }

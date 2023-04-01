@@ -7,16 +7,16 @@ import java.util.Optional;
 import mapper.AnnotationUtils;
 import marker.PathVariable;
 
-public class PathVariableParamValueExtractor implements ParamExtractor {
+public class PathVariableParameterConverter implements ParameterConverter {
     private static final Class<PathVariable> PATH_VARIABLE_CLASS = PathVariable.class;
 
     private final Map<String, String> pathValues;
 
-    public PathVariableParamValueExtractor(Map<String, String> pathValues) {
+    public PathVariableParameterConverter(Map<String, String> pathValues) {
         this.pathValues = pathValues;
     }
 
-    public Optional<Object> extractValue(Parameter parameter) {
+    public Optional<Object> convertValue(Parameter parameter) {
         Optional<PathVariable> optionalPathVariable = AnnotationUtils.find(parameter, PATH_VARIABLE_CLASS);
         if (optionalPathVariable.isEmpty()) {
             return Optional.empty();

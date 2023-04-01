@@ -8,17 +8,17 @@ import java.util.Optional;
 import mapper.AnnotationUtils;
 import marker.RequestBody;
 
-public class RequestBodyParamValueExtractor implements ParamExtractor {
+public class RequestBodyParameterConverter implements ParameterConverter {
     private static final Class<RequestBody> REQUEST_BODY_CLASS = RequestBody.class;
     private static final JsonMapper JSON_MAPPER = new JsonMapper();
 
     private final String bodyMessage;
 
-    public RequestBodyParamValueExtractor(String bodyMessage) {
+    public RequestBodyParameterConverter(String bodyMessage) {
         this.bodyMessage = bodyMessage;
     }
 
-    public Optional<Object> extractValue(Parameter parameter) {
+    public Optional<Object> convertValue(Parameter parameter) {
         Optional<RequestBody> optionalRequestBody = AnnotationUtils.find(parameter, REQUEST_BODY_CLASS);
         if (optionalRequestBody.isEmpty()) {
             return Optional.empty();

@@ -2,7 +2,6 @@ package variableExtractor;
 
 import java.lang.reflect.Method;
 import java.util.Map;
-import marker.PathVariable;
 
 public class Main {
 
@@ -11,13 +10,13 @@ public class Main {
         Map<String, String> pathVariables =Map.of("k1", "v1", "k2", "v2");
         Map<String, String> queryParams =Map.of("kq1", "vq1", "kq2", "vq2");
 
-        PathVariableParamValueExtractor pathVariableParamValueExtractor = new PathVariableParamValueExtractor(pathVariables);
-        RequestParamValueExtractor requestParamValueExtractor = new RequestParamValueExtractor(queryParams);
-        RequestBodyParamValueExtractor requestBodyParamValueExtractor = new RequestBodyParamValueExtractor(body);
+        PathVariableParameterConverter pathVariableParamValueExtractor = new PathVariableParameterConverter(pathVariables);
+        RequestParameterConverter requestParamValueExtractor = new RequestParameterConverter(queryParams);
+        RequestBodyParameterConverter requestBodyParamValueExtractor = new RequestBodyParameterConverter(body);
 
-        LastParamValueExtractor lastParamValueExtractor = new LastParamValueExtractor(requestBodyParamValueExtractor);
-        ChainParamValueExtractor postChainParamValueExtractor = new ChainParamValueExtractor(requestParamValueExtractor,lastParamValueExtractor);
-        ChainParamValueExtractor chainParamValueExtractor = new ChainParamValueExtractor(pathVariableParamValueExtractor, postChainParamValueExtractor);
+        LastParameterConverter lastParamValueExtractor = new LastParameterConverter(requestBodyParamValueExtractor);
+        ChainParameterConverter postChainParamValueExtractor = new ChainParameterConverter(requestParamValueExtractor, lastParamValueExtractor);
+        ChainParameterConverter chainParamValueExtractor = new ChainParameterConverter(pathVariableParamValueExtractor, postChainParamValueExtractor);
 
         Method method = getMethod();
         MethodParamValueExtractor methodParamValueExtractor = new MethodParamValueExtractor(chainParamValueExtractor,method);

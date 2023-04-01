@@ -7,16 +7,16 @@ import java.util.Optional;
 import mapper.AnnotationUtils;
 import marker.RequestParam;
 
-public class RequestParamValueExtractor implements ParamExtractor {
+public class RequestParameterConverter implements ParameterConverter {
     private static final Class<RequestParam> REQUEST_PARAM_CLASS = RequestParam.class;
 
     private final Map<String, String> requestParams;
 
-    public RequestParamValueExtractor(Map<String, String> requestParams) {
+    public RequestParameterConverter(Map<String, String> requestParams) {
         this.requestParams = requestParams;
     }
 
-    public Optional<Object> extractValue(Parameter parameter) {
+    public Optional<Object> convertValue(Parameter parameter) {
         Optional<RequestParam> optionalRequestParam = AnnotationUtils.find(parameter, REQUEST_PARAM_CLASS);
         if (optionalRequestParam.isEmpty()) {
             return Optional.empty();

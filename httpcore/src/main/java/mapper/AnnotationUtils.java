@@ -6,6 +6,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -70,6 +71,14 @@ public class AnnotationUtils {
         return !exist(clazz, annotationClazz);
     }
 
+    public static boolean doesNotExist(Parameter parameter, Class<?> annotationClazz) {
+        return !exist(parameter, annotationClazz);
+    }
+
+    public static boolean exist(Parameter param, Class<?> annotationClazz){
+        return find(param, annotationClazz).isPresent();
+    }
+
     public static boolean exist(Class<?> clazz, Class<?> annotationClazz) {
         return find(clazz, annotationClazz).isPresent();
     }
@@ -84,6 +93,10 @@ public class AnnotationUtils {
 
     public static <T> Optional<T> find(Method method, Class<T> annotationClazz) {
         return find(method.getDeclaredAnnotations(), annotationClazz);
+    }
+
+    public static <T> Optional<T> find(Parameter parameter, Class<T> annotationClazz) {
+        return find(parameter.getDeclaredAnnotations(), annotationClazz);
     }
 
     private static <T> Optional<T> find(Annotation[] annotations, Class<T> findAnnotationClazz) {

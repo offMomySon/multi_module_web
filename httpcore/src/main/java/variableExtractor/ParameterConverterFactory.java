@@ -17,6 +17,10 @@ public class ParameterConverterFactory {
     private final RequestBodyContent requestBodyContent;
 
     public ParameterConverterFactory(RequestParameters formParams, RequestParameters pathParams, RequestBodyContent requestBodyContent) {
+        if (Objects.isNull(formParams) || Objects.isNull(pathParams) || Objects.isNull(requestBodyContent)) {
+            throw new RuntimeException("parameter is null.");
+        }
+        
         this.formParams = formParams;
         this.pathParams = pathParams;
         this.requestBodyContent = requestBodyContent;

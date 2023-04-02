@@ -18,6 +18,16 @@ import vo.RequestParameters;
 
 class ParameterConverterFactoryTest {
 
+    @DisplayName("Parameter 가 null 이면 exception 이 발생합니다.")
+    @org.junit.jupiter.api.Test
+    void test1() throws Exception {
+        //given
+        //when
+        Throwable actual = Assertions.catchThrowable(() -> new ParameterConverterFactory(null, null, null));
+
+        //then
+        Assertions.assertThat(actual).isNotNull();
+    }
 
     @DisplayName("Parameter 가 가지고있는 annotation 에 매칭되는 converter 를 생성합니다.")
     @ParameterizedTest

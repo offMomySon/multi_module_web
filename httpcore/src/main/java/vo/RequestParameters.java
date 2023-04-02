@@ -22,6 +22,20 @@ public class RequestParameters {
         this.values = newValues;
     }
 
+    public String get(String key) {
+        return values.get(key);
+    }
+
+    public String getOrDefault(String key, String defaultValue) {
+        String valueOrNull = get(key);
+
+        if (Objects.isNull(valueOrNull)) {
+            return defaultValue;
+        }
+        return valueOrNull;
+    }
+
+
     public static RequestParameters empty() {
         return new RequestParameters(Collections.emptyMap());
     }

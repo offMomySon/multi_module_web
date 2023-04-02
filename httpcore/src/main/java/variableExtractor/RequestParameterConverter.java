@@ -1,19 +1,22 @@
 package variableExtractor;
 
 import java.lang.reflect.Parameter;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import mapper.AnnotationUtils;
 import marker.RequestParam;
+import vo.RequestParameters;
 
 public class RequestParameterConverter implements ParameterConverter {
     private static final Class<RequestParam> REQUEST_PARAM_CLASS = RequestParam.class;
 
-    private final Map<String, String> requestParams;
+    private final RequestParameters requestParameters;
 
-    public RequestParameterConverter(Map<String, String> requestParams) {
-        this.requestParams = requestParams;
+    public RequestParameterConverter(RequestParameters requestParameters) {
+        if (Objects.isNull(requestParameters)) {
+            throw new RuntimeException("requestParameters is null.");
+        }
+        this.requestParameters = requestParameters;
     }
 
     public Optional<Object> convertValue(Parameter parameter) {
@@ -26,9 +29,10 @@ public class RequestParameterConverter implements ParameterConverter {
 
         String findName = Objects.isNull(requestParam.value()) ? parameter.getName() : requestParam.value();
 
-        Object objectOrNull = requestParams.getOrDefault(findName, requestParam.defaultValue());
+        String objectOrNull = requestParameters.getOrDefault(findName, requestParam.defaultValue());
 
-        if (Objects.isNull(objectOrNull) && requestParam.required()) {
+        boolean doesNotPossibleCreate = Objects.isNull(objectOrNull) && requestParam.required();
+        if (doesNotPossibleCreate) {
             throw new RuntimeException("path value does not exist.");
         }
 

@@ -6,7 +6,7 @@ import marker.Controller;
 import marker.PathVariable;
 import marker.RequestMapping;
 import marker.RequestParam;
-import vo.HttpMethod;
+import vo.RequestMethod;
 
 @Slf4j
 @Controller
@@ -24,19 +24,19 @@ public class SampleController {
         return "testParam";
     }
 
-    @RequestMapping(value = "/test/age", method = HttpMethod.GET)
+    @RequestMapping(value = "/test/age", method = RequestMethod.GET)
     public String testMethod1(@RequestParam("id") String id, @RequestParam("age") Long _age) {
         log.info("id : `{}`, _age : `{}`");
         return id + _age;
     }
 
-    @RequestMapping(value = "/best", method = HttpMethod.GET)
+    @RequestMapping(value = "/best", method = RequestMethod.GET)
     public String testMethod2(@RequestParam("test") ResponseDate ds) {
         return "result";
     }
 
 
-    @RequestMapping(value = "/test/sambple", method = HttpMethod.POST)
+    @RequestMapping(value = "/test/sambple", method = RequestMethod.POST)
     public ResponseDate<String> testMethod2() {
         return new ResponseDate<String>(200, "result");
     }

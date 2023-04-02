@@ -10,10 +10,10 @@ import java.io.OutputStream;
 import java.io.SequenceInputStream;
 import lombok.extern.slf4j.Slf4j;
 import vo.HttpHeader;
-import vo.HttpMethod;
 import vo.HttpResponse;
 import vo.HttpStatus;
 import vo.HttpUri;
+import vo.RequestMethod;
 import static io.IoUtils.creatBufferedReader;
 import static io.IoUtils.createBufferedInputStream;
 import static io.IoUtils.createBufferedOutputStream;
@@ -33,15 +33,15 @@ public class HttpWorker implements Runnable {
 
     private final BufferedOutputStream responseStream;
 
-    private final HttpMethod httpMethod;
+    private final RequestMethod requestMethod;
     private final HttpUri httpUri;
     private final HttpHeader httpHeader;
     private final BufferedInputStream requestStream;
 
-    private HttpWorker(OutputStream responseStream, HttpMethod httpMethod, HttpUri httpUri, HttpHeader httpHeader, InputStream requestStream) {
+    private HttpWorker(OutputStream responseStream, RequestMethod requestMethod, HttpUri httpUri, HttpHeader httpHeader, InputStream requestStream) {
         this.responseStream = createBufferedOutputStream(validateNull(responseStream));
 
-        this.httpMethod = validateNull(httpMethod);
+        this.requestMethod = validateNull(requestMethod);
         this.httpUri = validateNull(httpUri);
         this.httpHeader = validateNull(httpHeader);
         this.requestStream = createBufferedInputStream(validateNull(requestStream));
@@ -74,7 +74,7 @@ public class HttpWorker implements Runnable {
             String startLine = requestReader.readLine();
             String[] startLineElement = startLine.split(REQUEST_LINE_DELIMITER, 3);
 
-            HttpMethod httpMethod = HttpMethod.find(startLineElement[0]);
+            RequestMethod requestMethod = RequestMethod.find(startLineElement[0]);
             HttpUri httpUri = HttpUri.from(startLineElement[1]);
 
             HttpHeader.Builder httpBuilder = HttpHeader.builder();
@@ -91,7 +91,7 @@ public class HttpWorker implements Runnable {
 
             InputStream combinedRequestInputStream = combineInputStream(requestStream, requestReader);
 
-            return new HttpWorker(responseStream, httpMethod, httpUri, httpHeader, combinedRequestInputStream);
+            return new HttpWorker(responseStream, requestMethod, httpUri, httpHeader, combinedRequestInputStream);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

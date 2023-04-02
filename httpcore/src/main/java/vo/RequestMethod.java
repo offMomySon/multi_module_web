@@ -4,10 +4,10 @@ import java.text.MessageFormat;
 import java.util.Arrays;
 import org.apache.commons.lang3.StringUtils;
 
-public enum HttpMethod {
+public enum RequestMethod {
     POST, GET, DELETE, PUT;
 
-    public static HttpMethod find(String name) {
+    public static RequestMethod find(String name) {
         return Arrays.stream(values())
             .filter(value -> StringUtils.equalsIgnoreCase(value.name(), name))
             .findFirst()

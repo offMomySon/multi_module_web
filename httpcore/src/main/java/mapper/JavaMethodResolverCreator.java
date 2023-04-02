@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import lombok.NonNull;
 import mapper.RequestMappingValueExtractor.RequestMappedMethod;
 import marker.RequestMapping;
-import vo.HttpMethod;
+import vo.RequestMethod;
 
 public class JavaMethodResolverCreator {
     private final static Class<RequestMapping> REQUEST_MAPPING_CLASS = RequestMapping.class;
@@ -30,11 +30,11 @@ public class JavaMethodResolverCreator {
 
         return requestMappedMethods.stream()
             .map(requestMappedMethod -> {
-                HttpMethod httpMethod = requestMappedMethod.getHttpMethod();
+                RequestMethod requestMethod = requestMappedMethod.getRequestMethod();
                 String requestUrl = requestMappedMethod.getUrl();
                 Method javaMethod = requestMappedMethod.getJavaMethod();
 
-                return new HttpPathMatcher(httpMethod, requestUrl, javaMethod);
+                return new HttpPathMatcher(requestMethod, requestUrl, javaMethod);
             })
             .collect(Collectors.toUnmodifiableList());
     }

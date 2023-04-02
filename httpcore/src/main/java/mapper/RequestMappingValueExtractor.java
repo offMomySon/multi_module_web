@@ -12,7 +12,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 import marker.RequestMapping;
-import vo.HttpMethod;
+import vo.RequestMethod;
 
 public class RequestMappingValueExtractor {
     private static final Class<RequestMapping> REQUEST_MAPPING_CLASS = RequestMapping.class;
@@ -38,7 +38,7 @@ public class RequestMappingValueExtractor {
         RequestMapping methodRequestMapping = AnnotationUtils.find(javaMethod, REQUEST_MAPPING_CLASS)
             .orElseThrow(() -> new RuntimeException("method does not have RequestMapping."));
 
-        List<HttpMethod> httpMethods = Arrays.stream(methodRequestMapping.method()).collect(Collectors.toUnmodifiableList());
+        List<RequestMethod> requestMethods = Arrays.stream(methodRequestMapping.method()).collect(Collectors.toUnmodifiableList());
         List<String> clazzUrls = clazzRequestMapping
             .map(c -> Arrays.asList(c.value()))
             .orElseGet(Collections::emptyList);
@@ -50,7 +50,7 @@ public class RequestMappingValueExtractor {
                 .map(methodUrl -> clazzUrl + methodUrl))
             .collect(Collectors.toUnmodifiableList());
 
-        return httpMethods.stream()
+        return requestMethods.stream()
             .flatMap(httpMethod -> fullMethodUrls.stream()
                 .map(methodUrl -> new RequestMappedMethod(httpMethod, methodUrl, javaMethod)))
             .collect(Collectors.toUnmodifiableList());
@@ -59,17 +59,17 @@ public class RequestMappingValueExtractor {
     @EqualsAndHashCode
     @Getter
     public static class RequestMappedMethod {
-        private final HttpMethod httpMethod;
+        private final RequestMethod requestMethod;
         private final String url;
         private final Method javaMethod;
 
-        public RequestMappedMethod(HttpMethod httpMethod, String url, Method javaMethod) {
-            if (Objects.isNull(httpMethod) || Objects.isNull(javaMethod) ||
+        public RequestMappedMethod(RequestMethod requestMethod, String url, Method javaMethod) {
+            if (Objects.isNull(requestMethod) || Objects.isNull(javaMethod) ||
                 Objects.isNull(url) || url.isBlank() || url.isBlank()) {
                 throw new RuntimeException("value is invalid.");
             }
 
-            this.httpMethod = httpMethod;
+            this.requestMethod = requestMethod;
             this.url = url;
             this.javaMethod = javaMethod;
         }

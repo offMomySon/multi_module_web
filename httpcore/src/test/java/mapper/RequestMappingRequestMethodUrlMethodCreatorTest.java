@@ -7,9 +7,9 @@ import marker.RequestMapping;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import vo.HttpMethod;
+import vo.RequestMethod;
 
-class RequestMappingHttpMethodUrlMethodCreatorTest {
+class RequestMappingRequestMethodUrlMethodCreatorTest {
 
     @DisplayName("RequestMapping 이 존재하지 않는 class 를 받으면 exception 이 발생합니다.")
     @Test
@@ -66,7 +66,7 @@ class RequestMappingHttpMethodUrlMethodCreatorTest {
     @RequestMapping(value = {"/testclass1", "/testclass2"})
     private static class TestAnnotatedClass {
 
-        @RequestMapping(value = {"/testMethod1", "/testMethod2"}, method = {HttpMethod.GET, HttpMethod.POST})
+        @RequestMapping(value = {"/testMethod1", "/testMethod2"}, method = {RequestMethod.GET, RequestMethod.POST})
         public void annotatedMethod() {
         }
 
@@ -93,20 +93,20 @@ class RequestMappingHttpMethodUrlMethodCreatorTest {
         public static List<RequestMappedMethod> getCartesianProduct() {
             Method annotatedMethod = getAnnotatedMethod();
             return List.of(
-                new RequestMappedMethod(HttpMethod.GET, "/testclass1" + "/testMethod1", annotatedMethod),
-                new RequestMappedMethod(HttpMethod.GET, "/testclass1" + "/testMethod2", annotatedMethod),
-                new RequestMappedMethod(HttpMethod.GET, "/testclass2" + "/testMethod1", annotatedMethod),
-                new RequestMappedMethod(HttpMethod.GET, "/testclass2" + "/testMethod2", annotatedMethod),
-                new RequestMappedMethod(HttpMethod.POST, "/testclass1" + "/testMethod1", annotatedMethod),
-                new RequestMappedMethod(HttpMethod.POST, "/testclass1" + "/testMethod2", annotatedMethod),
-                new RequestMappedMethod(HttpMethod.POST, "/testclass2" + "/testMethod1", annotatedMethod),
-                new RequestMappedMethod(HttpMethod.POST, "/testclass2" + "/testMethod2", annotatedMethod)
+                new RequestMappedMethod(RequestMethod.GET, "/testclass1" + "/testMethod1", annotatedMethod),
+                new RequestMappedMethod(RequestMethod.GET, "/testclass1" + "/testMethod2", annotatedMethod),
+                new RequestMappedMethod(RequestMethod.GET, "/testclass2" + "/testMethod1", annotatedMethod),
+                new RequestMappedMethod(RequestMethod.GET, "/testclass2" + "/testMethod2", annotatedMethod),
+                new RequestMappedMethod(RequestMethod.POST, "/testclass1" + "/testMethod1", annotatedMethod),
+                new RequestMappedMethod(RequestMethod.POST, "/testclass1" + "/testMethod2", annotatedMethod),
+                new RequestMappedMethod(RequestMethod.POST, "/testclass2" + "/testMethod1", annotatedMethod),
+                new RequestMappedMethod(RequestMethod.POST, "/testclass2" + "/testMethod2", annotatedMethod)
             );
         }
     }
 
     private static class TestDoesNotAnnotatedClass {
-        @RequestMapping(value = {"/testMethod1", "/testMethod2"}, method = {HttpMethod.GET, HttpMethod.POST})
+        @RequestMapping(value = {"/testMethod1", "/testMethod2"}, method = {RequestMethod.GET, RequestMethod.POST})
         public void annotatedMethod() {
 
         }

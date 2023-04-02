@@ -15,27 +15,27 @@ import lombok.Getter;
 import mapper.segment.PathVariableSement;
 import mapper.segment.Segment;
 import mapper.segment.WildCardSement;
-import vo.HttpMethod;
+import vo.RequestMethod;
 
 public class HttpPathMatcher {
     private static final String PATH_DELIMITER = "/";
     private static final String EMPTY_PATTERN = "";
 
-    private final HttpMethod httpMethod;
+    private final RequestMethod requestMethod;
     private final String url;
     private final Method javaMethod;
 
-    public HttpPathMatcher(HttpMethod httpMethod, String url, Method javaMethod) {
-        this.httpMethod = httpMethod;
+    public HttpPathMatcher(RequestMethod requestMethod, String url, Method javaMethod) {
+        this.requestMethod = requestMethod;
         this.url = url;
         this.javaMethod = javaMethod;
     }
 
-    public Optional<MatchedMethod> matchMethod(HttpMethod requestMethod, String requestUrl) {
+    public Optional<MatchedMethod> matchMethod(RequestMethod requestMethod, String requestUrl) {
         if (Objects.isNull(requestUrl)) {
             return Optional.empty();
         }
-        if (httpMethod != requestMethod) {
+        if (this.requestMethod != requestMethod) {
             return Optional.empty();
         }
 

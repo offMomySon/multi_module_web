@@ -30,7 +30,7 @@ public class App {
             .map(JavaMethodResolverCreator::new)
             .map(JavaMethodResolverCreator::create)
             .flatMap(Collection::stream)
-            .peek(javaMethodResolver -> log.info("methodResolver : `{}`", javaMethodResolver))
+            .peek(httpPathMatcher -> log.info("httpPathMatcher : `{}`", httpPathMatcher))
             .collect(Collectors.toUnmodifiableList());
 
         List<Class<?>> componentClasses = classes.stream()

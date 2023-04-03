@@ -13,12 +13,12 @@ public class ChainParameterConverter implements ParameterConverter {
     }
 
     @Override
-    public Optional<Object> convertValue(Parameter parameter) {
-        Optional<Object> extract = parameterConverter.convertValue(parameter);
+    public Optional<Object> convertAsValue(Parameter parameter) {
+        Optional<Object> extract = parameterConverter.convertAsValue(parameter);
         if (extract.isPresent()) {
             return extract;
         }
 
-        return nextExtractor.convertValue(parameter);
+        return nextExtractor.convertAsValue(parameter);
     }
 }

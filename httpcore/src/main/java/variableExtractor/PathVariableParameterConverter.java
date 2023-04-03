@@ -19,7 +19,7 @@ public class PathVariableParameterConverter implements ParameterConverter {
         this.requestParameters = requestParameters;
     }
 
-    public Optional<Object> convertValue(Parameter parameter) {
+    public Optional<Object> convertAsValue(Parameter parameter) {
         Optional<PathVariable> optionalPathVariable = AnnotationUtils.find(parameter, PATH_VARIABLE_CLASS);
         if (optionalPathVariable.isEmpty()) {
             return Optional.empty();

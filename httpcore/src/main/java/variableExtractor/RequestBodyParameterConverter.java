@@ -22,7 +22,7 @@ public class RequestBodyParameterConverter implements ParameterConverter {
         this.requestBodyContent = requestBodyContent;
     }
 
-    public Optional<Object> convertValue(Parameter parameter) {
+    public Optional<Object> convertAsValue(Parameter parameter) {
         Optional<RequestBody> optionalRequestBody = AnnotationUtils.find(parameter, REQUEST_BODY_CLASS);
         if (optionalRequestBody.isEmpty()) {
             return Optional.empty();

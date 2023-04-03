@@ -10,14 +10,14 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class ParamAnnotationTest {
+class ParamAnnotationValueTest {
 
     @DisplayName("이름이 존재하지 않으면 exception 이 발생합니다.")
     @Test
     void test1() throws Exception {
         //given
         //when
-        Throwable actual = Assertions.catchThrowable(() -> new ParamAnnotation(null, true, "defaultValue"));
+        Throwable actual = Assertions.catchThrowable(() -> new ParamAnnotationValue(null, true, "defaultValue"));
 
         //then
         Assertions.assertThat(actual).isNotNull();
@@ -28,7 +28,7 @@ class ParamAnnotationTest {
     void test2() throws Exception {
         //given
         //when
-        ParamAnnotation actual = new ParamAnnotation("name", true, null);
+        ParamAnnotationValue actual = new ParamAnnotationValue("name", true, null);
 
         //then
         Assertions.assertThat(actual).isNotNull();
@@ -43,7 +43,7 @@ class ParamAnnotationTest {
             .orElseThrow(() -> new RuntimeException("does not exist requestParam"));
 
         //when
-        ParamAnnotation actual = ParamAnnotation.from(requestParam);
+        ParamAnnotationValue actual = ParamAnnotationValue.from(requestParam);
 
         //then
         Assertions.assertThat(actual).isNotNull();
@@ -63,7 +63,7 @@ class ParamAnnotationTest {
             .orElseThrow(() -> new RuntimeException("does not exist requestParam"));
 
         //when
-        ParamAnnotation actual = ParamAnnotation.from(pathVariable);
+        ParamAnnotationValue actual = ParamAnnotationValue.from(pathVariable);
 
         //then
         Assertions.assertThat(actual).isNotNull();

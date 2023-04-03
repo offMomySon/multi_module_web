@@ -22,7 +22,7 @@ public class MethodParamValueExtractor {
         List<Parameter> parameters = Arrays.stream(method.getParameters()).collect(Collectors.toUnmodifiableList());
 
         return parameters.stream()
-            .map(parameterConverter::convertValue)
+            .map(parameterConverter::convertAsValue)
             .map(optionalObject -> optionalObject.orElse(DOES_NOT_EXIST_VALUE))
             .toArray();
     }

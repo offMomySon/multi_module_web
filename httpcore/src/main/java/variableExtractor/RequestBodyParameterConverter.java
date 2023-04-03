@@ -25,7 +25,7 @@ public class RequestBodyParameterConverter implements ParameterConverter {
     public Optional<Object> convertAsValue(Parameter parameter) {
         Optional<RequestBody> optionalRequestBody = AnnotationUtils.find(parameter, REQUEST_BODY_CLASS);
         if (optionalRequestBody.isEmpty()) {
-            return Optional.empty();
+            throw new IllegalArgumentException("requestBody 만 받을 수 있습니다.");
         }
 
         RequestBody requestBody = optionalRequestBody.get();
@@ -54,7 +54,6 @@ public class RequestBodyParameterConverter implements ParameterConverter {
 
             return JSON_MAPPER.readValue(bodyMessage, type);
         } catch (JsonProcessingException e) {
-            System.out.println(e);
             throw new RuntimeException("json 을 파싱 할 수 없습니다. value : " + requestBodyContent.getValue(), e);
         }
     }

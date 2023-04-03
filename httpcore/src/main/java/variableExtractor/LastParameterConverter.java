@@ -11,8 +11,8 @@ public class LastParameterConverter implements ParameterConverter {
     }
 
     @Override
-    public Optional<Object> convertValue(Parameter parameter) {
-        Optional<Object> extract = parameterConverter.convertValue(parameter);
+    public Optional<Object> convertAsValue(Parameter parameter) {
+        Optional<Object> extract = parameterConverter.convertAsValue(parameter);
         return extract;
     }
 }

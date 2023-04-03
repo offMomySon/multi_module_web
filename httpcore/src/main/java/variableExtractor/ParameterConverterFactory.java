@@ -7,6 +7,7 @@ import mapper.AnnotationUtils;
 import marker.PathVariable;
 import marker.RequestBody;
 import marker.RequestParam;
+import vo.ParamAnnotationValue;
 import vo.RequestBodyContent;
 import vo.RequestParameters;
 
@@ -33,12 +34,18 @@ public class ParameterConverterFactory {
 
         Optional<RequestParam> optionalRequestParam = AnnotationUtils.find(parameter, RequestParam.class);
         if (optionalRequestParam.isPresent()) {
-            return new RequestParameterConverter(formParams);
+            RequestParam requestParam = optionalRequestParam.get();
+            ParamAnnotationValue requestParamAnnotationValue = ParamAnnotationValue.from(requestParam);
+
+            return new RequestParameterConverter(formParams, requestParamAnnotationValue);
         }
 
         Optional<PathVariable> optionalPathVariable = AnnotationUtils.find(parameter, PathVariable.class);
         if (optionalPathVariable.isPresent()) {
-            return new PathVariableParameterConverter(pathParams);
+            PathVariable pathVariable = optionalPathVariable.get();
+            ParamAnnotationValue paramAnnotationValue = ParamAnnotationValue.from(pathVariable);
+            
+            return new RequestParameterConverter(pathParams, paramAnnotationValue);
         }
 
         Optional<RequestBody> optionalRequestBody = AnnotationUtils.find(parameter, RequestBody.class);

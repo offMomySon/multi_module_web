@@ -4,23 +4,26 @@ import java.util.Objects;
 import java.util.Optional;
 import marker.PathVariable;
 import marker.RequestParam;
+import marker.ValueConstants;
 
-public class ParamAnnotation {
+public class ParamAnnotationValue {
     private final String name;
     private final boolean required;
     private final Optional<String> defaultValue;
 
-    public ParamAnnotation(String name, boolean required, String defaultValue) {
-        if (Objects.isNull(name) || name.isEmpty() || name.isBlank()) {
+    public ParamAnnotationValue(String name, boolean required, String defaultValue) {
+        if (Objects.isNull(name)) {
             throw new RuntimeException("invalid name value. value : " + name);
         }
+
+        defaultValue = Objects.equals(ValueConstants.DEFAULT_NONE, defaultValue) ? null : defaultValue;
 
         this.name = name;
         this.required = required;
         this.defaultValue = Optional.ofNullable(defaultValue);
     }
 
-    public static ParamAnnotation from(RequestParam requestParam) {
+    public static ParamAnnotationValue from(RequestParam requestParam) {
         if (Objects.isNull(requestParam)) {
             throw new RuntimeException("requestParam is null.");
         }
@@ -29,10 +32,10 @@ public class ParamAnnotation {
         boolean required = requestParam.required();
         String defaultValue = requestParam.defaultValue();
 
-        return new ParamAnnotation(name, required, defaultValue);
+        return new ParamAnnotationValue(name, required, defaultValue);
     }
 
-    public static ParamAnnotation from(PathVariable requestParam) {
+    public static ParamAnnotationValue from(PathVariable requestParam) {
         if (Objects.isNull(requestParam)) {
             throw new RuntimeException("requestParam is null.");
         }
@@ -40,7 +43,7 @@ public class ParamAnnotation {
         String name = requestParam.value();
         boolean required = requestParam.required();
 
-        return new ParamAnnotation(name, required, null);
+        return new ParamAnnotationValue(name, required, null);
     }
 
     public String getName() {

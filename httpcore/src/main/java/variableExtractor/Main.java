@@ -2,6 +2,7 @@ package variableExtractor;
 
 import java.lang.reflect.Method;
 import java.util.Map;
+import vo.ParamAnnotationValue;
 import vo.RequestBodyContent;
 import vo.RequestParameters;
 
@@ -13,7 +14,7 @@ public class Main {
         Map<String, String> queryParams = Map.of("kq1", "vq1", "kq2", "vq2");
 
         PathVariableParameterConverter pathVariableParamValueExtractor = new PathVariableParameterConverter(new RequestParameters(pathVariables));
-        RequestParameterConverter requestParamValueExtractor = new RequestParameterConverter(new RequestParameters(queryParams));
+        RequestParameterConverter requestParamValueExtractor = new RequestParameterConverter(new RequestParameters(queryParams), new ParamAnnotationValue("k1", true, "defaultValue"));
         RequestBodyParameterConverter requestBodyParamValueExtractor = new RequestBodyParameterConverter(new RequestBodyContent(body));
 
         LastParameterConverter lastParamValueExtractor = new LastParameterConverter(requestBodyParamValueExtractor);

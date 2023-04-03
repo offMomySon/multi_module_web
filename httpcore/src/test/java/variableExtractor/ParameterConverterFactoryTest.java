@@ -10,6 +10,7 @@ import marker.RequestBody;
 import marker.RequestParam;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -19,7 +20,7 @@ import vo.RequestParameters;
 class ParameterConverterFactoryTest {
 
     @DisplayName("Parameter 가 null 이면 exception 이 발생합니다.")
-    @org.junit.jupiter.api.Test
+    @Test
     void test1() throws Exception {
         //given
         //when
@@ -50,14 +51,14 @@ class ParameterConverterFactoryTest {
 
     public static Stream<Arguments> provideMatchConverterAndParameter() {
         return Stream.of(
-            Arguments.of(RequestParameterConverter.class, Test.getParameter(RequestParam.class)),
-            Arguments.of(PathVariableParameterConverter.class, Test.getParameter(PathVariable.class)),
-            Arguments.of(RequestBodyParameterConverter.class, Test.getParameter(RequestBody.class))
+            Arguments.of(RequestParameterConverter.class, TestClass.getParameter(RequestParam.class)),
+            Arguments.of(RequestParameterConverter.class, TestClass.getParameter(PathVariable.class)),
+            Arguments.of(RequestBodyParameterConverter.class, TestClass.getParameter(RequestBody.class))
         );
     }
 
 
-    private static class Test {
+    private static class TestClass {
         public void annotatedMethod(@PathVariable String pathVariable,
                                     @RequestParam String requestParam,
                                     @RequestBody String requestBody) {
@@ -65,14 +66,14 @@ class ParameterConverterFactoryTest {
 
         private static Method getAnnotatedMethod() {
             try {
-                return Test.class.getDeclaredMethod("annotatedMethod", String.class, String.class, String.class);
+                return TestClass.class.getDeclaredMethod("annotatedMethod", String.class, String.class, String.class);
             } catch (NoSuchMethodException e) {
                 throw new RuntimeException(e);
             }
         }
 
         public static Parameter getParameter(Class<?> annotationClazz) {
-            Parameter[] parameters = Test.getAnnotatedMethod().getParameters();
+            Parameter[] parameters = TestClass.getAnnotatedMethod().getParameters();
 
             return Arrays.stream(parameters)
                 .filter(parameter -> AnnotationUtils.exist(parameter, annotationClazz))

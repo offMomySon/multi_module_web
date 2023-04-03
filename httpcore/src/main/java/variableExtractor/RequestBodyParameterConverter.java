@@ -50,9 +50,11 @@ public class RequestBodyParameterConverter implements ParameterConverter {
         try {
             Class<?> type = parameter.getType();
             String bodyMessage = requestBodyContent.getValue();
+            System.out.println(type);
 
             return JSON_MAPPER.readValue(bodyMessage, type);
         } catch (JsonProcessingException e) {
+            System.out.println(e);
             throw new RuntimeException("json 을 파싱 할 수 없습니다. value : " + requestBodyContent.getValue(), e);
         }
     }

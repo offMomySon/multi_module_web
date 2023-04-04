@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import vo.RequestMethod;
 
 // n 개의 methodResolver 를 1개 처럼 다룬다.
-public class CompositedHttpPathMatcher implements IfHttpPathMatcher {
+public class CompositedHttpPathMatcher implements HttpPathMatcherIf {
     private final List<HttpPathMatcher> httpPathMatchers;
 
     public CompositedHttpPathMatcher(List<HttpPathMatcher> httpPathMatchers) {

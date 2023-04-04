@@ -1,22 +1,15 @@
 package com.main;
 
-import beanContainer.ComponentClassLoader;
+import beanContainer.ContainerCreator;
 import executor.MethodExecutor;
 import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import mapper.AnnotationUtils;
-import mapper.CompositedHttpPathMatcher;
 import mapper.FileSystemUtil;
-import mapper.HttpPathMatcher;
 import mapper.HttpPathMatcher.MatchedMethod;
-import mapper.JavaMethodResolverCreator;
-import marker.Component;
-import marker.Controller;
+import mapper.HttpPathMatcherCreator;
+import mapper.HttpPathMatcherIf;
 import variableExtractor.MethodConverter;
 import variableExtractor.ParameterConverterFactory;
 import vo.RequestBodyContent;
@@ -31,43 +24,16 @@ public class App {
         // 가져온 이유는 클래스의 메소드를 객체화 하기 위해서 입니다.
         List<Class<?>> classes = FileSystemUtil.findClass(App.class, "com.main");
 
-        List<Class<?>> controllerClazzs = classes.stream()
-            .filter(clazz -> AnnotationUtils.exist(clazz, Controller.class))
-            .collect(Collectors.toUnmodifiableList());
+        Map<Class<?>, Object> container = ContainerCreator.create(classes);
+        HttpPathMatcherIf httpPathMatcher = HttpPathMatcherCreator.create(classes);
 
-        List<HttpPathMatcher> httpPathMatchers = controllerClazzs.stream()
-            .map(JavaMethodResolverCreator::new)
-            .map(JavaMethodResolverCreator::create)
-            .flatMap(Collection::stream)
-            .peek(httpPathMatcher -> log.info("httpPathMatcher : `{}`", httpPathMatcher))
-            .collect(Collectors.toUnmodifiableList());
-
-        List<Class<?>> componentClasses = classes.stream()
-            .filter(clazz -> AnnotationUtils.exist(clazz, Component.class))
-            .collect(Collectors.toUnmodifiableList());
-
-        List<ComponentClassLoader> componentClassLoaders = componentClasses.stream()
-            .map(ComponentClassLoader::new)
-            .collect(Collectors.toUnmodifiableList());
-
-        Map<Class<?>, Object> container = new HashMap<>();
-        for (ComponentClassLoader classLoader : componentClassLoaders) {
-            Map<Class<?>, Object> newContainer = classLoader.load(container);
-            newContainer.forEach((key, value) -> container.merge(key, value, (prev, curr) -> prev));
-        }
-        container.forEach((key, value) -> log.info("class : `{}`, obj : `{}`", key, value));
-
-        CompositedHttpPathMatcher httpPathMatcher = new CompositedHttpPathMatcher(httpPathMatchers);
-        MatchedMethod matchedMethod = httpPathMatcher.matchMethod(RequestMethod.GET, "/basic/pathVariable")
-            .orElseThrow(() -> new RuntimeException(""));
-
-        Map<String, String> pathVariable = matchedMethod.getPathVariable();
-
-        ParameterConverterFactory converterFactory = new ParameterConverterFactory(RequestParameters.empty(), new RequestParameters(pathVariable), RequestBodyContent.empty());
-        MethodConverter converter = new MethodConverter(converterFactory);
-
+        MatchedMethod matchedMethod = httpPathMatcher.matchMethod(RequestMethod.GET, "/basic/pathVariable").orElseThrow(() -> new RuntimeException(""));
         Method javaMethod = matchedMethod.getJavaMethod();
+
+        ParameterConverterFactory converterFactory = new ParameterConverterFactory(RequestParameters.empty(), new RequestParameters(matchedMethod.getPathVariable()), RequestBodyContent.empty());
+        MethodConverter converter = new MethodConverter(converterFactory);
         MethodExecutor methodExecutor = new MethodExecutor(container, converter);
+
         Object result = methodExecutor.execute(javaMethod);
         System.out.println(result);
     }

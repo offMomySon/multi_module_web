@@ -2,9 +2,7 @@ package beanContainer;
 
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.NonNull;
@@ -25,18 +23,16 @@ public class ComponentClassLoader {
         this.clazz = clazz;
     }
 
-    public Map<Class<?>, Object> load(Map<Class<?>, Object> prevContainer) {
-        Map<Class<?>, Object> newContainer = new HashMap<>();
-        Map<Class<?>, Object> readOnlyContainer = prevContainer.entrySet().stream()
-            .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
+    public BeanContainer load(BeanContainer prevContainer) {
+        BeanContainer newContainer = new BeanContainer();
 
-        Object instantiate = instantiate(clazz, newContainer, readOnlyContainer, new LinkedHashSet<>());
+        Object instantiate = instantiate(clazz, newContainer, prevContainer, new LinkedHashSet<>());
         newContainer.put(clazz, instantiate);
 
         return newContainer;
     }
 
-    private Object instantiate(Class<?> clazz, Map<Class<?>, Object> writableContainer, Map<Class<?>, Object> readOnlyContainer, Set<Class<?>> alreadyVisitedClasses) {
+    private Object instantiate(Class<?> clazz, BeanContainer newContainer, BeanContainer prevContainer, Set<Class<?>> alreadyVisitedClasses) {
         if (alreadyVisitedClasses.contains(clazz)) {
             String alreadyVisitedClassesName = alreadyVisitedClasses.stream()
                 .map(Class::getSimpleName)
@@ -46,14 +42,14 @@ public class ComponentClassLoader {
         }
         alreadyVisitedClasses.add(clazz);
 
-        if (writableContainer.containsKey(clazz) || readOnlyContainer.containsKey(clazz)) {
+        if (newContainer.containsKey(clazz) || prevContainer.containsKey(clazz)) {
             alreadyVisitedClasses.remove(clazz);
-            return writableContainer.containsKey(clazz) ? writableContainer.get(clazz) : readOnlyContainer.get(clazz);
+            return newContainer.containsKey(clazz) ? newContainer.get(clazz) : prevContainer.get(clazz);
         }
 
-        Object instance = doInstantiate(clazz, writableContainer, readOnlyContainer, alreadyVisitedClasses);
+        Object instance = doInstantiate(clazz, newContainer, prevContainer, alreadyVisitedClasses);
 
-        writableContainer.put(clazz, instance);
+        newContainer.put(clazz, instance);
 
         // need remove. ex) s1, s2 ref r1
         // s1, r1 already has instance.
@@ -63,11 +59,11 @@ public class ComponentClassLoader {
         return instance;
     }
 
-    private Object doInstantiate(Class<?> clazz, Map<Class<?>, Object> writableContainer, Map<Class<?>, Object> readOnlyContainer, Set<Class<?>> alreadyVisitedClasses) {
+    private Object doInstantiate(Class<?> clazz, BeanContainer newContainer, BeanContainer prevContainer, Set<Class<?>> alreadyVisitedClasses) {
         Class<?>[] memberClasses = AnnotationUtils.peekFieldsType(clazz, COMPONENT_CLASS).toArray(Class<?>[]::new);
 
         Object[] memberObjects = Arrays.stream(memberClasses)
-            .map(memberClazz -> this.instantiate(memberClazz, writableContainer, readOnlyContainer, alreadyVisitedClasses))
+            .map(memberClazz -> this.instantiate(memberClazz, newContainer, prevContainer, alreadyVisitedClasses))
             .toArray();
 
         return newObject(clazz, memberClasses, memberObjects);

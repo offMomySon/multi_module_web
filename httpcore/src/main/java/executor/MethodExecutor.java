@@ -1,14 +1,14 @@
 package executor;
 
+import beanContainer.BeanContainer;
 import java.lang.reflect.Method;
-import java.util.Map;
 import variableExtractor.MethodConverter;
 
 public class MethodExecutor {
-    private final Map<Class<?>, Object> container;
+    private final BeanContainer container;
     private final MethodConverter methodConverter;
 
-    public MethodExecutor(Map<Class<?>, Object> container, MethodConverter methodConverter) {
+    public MethodExecutor(BeanContainer container, MethodConverter methodConverter) {
         this.container = container;
         this.methodConverter = methodConverter;
     }

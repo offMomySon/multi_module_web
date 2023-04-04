@@ -1,8 +1,7 @@
 package beanContainer;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import mapper.AnnotationUtils;
@@ -10,22 +9,29 @@ import marker.Component;
 
 @Slf4j
 public class ContainerCreator {
+    private static final Class<Component> COMPONENT_CLASS = Component.class;
 
-    public static Map<Class<?>, Object> create(List<Class<?>> classes) {
-        List<Class<?>> componentClasses = classes.stream()
-            .filter(clazz -> AnnotationUtils.exist(clazz, Component.class))
+    private final List<Class<?>> componentClasses;
+
+    public ContainerCreator(List<Class<?>> classes) {
+        Objects.requireNonNull(classes, "classes is null.");
+
+        this.componentClasses = classes.stream()
+            .filter(clazz -> !Objects.isNull(clazz))
+            .filter(clazz -> AnnotationUtils.exist(clazz, COMPONENT_CLASS))
             .collect(Collectors.toUnmodifiableList());
+    }
 
+    public BeanContainer create() {
         List<ComponentClassLoader> componentClassLoaders = componentClasses.stream()
             .map(ComponentClassLoader::new)
             .collect(Collectors.toUnmodifiableList());
 
-        Map<Class<?>, Object> container = new HashMap<>();
+        BeanContainer container = new BeanContainer();
         for (ComponentClassLoader classLoader : componentClassLoaders) {
-            Map<Class<?>, Object> newContainer = classLoader.load(container);
-            newContainer.forEach((key, value) -> container.merge(key, value, (prev, curr) -> prev));
+            BeanContainer newContainer = classLoader.load(container);
+            container.merge(newContainer);
         }
-        container.forEach((key, value) -> log.info("class : `{}`, obj : `{}`", key, value));
 
         return container;
     }

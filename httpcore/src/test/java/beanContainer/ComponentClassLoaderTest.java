@@ -1,7 +1,5 @@
 package beanContainer;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 import marker.Controller;
@@ -28,10 +26,10 @@ class ComponentClassLoaderTest {
         ComponentClassLoader componentClassLoader = new ComponentClassLoader(Controller1.class);
 
         //when
-        Map<Class<?>, Object> actual = componentClassLoader.load(new HashMap<>());
+        Set<Class<?>> actual = componentClassLoader.load(new BeanContainer()).keySet();
 
         //then
-        Assertions.assertThat(actual).containsOnlyKeys(expect);
+        Assertions.assertThat(actual).containsAll(expect);
     }
 
     @DisplayName("순환참조 class 가 존재하면, exception 이 발생합니다.")
@@ -42,7 +40,7 @@ class ComponentClassLoaderTest {
         ComponentClassLoader componentClassLoader = new ComponentClassLoader(clazz);
 
         //when
-        Throwable actual = Assertions.catchThrowable(() -> componentClassLoader.load(new HashMap<>()));
+        Throwable actual = Assertions.catchThrowable(() -> componentClassLoader.load(new BeanContainer()));
 
         //then
         Assertions.assertThat(actual).isNotNull();

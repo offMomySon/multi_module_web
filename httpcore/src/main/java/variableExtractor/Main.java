@@ -15,8 +15,8 @@ public class Main {
         ParameterConverterFactory parameterConverterFactory = new ParameterConverterFactory(new RequestParameters(formParams), new RequestParameters(pathVariables), RequestBodyContent.empty());
 
         Method method = getMethod();
-        MethodParamValueExtractor methodParamValueExtractor = new MethodParamValueExtractor(parameterConverterFactory, method);
-        Object[] objects = methodParamValueExtractor.extractValues();
+        MethodConverter methodConverter = new MethodConverter(parameterConverterFactory);
+        Object[] objects = methodConverter.convertAsParameterValues(method);
 
     }
 

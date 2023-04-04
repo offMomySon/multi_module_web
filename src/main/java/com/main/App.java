@@ -16,7 +16,7 @@ import mapper.HttpPathMatcher;
 import mapper.JavaMethodResolverCreator;
 import marker.Component;
 import marker.Controller;
-import variableExtractor.MethodParamValueExtractor;
+import variableExtractor.MethodConverter;
 import variableExtractor.ParameterConverterFactory;
 import vo.RequestBodyContent;
 import vo.RequestMethod;
@@ -64,8 +64,8 @@ public class App {
         Map<String, String> pathVariable = matchedMethod.getPathVariable();
 
         ParameterConverterFactory converterFactory = new ParameterConverterFactory(RequestParameters.empty(), new RequestParameters(pathVariable), RequestBodyContent.empty());
-        MethodParamValueExtractor extractor = new MethodParamValueExtractor(converterFactory, javaMethod);
-        Object[] methodArguments = extractor.extractValues();
+        MethodConverter extractor = new MethodConverter(converterFactory);
+        Object[] methodArguments = extractor.convertAsParameterValues(javaMethod);
         System.out.println(Arrays.toString(methodArguments));
 
         Class<?> declaringClass = javaMethod.getDeclaringClass();

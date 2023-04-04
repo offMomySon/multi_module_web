@@ -19,14 +19,14 @@ import org.junit.jupiter.params.provider.MethodSource;
 import vo.RequestBodyContent;
 import vo.RequestParameters;
 
-class MethodParamValueExtractorTest {
+class MethodConverterTest {
 
     @DisplayName("constructor param 이 null 이면 exepction 이 발생합니다.")
     @Test
     void test1() throws Exception {
         //given
         //when
-        Throwable actual = Assertions.catchThrowable(() -> new MethodParamValueExtractor(null, null));
+        Throwable actual = Assertions.catchThrowable(() -> new MethodConverter(null));
 
         //then
         Assertions.assertThat(actual).isNotNull();
@@ -42,10 +42,10 @@ class MethodParamValueExtractorTest {
             TestClass.getPathVariableRequestParameters(),
             TestClass.getRequestBodyContent()
         );
-        MethodParamValueExtractor methodParamValueExtractor = new MethodParamValueExtractor(parameterConverterFactory, method);
+        MethodConverter methodConverter = new MethodConverter(parameterConverterFactory);
 
         //when
-        Object[] actuals = methodParamValueExtractor.extractValues();
+        Object[] actuals = methodConverter.convertAsParameterValues(method);
 
         //then
         Assertions.assertThat(actuals)

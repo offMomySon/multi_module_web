@@ -7,21 +7,20 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public class MethodParamValueExtractor {
+public class MethodConverter {
     private static final Objects DOES_NOT_EXIST_VALUE = null;
 
     private final ParameterConverterFactory parameterConverterFactory;
-    private final Method method;
 
-    public MethodParamValueExtractor(ParameterConverterFactory parameterConverterFactory, Method method) {
+    public MethodConverter(ParameterConverterFactory parameterConverterFactory) {
         Objects.requireNonNull(parameterConverterFactory, "parameterConverterFactory is null.");
-        Objects.requireNonNull(method, "method is null.");
 
         this.parameterConverterFactory = parameterConverterFactory;
-        this.method = method;
     }
 
-    public Object[] extractValues() {
+    public Object[] convertAsParameterValues(Method method) {
+        Objects.requireNonNull(method);
+
         List<Object> objects = new ArrayList<>();
         for (Parameter parameter : method.getParameters()) {
             ParameterConverter converter = parameterConverterFactory.create(parameter);

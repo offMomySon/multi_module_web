@@ -1,7 +1,7 @@
 package com.main;
 
 import beanContainer.BeanContainer;
-import beanContainer.ContainerCreator;
+import beanContainer.BeanContainerCreator;
 import executor.MethodExecutor;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -24,7 +24,7 @@ public class App {
         // 가져온 이유는 클래스의 메소드를 객체화 하기 위해서 입니다.
         List<Class<?>> classes = FileSystemUtil.findClass(App.class, "com.main");
 
-        BeanContainer beanContainer = new ContainerCreator(classes).create();
+        BeanContainer beanContainer = new BeanContainerCreator(classes).create();
         HttpPathMatcherIf httpPathMatcher = new HttpPathMatcherCreator(classes).create();
 
         MatchedMethod matchedMethod = httpPathMatcher.matchMethod(RequestMethod.GET, "/basic/pathVariable").orElseThrow(() -> new RuntimeException(""));

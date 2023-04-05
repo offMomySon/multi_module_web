@@ -8,12 +8,12 @@ import mapper.AnnotationUtils;
 import marker.Component;
 
 @Slf4j
-public class ContainerCreator {
+public class BeanContainerCreator {
     private static final Class<Component> COMPONENT_CLASS = Component.class;
 
     private final List<Class<?>> componentClasses;
 
-    public ContainerCreator(List<Class<?>> classes) {
+    public BeanContainerCreator(List<Class<?>> classes) {
         Objects.requireNonNull(classes, "classes is null.");
 
         this.componentClasses = classes.stream()

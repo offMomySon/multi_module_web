@@ -17,7 +17,7 @@ public class RequestParameters {
             values.entrySet().stream()
                 .filter(entry -> !Objects.isNull(entry.getKey()))
                 .filter(entry -> !Objects.isNull(entry.getValue()))
-                .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
 
         this.values = newValues;
     }
@@ -43,8 +43,20 @@ public class RequestParameters {
         return valueOrNull;
     }
 
-
     public static RequestParameters empty() {
         return new RequestParameters(Collections.emptyMap());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RequestParameters that = (RequestParameters) o;
+        return Objects.equals(values, that.values);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(values);
     }
 }

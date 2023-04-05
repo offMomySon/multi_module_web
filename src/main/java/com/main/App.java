@@ -27,7 +27,7 @@ public class App {
         BeanContainer beanContainer = new BeanContainerCreator(classes).create();
         HttpPathMatcherIf httpPathMatcher = new HttpPathMatcherCreator(classes).create();
 
-        MatchedMethod matchedMethod = httpPathMatcher.matchMethod(RequestMethod.GET, "/basic/pathVariable").orElseThrow(() -> new RuntimeException(""));
+        MatchedMethod matchedMethod = httpPathMatcher.matchJavaMethod(RequestMethod.GET, "/basic/pathVariable").orElseThrow(() -> new RuntimeException(""));
         Method javaMethod = matchedMethod.getJavaMethod();
 
         ParameterConverterFactory converterFactory = new ParameterConverterFactory(RequestParameters.empty(), matchedMethod.getPathVariable(), RequestBodyContent.empty());

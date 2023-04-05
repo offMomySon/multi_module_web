@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import vo.RequestMethod;
+import static mapper.HttpPathMatcher.MatchedMethod;
 
 // n 개의 methodResolver 를 1개 처럼 다룬다.
 public class CompositedHttpPathMatcher implements HttpPathMatcherIf {
@@ -27,7 +28,7 @@ public class CompositedHttpPathMatcher implements HttpPathMatcherIf {
     }
 
     @Override
-    public Optional<HttpPathMatcher.MatchedMethod> matchMethod(RequestMethod requestMethod, String requestUrl) {
+    public Optional<MatchedMethod> matchJavaMethod(RequestMethod requestMethod, String requestUrl) {
         return httpPathMatchers.stream()
             .map(methodResolver -> methodResolver.matchMethod(requestMethod, requestUrl))
             .filter(Optional::isPresent)

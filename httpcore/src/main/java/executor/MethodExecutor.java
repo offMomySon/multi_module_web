@@ -2,6 +2,7 @@ package executor;
 
 import beanContainer.BeanContainer;
 import java.lang.reflect.Method;
+import java.util.Objects;
 import variableExtractor.MethodConverter;
 
 public class MethodExecutor {
@@ -14,14 +15,17 @@ public class MethodExecutor {
     }
 
     public Object execute(Method javaMethod) {
-        Class<?> declaringClass = javaMethod.getDeclaringClass();
-        Object object = container.get(declaringClass);
-        Object[] paramValues = methodConverter.convertAsParameterValues(javaMethod);
+        Objects.requireNonNull(javaMethod, "javaMethod is null.");
 
-        return doExecute(javaMethod, object, paramValues);
+        Class<?> declaringClass = javaMethod.getDeclaringClass();
+
+        Object instance = container.get(declaringClass);
+        Object[] values = methodConverter.convertAsParameterValues(javaMethod);
+
+        return doExecute(instance, javaMethod, values);
     }
 
-    private static Object doExecute(Method javaMethod, Object object, Object[] paramsValues) {
+    private static Object doExecute(Object object, Method javaMethod, Object[] paramsValues) {
         try {
             return javaMethod.invoke(object, paramsValues);
         } catch (Exception e) {

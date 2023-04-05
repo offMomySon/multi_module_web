@@ -4,9 +4,7 @@ import java.lang.reflect.Method;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -16,6 +14,7 @@ import mapper.segment.PathVariableSement;
 import mapper.segment.Segment;
 import mapper.segment.WildCardSement;
 import vo.RequestMethod;
+import vo.RequestParameters;
 
 public class HttpPathMatcher {
     private static final String PATH_DELIMITER = "/";
@@ -39,7 +38,7 @@ public class HttpPathMatcher {
             return Optional.empty();
         }
 
-        Map<String, String> pathVariables = new HashMap<>();
+        RequestParameters pathVariables = RequestParameters.empty();
         if (doesNotMatch(requestUrl, pathVariables)) {
             return Optional.empty();
         }
@@ -47,11 +46,11 @@ public class HttpPathMatcher {
         return Optional.of(new MatchedMethod(javaMethod, pathVariables));
     }
 
-    private boolean doesNotMatch(String requestUrl, Map<String, String> pathVariables) {
+    private boolean doesNotMatch(String requestUrl, RequestParameters pathVariables) {
         return !match(requestUrl, pathVariables);
     }
 
-    private boolean match(String requestUrl, Map<String, String> pathVariables) {
+    private boolean match(String requestUrl, RequestParameters pathVariables) {
         requestUrl = Paths.get(requestUrl).normalize().toString();
 
         List<String> thisPaths;
@@ -73,7 +72,7 @@ public class HttpPathMatcher {
         return doMatch(thisPaths, requestPaths, pathVariables);
     }
 
-    private boolean doMatch(List<String> thisPaths, List<String> requestPaths, Map<String, String> pathVariables) {
+    private boolean doMatch(List<String> thisPaths, List<String> requestPaths, RequestParameters pathVariables) {
         boolean finishMatch = thisPaths.isEmpty() && requestPaths.isEmpty();
         if (finishMatch) {
             return true;
@@ -150,9 +149,9 @@ public class HttpPathMatcher {
     @Getter
     public static class MatchedMethod {
         private final Method javaMethod;
-        private final Map<String, String> pathVariable;
+        private final RequestParameters pathVariable;
 
-        public MatchedMethod(Method javaMethod, Map<String, String> pathVariable) {
+        public MatchedMethod(Method javaMethod, RequestParameters pathVariable) {
             this.javaMethod = javaMethod;
             this.pathVariable = pathVariable;
         }

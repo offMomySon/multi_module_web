@@ -22,6 +22,14 @@ public class RequestParameters {
         this.values = newValues;
     }
 
+    public void put(String key, String value) {
+        values.put(key, value);
+    }
+
+    public void remove(String key) {
+        values.remove(key);
+    }
+
     public String get(String key) {
         return values.get(key);
     }

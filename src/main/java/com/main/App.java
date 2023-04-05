@@ -30,7 +30,7 @@ public class App {
         MatchedMethod matchedMethod = httpPathMatcher.matchMethod(RequestMethod.GET, "/basic/pathVariable").orElseThrow(() -> new RuntimeException(""));
         Method javaMethod = matchedMethod.getJavaMethod();
 
-        ParameterConverterFactory converterFactory = new ParameterConverterFactory(RequestParameters.empty(), new RequestParameters(matchedMethod.getPathVariable()), RequestBodyContent.empty());
+        ParameterConverterFactory converterFactory = new ParameterConverterFactory(RequestParameters.empty(), matchedMethod.getPathVariable(), RequestBodyContent.empty());
         MethodConverter converter = new MethodConverter(converterFactory);
         MethodExecutor methodExecutor = new MethodExecutor(beanContainer, converter);
 

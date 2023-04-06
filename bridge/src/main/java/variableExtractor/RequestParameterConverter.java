@@ -22,9 +22,6 @@ public class RequestParameterConverter implements ParameterConverter {
         Objects.requireNonNull(requestParameters, "requestParameters is null");
         Objects.requireNonNull(targetAnnotationType, "targetAnnotation is null");
 
-        System.out.println(REQUEST_PARAM_CLASS);
-        System.out.println(targetAnnotationType);
-
         if (REQUEST_PARAM_CLASS != targetAnnotationType && PATH_VARIABLE_CLASS != targetAnnotationType) {
             throw new IllegalArgumentException("does not convertable target.");
         }

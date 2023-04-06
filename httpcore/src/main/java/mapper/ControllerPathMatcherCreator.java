@@ -8,12 +8,12 @@ import lombok.extern.slf4j.Slf4j;
 import marker.Controller;
 
 @Slf4j
-public class HttpPathMatcherCreator {
+public class ControllerPathMatcherCreator {
     private static final Class<Controller> CONTROLLER_CLASS = Controller.class;
 
     private final List<Class<?>> controllerClazzs;
 
-    public HttpPathMatcherCreator(List<Class<?>> classes) {
+    public ControllerPathMatcherCreator(List<Class<?>> classes) {
         Objects.requireNonNull(classes, "classes is null.");
 
         this.controllerClazzs = classes.stream()
@@ -24,8 +24,8 @@ public class HttpPathMatcherCreator {
 
     public HttpPathMatcherIf create() {
         List<HttpPathMatcher> httpPathMatchers = controllerClazzs.stream()
-            .map(JavaMethodResolverCreator::new)
-            .map(JavaMethodResolverCreator::create)
+            .map(JavaMethodPathMatcherCreator::new)
+            .map(JavaMethodPathMatcherCreator::create)
             .flatMap(Collection::stream)
             .peek(httpPathMatcher -> log.info("httpPathMatcher : `{}`", httpPathMatcher))
             .collect(Collectors.toUnmodifiableList());

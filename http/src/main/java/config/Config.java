@@ -2,13 +2,12 @@ package config;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.MessageFormat;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
-import static validate.ValidateUtil.*;
 
 @Slf4j
 public class Config {
@@ -37,10 +36,15 @@ public class Config {
     }
 
     private Config(Integer maxConnection, Integer waitConnection, Long keepAliveTime, Integer port) {
-        this.maxConnection = validateNull(maxConnection);
-        this.waitConnection = validateNull(waitConnection);
-        this.keepAliveTime = validateNull(keepAliveTime);
-        this.port = validateNull(port);
+        Objects.requireNonNull(maxConnection);
+        Objects.requireNonNull(waitConnection);
+        Objects.requireNonNull(keepAliveTime);
+        Objects.requireNonNull(port);
+
+        this.maxConnection = maxConnection;
+        this.waitConnection = waitConnection;
+        this.keepAliveTime = keepAliveTime;
+        this.port = port;
 
         log.info("maxConnection : `{}`", this.maxConnection);
         log.info("waitConnection : `{}`", this.waitConnection);
@@ -53,10 +57,10 @@ public class Config {
                                     @JsonProperty("waitConnection") Integer waitConnection,
                                     @JsonProperty("keepAliveTime") Long keepAliveTime,
                                     @JsonProperty("port") Integer port) {
-        validateNull(maxConnection);
-        validateNull(waitConnection);
-        validateNull(keepAliveTime);
-        validateNull(port);
+        Objects.requireNonNull(maxConnection);
+        Objects.requireNonNull(waitConnection);
+        Objects.requireNonNull(keepAliveTime);
+        Objects.requireNonNull(port);
 
         return new Config(maxConnection, waitConnection, keepAliveTime, port);
     }

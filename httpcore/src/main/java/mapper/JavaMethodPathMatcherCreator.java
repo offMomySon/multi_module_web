@@ -8,13 +8,13 @@ import mapper.RequestMappingValueExtractor.RequestMappedMethod;
 import marker.RequestMapping;
 import vo.RequestMethod;
 
-public class JavaMethodResolverCreator {
+public class JavaMethodPathMatcherCreator {
     private final static Class<RequestMapping> REQUEST_MAPPING_CLASS = RequestMapping.class;
 
     private final Class<?> clazz;
     private final RequestMappingValueExtractor valueExtractor;
 
-    public JavaMethodResolverCreator(@NonNull Class<?> clazz) {
+    public JavaMethodPathMatcherCreator(@NonNull Class<?> clazz) {
         this.clazz = clazz;
         this.valueExtractor = new RequestMappingValueExtractor(clazz);
     }

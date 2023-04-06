@@ -7,21 +7,21 @@ import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.Objects;
 import lombok.ToString;
-import validate.ValidateUtil;
 
 @ToString
 public class HttpUri {
     private final Path value;
 
     private HttpUri(Path value) {
-        ValidateUtil.validateNull(value);
+        Objects.requireNonNull(value);
+
         value = value.normalize();
 
         this.value = value;
     }
 
     public static HttpUri from(String requestUri) {
-        ValidateUtil.validateNull(requestUri);
+        Objects.requireNonNull(requestUri);
 
         try {
             URI uri = new URI(requestUri);

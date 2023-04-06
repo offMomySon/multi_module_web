@@ -11,23 +11,7 @@ import vo.RequestMethod;
 
 class RequestMappingRequestMethodUrlMethodCreatorTest {
 
-    @DisplayName("RequestMapping 이 존재하지 않는 class 를 받으면 exception 이 발생합니다.")
-    @Test
-    void test() throws Exception {
-        //given
-        Class<TestDoesNotAnnotatedClass> clazz = TestDoesNotAnnotatedClass.class;
-        RequestMappingValueExtractor valueExtractor = new RequestMappingValueExtractor(clazz);
-        Method method = TestDoesNotAnnotatedClass.getAnnotatedMethod();
-
-        //when
-        Throwable actual = Assertions.catchThrowable(() -> valueExtractor.extractRequestMappedMethods(method));
-
-        //then
-        Assertions.assertThat(actual)
-            .isNotNull();
-    }
-
-    @DisplayName("RequestMapping 이 존재하지 않는 method 를 받으면 exception 이 발생합니다.")
+    @DisplayName("class 의 method 중에서 requestMapping 어노테이션이 붙지 않은 method 를 받으면 empty 를 반환합니다.")
     @Test
     void test1() throws Exception {
         //given
@@ -36,11 +20,11 @@ class RequestMappingRequestMethodUrlMethodCreatorTest {
         Method method = TestAnnotatedClass.getDoesNotAnnotatedMethod();
 
         //when
-        Throwable actual = Assertions.catchThrowable(() -> valueExtractor.extractRequestMappedMethods(method));
+        List<RequestMappedMethod> actual = valueExtractor.extractRequestMappedMethods(method);
 
         //then
         Assertions.assertThat(actual)
-            .isNotNull();
+            .isEmpty();
     }
 
     @DisplayName("class 의 RequestMapping urls, method 의 RequestMapping urls, methods 의 카타시안곱 으로 HttpMethodUrlMethod 를 생성합니다.")

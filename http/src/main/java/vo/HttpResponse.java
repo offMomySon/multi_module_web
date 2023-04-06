@@ -1,6 +1,5 @@
 package vo;
 
-import io.IoUtils;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
@@ -8,8 +7,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.MessageFormat;
 import java.util.Objects;
-import validate.ValidateUtil;
+import org.apache.commons.lang3.StringUtils;
+import util.IoUtils;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class HttpResponse {
@@ -27,13 +28,24 @@ public class HttpResponse {
     private BufferedInputStream sourceInputStream;
 
     public HttpResponse(String httpVersion, String status, String statusMessage, HttpHeader httpHeader, InputStream sourceInputStream, OutputStream responseOutputStream) {
-        this.httpVersion = ValidateUtil.validate(httpVersion);
-        this.status = ValidateUtil.validate(status);
-        this.statusMessage = ValidateUtil.validate(statusMessage);
-        this.httpHeader = ValidateUtil.validateNull(httpHeader);
-        this.sourceInputStream = IoUtils.createBufferedInputStream(ValidateUtil.validateNull(sourceInputStream));
+        if (StringUtils.isEmpty(httpVersion) || StringUtils.isBlank(httpVersion)) {
+            throw new RuntimeException(MessageFormat.format("httpVersion is invalid : `{}`", httpVersion));
+        }
+        if (StringUtils.isEmpty(status) || StringUtils.isBlank(status)) {
+            throw new RuntimeException(MessageFormat.format("status is invalid : `{}`", status));
+        }
+        if (StringUtils.isEmpty(statusMessage) || StringUtils.isBlank(statusMessage)) {
+            throw new RuntimeException(MessageFormat.format("statusMessage is invalid : `{}`", statusMessage));
+        }
+        Objects.requireNonNull(httpHeader, "httpHeader is null.");
+        Objects.requireNonNull(sourceInputStream, "sourceInputStream is null.");
+        Objects.requireNonNull(responseOutputStream, "responseOutputStream is null.");
 
-        ValidateUtil.validateNull(responseOutputStream);
+        this.httpVersion = httpVersion;
+        this.status = status;
+        this.statusMessage = statusMessage;
+        this.httpHeader = httpHeader;
+        this.sourceInputStream = IoUtils.createBufferedInputStream(sourceInputStream);
         this.responseWriter = IoUtils.createBufferedWriter(responseOutputStream);
         this.responseOutputStream = IoUtils.createBufferedOutputStream(responseOutputStream);
     }
@@ -82,25 +94,31 @@ public class HttpResponse {
         }
 
         public Builder httpVersion(String httpVersion) {
-            ValidateUtil.validate(httpVersion);
+            if (StringUtils.isEmpty(httpVersion) || StringUtils.isBlank(httpVersion)) {
+                throw new RuntimeException(MessageFormat.format("httpVersion is invalid : `{}`", httpVersion));
+            }
             this.httpVersion = httpVersion;
             return this;
         }
 
         public Builder status(String status) {
-            ValidateUtil.validate(status);
+            if (StringUtils.isEmpty(status) || StringUtils.isBlank(status)) {
+                throw new RuntimeException(MessageFormat.format("status is invalid : `{}`", status));
+            }
             this.status = status;
             return this;
         }
 
         public Builder statusMessage(String statusMessage) {
-            ValidateUtil.validate(statusMessage);
+            if (StringUtils.isEmpty(statusMessage) || StringUtils.isBlank(statusMessage)) {
+                throw new RuntimeException(MessageFormat.format("statusMessage is invalid : `{}`", statusMessage));
+            }
             this.statusMessage = statusMessage;
             return this;
         }
 
         public Builder httpHeader(HttpHeader httpHeader) {
-            ValidateUtil.validateNull(httpHeader);
+            Objects.requireNonNull(httpHeader, "httpHeader is null.");
             this.httpHeader = httpHeader;
             return this;
         }
@@ -117,7 +135,7 @@ public class HttpResponse {
         }
 
         public Builder responseOutputStream(OutputStream responseOutputStream){
-            ValidateUtil.validateNull(responseOutputStream);
+            Objects.requireNonNull(responseOutputStream);
             this.responseOutputStream = responseOutputStream;
             return this;
         }

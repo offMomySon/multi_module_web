@@ -26,7 +26,7 @@ class ComponentClassLoaderTest {
         ComponentClassLoader componentClassLoader = new ComponentClassLoader(Controller1.class);
 
         //when
-        Set<Class<?>> actual = componentClassLoader.load(new BeanContainer()).keySet();
+        Set<Class<?>> actual = componentClassLoader.load(new ComponentContainer()).keySet();
 
         //then
         Assertions.assertThat(actual).containsAll(expect);
@@ -40,7 +40,7 @@ class ComponentClassLoaderTest {
         ComponentClassLoader componentClassLoader = new ComponentClassLoader(clazz);
 
         //when
-        Throwable actual = Assertions.catchThrowable(() -> componentClassLoader.load(new BeanContainer()));
+        Throwable actual = Assertions.catchThrowable(() -> componentClassLoader.load(new ComponentContainer()));
 
         //then
         Assertions.assertThat(actual).isNotNull();

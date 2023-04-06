@@ -23,8 +23,8 @@ public class ComponentClassLoader {
         this.clazz = clazz;
     }
 
-    public BeanContainer load(BeanContainer prevContainer) {
-        BeanContainer newContainer = new BeanContainer();
+    public ComponentContainer load(ComponentContainer prevContainer) {
+        ComponentContainer newContainer = new ComponentContainer();
 
         Object instantiate = instantiate(clazz, newContainer, prevContainer, new LinkedHashSet<>());
         newContainer.put(clazz, instantiate);
@@ -32,7 +32,7 @@ public class ComponentClassLoader {
         return newContainer;
     }
 
-    private Object instantiate(Class<?> clazz, BeanContainer newContainer, BeanContainer prevContainer, Set<Class<?>> alreadyVisitedClasses) {
+    private Object instantiate(Class<?> clazz, ComponentContainer newContainer, ComponentContainer prevContainer, Set<Class<?>> alreadyVisitedClasses) {
         if (alreadyVisitedClasses.contains(clazz)) {
             String alreadyVisitedClassesName = alreadyVisitedClasses.stream()
                 .map(Class::getSimpleName)
@@ -59,7 +59,7 @@ public class ComponentClassLoader {
         return instance;
     }
 
-    private Object doInstantiate(Class<?> clazz, BeanContainer newContainer, BeanContainer prevContainer, Set<Class<?>> alreadyVisitedClasses) {
+    private Object doInstantiate(Class<?> clazz, ComponentContainer newContainer, ComponentContainer prevContainer, Set<Class<?>> alreadyVisitedClasses) {
         Class<?>[] memberClasses = AnnotationUtils.peekFieldsType(clazz, COMPONENT_CLASS).toArray(Class<?>[]::new);
 
         Object[] memberObjects = Arrays.stream(memberClasses)

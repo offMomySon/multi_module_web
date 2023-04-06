@@ -1,6 +1,6 @@
 package executor;
 
-import beanContainer.BeanContainer;
+import beanContainer.ComponentContainer;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Objects;
@@ -9,10 +9,10 @@ import variableExtractor.ParameterConverter;
 public class MethodExecutor {
     private static final Objects EMPTY_VALUE = null;
 
-    private final BeanContainer container;
+    private final ComponentContainer container;
     private final ParameterConverter parameterConverter;
 
-    public MethodExecutor(BeanContainer container, ParameterConverter parameterConverter) {
+    public MethodExecutor(ComponentContainer container, ParameterConverter parameterConverter) {
         this.container = container;
         this.parameterConverter = parameterConverter;
     }

@@ -8,17 +8,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.SequenceInputStream;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import vo.HttpHeader;
 import vo.HttpResponse;
 import vo.HttpStatus;
 import vo.HttpUri;
 import vo.RequestMethod;
-import static io.IoUtils.creatBufferedReader;
-import static io.IoUtils.createBufferedInputStream;
-import static io.IoUtils.createBufferedOutputStream;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static validate.ValidateUtil.validateNull;
+import static util.IoUtils.creatBufferedReader;
+import static util.IoUtils.createBufferedInputStream;
+import static util.IoUtils.createBufferedOutputStream;
 
 /**
  * 역할.
@@ -39,12 +39,17 @@ public class HttpWorker implements Runnable {
     private final BufferedInputStream requestStream;
 
     private HttpWorker(OutputStream responseStream, RequestMethod requestMethod, HttpUri httpUri, HttpHeader httpHeader, InputStream requestStream) {
-        this.responseStream = createBufferedOutputStream(validateNull(responseStream));
+        Objects.requireNonNull(requestMethod);
+        Objects.requireNonNull(requestMethod);
+        Objects.requireNonNull(httpUri);
+        Objects.requireNonNull(httpHeader);
+        Objects.requireNonNull(requestStream);
 
-        this.requestMethod = validateNull(requestMethod);
-        this.httpUri = validateNull(httpUri);
-        this.httpHeader = validateNull(httpHeader);
-        this.requestStream = createBufferedInputStream(validateNull(requestStream));
+        this.responseStream = createBufferedOutputStream(responseStream);
+        this.requestMethod = requestMethod;
+        this.httpUri = httpUri;
+        this.httpHeader = httpHeader;
+        this.requestStream = createBufferedInputStream(requestStream);
     }
 
     public void run() {
@@ -66,8 +71,8 @@ public class HttpWorker implements Runnable {
 
     public static HttpWorker create(InputStream requestStream, OutputStream responseStream) {
         try {
-            validateNull(requestStream);
-            validateNull(responseStream);
+            Objects.requireNonNull(requestStream);
+            Objects.requireNonNull(requestStream);
 
             BufferedReader requestReader = creatBufferedReader(requestStream);
 

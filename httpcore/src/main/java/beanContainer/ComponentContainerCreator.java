@@ -8,12 +8,12 @@ import mapper.AnnotationUtils;
 import marker.Component;
 
 @Slf4j
-public class BeanContainerCreator {
+public class ComponentContainerCreator {
     private static final Class<Component> COMPONENT_CLASS = Component.class;
 
     private final List<Class<?>> componentClasses;
 
-    public BeanContainerCreator(List<Class<?>> classes) {
+    public ComponentContainerCreator(List<Class<?>> classes) {
         Objects.requireNonNull(classes, "classes is null.");
 
         this.componentClasses = classes.stream()
@@ -22,14 +22,14 @@ public class BeanContainerCreator {
             .collect(Collectors.toUnmodifiableList());
     }
 
-    public BeanContainer create() {
+    public ComponentContainer create() {
         List<ComponentClassLoader> componentClassLoaders = componentClasses.stream()
             .map(ComponentClassLoader::new)
             .collect(Collectors.toUnmodifiableList());
 
-        BeanContainer container = new BeanContainer();
+        ComponentContainer container = new ComponentContainer();
         for (ComponentClassLoader classLoader : componentClassLoaders) {
-            BeanContainer newContainer = classLoader.load(container);
+            ComponentContainer newContainer = classLoader.load(container);
             container.merge(newContainer);
         }
 

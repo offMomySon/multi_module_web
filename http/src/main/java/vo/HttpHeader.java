@@ -1,12 +1,14 @@
 package vo;
 
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import validate.ValidateUtil;
+import org.apache.commons.lang3.StringUtils;
 import static java.util.Objects.nonNull;
 
 public class HttpHeader {
@@ -17,7 +19,9 @@ public class HttpHeader {
     private final Map<String, Set<String>> value;
 
     private HttpHeader(Map<String, Set<String>> value) {
-        this.value = createFilteredNoneValidAndUnmodifiable(ValidateUtil.validateNull(value));
+        Objects.requireNonNull(value);
+        
+        this.value = createFilteredNoneValidAndUnmodifiable(value);
     }
 
     public Set<String> getKeys() {
@@ -25,7 +29,9 @@ public class HttpHeader {
     }
 
     public Set<String> getValues(String key) {
-        ValidateUtil.validate(key);
+        if (StringUtils.isEmpty(key) || StringUtils.isBlank(key)) {
+            throw new RuntimeException(MessageFormat.format("key is invalid : `{}`", key));
+        }
 
         return value.get(key);
     }
@@ -50,7 +56,7 @@ public class HttpHeader {
 
     private static Map<String, Set<String>> createFilteredNoneValidAndUnmodifiable(Map<String, Set<String>> value) {
         return value.entrySet().stream()
-            .filter(es -> ValidateUtil.isValid(es.getKey()))
+            .filter(es -> isValid(es.getKey()))
             .filter(es -> nonNull(es.getValue()))
             .map(e -> Map.entry(e.getKey(), createFilteredNoneValidAndUnmodifiable(e.getValue())))
             .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, HttpHeader::merge));
@@ -58,12 +64,19 @@ public class HttpHeader {
 
     private static Set<String> createFilteredNoneValidAndUnmodifiable(Set<String> value) {
         return value.stream()
-            .filter(ValidateUtil::isValid)
+            .filter(HttpHeader::isValid)
             .collect(Collectors.toUnmodifiableSet());
     }
 
     private static Set<String> merge(Set<String> prevValue, Set<String> value) {
         return Stream.concat(prevValue.stream(), value.stream()).collect(Collectors.toUnmodifiableSet());
+    }
+
+    private static boolean isValid(String value) {
+        if (StringUtils.isEmpty(value) || StringUtils.isBlank(value)) {
+            return false;
+        }
+        return true;
     }
 
     public static HttpHeader.Builder builder() {
@@ -77,7 +90,9 @@ public class HttpHeader {
         }
 
         public Builder append(String headerLine) {
-            ValidateUtil.validate(headerLine);
+            if (StringUtils.isEmpty(headerLine) || StringUtils.isBlank(headerLine)) {
+                throw new RuntimeException(MessageFormat.format("headerLine is invalid : `{}`", headerLine));
+            }
 
             String[] splitHeader = headerLine.split(HEADER_KEY_VALUE_DELIMITER, 2);
 

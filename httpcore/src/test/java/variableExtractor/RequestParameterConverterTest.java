@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
-import mapper.AnnotationUtils;
 import marker.PathVariable;
 import marker.RequestBody;
 import marker.RequestParam;
@@ -17,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import util.AnnotationUtils;
 import vo.RequestParameters;
 
 class RequestParameterConverterTest {

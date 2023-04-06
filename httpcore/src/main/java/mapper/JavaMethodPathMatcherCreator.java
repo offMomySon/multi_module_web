@@ -6,7 +6,8 @@ import java.util.stream.Collectors;
 import lombok.NonNull;
 import mapper.RequestMappingValueExtractor.RequestMappedMethod;
 import marker.RequestMapping;
-import vo.RequestMethod;
+import marker.RequestMethod;
+import util.AnnotationUtils;
 
 public class JavaMethodPathMatcherCreator {
     private final static Class<RequestMapping> REQUEST_MAPPING_CLASS = RequestMapping.class;

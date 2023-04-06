@@ -4,10 +4,10 @@ import java.lang.reflect.Method;
 import java.util.List;
 import mapper.RequestMappingValueExtractor.RequestMappedMethod;
 import marker.RequestMapping;
+import marker.RequestMethod;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import vo.RequestMethod;
 
 class RequestMappingRequestMethodUrlMethodCreatorTest {
 

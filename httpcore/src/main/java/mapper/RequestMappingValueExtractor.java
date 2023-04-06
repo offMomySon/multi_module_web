@@ -12,7 +12,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 import marker.RequestMapping;
-import vo.RequestMethod;
+import marker.RequestMethod;
+import util.AnnotationUtils;
 
 public class RequestMappingValueExtractor {
     private static final Class<RequestMapping> REQUEST_MAPPING_CLASS = RequestMapping.class;
@@ -30,7 +31,7 @@ public class RequestMappingValueExtractor {
         if (Objects.isNull(javaMethod)) {
             return Collections.emptyList();
         }
-        if(!methods.contains(javaMethod)){
+        if (!methods.contains(javaMethod)) {
             return Collections.emptyList();
         }
 

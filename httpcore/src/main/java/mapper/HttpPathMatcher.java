@@ -13,7 +13,7 @@ import lombok.Getter;
 import mapper.segment.PathVariableSement;
 import mapper.segment.Segment;
 import mapper.segment.WildCardSement;
-import vo.RequestMethod;
+import marker.RequestMethod;
 import vo.RequestParameters;
 
 public class HttpPathMatcher {

@@ -13,6 +13,7 @@ dependencies {
     implementation project(':httpcore')
     implementation project(':http')
     implementation project(':container')
+    implementation project(':marker')
 
     //logback
     implementation 'ch.qos.logback:logback-core:1.2.3'

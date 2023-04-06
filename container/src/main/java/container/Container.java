@@ -1,4 +1,4 @@
-package beanContainer;
+package container;
 
 import java.util.HashMap;
 import java.util.HashSet;

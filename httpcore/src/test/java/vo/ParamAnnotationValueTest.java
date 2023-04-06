@@ -3,12 +3,12 @@ package vo;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
-import mapper.AnnotationUtils;
 import marker.PathVariable;
 import marker.RequestParam;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import util.AnnotationUtils;
 
 class ParamAnnotationValueTest {
 

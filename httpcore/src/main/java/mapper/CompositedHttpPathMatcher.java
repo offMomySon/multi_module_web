@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import vo.RequestMethod;
+import marker.RequestMethod;
 import static mapper.HttpPathMatcher.MatchedMethod;
 
 // n 개의 methodResolver 를 1개 처럼 다룬다.

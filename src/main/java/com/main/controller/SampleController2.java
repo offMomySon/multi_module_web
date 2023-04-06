@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import marker.Controller;
 import marker.PathVariable;
 import marker.RequestMapping;
+import marker.RequestMethod;
 import marker.RequestParam;
-import vo.RequestMethod;
 
 @Slf4j
 @Controller
@@ -26,7 +26,7 @@ public class SampleController2 {
 
     @RequestMapping(value = "/test/age", method = RequestMethod.GET)
     public String testMethod1(@RequestParam("id") String id, @RequestParam("age") Long _age) {
-        log.info("id : `{}`, _age : `{}`");
+        log.info("id : `{}`, _age : `{}`", id, _age);
         return id + _age;
     }
 

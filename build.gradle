@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    implementation project(':httpcore')
+    implementation project(':bridge')
     implementation project(':http')
     implementation project(':container')
     implementation project(':marker')

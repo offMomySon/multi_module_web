@@ -1,6 +1,6 @@
 package executor;
 
-import beanContainer.ComponentContainer;
+import beanContainer.Container;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Objects;
@@ -16,10 +16,10 @@ import vo.RequestParameters;
 import static mapper.HttpPathMatcher.MatchedMethod;
 
 public class RequestExecutor {
-    private final ComponentContainer container;
+    private final Container container;
     private final HttpPathMatcherIf httpPathMatcher;
 
-    public RequestExecutor(ComponentContainer container, HttpPathMatcherIf httpPathMatcher) {
+    public RequestExecutor(Container container, HttpPathMatcherIf httpPathMatcher) {
         Objects.requireNonNull(container, "beanContainer require not null.");
         Objects.requireNonNull(httpPathMatcher, "httpPathMatcher require not null.");
         this.container = container;

@@ -1,7 +1,7 @@
 package com.main;
 
-import beanContainer.ComponentContainer;
 import beanContainer.ComponentContainerCreator;
+import beanContainer.Container;
 import executor.RequestExecutor;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -20,10 +20,10 @@ public class App {
         // 가져온 이유는 클래스의 메소드를 객체화 하기 위해서 입니다.
         List<Class<?>> classes = FileSystemUtil.findClass(App.class, "com.main");
 
-        ComponentContainer componentContainer = new ComponentContainerCreator(classes).create();
+        Container container = new ComponentContainerCreator(classes).create();
         HttpPathMatcherIf httpPathMatcher = new ControllerPathMatcherCreator(classes).create();
 
-        RequestExecutor requestExecutor = new RequestExecutor(componentContainer, httpPathMatcher);
+        RequestExecutor requestExecutor = new RequestExecutor(container, httpPathMatcher);
         Object result = requestExecutor.execute(RequestMethod.GET, "/basic/pathVariable", RequestParameters.empty(), RequestBodyContent.empty());
 
         System.out.println(result);

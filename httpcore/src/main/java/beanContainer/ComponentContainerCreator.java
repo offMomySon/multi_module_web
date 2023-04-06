@@ -22,14 +22,14 @@ public class ComponentContainerCreator {
             .collect(Collectors.toUnmodifiableList());
     }
 
-    public ComponentContainer create() {
+    public Container create() {
         List<ComponentClassLoader> componentClassLoaders = componentClasses.stream()
             .map(ComponentClassLoader::new)
             .collect(Collectors.toUnmodifiableList());
 
-        ComponentContainer container = new ComponentContainer();
+        Container container = new Container();
         for (ComponentClassLoader classLoader : componentClassLoaders) {
-            ComponentContainer newContainer = classLoader.load(container);
+            Container newContainer = classLoader.load(container);
             container.merge(newContainer);
         }
 

@@ -7,21 +7,21 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class ComponentContainer {
+public class Container {
     private final Map<Class<?>, Object> values;
 
-    public ComponentContainer() {
+    public Container() {
         this.values = new HashMap<>();
     }
 
-    public ComponentContainer(Map<Class<?>, Object> values) {
+    public Container(Map<Class<?>, Object> values) {
         this.values = values.entrySet().stream()
             .filter(entry -> !Objects.isNull(entry.getKey()))
             .filter(entry -> !Objects.isNull(entry.getValue()))
             .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
     }
 
-    public ComponentContainer merge(ComponentContainer otherContainer) {
+    public Container merge(Container otherContainer) {
         if (Objects.isNull(otherContainer)) {
             return this;
         }

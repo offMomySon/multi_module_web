@@ -7,17 +7,19 @@ import marker.RequestParam;
 import marker.ValueConstants;
 
 public class ParamAnnotationValue {
+    private final Class<?> annotationType;
     private final String name;
     private final boolean required;
     private final Optional<String> defaultValue;
 
-    public ParamAnnotationValue(String name, boolean required, String defaultValue) {
+    public ParamAnnotationValue(Class<?> annotationType, String name, boolean required, String defaultValue) {
         if (Objects.isNull(name)) {
             throw new RuntimeException("invalid name value. value : " + name);
         }
 
         defaultValue = Objects.equals(ValueConstants.DEFAULT_NONE, defaultValue) ? null : defaultValue;
 
+        this.annotationType = annotationType;
         this.name = name;
         this.required = required;
         this.defaultValue = Optional.ofNullable(defaultValue);
@@ -32,7 +34,7 @@ public class ParamAnnotationValue {
         boolean required = requestParam.required();
         String defaultValue = requestParam.defaultValue();
 
-        return new ParamAnnotationValue(name, required, defaultValue);
+        return new ParamAnnotationValue(requestParam.annotationType(), name, required, defaultValue);
     }
 
     public static ParamAnnotationValue from(PathVariable requestParam) {
@@ -43,7 +45,11 @@ public class ParamAnnotationValue {
         String name = requestParam.value();
         boolean required = requestParam.required();
 
-        return new ParamAnnotationValue(name, required, null);
+        return new ParamAnnotationValue(requestParam.annotationType(), name, required, null);
+    }
+
+    public Class<?> getAnnotationType() {
+        return annotationType;
     }
 
     public String getName() {

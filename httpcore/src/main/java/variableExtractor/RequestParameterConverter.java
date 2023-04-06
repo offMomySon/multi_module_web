@@ -1,5 +1,6 @@
 package variableExtractor;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
 import java.util.Objects;
 import java.util.Optional;
@@ -15,14 +16,35 @@ public class RequestParameterConverter implements ParameterConverter {
     private static final String EMPTY_DEFAULT_VALUE = null;
 
     private final RequestParameters requestParameters;
-    private final ParamAnnotationValue annotationValue;
+    private final Class<?> targetAnnotationType;
 
-    public RequestParameterConverter(RequestParameters requestParameters, ParamAnnotationValue annotationValue) {
+    public RequestParameterConverter(Class<?> targetAnnotationType, RequestParameters requestParameters) {
         Objects.requireNonNull(requestParameters, "requestParameters is null");
-        Objects.requireNonNull(annotationValue, "annotationValue is null");
+        Objects.requireNonNull(targetAnnotationType, "targetAnnotation is null");
 
+        System.out.println(REQUEST_PARAM_CLASS);
+        System.out.println(targetAnnotationType);
+
+        if (REQUEST_PARAM_CLASS != targetAnnotationType && PATH_VARIABLE_CLASS != targetAnnotationType) {
+            throw new IllegalArgumentException("does not convertable target.");
+        }
+
+        this.targetAnnotationType = targetAnnotationType;
         this.requestParameters = requestParameters;
-        this.annotationValue = annotationValue;
+    }
+
+    public static RequestParameterConverter from(Annotation annotation, RequestParameters requestParameters) {
+        Objects.requireNonNull(annotation);
+        Objects.requireNonNull(requestParameters);
+
+        Class<? extends Annotation> annotationType = annotation.annotationType();
+
+        boolean doesNotPossibleConvertAnnotation = REQUEST_PARAM_CLASS != annotationType && PATH_VARIABLE_CLASS != annotationType;
+        if (doesNotPossibleConvertAnnotation) {
+            throw new RuntimeException("does Not Possible Convert Annotation");
+        }
+
+        return new RequestParameterConverter(annotationType, requestParameters);
     }
 
     public Optional<Object> convertAsValue(Parameter parameter) {
@@ -33,14 +55,21 @@ public class RequestParameterConverter implements ParameterConverter {
 
         boolean doesNotConvertableParameter = optionalRequestParam.isEmpty() && optionalPathVariable.isEmpty();
         if (doesNotConvertableParameter) {
-            throw new IllegalArgumentException("does not convertable parameter.");
+            return Optional.empty();
         }
 
-        String findParamName = annotationValue.getName().isBlank() || annotationValue.getName().isEmpty() ? parameter.getName() : annotationValue.getName();
-        String defaultValueOrNull = annotationValue.getDefaultValue().orElse(EMPTY_DEFAULT_VALUE);
+        ParamAnnotationValue paramAnnotationValue = optionalRequestParam.isEmpty() ? ParamAnnotationValue.from(optionalPathVariable.get()) : ParamAnnotationValue.from(optionalRequestParam.get());
+
+        boolean doesNotTargetAnnotationType = paramAnnotationValue.getAnnotationType() != targetAnnotationType;
+        if (doesNotTargetAnnotationType) {
+            return Optional.empty();
+        }
+
+        String findParamName = paramAnnotationValue.getName().isBlank() || paramAnnotationValue.getName().isEmpty() ? parameter.getName() : paramAnnotationValue.getName();
+        String defaultValueOrNull = paramAnnotationValue.getDefaultValue().orElse(EMPTY_DEFAULT_VALUE);
         String paramValueOrNull = requestParameters.getOrDefault(findParamName, defaultValueOrNull);
 
-        boolean doesNotAbleToCreate = Objects.isNull(paramValueOrNull) && annotationValue.isRequired();
+        boolean doesNotAbleToCreate = Objects.isNull(paramValueOrNull) && paramAnnotationValue.isRequired();
         if (doesNotAbleToCreate) {
             throw new RuntimeException("path value does not exist.");
         }

@@ -37,15 +37,15 @@ public class ParameterConverterFactory {
             RequestParam requestParam = optionalRequestParam.get();
             ParamAnnotationValue requestParamAnnotationValue = ParamAnnotationValue.from(requestParam);
 
-            return new RequestParameterConverter(formParams, requestParamAnnotationValue);
+            return new RequestParameterConverter(requestParam.annotationType(), formParams);
         }
 
         Optional<PathVariable> optionalPathVariable = AnnotationUtils.find(parameter, PathVariable.class);
         if (optionalPathVariable.isPresent()) {
             PathVariable pathVariable = optionalPathVariable.get();
             ParamAnnotationValue paramAnnotationValue = ParamAnnotationValue.from(pathVariable);
-            
-            return new RequestParameterConverter(pathParams, paramAnnotationValue);
+
+            return new RequestParameterConverter(pathVariable.annotationType(), pathParams);
         }
 
         Optional<RequestBody> optionalRequestBody = AnnotationUtils.find(parameter, RequestBody.class);

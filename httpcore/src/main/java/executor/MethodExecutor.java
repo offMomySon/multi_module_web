@@ -2,16 +2,19 @@ package executor;
 
 import beanContainer.BeanContainer;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Objects;
-import variableExtractor.MethodConverter;
+import variableExtractor.ParameterConverter;
 
 public class MethodExecutor {
-    private final BeanContainer container;
-    private final MethodConverter methodConverter;
+    private static final Objects EMPTY_VALUE = null;
 
-    public MethodExecutor(BeanContainer container, MethodConverter methodConverter) {
+    private final BeanContainer container;
+    private final ParameterConverter parameterConverter;
+
+    public MethodExecutor(BeanContainer container, ParameterConverter parameterConverter) {
         this.container = container;
-        this.methodConverter = methodConverter;
+        this.parameterConverter = parameterConverter;
     }
 
     public Object execute(Method javaMethod) {
@@ -20,7 +23,10 @@ public class MethodExecutor {
         Class<?> declaringClass = javaMethod.getDeclaringClass();
 
         Object instance = container.get(declaringClass);
-        Object[] values = methodConverter.convertAsParameterValues(javaMethod);
+        Object[] values = Arrays.stream(javaMethod.getParameters())
+            .map(parameterConverter::convertAsValue)
+            .map(optionalObject -> optionalObject.orElse(EMPTY_VALUE))
+            .toArray();
 
         return doExecute(instance, javaMethod, values);
     }

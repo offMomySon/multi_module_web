@@ -17,7 +17,7 @@ class ParamAnnotationValueTest {
     void test1() throws Exception {
         //given
         //when
-        Throwable actual = Assertions.catchThrowable(() -> new ParamAnnotationValue(null, true, "defaultValue"));
+        Throwable actual = Assertions.catchThrowable(() -> new ParamAnnotationValue(RequestParam.class, null, true, "defaultValue"));
 
         //then
         Assertions.assertThat(actual).isNotNull();
@@ -28,7 +28,7 @@ class ParamAnnotationValueTest {
     void test2() throws Exception {
         //given
         //when
-        ParamAnnotationValue actual = new ParamAnnotationValue("name", true, null);
+        ParamAnnotationValue actual = new ParamAnnotationValue(RequestParam.class, "name", true, null);
 
         //then
         Assertions.assertThat(actual).isNotNull();

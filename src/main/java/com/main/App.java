@@ -2,16 +2,12 @@ package com.main;
 
 import beanContainer.BeanContainer;
 import beanContainer.BeanContainerCreator;
-import executor.MethodExecutor;
-import java.lang.reflect.Method;
+import executor.RequestExecutor;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import mapper.FileSystemUtil;
-import mapper.HttpPathMatcher.MatchedMethod;
 import mapper.HttpPathMatcherCreator;
 import mapper.HttpPathMatcherIf;
-import variableExtractor.MethodConverter;
-import variableExtractor.ParameterConverterFactory;
 import vo.RequestBodyContent;
 import vo.RequestMethod;
 import vo.RequestParameters;
@@ -27,14 +23,9 @@ public class App {
         BeanContainer beanContainer = new BeanContainerCreator(classes).create();
         HttpPathMatcherIf httpPathMatcher = new HttpPathMatcherCreator(classes).create();
 
-        MatchedMethod matchedMethod = httpPathMatcher.matchJavaMethod(RequestMethod.GET, "/basic/pathVariable").orElseThrow(() -> new RuntimeException(""));
-        Method javaMethod = matchedMethod.getJavaMethod();
+        RequestExecutor requestExecutor = new RequestExecutor(beanContainer, httpPathMatcher);
+        Object result = requestExecutor.execute(RequestMethod.GET, "/basic/pathVariable", RequestParameters.empty(), RequestBodyContent.empty());
 
-        ParameterConverterFactory converterFactory = new ParameterConverterFactory(RequestParameters.empty(), matchedMethod.getPathVariable(), RequestBodyContent.empty());
-        MethodConverter converter = new MethodConverter(converterFactory);
-        MethodExecutor methodExecutor = new MethodExecutor(beanContainer, converter);
-
-        Object result = methodExecutor.execute(javaMethod);
         System.out.println(result);
     }
 }

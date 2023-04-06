@@ -2,10 +2,14 @@ package executor;
 
 import beanContainer.BeanContainer;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Objects;
 import mapper.HttpPathMatcherIf;
-import variableExtractor.MethodConverter;
-import variableExtractor.ParameterConverterFactory;
+import marker.PathVariable;
+import marker.RequestParam;
+import variableExtractor.CompositeParameterConverter;
+import variableExtractor.RequestBodyParameterConverter;
+import variableExtractor.RequestParameterConverter;
 import vo.RequestBodyContent;
 import vo.RequestMethod;
 import vo.RequestParameters;
@@ -28,9 +32,10 @@ public class RequestExecutor {
         Method javaMethod = matchedMethod.getJavaMethod();
         RequestParameters pathVariable = matchedMethod.getPathVariable();
 
-        ParameterConverterFactory paramConverterFactory = new ParameterConverterFactory(formVariable, pathVariable, bodyContent);
-        MethodConverter methodConverter = new MethodConverter(paramConverterFactory);
-        MethodExecutor methodExecutor = new MethodExecutor(container, methodConverter);
+        CompositeParameterConverter parameterConverter = new CompositeParameterConverter(List.of(new RequestParameterConverter(RequestParam.class, formVariable),
+                                                                                                 new RequestParameterConverter(PathVariable.class, pathVariable),
+                                                                                                 new RequestBodyParameterConverter(bodyContent)));
+        MethodExecutor methodExecutor = new MethodExecutor(container, parameterConverter);
 
         return methodExecutor.execute(javaMethod);
     }

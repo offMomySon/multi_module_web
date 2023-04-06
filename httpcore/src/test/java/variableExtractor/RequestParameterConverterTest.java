@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import vo.ParamAnnotationValue;
 import vo.RequestParameters;
 
 class RequestParameterConverterTest {
@@ -25,11 +24,11 @@ class RequestParameterConverterTest {
     @DisplayName("변환 가능한 어노테인션을 가진 parameter 은 올바르게 동작합니다.")
     @ParameterizedTest
     @MethodSource("provideAbleConvertAnnotatedParameters")
-    void test1(Parameter parameter) throws Exception {
+    void test1(Class<?> annotationType, Parameter parameter) throws Exception {
         //given
         RequestParameterConverter converter = new RequestParameterConverter(
-            new RequestParameters(new HashMap<>()),
-            new ParamAnnotationValue("name", false, "defaultValue"));
+            annotationType,
+            new RequestParameters(Map.of("arg0", "1", "arg1", "2", "rp", "1")));
 
         //when
         Throwable actual = Assertions.catchThrowable(() -> converter.convertAsValue(parameter));
@@ -43,12 +42,11 @@ class RequestParameterConverterTest {
     void test2() throws Exception {
         //given
         Parameter requestBodyAnnotatedParameter = TestClass.getParameter(RequestBody.class);
-        RequestParameterConverter converter = new RequestParameterConverter(
-            new RequestParameters(new HashMap<>()),
-            new ParamAnnotationValue("name", false, "defaultValue"));
 
         //when
-        Throwable actual = Assertions.catchThrowable(() -> converter.convertAsValue(requestBodyAnnotatedParameter));
+        Throwable actual = Assertions.catchThrowable(() -> new RequestParameterConverter(
+            RequestBody.class,
+            new RequestParameters(new HashMap<>())));
 
         //then
         Assertions.assertThat(actual).isInstanceOf(IllegalArgumentException.class);
@@ -60,8 +58,8 @@ class RequestParameterConverterTest {
         //given
         Parameter parameter = TestClass.getParameter(RequestParam.class);
         RequestParameterConverter converter = new RequestParameterConverter(
-            TestClass.getDoesNotExistValueRequestParameters(),
-            TestClass.getRequiredRequestParamValue()
+            RequestParam.class,
+            TestClass.getDoesNotExistValueRequestParameters()
         );
 
         //when
@@ -75,10 +73,10 @@ class RequestParameterConverterTest {
     @Test
     void test4() throws Exception {
         //given
-        Parameter parameter = TestClass.getParameter(RequestParam.class);
+        Parameter parameter = TestClassDoesNotRequired.getParameter(RequestParam.class);
         RequestParameterConverter converter = new RequestParameterConverter(
-            TestClass.getDoesNotExistValueRequestParameters(),
-            TestClass.getDoesNotRequiredRequestParamValue()
+            RequestParam.class,
+            TestClassDoesNotRequired.getDoesNotExistValueRequestParameters()
         );
 
         //when
@@ -95,8 +93,8 @@ class RequestParameterConverterTest {
         Parameter parameter = TestClass.getParameter(PathVariable.class);
         RequestParameters existValueRequestParameters = TestClass.getExistValueReuqestParameters();
         RequestParameterConverter converter = new RequestParameterConverter(
-            existValueRequestParameters,
-            TestClass.getDoesNotHasNameRequestParamValue()
+            PathVariable.class,
+            existValueRequestParameters
         );
 
         String parameterName = parameter.getName();
@@ -112,9 +110,10 @@ class RequestParameterConverterTest {
     }
 
     public static Stream<Arguments> provideAbleConvertAnnotatedParameters() {
+
         return Stream.of(
-            Arguments.of(TestClass.getParameter(RequestParam.class)),
-            Arguments.of(TestClass.getParameter(PathVariable.class))
+            Arguments.of(RequestParam.class, TestClass.getParameter(RequestParam.class)),
+            Arguments.of(PathVariable.class, TestClass.getParameter(PathVariable.class))
         );
     }
 
@@ -123,27 +122,6 @@ class RequestParameterConverterTest {
         public void annotatedMethod(@PathVariable String pathVariable,
                                     @RequestParam(value = "rp", required = true) String requestParam,
                                     @RequestBody String requestBody) {
-        }
-
-        public static ParamAnnotationValue getRequiredRequestParamValue() {
-            Parameter parameter = TestClass.getParameter(RequestParam.class);
-            RequestParam requestParam = AnnotationUtils.find(parameter, RequestParam.class)
-                .orElseThrow(() -> new RuntimeException("does not exist requestParam"));
-            return ParamAnnotationValue.from(requestParam);
-        }
-
-        public static ParamAnnotationValue getDoesNotHasNameRequestParamValue() {
-            Parameter parameter = TestClass.getParameter(PathVariable.class);
-            PathVariable pathVariable = AnnotationUtils.find(parameter, PathVariable.class)
-                .orElseThrow(() -> new RuntimeException("does not exist PathVariable"));
-            return ParamAnnotationValue.from(pathVariable);
-        }
-
-        public static ParamAnnotationValue getDoesNotRequiredRequestParamValue() {
-            Parameter parameter = TestClass.getParameter(RequestParam.class);
-            RequestParam requestParam = AnnotationUtils.find(parameter, RequestParam.class)
-                .orElseThrow(() -> new RuntimeException("does not exist requestParam"));
-            return new ParamAnnotationValue(requestParam.value(), false, requestParam.defaultValue());
         }
 
         public static RequestParameters getDoesNotExistValueRequestParameters() {
@@ -167,6 +145,34 @@ class RequestParameterConverterTest {
 
         public static Parameter getParameter(Class<?> annotationClazz) {
             Parameter[] parameters = TestClass.getAnnotatedMethod().getParameters();
+
+            return Arrays.stream(parameters)
+                .filter(parameter -> AnnotationUtils.exist(parameter, annotationClazz))
+                .findAny()
+                .orElseThrow(() -> new RuntimeException("does not exist annotated param. find annotation : " + annotationClazz));
+        }
+    }
+
+    private static class TestClassDoesNotRequired {
+        public void annotatedMethod(@RequestParam(value = "rp", required = false) String requestParam) {
+
+        }
+
+        public static RequestParameters getDoesNotExistValueRequestParameters() {
+            Map<String, String> doesNotExistValue = Map.of("doesNotExistKey", "value");
+            return new RequestParameters(doesNotExistValue);
+        }
+
+        private static Method getAnnotatedMethod() {
+            try {
+                return TestClassDoesNotRequired.class.getDeclaredMethod("annotatedMethod", String.class);
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        public static Parameter getParameter(Class<?> annotationClazz) {
+            Parameter[] parameters = TestClassDoesNotRequired.getAnnotatedMethod().getParameters();
 
             return Arrays.stream(parameters)
                 .filter(parameter -> AnnotationUtils.exist(parameter, annotationClazz))

@@ -12,7 +12,7 @@ import variableExtractor.CompositeParameterConverter;
 import variableExtractor.RequestBodyParameterConverter;
 import variableExtractor.RequestParameterConverter;
 import vo.RequestBodyContent;
-import vo.RequestParameters;
+import vo.ParameterValues;
 import static mapper.HttpPathMatcher.MatchedMethod;
 
 public class RequestExecutor {
@@ -26,11 +26,11 @@ public class RequestExecutor {
         this.httpPathMatcher = httpPathMatcher;
     }
 
-    public Object execute(RequestMethod method, String url, RequestParameters formVariable, RequestBodyContent bodyContent) {
+    public Object execute(RequestMethod method, String url, ParameterValues formVariable, RequestBodyContent bodyContent) {
         MatchedMethod matchedMethod = httpPathMatcher.matchJavaMethod(method, url).orElseThrow(() -> new RuntimeException(""));
 
         Method javaMethod = matchedMethod.getJavaMethod();
-        RequestParameters pathVariable = matchedMethod.getPathVariable();
+        ParameterValues pathVariable = matchedMethod.getPathVariable();
 
         CompositeParameterConverter parameterConverter = new CompositeParameterConverter(List.of(new RequestParameterConverter(RequestParam.class, formVariable),
                                                                                                  new RequestParameterConverter(PathVariable.class, pathVariable),

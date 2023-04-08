@@ -8,18 +8,18 @@ import marker.PathVariable;
 import marker.RequestParam;
 import util.AnnotationUtils;
 import vo.ParamAnnotationValue;
-import vo.RequestParameters;
+import vo.ParameterValues;
 
 public class RequestParameterConverter implements ParameterConverter {
     private static final Class<RequestParam> REQUEST_PARAM_CLASS = RequestParam.class;
     private static final Class<PathVariable> PATH_VARIABLE_CLASS = PathVariable.class;
     private static final String EMPTY_DEFAULT_VALUE = null;
 
-    private final RequestParameters requestParameters;
+    private final ParameterValues parameterValues;
     private final Class<?> targetAnnotationType;
 
-    public RequestParameterConverter(Class<?> targetAnnotationType, RequestParameters requestParameters) {
-        Objects.requireNonNull(requestParameters, "requestParameters is null");
+    public RequestParameterConverter(Class<?> targetAnnotationType, ParameterValues parameterValues) {
+        Objects.requireNonNull(parameterValues, "requestParameters is null");
         Objects.requireNonNull(targetAnnotationType, "targetAnnotation is null");
 
         if (REQUEST_PARAM_CLASS != targetAnnotationType && PATH_VARIABLE_CLASS != targetAnnotationType) {
@@ -27,12 +27,12 @@ public class RequestParameterConverter implements ParameterConverter {
         }
 
         this.targetAnnotationType = targetAnnotationType;
-        this.requestParameters = requestParameters;
+        this.parameterValues = parameterValues;
     }
 
-    public static RequestParameterConverter from(Annotation annotation, RequestParameters requestParameters) {
+    public static RequestParameterConverter from(Annotation annotation, ParameterValues parameterValues) {
         Objects.requireNonNull(annotation);
-        Objects.requireNonNull(requestParameters);
+        Objects.requireNonNull(parameterValues);
 
         Class<? extends Annotation> annotationType = annotation.annotationType();
 
@@ -41,7 +41,7 @@ public class RequestParameterConverter implements ParameterConverter {
             throw new RuntimeException("does Not Possible Convert Annotation");
         }
 
-        return new RequestParameterConverter(annotationType, requestParameters);
+        return new RequestParameterConverter(annotationType, parameterValues);
     }
 
     public Optional<Object> convertAsValue(Parameter parameter) {
@@ -64,7 +64,7 @@ public class RequestParameterConverter implements ParameterConverter {
 
         String findParamName = paramAnnotationValue.getName().isBlank() || paramAnnotationValue.getName().isEmpty() ? parameter.getName() : paramAnnotationValue.getName();
         String defaultValueOrNull = paramAnnotationValue.getDefaultValue().orElse(EMPTY_DEFAULT_VALUE);
-        String paramValueOrNull = requestParameters.getOrDefault(findParamName, defaultValueOrNull);
+        String paramValueOrNull = parameterValues.getOrDefault(findParamName, defaultValueOrNull);
 
         boolean doesNotAbleToCreate = Objects.isNull(paramValueOrNull) && paramAnnotationValue.isRequired();
         if (doesNotAbleToCreate) {

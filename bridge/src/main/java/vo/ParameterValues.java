@@ -5,10 +5,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class RequestParameters {
+public class ParameterValues {
     private final Map<String, String> values;
 
-    public RequestParameters(Map<String, String> values) {
+    public ParameterValues(Map<String, String> values) {
         if (Objects.isNull(values)) {
             throw new RuntimeException("values is null.");
         }
@@ -43,15 +43,15 @@ public class RequestParameters {
         return valueOrNull;
     }
 
-    public static RequestParameters empty() {
-        return new RequestParameters(Collections.emptyMap());
+    public static ParameterValues empty() {
+        return new ParameterValues(Collections.emptyMap());
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        RequestParameters that = (RequestParameters) o;
+        ParameterValues that = (ParameterValues) o;
         return Objects.equals(values, that.values);
     }
 

@@ -8,20 +8,20 @@ import marker.RequestBody;
 import marker.RequestParam;
 import util.AnnotationUtils;
 import vo.ParamAnnotationValue;
+import vo.ParameterValues;
 import vo.RequestBodyContent;
-import vo.RequestParameters;
 
 
 public class ParameterConverterFactory {
-    private final RequestParameters formParams;
-    private final RequestParameters pathParams;
+    private final ParameterValues formParams;
+    private final ParameterValues pathParams;
     private final RequestBodyContent requestBodyContent;
 
-    public ParameterConverterFactory(RequestParameters formParams, RequestParameters pathParams, RequestBodyContent requestBodyContent) {
+    public ParameterConverterFactory(ParameterValues formParams, ParameterValues pathParams, RequestBodyContent requestBodyContent) {
         if (Objects.isNull(formParams) || Objects.isNull(pathParams) || Objects.isNull(requestBodyContent)) {
             throw new RuntimeException("parameter is null.");
         }
-        
+
         this.formParams = formParams;
         this.pathParams = pathParams;
         this.requestBodyContent = requestBodyContent;

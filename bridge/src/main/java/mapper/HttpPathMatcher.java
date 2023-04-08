@@ -14,7 +14,7 @@ import mapper.segment.PathVariableSement;
 import mapper.segment.Segment;
 import mapper.segment.WildCardSement;
 import marker.RequestMethod;
-import vo.RequestParameters;
+import vo.ParameterValues;
 
 public class HttpPathMatcher {
     private static final String PATH_DELIMITER = "/";
@@ -38,7 +38,7 @@ public class HttpPathMatcher {
             return Optional.empty();
         }
 
-        RequestParameters pathVariables = RequestParameters.empty();
+        ParameterValues pathVariables = ParameterValues.empty();
         if (doesNotMatch(requestUrl, pathVariables)) {
             return Optional.empty();
         }
@@ -46,11 +46,11 @@ public class HttpPathMatcher {
         return Optional.of(new MatchedMethod(javaMethod, pathVariables));
     }
 
-    private boolean doesNotMatch(String requestUrl, RequestParameters pathVariables) {
+    private boolean doesNotMatch(String requestUrl, ParameterValues pathVariables) {
         return !match(requestUrl, pathVariables);
     }
 
-    private boolean match(String requestUrl, RequestParameters pathVariables) {
+    private boolean match(String requestUrl, ParameterValues pathVariables) {
         requestUrl = Paths.get(requestUrl).normalize().toString();
 
         List<String> thisPaths;
@@ -72,7 +72,7 @@ public class HttpPathMatcher {
         return doMatch(thisPaths, requestPaths, pathVariables);
     }
 
-    private boolean doMatch(List<String> thisPaths, List<String> requestPaths, RequestParameters pathVariables) {
+    private boolean doMatch(List<String> thisPaths, List<String> requestPaths, ParameterValues pathVariables) {
         boolean finishMatch = thisPaths.isEmpty() && requestPaths.isEmpty();
         if (finishMatch) {
             return true;
@@ -149,9 +149,9 @@ public class HttpPathMatcher {
     @Getter
     public static class MatchedMethod {
         private final Method javaMethod;
-        private final RequestParameters pathVariable;
+        private final ParameterValues pathVariable;
 
-        public MatchedMethod(Method javaMethod, RequestParameters pathVariable) {
+        public MatchedMethod(Method javaMethod, ParameterValues pathVariable) {
             this.javaMethod = javaMethod;
             this.pathVariable = pathVariable;
         }

@@ -10,9 +10,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import lombok.Getter;
-import mapper.segment.PathVariableSement;
+import mapper.segment.PathVariableSegment;
 import mapper.segment.Segment;
-import mapper.segment.WildCardSement;
+import mapper.segment.WildCardSegment;
 import marker.RequestMethod;
 import vo.ParameterValues;
 
@@ -80,7 +80,7 @@ public class HttpPathMatcher {
         boolean onlyRemainThisPath = requestPaths.isEmpty();
         if (onlyRemainThisPath) {
             Segment thisPath = Segment.create(thisPaths.get(0));
-            if (!(thisPath instanceof WildCardSement)) {
+            if (!(thisPath instanceof WildCardSegment)) {
                 return false;
             }
 
@@ -97,17 +97,11 @@ public class HttpPathMatcher {
 
         boolean match = thisPath.match(requestPath);
         if (match) {
-            if (thisPath instanceof PathVariableSement) {
-                String key = ((PathVariableSement) thisPath).getExtractBraceValue();
+            if (thisPath instanceof PathVariableSegment) {
+                String key = ((PathVariableSegment) thisPath).getExtractBraceValue();
                 pathVariables.put(key, requestPath);
 
-                List<String> nextThisPaths = 1 < thisPaths.size() ?
-                    thisPaths.subList(1, thisPaths.size()).stream().filter(s -> !Objects.isNull(s)).collect(Collectors.toUnmodifiableList()) :
-                    Collections.emptyList();
-                List<String> nextRequestPaths = 1 < requestPaths.size() ?
-                    requestPaths.subList(1, requestPaths.size()).stream().filter(s -> !Objects.isNull(s)).collect(Collectors.toUnmodifiableList()) :
-                    Collections.emptyList();
-                boolean doMatch = doMatch(nextThisPaths, nextRequestPaths, pathVariables);
+                boolean doMatch = doNextMatch(thisPaths, requestPaths, pathVariables, 1);
 
                 if (!doMatch) {
                     pathVariables.remove(key);
@@ -116,7 +110,7 @@ public class HttpPathMatcher {
                 return doMatch;
             }
 
-            if (thisPath instanceof WildCardSement) {
+            if (thisPath instanceof WildCardSegment) {
                 boolean onlyRemainWildCard = thisPaths.size() == 1;
                 if (onlyRemainWildCard) {
                     return true;
@@ -124,26 +118,22 @@ public class HttpPathMatcher {
 
                 List<Integer> nextRequestIndexes = IntStream.range(0, requestPaths.size()).boxed().collect(Collectors.toUnmodifiableList());
                 return nextRequestIndexes.stream()
-                    .anyMatch(_nextRequestIndex -> {
-                        List<String> nextThisPaths = 1 < thisPaths.size() ?
-                            thisPaths.subList(1, thisPaths.size()).stream().filter(s -> !Objects.isNull(s)).collect(Collectors.toUnmodifiableList()) :
-                            Collections.emptyList();
-                        List<String> nextRequestPaths = _nextRequestIndex < requestPaths.size() ?
-                            requestPaths.subList(_nextRequestIndex, requestPaths.size()).stream().filter(s -> !Objects.isNull(s)).collect(Collectors.toUnmodifiableList()) :
-                            Collections.emptyList();
-                        return doMatch(nextThisPaths, nextRequestPaths, pathVariables);
-                    });
+                    .anyMatch(_nextRequestIndex -> doNextMatch(thisPaths, requestPaths, pathVariables, _nextRequestIndex));
             }
 
-            List<String> nextThisPaths = 1 < thisPaths.size() ?
-                thisPaths.subList(1, thisPaths.size()).stream().filter(s -> !Objects.isNull(s)).collect(Collectors.toUnmodifiableList()) :
-                Collections.emptyList();
-            List<String> nextRequestPaths = 1 < requestPaths.size() ?
-                requestPaths.subList(1, requestPaths.size()).stream().filter(s -> !Objects.isNull(s)).collect(Collectors.toUnmodifiableList()) :
-                Collections.emptyList();
-            return doMatch(nextThisPaths, nextRequestPaths, pathVariables);
+            return doNextMatch(thisPaths, requestPaths, pathVariables, 1);
         }
         return false;
+    }
+
+    private boolean doNextMatch(List<String> thisPaths, List<String> requestPaths, ParameterValues pathVariables, Integer nextRequestIndex) {
+        List<String> nextThisPaths = 1 < thisPaths.size() ?
+            thisPaths.subList(1, thisPaths.size()).stream().filter(s -> !Objects.isNull(s)).collect(Collectors.toUnmodifiableList()) :
+            Collections.emptyList();
+        List<String> nextRequestPaths = nextRequestIndex < requestPaths.size() ?
+            requestPaths.subList(nextRequestIndex, requestPaths.size()).stream().filter(s -> !Objects.isNull(s)).collect(Collectors.toUnmodifiableList()) :
+            Collections.emptyList();
+        return doMatch(nextThisPaths, nextRequestPaths, pathVariables);
     }
 
     @Getter

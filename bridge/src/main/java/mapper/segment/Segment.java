@@ -15,11 +15,11 @@ public abstract class Segment {
         }
 
         if (value.equals(WILD_CARD_PATTERN)) {
-            return new WildCardSement();
+            return new WildCardSegment();
         }
 
         if (value.startsWith(PATH_VARIABLE_OPENER) && value.endsWith(PATH_VARIABLE_CLOSER)) {
-            return new PathVariableSement(value);
+            return new PathVariableSegment(value);
         }
 
         return new DefaultSegment(value);

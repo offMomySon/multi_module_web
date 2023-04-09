@@ -2,13 +2,13 @@ package mapper.segment;
 
 import java.util.Objects;
 
-public class PathVariableSement extends Segment {
+public class PathVariableSegment extends Segment {
     private static final String PATH_VARIABLE_OPENER = "{";
     private static final String PATH_VARIABLE_CLOSER = "}";
 
     private final String value;
 
-    public PathVariableSement(String value) {
+    public PathVariableSegment(String value) {
         if (!value.startsWith(PATH_VARIABLE_OPENER)) {
             throw new RuntimeException("valeu 가 pathvariable 형태가 아닙니다.");
         }

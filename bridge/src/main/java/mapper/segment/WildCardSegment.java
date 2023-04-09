@@ -2,7 +2,7 @@ package mapper.segment;
 
 import java.util.Objects;
 
-public class WildCardSement extends Segment {
+public class WildCardSegment extends Segment {
 
     @Override
     public boolean match(String other) {

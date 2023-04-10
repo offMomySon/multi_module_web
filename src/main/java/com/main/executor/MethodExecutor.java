@@ -5,21 +5,21 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
-import variableExtractor.CompositeParameterConverter;
+import variableExtractor.ParameterConverter;
 
 @Slf4j
 public class MethodExecutor {
     private static final Objects EMPTY_VALUE = null;
 
     private final Container container;
-    private final CompositeParameterConverter compositeParameterConverter;
+    private final ParameterConverter parameterConverter;
 
-    public MethodExecutor(Container container, CompositeParameterConverter compositeParameterConverter) {
+    public MethodExecutor(Container container, ParameterConverter parameterConverter) {
         Objects.requireNonNull(container);
-        Objects.requireNonNull(compositeParameterConverter);
+        Objects.requireNonNull(parameterConverter);
 
         this.container = container;
-        this.compositeParameterConverter = compositeParameterConverter;
+        this.parameterConverter = parameterConverter;
     }
 
     public Object execute(Method javaMethod) {
@@ -29,7 +29,7 @@ public class MethodExecutor {
 
         Object instance = container.get(declaringClass);
         Object[] values = Arrays.stream(javaMethod.getParameters())
-            .map(compositeParameterConverter::convertAsValue)
+            .map(parameterConverter::convertAsValue)
             .map(optionalObject -> optionalObject.orElse(EMPTY_VALUE))
             .toArray();
 

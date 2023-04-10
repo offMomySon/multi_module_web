@@ -14,7 +14,7 @@ import marker.RequestParam;
 import variableExtractor.CompositeParameterConverter;
 import variableExtractor.ParameterConverter;
 import variableExtractor.RequestBodyParameterConverter;
-import variableExtractor.RequestParameterConverterV2;
+import variableExtractor.RequestParameterConverter;
 import vo.RequestBodyContent;
 import vo.RequestValues;
 import static mapper.HttpPathMatcher.MatchedMethod;
@@ -37,8 +37,8 @@ public class RequestExecutor {
         Method javaMethod = matchedMethod.getJavaMethod();
         RequestValues pathVariable = matchedMethod.getPathVariable();
 
-        Map<Class<? extends Annotation>, ParameterConverter> classParameterConverterMap = Map.of(RequestParam.class, new RequestParameterConverterV2(RequestParam.class, formVariable),
-                                                                                                 PathVariable.class, new RequestParameterConverterV2(PathVariable.class, pathVariable),
+        Map<Class<? extends Annotation>, ParameterConverter> classParameterConverterMap = Map.of(RequestParam.class, new RequestParameterConverter(RequestParam.class, formVariable),
+                                                                                                 PathVariable.class, new RequestParameterConverter(PathVariable.class, pathVariable),
                                                                                                  RequestBody.class, new RequestBodyParameterConverter(bodyContent));
         CompositeParameterConverter compositeParameterConverter = new CompositeParameterConverter(classParameterConverterMap);
 

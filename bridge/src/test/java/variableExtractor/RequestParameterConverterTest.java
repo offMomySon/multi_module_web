@@ -37,22 +37,23 @@ class RequestParameterConverterTest {
         Assertions.assertThat(actual).isNull();
     }
 
-    @DisplayName("변환 할 수 없는 어노테이션이을 가진 parameter 은 exception 이 발생합니다.")
+    @DisplayName("타깃어노테이션과 parameter 의 어노테이션이 다르면 empty value 를 반환합니다.")
     @Test
     void test2() throws Exception {
         //given
-        Parameter requestBodyAnnotatedParameter = TestClass.getParameter(RequestBody.class);
+        Parameter requestBodyAnnotatedParameter = TestClass.getParameter(RequestParam.class);
+        RequestParameterConverter converter = new RequestParameterConverter(
+            PathVariable.class,
+            new RequestValues(new HashMap<>()));
 
         //when
-        Throwable actual = Assertions.catchThrowable(() -> new RequestParameterConverter(
-            RequestBody.class,
-            new RequestValues(new HashMap<>())));
+        Optional<Object> actual = converter.convertAsValue(requestBodyAnnotatedParameter);
 
         //then
-        Assertions.assertThat(actual).isInstanceOf(IllegalArgumentException.class);
+        Assertions.assertThat(actual).isEmpty();
     }
 
-    @DisplayName("변환을 필요로하는 parameter 가 변환될 value 를 찾지못하면 excpetion 이 발생합니다.")
+    @DisplayName("변환을 필요로하는 parameter 가 변환될 value 를 찾지못하면 empty 이 발생합니다.")
     @Test
     void test3() throws Exception {
         //given

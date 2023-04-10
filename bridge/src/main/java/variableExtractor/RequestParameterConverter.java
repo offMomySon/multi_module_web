@@ -8,18 +8,18 @@ import marker.PathVariable;
 import marker.RequestParam;
 import util.AnnotationUtils;
 import vo.ParamAnnotationValue;
-import vo.ParameterValues;
+import vo.RequestValues;
 
 public class RequestParameterConverter implements ParameterConverter {
     private static final Class<RequestParam> REQUEST_PARAM_CLASS = RequestParam.class;
     private static final Class<PathVariable> PATH_VARIABLE_CLASS = PathVariable.class;
     private static final String EMPTY_DEFAULT_VALUE = null;
 
-    private final ParameterValues parameterValues;
+    private final RequestValues requestValues;
     private final Class<?> targetAnnotationType;
 
-    public RequestParameterConverter(Class<?> targetAnnotationType, ParameterValues parameterValues) {
-        Objects.requireNonNull(parameterValues, "requestParameters is null");
+    public RequestParameterConverter(Class<?> targetAnnotationType, RequestValues requestValues) {
+        Objects.requireNonNull(requestValues, "requestParameters is null");
         Objects.requireNonNull(targetAnnotationType, "targetAnnotation is null");
 
         if (REQUEST_PARAM_CLASS != targetAnnotationType && PATH_VARIABLE_CLASS != targetAnnotationType) {
@@ -27,12 +27,12 @@ public class RequestParameterConverter implements ParameterConverter {
         }
 
         this.targetAnnotationType = targetAnnotationType;
-        this.parameterValues = parameterValues;
+        this.requestValues = requestValues;
     }
 
-    public static RequestParameterConverter from(Annotation annotation, ParameterValues parameterValues) {
+    public static RequestParameterConverter from(Annotation annotation, RequestValues requestValues) {
         Objects.requireNonNull(annotation);
-        Objects.requireNonNull(parameterValues);
+        Objects.requireNonNull(requestValues);
 
         Class<? extends Annotation> annotationType = annotation.annotationType();
 
@@ -41,7 +41,7 @@ public class RequestParameterConverter implements ParameterConverter {
             throw new RuntimeException("does Not Possible Convert Annotation");
         }
 
-        return new RequestParameterConverter(annotationType, parameterValues);
+        return new RequestParameterConverter(annotationType, requestValues);
     }
 
     public Optional<Object> convertAsValue(Parameter parameter) {
@@ -64,7 +64,7 @@ public class RequestParameterConverter implements ParameterConverter {
 
         String findParamName = paramAnnotationValue.getName().isBlank() || paramAnnotationValue.getName().isEmpty() ? parameter.getName() : paramAnnotationValue.getName();
         String defaultValueOrNull = paramAnnotationValue.getDefaultValue().orElse(EMPTY_DEFAULT_VALUE);
-        String paramValueOrNull = parameterValues.getOrDefault(findParamName, defaultValueOrNull);
+        String paramValueOrNull = requestValues.getOrDefault(findParamName, defaultValueOrNull);
 
         boolean doesNotAbleToCreate = Objects.isNull(paramValueOrNull) && paramAnnotationValue.isRequired();
         if (doesNotAbleToCreate) {

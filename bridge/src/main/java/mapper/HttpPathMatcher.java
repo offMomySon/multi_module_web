@@ -14,7 +14,7 @@ import mapper.segment.PathVariableSegment;
 import mapper.segment.Segment;
 import mapper.segment.WildCardSegment;
 import marker.RequestMethod;
-import vo.ParameterValues;
+import vo.RequestValues;
 
 public class HttpPathMatcher {
     private static final String PATH_DELIMITER = "/";
@@ -38,7 +38,7 @@ public class HttpPathMatcher {
             return Optional.empty();
         }
 
-        ParameterValues pathVariables = ParameterValues.empty();
+        RequestValues pathVariables = RequestValues.empty();
         if (doesNotMatch(requestUrl, pathVariables)) {
             return Optional.empty();
         }
@@ -46,11 +46,11 @@ public class HttpPathMatcher {
         return Optional.of(new MatchedMethod(javaMethod, pathVariables));
     }
 
-    private boolean doesNotMatch(String requestUrl, ParameterValues pathVariables) {
+    private boolean doesNotMatch(String requestUrl, RequestValues pathVariables) {
         return !match(requestUrl, pathVariables);
     }
 
-    private boolean match(String requestUrl, ParameterValues pathVariables) {
+    private boolean match(String requestUrl, RequestValues pathVariables) {
         requestUrl = Paths.get(requestUrl).normalize().toString();
 
         List<String> thisPaths;
@@ -72,7 +72,7 @@ public class HttpPathMatcher {
         return doMatch(thisPaths, requestPaths, pathVariables);
     }
 
-    private boolean doMatch(List<String> thisPaths, List<String> requestPaths, ParameterValues pathVariables) {
+    private boolean doMatch(List<String> thisPaths, List<String> requestPaths, RequestValues pathVariables) {
         boolean finishMatch = thisPaths.isEmpty() && requestPaths.isEmpty();
         if (finishMatch) {
             return true;
@@ -126,7 +126,7 @@ public class HttpPathMatcher {
         return false;
     }
 
-    private boolean doNextMatch(List<String> thisPaths, List<String> requestPaths, ParameterValues pathVariables, Integer nextRequestIndex) {
+    private boolean doNextMatch(List<String> thisPaths, List<String> requestPaths, RequestValues pathVariables, Integer nextRequestIndex) {
         List<String> nextThisPaths = 1 < thisPaths.size() ?
             thisPaths.subList(1, thisPaths.size()).stream().filter(s -> !Objects.isNull(s)).collect(Collectors.toUnmodifiableList()) :
             Collections.emptyList();
@@ -139,9 +139,9 @@ public class HttpPathMatcher {
     @Getter
     public static class MatchedMethod {
         private final Method javaMethod;
-        private final ParameterValues pathVariable;
+        private final RequestValues pathVariable;
 
-        public MatchedMethod(Method javaMethod, ParameterValues pathVariable) {
+        public MatchedMethod(Method javaMethod, RequestValues pathVariable) {
             this.javaMethod = javaMethod;
             this.pathVariable = pathVariable;
         }

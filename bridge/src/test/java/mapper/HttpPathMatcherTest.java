@@ -10,7 +10,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import vo.ParameterValues;
+import vo.RequestValues;
 
 class HttpPathMatcherTest {
 
@@ -250,7 +250,7 @@ class HttpPathMatcherTest {
     @MethodSource("provideResult")
     void test1(String registerPath, String requestPath, Map<String, String> expectMap) throws Exception {
         //given
-        ParameterValues expect = new ParameterValues(expectMap);
+        RequestValues expect = new RequestValues(expectMap);
         HttpPathMatcher httpPathMatcher = new HttpPathMatcher(RequestMethod.GET, registerPath, TestClass.class.getDeclaredMethod("method"));
 
         //when
@@ -258,7 +258,7 @@ class HttpPathMatcherTest {
 
         //then
         Assertions.assertThat(optionalResolvedMethod).isPresent();
-        ParameterValues actual = optionalResolvedMethod.get().getPathVariable();
+        RequestValues actual = optionalResolvedMethod.get().getPathVariable();
         Assertions.assertThat(actual).isEqualTo(expect);
     }
 

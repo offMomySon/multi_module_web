@@ -1,20 +1,25 @@
 package com.main.executor;
 
 import container.Container;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import lombok.extern.slf4j.Slf4j;
 import mapper.HttpPathMatcherIf;
 import marker.PathVariable;
+import marker.RequestBody;
 import marker.RequestMethod;
 import marker.RequestParam;
 import variableExtractor.CompositeParameterConverter;
+import variableExtractor.ParameterConverter;
 import variableExtractor.RequestBodyParameterConverter;
-import variableExtractor.RequestParameterConverter;
-import vo.ParameterValues;
+import variableExtractor.RequestParameterConverterV2;
 import vo.RequestBodyContent;
+import vo.RequestValues;
 import static mapper.HttpPathMatcher.MatchedMethod;
 
+@Slf4j
 public class RequestExecutor {
     private final Container container;
     private final HttpPathMatcherIf httpPathMatcher;
@@ -26,16 +31,19 @@ public class RequestExecutor {
         this.httpPathMatcher = httpPathMatcher;
     }
 
-    public Object execute(RequestMethod method, String url, ParameterValues formVariable, RequestBodyContent bodyContent) {
+    public Object execute(RequestMethod method, String url, RequestValues formVariable, RequestBodyContent bodyContent) {
         MatchedMethod matchedMethod = httpPathMatcher.matchJavaMethod(method, url).orElseThrow(() -> new RuntimeException(""));
 
         Method javaMethod = matchedMethod.getJavaMethod();
-        ParameterValues pathVariable = matchedMethod.getPathVariable();
+        RequestValues pathVariable = matchedMethod.getPathVariable();
 
-        CompositeParameterConverter parameterConverter = new CompositeParameterConverter(List.of(new RequestParameterConverter(RequestParam.class, formVariable),
-                                                                                                 new RequestParameterConverter(PathVariable.class, pathVariable),
-                                                                                                 new RequestBodyParameterConverter(bodyContent)));
-        MethodExecutor methodExecutor = new MethodExecutor(container, parameterConverter);
+        Map<Class<? extends Annotation>, ParameterConverter> classParameterConverterMap = Map.of(RequestParam.class, new RequestParameterConverterV2(RequestParam.class, formVariable),
+                                                                                                 PathVariable.class, new RequestParameterConverterV2(PathVariable.class, pathVariable),
+                                                                                                 RequestBody.class, new RequestBodyParameterConverter(bodyContent));
+        CompositeParameterConverter compositeParameterConverter = new CompositeParameterConverter(classParameterConverterMap);
+
+
+        MethodExecutor methodExecutor = new MethodExecutor(container, compositeParameterConverter);
 
         return methodExecutor.execute(javaMethod);
     }

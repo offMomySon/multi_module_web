@@ -17,7 +17,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import util.AnnotationUtils;
-import vo.ParameterValues;
+import vo.RequestValues;
 
 class RequestParameterConverterTest {
 
@@ -28,7 +28,7 @@ class RequestParameterConverterTest {
         //given
         RequestParameterConverter converter = new RequestParameterConverter(
             annotationType,
-            new ParameterValues(Map.of("arg0", "1", "arg1", "2", "rp", "1")));
+            new RequestValues(Map.of("arg0", "1", "arg1", "2", "rp", "1")));
 
         //when
         Throwable actual = Assertions.catchThrowable(() -> converter.convertAsValue(parameter));
@@ -46,7 +46,7 @@ class RequestParameterConverterTest {
         //when
         Throwable actual = Assertions.catchThrowable(() -> new RequestParameterConverter(
             RequestBody.class,
-            new ParameterValues(new HashMap<>())));
+            new RequestValues(new HashMap<>())));
 
         //then
         Assertions.assertThat(actual).isInstanceOf(IllegalArgumentException.class);
@@ -91,14 +91,14 @@ class RequestParameterConverterTest {
     void test5() throws Exception {
         //given
         Parameter parameter = TestClass.getParameter(PathVariable.class);
-        ParameterValues existValueParameterValues = TestClass.getExistValueReuqestParameters();
+        RequestValues existValueRequestValues = TestClass.getExistValueReuqestParameters();
         RequestParameterConverter converter = new RequestParameterConverter(
             PathVariable.class,
-            existValueParameterValues
+            existValueRequestValues
         );
 
         String parameterName = parameter.getName();
-        String expect = existValueParameterValues.get(parameterName);
+        String expect = existValueRequestValues.get(parameterName);
 
         //when
         Optional<Object> actual = converter.convertAsValue(parameter);
@@ -124,15 +124,15 @@ class RequestParameterConverterTest {
                                     @RequestBody String requestBody) {
         }
 
-        public static ParameterValues getDoesNotExistValueRequestParameters() {
+        public static RequestValues getDoesNotExistValueRequestParameters() {
             Map<String, String> doesNotExistValue = Map.of("doesNotExistKey", "value");
-            return new ParameterValues(doesNotExistValue);
+            return new RequestValues(doesNotExistValue);
         }
 
-        public static ParameterValues getExistValueReuqestParameters() {
+        public static RequestValues getExistValueReuqestParameters() {
             Map<String, String> existValue = Map.of("arg0", "arg0",
                                                     "rp", "requestParam");
-            return new ParameterValues(existValue);
+            return new RequestValues(existValue);
         }
 
         private static Method getAnnotatedMethod() {
@@ -158,9 +158,9 @@ class RequestParameterConverterTest {
 
         }
 
-        public static ParameterValues getDoesNotExistValueRequestParameters() {
+        public static RequestValues getDoesNotExistValueRequestParameters() {
             Map<String, String> doesNotExistValue = Map.of("doesNotExistKey", "value");
-            return new ParameterValues(doesNotExistValue);
+            return new RequestValues(doesNotExistValue);
         }
 
         private static Method getAnnotatedMethod() {

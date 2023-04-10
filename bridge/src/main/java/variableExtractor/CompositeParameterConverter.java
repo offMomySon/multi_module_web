@@ -1,40 +1,52 @@
 package variableExtractor;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class CompositeParameterConverter implements ParameterConverter {
-    private final List<ParameterConverter> parameterConverters;
+    private final Map<Class<? extends Annotation>, ParameterConverter> parameterConverters;
 
-    public CompositeParameterConverter(List<ParameterConverter> parameterConverters) {
+    public CompositeParameterConverter(Map<Class<? extends Annotation>, ParameterConverter> parameterConverters) {
         if (Objects.isNull(parameterConverters)) {
             throw new RuntimeException("parameterConverters is null.");
         }
 
-        List<ParameterConverter> newJavaMethodResolver = parameterConverters.stream()
-            .filter(o -> !Objects.isNull(o))
-            .collect(Collectors.toUnmodifiableList());
+        Map<Class<? extends Annotation>, ParameterConverter> newParameterConverters = parameterConverters.entrySet().stream()
+            .filter(entry -> Objects.nonNull(entry.getKey()))
+            .filter(entry -> Objects.nonNull(entry.getValue()))
+            .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
 
-        if (newJavaMethodResolver.isEmpty()) {
-            throw new RuntimeException("newMethodResovler is empty.");
+        if (newParameterConverters.isEmpty()) {
+            throw new RuntimeException("newParameterConverters is empty.");
         }
 
-        this.parameterConverters = newJavaMethodResolver;
+        this.parameterConverters = newParameterConverters;
     }
 
     @Override
     public Optional<Object> convertAsValue(Parameter parameter) {
-        if (Objects.isNull(parameter)) {
-            return Optional.empty();
-        }
-        
-        return parameterConverters.stream()
-            .map(converter -> converter.convertAsValue(parameter))
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .findAny();
+        Objects.requireNonNull(parameter);
+
+        ParameterConverter foundConverter = findParameterConverter(parameter);
+
+        return foundConverter.convertAsValue(parameter);
+    }
+
+    private ParameterConverter findParameterConverter(Parameter parameter) {
+        List<? extends Class<? extends Annotation>> annotationTypes = Arrays.stream(parameter.getDeclaredAnnotations())
+            .map(Annotation::annotationType)
+            .collect(Collectors.toUnmodifiableList());
+
+        return annotationTypes.stream()
+            .filter(parameterConverters::containsKey)
+            .map(parameterConverters::get)
+            .findAny()
+            .orElseThrow(() -> new RuntimeException("does not exist converter"));
     }
 }

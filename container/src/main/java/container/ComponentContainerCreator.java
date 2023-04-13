@@ -27,7 +27,7 @@ public class ComponentContainerCreator {
             .map(ComponentClassLoader::new)
             .collect(Collectors.toUnmodifiableList());
 
-        Container container = new Container();
+        Container container = Container.empty();
         for (ComponentClassLoader classLoader : componentClassLoaders) {
             Container newContainer = classLoader.load(container);
             container.merge(newContainer);

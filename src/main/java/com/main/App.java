@@ -1,5 +1,6 @@
 package com.main;
 
+import com.main.executor.MethodExecutor;
 import com.main.executor.RequestExecutor;
 import container.ComponentContainerCreator;
 import container.Container;
@@ -21,9 +22,10 @@ public class App {
         List<Class<?>> classes = FileSystemUtil.findClass(App.class, "com.main");
 
         Container container = new ComponentContainerCreator(classes).create();
+        MethodExecutor methodExecutor = new MethodExecutor(container);
         HttpPathMatcherIf httpPathMatcher = new ControllerPathMatcherCreator(classes).create();
+        RequestExecutor requestExecutor = new RequestExecutor(methodExecutor, httpPathMatcher);
 
-        RequestExecutor requestExecutor = new RequestExecutor(container, httpPathMatcher);
         Object result = requestExecutor.execute(RequestMethod.GET, "/basic/pathVariable", RequestValues.empty(), RequestBodyContent.empty());
 
         System.out.println(result);

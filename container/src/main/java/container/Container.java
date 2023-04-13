@@ -21,6 +21,10 @@ public class Container {
             .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
     }
 
+    public static Container empty() {
+        return new Container(new HashMap<>());
+    }
+
     public Container merge(Container otherContainer) {
         if (Objects.isNull(otherContainer)) {
             return this;

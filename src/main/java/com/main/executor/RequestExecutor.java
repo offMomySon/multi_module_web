@@ -1,6 +1,5 @@
 package com.main.executor;
 
-import container.Container;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -21,13 +20,14 @@ import static mapper.HttpPathMatcher.MatchedMethod;
 
 @Slf4j
 public class RequestExecutor {
-    private final Container container;
+    private final MethodExecutor methodExecutor;
     private final HttpPathMatcherIf httpPathMatcher;
 
-    public RequestExecutor(Container container, HttpPathMatcherIf httpPathMatcher) {
-        Objects.requireNonNull(container, "beanContainer require not null.");
+    public RequestExecutor(MethodExecutor methodExecutor, HttpPathMatcherIf httpPathMatcher) {
+        Objects.requireNonNull(methodExecutor, "methodExecutor require not null.");
         Objects.requireNonNull(httpPathMatcher, "httpPathMatcher require not null.");
-        this.container = container;
+
+        this.methodExecutor = methodExecutor;
         this.httpPathMatcher = httpPathMatcher;
     }
 
@@ -42,8 +42,6 @@ public class RequestExecutor {
                                                                                                  RequestBody.class, new RequestBodyParameterConverter(bodyContent));
         CompositeParameterConverter compositeParameterConverter = new CompositeParameterConverter(classParameterConverterMap);
 
-        MethodExecutor methodExecutor = new MethodExecutor(container, compositeParameterConverter);
-
-        return methodExecutor.execute(javaMethod);
+        return methodExecutor.execute(javaMethod, compositeParameterConverter);
     }
 }

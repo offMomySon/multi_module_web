@@ -24,7 +24,7 @@ public class ComponentClassLoader {
     }
 
     public Container load(Container prevContainer) {
-        Container newContainer = new Container();
+        Container newContainer = Container.empty();
 
         Object instantiate = instantiate(clazz, newContainer, prevContainer, new LinkedHashSet<>());
         newContainer.put(clazz, instantiate);

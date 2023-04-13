@@ -45,15 +45,6 @@ public class NewWorker implements Runnable {
         closeStream();
     }
 
-    private void closeStream() {
-        try {
-            inputStream.close();
-            outputStream.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     private void sendResponse(RequestResult result) {
         try {
             InputStream resultInputStream = IoUtils.createBufferedInputStream(result.getInputStream());
@@ -65,6 +56,15 @@ public class NewWorker implements Runnable {
             }
 
             bufferedOutputStream.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void closeStream() {
+        try {
+            inputStream.close();
+            outputStream.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

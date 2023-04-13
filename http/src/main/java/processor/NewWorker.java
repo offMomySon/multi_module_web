@@ -1,11 +1,9 @@
 package processor;
 
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import util.IoUtils;
 import vo.HttpMethod;
@@ -13,6 +11,7 @@ import vo.HttpUri;
 import vo.NewHttpHeader;
 import vo.RequestMessageHeaderParser;
 import vo.RequestMessageHeaderParser.RequestMessageHeader;
+import vo.RequestResult;
 
 public class NewWorker implements Runnable {
     private final byte[] BUFFER = new byte[8192];
@@ -34,6 +33,7 @@ public class NewWorker implements Runnable {
     @Override
     public void run() {
         RequestMessageHeaderParser messageHeaderParser = RequestMessageHeaderParser.parse(inputStream);
+
         RequestMessageHeader requestMessageHeader = messageHeaderParser.getRequestMessageHeader();
 
         HttpMethod httpMethod = requestMessageHeader.getHttpMethod();
@@ -41,7 +41,7 @@ public class NewWorker implements Runnable {
         NewHttpHeader httpHeader = requestMessageHeader.getHttpHeader();
         InputStream requestStream = messageHeaderParser.getRequestStream();
 
-        Object result = httpRequestExecutor.execute(httpMethod, httpUri, httpHeader, requestStream, outputStream);
+        RequestResult result = httpRequestExecutor.execute(httpMethod, httpUri, httpHeader, requestStream, outputStream);
 
         sendResponse(result);
 
@@ -57,10 +57,9 @@ public class NewWorker implements Runnable {
         }
     }
 
-    private void sendResponse(Object result) {
+    private void sendResponse(RequestResult result) {
         try {
-            InputStream resultInputStream = new ByteArrayInputStream(result.toString().getBytes(StandardCharsets.UTF_8));
-            resultInputStream = IoUtils.createBufferedInputStream(resultInputStream);
+            InputStream resultInputStream = IoUtils.createBufferedInputStream(result.getInputStream());
 
             BufferedOutputStream bufferedOutputStream = IoUtils.createBufferedOutputStream(outputStream);
             while (resultInputStream.available() != 0) {

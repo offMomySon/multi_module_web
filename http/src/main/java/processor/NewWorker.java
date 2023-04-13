@@ -10,7 +10,6 @@ import vo.HttpMethod;
 import vo.HttpUri;
 import vo.NewHttpHeader;
 import vo.RequestMessageHeaderParser;
-import vo.RequestMessageHeaderParser.RequestMessageHeader;
 import vo.RequestResult;
 
 public class NewWorker implements Runnable {
@@ -34,11 +33,9 @@ public class NewWorker implements Runnable {
     public void run() {
         RequestMessageHeaderParser messageHeaderParser = RequestMessageHeaderParser.parse(inputStream);
 
-        RequestMessageHeader requestMessageHeader = messageHeaderParser.getRequestMessageHeader();
-
-        HttpMethod httpMethod = requestMessageHeader.getHttpMethod();
-        HttpUri httpUri = requestMessageHeader.getHttpUri();
-        NewHttpHeader httpHeader = requestMessageHeader.getHttpHeader();
+        HttpMethod httpMethod = messageHeaderParser.getHttpMethod();
+        HttpUri httpUri = messageHeaderParser.getHttpUri();
+        NewHttpHeader httpHeader = messageHeaderParser.getHttpHeader();
         InputStream requestStream = messageHeaderParser.getRequestStream();
 
         RequestResult result = httpRequestExecutor.execute(httpMethod, httpUri, httpHeader, requestStream, outputStream);

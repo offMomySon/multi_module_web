@@ -9,7 +9,7 @@ public class HttpRequest {
     private final QueryParameters queryParameters;
     private final HttpHeader httpHeader;
     private final InputStream requestStream;
-    
+
     public HttpRequest(HttpMethod httpMethod, HttpUri httpUri, QueryParameters queryParameters, HttpHeader httpHeader, InputStream requestStream) {
         Objects.requireNonNull(httpMethod);
         Objects.requireNonNull(httpUri);
@@ -38,5 +38,9 @@ public class HttpRequest {
 
     public InputStream getRequestStream() {
         return requestStream;
+    }
+
+    public QueryParameters getQueryParameters() {
+        return queryParameters;
     }
 }

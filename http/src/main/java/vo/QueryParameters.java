@@ -53,7 +53,7 @@ public class QueryParameters {
         return values.getOrDefault(key, DEFUALT_VALUE);
     }
 
-    public Map<String, String> getQueryParameters() {
+    public Map<String, String> getParameterMap() {
         return new HashMap<>(values);
     }
 }

@@ -7,19 +7,19 @@ import java.util.Objects;
 import java.util.Optional;
 import marker.RequestBody;
 import util.AnnotationUtils;
-import vo.RequestBodyContent;
+import vo.BodyContent;
 
 public class RequestBodyParameterConverter implements ParameterConverter {
     private static final Class<RequestBody> REQUEST_BODY_CLASS = RequestBody.class;
     private static final JsonMapper JSON_MAPPER = new JsonMapper();
 
-    private final RequestBodyContent requestBodyContent;
+    private final BodyContent bodyContent;
 
-    public RequestBodyParameterConverter(RequestBodyContent requestBodyContent) {
-        if (Objects.isNull(requestBodyContent)) {
+    public RequestBodyParameterConverter(BodyContent bodyContent) {
+        if (Objects.isNull(bodyContent)) {
             throw new RuntimeException("requestBodyContent is null.");
         }
-        this.requestBodyContent = requestBodyContent;
+        this.bodyContent = bodyContent;
     }
 
     public Optional<Object> convertAsValue(Parameter parameter) {
@@ -30,7 +30,7 @@ public class RequestBodyParameterConverter implements ParameterConverter {
 
         RequestBody requestBody = optionalRequestBody.get();
 
-        boolean isEmptyBody = requestBodyContent.isEmpty();
+        boolean isEmptyBody = bodyContent.isEmpty();
 
         boolean doesNotPossibleCreate = requestBody.required() && isEmptyBody;
         if (doesNotPossibleCreate) {
@@ -42,19 +42,19 @@ public class RequestBodyParameterConverter implements ParameterConverter {
             return Optional.empty();
         }
 
-        return Optional.ofNullable(requestBodyContent.getValue())
+        return Optional.ofNullable(bodyContent.getValue())
             .map(bodyMessage -> createObject(parameter));
     }
 
     private Object createObject(Parameter parameter) {
         try {
             Class<?> type = parameter.getType();
-            String bodyMessage = requestBodyContent.getValue();
+            String bodyMessage = bodyContent.getValue();
             System.out.println(type);
 
             return JSON_MAPPER.readValue(bodyMessage, type);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("json 을 파싱 할 수 없습니다. value : " + requestBodyContent.getValue(), e);
+            throw new RuntimeException("json 을 파싱 할 수 없습니다. value : " + bodyContent.getValue(), e);
         }
     }
 }

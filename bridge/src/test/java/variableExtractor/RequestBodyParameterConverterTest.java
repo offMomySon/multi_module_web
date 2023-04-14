@@ -13,7 +13,7 @@ import marker.RequestParam;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import vo.RequestBodyContent;
+import vo.BodyContent;
 
 class RequestBodyParameterConverterTest {
 
@@ -37,7 +37,7 @@ class RequestBodyParameterConverterTest {
     void test2() throws Exception {
         //given
         Parameter[] parameters = TestClass.getPathVariableAndRequestParamAnnotatedParameters();
-        RequestBodyParameterConverter converter = new RequestBodyParameterConverter(RequestBodyContent.empty());
+        RequestBodyParameterConverter converter = new RequestBodyParameterConverter(BodyContent.empty());
 
         //when
         List<Throwable> actuals = new ArrayList<>();
@@ -55,7 +55,7 @@ class RequestBodyParameterConverterTest {
     @Test
     void test3() throws Exception {
         //given
-        RequestBodyParameterConverter converter = new RequestBodyParameterConverter(RequestBodyContent.empty());
+        RequestBodyParameterConverter converter = new RequestBodyParameterConverter(BodyContent.empty());
         Parameter parameter = TestClass.getRequestBodyAnnotatedParameter();
 
         //when
@@ -69,7 +69,7 @@ class RequestBodyParameterConverterTest {
     @Test
     void test4() throws Exception {
         //given
-        RequestBodyParameterConverter converter = new RequestBodyParameterConverter(RequestBodyContent.empty());
+        RequestBodyParameterConverter converter = new RequestBodyParameterConverter(BodyContent.empty());
         Parameter parameter = TestClass.getRequestBodyAnnotatedAndRequiredFalseParameter();
 
         //when
@@ -129,14 +129,14 @@ class RequestBodyParameterConverterTest {
             return method.getParameters();
         }
 
-        public static RequestBodyContent getRequestBodyContent() {
+        public static BodyContent getRequestBodyContent() {
             StringBuilder sb = new StringBuilder();
             sb.append("{\"tt\" : \"test\"");
             sb.append(", ");
             sb.append("\"vv\" : \"test\"}");
             String jsonBody = sb.toString();
 
-            return new RequestBodyContent(jsonBody);
+            return new BodyContent(jsonBody);
         }
 
 

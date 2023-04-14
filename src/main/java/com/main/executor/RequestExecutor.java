@@ -1,9 +1,11 @@
 package com.main.executor;
 
+import java.io.ByteArrayInputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import mapper.HttpPathMatcherIf;
 import marker.PathVariable;
@@ -15,10 +17,11 @@ import variableExtractor.CompositeParameterConverter;
 import variableExtractor.ParameterConverter;
 import variableExtractor.RequestBodyParameterConverter;
 import variableExtractor.RequestParameterConverter;
+import vo.BodyContent;
 import vo.HttpRequest;
-import vo.RequestBodyContent;
 import vo.RequestResult;
 import vo.RequestValues;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static mapper.HttpPathMatcher.MatchedMethod;
 
 @Slf4j
@@ -36,10 +39,25 @@ public class RequestExecutor implements HttpRequestExecutor {
 
     @Override
     public RequestResult execute(HttpRequest httpRequest) {
-        return null;
+        try {
+            RequestMethod method = RequestMethod.find(httpRequest.getHttpMethod().name());
+            String url = httpRequest.getHttpUri().getUrl();
+            RequestValues formVariable = new RequestValues(httpRequest.getQueryParameters().getParameterMap());
+            BodyContent bodyContent = BodyContent.from(httpRequest.getRequestStream());
+
+            String result = doExecute(method, url, formVariable, bodyContent);
+
+            String startLine = "HTTP/1.1 200 OK";
+            Map<String, String> header = Map.of("Host", "localhost:8080");
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(result.getBytes(UTF_8));
+
+            return new RequestResult(startLine, header, byteArrayInputStream);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public Object execute(RequestMethod method, String url, RequestValues formVariable, RequestBodyContent bodyContent) {
+    public String doExecute(RequestMethod method, String url, RequestValues formVariable, BodyContent bodyContent) {
         MatchedMethod matchedMethod = httpPathMatcher.matchJavaMethod(method, url).orElseThrow(() -> new RuntimeException(""));
 
         Method javaMethod = matchedMethod.getJavaMethod();
@@ -50,6 +68,11 @@ public class RequestExecutor implements HttpRequestExecutor {
                                                                                                  RequestBody.class, new RequestBodyParameterConverter(bodyContent));
         CompositeParameterConverter compositeParameterConverter = new CompositeParameterConverter(classParameterConverterMap);
 
-        return methodExecutor.execute(javaMethod, compositeParameterConverter);
+        Optional<Object> result = methodExecutor.execute(javaMethod, compositeParameterConverter);
+
+        if (result.isPresent()) {
+            return "success to execute";
+        }
+        return "failt to execute";
     }
 }

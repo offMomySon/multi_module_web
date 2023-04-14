@@ -10,7 +10,7 @@ import mapper.ControllerPathMatcherCreator;
 import mapper.FileSystemUtil;
 import mapper.HttpPathMatcherIf;
 import marker.RequestMethod;
-import vo.RequestBodyContent;
+import vo.BodyContent;
 import vo.RequestValues;
 
 @Slf4j
@@ -26,7 +26,7 @@ public class App {
         HttpPathMatcherIf httpPathMatcher = new ControllerPathMatcherCreator(classes).create();
         RequestExecutor requestExecutor = new RequestExecutor(methodExecutor, httpPathMatcher);
 
-        Object result = requestExecutor.execute(RequestMethod.GET, "/basic/pathVariable", RequestValues.empty(), RequestBodyContent.empty());
+        Object result = requestExecutor.doExecute(RequestMethod.GET, "/basic/pathVariable", RequestValues.empty(), BodyContent.empty());
 
         System.out.println(result);
     }

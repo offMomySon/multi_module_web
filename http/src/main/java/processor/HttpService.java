@@ -2,6 +2,8 @@ package processor;
 
 import config.Config;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.MessageFormat;
@@ -10,6 +12,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
+import vo.HttpRequestReader;
+import vo.ResponseSender;
 
 /***
  * 역할.
@@ -42,14 +46,33 @@ public class HttpService {
 
         while (true) {
             try {
-                log.info("Ready client connection..");
-                Socket socket = serverSocket.accept();
+                Socket socket = acceptSocket();
+                InputStream inputStream = socket.getInputStream();
+                OutputStream outputStream = socket.getOutputStream();
 
-                log.info("load worker to thread.");
-                threadPoolExecutor.execute(HttpWorker.create(socket.getInputStream(), socket.getOutputStream()));
+                NewWorker httpWorker = createHttpWorker(inputStream, outputStream, httpRequestExecutor);
+
+                log.info("load request to thread.");
+                threadPoolExecutor.execute(httpWorker);
             } catch (IOException e) {
                 throw new RuntimeException(MessageFormat.format("I/O fail. Reason : `{0}`", e.getCause()));
             }
         }
+    }
+
+    private static NewWorker createHttpWorker(InputStream inputStream, OutputStream outputStream, HttpRequestExecutor httpRequestExecutor) {
+        log.info("start to create requestWorker");
+        HttpRequestReader httpRequestReader = new HttpRequestReader(inputStream);
+        ResponseSender responseSender = new ResponseSender(outputStream);
+        NewWorker newWorker = new NewWorker(httpRequestReader, responseSender, httpRequestExecutor);
+        log.info("created requestWorker");
+        return newWorker;
+    }
+
+    private Socket acceptSocket() throws IOException {
+        log.info("Ready client connection..");
+        Socket socket = serverSocket.accept();
+        log.info("socker connected.");
+        return socket;
     }
 }

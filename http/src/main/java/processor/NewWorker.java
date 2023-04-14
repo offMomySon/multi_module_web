@@ -12,8 +12,6 @@ import vo.RequestResult;
 import vo.ResponseSender;
 
 public class NewWorker implements Runnable {
-    private final byte[] BUFFER = new byte[8192];
-
     private final HttpRequestReader requestReader;
     private final ResponseSender responseSender;
     private final HttpRequestExecutor httpRequestExecutor;

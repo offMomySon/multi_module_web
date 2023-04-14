@@ -1,6 +1,5 @@
 package com.main.executor;
 
-import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -16,9 +15,7 @@ import variableExtractor.CompositeParameterConverter;
 import variableExtractor.ParameterConverter;
 import variableExtractor.RequestBodyParameterConverter;
 import variableExtractor.RequestParameterConverter;
-import vo.HttpHeader;
-import vo.HttpMethod;
-import vo.HttpUri;
+import vo.HttpRequest;
 import vo.RequestBodyContent;
 import vo.RequestResult;
 import vo.RequestValues;
@@ -38,12 +35,9 @@ public class RequestExecutor implements HttpRequestExecutor {
     }
 
     @Override
-    public RequestResult execute(HttpMethod httpMethod, HttpUri httpUri, HttpHeader httpHeader, InputStream inputStream) {
-
-        String url = httpUri.getUrl();
-
+    public RequestResult execute(HttpRequest httpRequest) {
+        return null;
     }
-
 
     public Object execute(RequestMethod method, String url, RequestValues formVariable, RequestBodyContent bodyContent) {
         MatchedMethod matchedMethod = httpPathMatcher.matchJavaMethod(method, url).orElseThrow(() -> new RuntimeException(""));

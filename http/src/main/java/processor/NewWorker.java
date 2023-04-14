@@ -1,70 +1,46 @@
 package processor;
 
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Objects;
-import util.IoUtils;
 import vo.HttpMethod;
+import vo.HttpRequest;
+import vo.HttpRequestReader;
 import vo.HttpUri;
 import vo.NewHttpHeader;
-import vo.RequestMessageHeaderParser;
 import vo.RequestResult;
+import vo.ResponseSender;
 
 public class NewWorker implements Runnable {
     private final byte[] BUFFER = new byte[8192];
 
-    private final InputStream inputStream;
-    private final OutputStream outputStream;
+    private final HttpRequestReader requestReader;
+    private final ResponseSender responseSender;
     private final HttpRequestExecutor httpRequestExecutor;
 
-    public NewWorker(InputStream inputStream, OutputStream outputStream, HttpRequestExecutor httpRequestExecutor) {
-        Objects.requireNonNull(inputStream);
-        Objects.requireNonNull(outputStream);
+    public NewWorker(HttpRequestReader requestReader, ResponseSender responseSender, HttpRequestExecutor httpRequestExecutor) {
+        Objects.requireNonNull(requestReader);
+        Objects.requireNonNull(responseSender);
         Objects.requireNonNull(httpRequestExecutor);
 
-        this.inputStream = inputStream;
-        this.outputStream = outputStream;
+        this.requestReader = requestReader;
+        this.responseSender = responseSender;
         this.httpRequestExecutor = httpRequestExecutor;
     }
 
     @Override
     public void run() {
-        RequestMessageHeaderParser messageHeaderParser = RequestMessageHeaderParser.parse(inputStream);
+        try (requestReader; responseSender) {
+            HttpRequest httpRequest = requestReader.read();
 
-        HttpMethod httpMethod = messageHeaderParser.getHttpMethod();
-        HttpUri httpUri = messageHeaderParser.getHttpUri();
-        NewHttpHeader httpHeader = messageHeaderParser.getHttpHeader();
-        InputStream requestStream = messageHeaderParser.getRequestStream();
+            HttpMethod httpMethod = httpRequest.getHttpMethod();
+            HttpUri httpUri = httpRequest.getHttpUri();
+            NewHttpHeader httpHeader = httpRequest.getHttpHeader();
+            InputStream requestStream = httpRequest.getRequestStream();
 
-        RequestResult result = httpRequestExecutor.execute(httpMethod, httpUri, httpHeader, requestStream, outputStream);
+            RequestResult result = httpRequestExecutor.execute(httpMethod, httpUri, httpHeader, requestStream);
 
-        sendResponse(result);
-
-        closeStream();
-    }
-
-    private void sendResponse(RequestResult result) {
-        try {
-            InputStream resultInputStream = IoUtils.createBufferedInputStream(result.getInputStream());
-
-            BufferedOutputStream bufferedOutputStream = IoUtils.createBufferedOutputStream(outputStream);
-            while (resultInputStream.available() != 0) {
-                int read = resultInputStream.read(BUFFER);
-                bufferedOutputStream.write(BUFFER, 0, read);
-            }
-
-            bufferedOutputStream.flush();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void closeStream() {
-        try {
-            inputStream.close();
-            outputStream.close();
+            responseSender.send(result);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

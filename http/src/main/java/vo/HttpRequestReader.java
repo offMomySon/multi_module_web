@@ -2,6 +2,7 @@ package vo;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.SequenceInputStream;
@@ -9,27 +10,17 @@ import java.util.Objects;
 import util.IoUtils;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-public class RequestMessageHeaderParser {
+public class HttpRequestReader implements Closeable {
     private static final String REQUEST_LINE_DELIMITER = " ";
 
-    private final HttpMethod httpMethod;
-    private final HttpUri httpUri;
-    private final NewHttpHeader httpHeader;
     private final InputStream requestStream;
 
-    public RequestMessageHeaderParser(HttpMethod httpMethod, HttpUri httpUri, NewHttpHeader httpHeader, InputStream requestStream) {
-        Objects.requireNonNull(httpMethod);
-        Objects.requireNonNull(httpUri);
-        Objects.requireNonNull(httpHeader);
+    public HttpRequestReader(InputStream requestStream) {
         Objects.requireNonNull(requestStream);
-
-        this.httpMethod = httpMethod;
-        this.httpUri = httpUri;
-        this.httpHeader = httpHeader;
         this.requestStream = requestStream;
     }
 
-    public static RequestMessageHeaderParser parse(InputStream requestStream) {
+    public HttpRequest read() {
         try {
             Objects.requireNonNull(requestStream);
 
@@ -41,9 +32,9 @@ public class RequestMessageHeaderParser {
             HttpMethod httpMethod = HttpMethod.find(startLineElement[0]);
             HttpUri httpUri = HttpUri.from(startLineElement[1]);
             NewHttpHeader httpHeader = createHttpHeader(reader);
-            requestStream = combineRequestStream(reader, requestStream);
+            InputStream newRequestStream = combineRequestStream(reader, requestStream);
 
-            return new RequestMessageHeaderParser(httpMethod, httpUri, httpHeader, requestStream);
+            return new HttpRequest(httpMethod, httpUri, httpHeader, newRequestStream);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -76,19 +67,8 @@ public class RequestMessageHeaderParser {
         return httpHeaderBuilder.build();
     }
 
-    public HttpMethod getHttpMethod() {
-        return httpMethod;
-    }
-
-    public HttpUri getHttpUri() {
-        return httpUri;
-    }
-
-    public NewHttpHeader getHttpHeader() {
-        return httpHeader;
-    }
-
-    public InputStream getRequestStream() {
-        return requestStream;
+    @Override
+    public void close() throws IOException {
+        requestStream.close();
     }
 }

@@ -23,7 +23,7 @@ public class HttpService {
 
     public HttpService(HttpRequestExecutor httpRequestExecutor) {
         Objects.requireNonNull(httpRequestExecutor);
-        
+
         try {
             this.threadPoolExecutor = new ThreadPoolExecutor(Config.INSTANCE.getMaxConnection(),
                                                              Config.INSTANCE.getMaxConnection(),

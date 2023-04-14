@@ -20,6 +20,10 @@ public class HttpUri {
         this.value = value;
     }
 
+    public String getUrl() {
+        return value.toString();
+    }
+
     public static HttpUri from(String requestUri) {
         Objects.requireNonNull(requestUri);
 

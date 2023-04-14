@@ -1,5 +1,6 @@
 package com.main.executor;
 
+import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -10,16 +11,21 @@ import marker.PathVariable;
 import marker.RequestBody;
 import marker.RequestMethod;
 import marker.RequestParam;
+import processor.HttpRequestExecutor;
 import variableExtractor.CompositeParameterConverter;
 import variableExtractor.ParameterConverter;
 import variableExtractor.RequestBodyParameterConverter;
 import variableExtractor.RequestParameterConverter;
+import vo.HttpHeader;
+import vo.HttpMethod;
+import vo.HttpUri;
 import vo.RequestBodyContent;
+import vo.RequestResult;
 import vo.RequestValues;
 import static mapper.HttpPathMatcher.MatchedMethod;
 
 @Slf4j
-public class RequestExecutor {
+public class RequestExecutor implements HttpRequestExecutor {
     private final MethodExecutor methodExecutor;
     private final HttpPathMatcherIf httpPathMatcher;
 
@@ -30,6 +36,14 @@ public class RequestExecutor {
         this.methodExecutor = methodExecutor;
         this.httpPathMatcher = httpPathMatcher;
     }
+
+    @Override
+    public RequestResult execute(HttpMethod httpMethod, HttpUri httpUri, HttpHeader httpHeader, InputStream inputStream) {
+
+        String url = httpUri.getUrl();
+
+    }
+
 
     public Object execute(RequestMethod method, String url, RequestValues formVariable, RequestBodyContent bodyContent) {
         MatchedMethod matchedMethod = httpPathMatcher.matchJavaMethod(method, url).orElseThrow(() -> new RuntimeException(""));

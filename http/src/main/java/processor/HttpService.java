@@ -50,7 +50,7 @@ public class HttpService {
                 InputStream inputStream = socket.getInputStream();
                 OutputStream outputStream = socket.getOutputStream();
 
-                NewWorker httpWorker = createHttpWorker(inputStream, outputStream, httpRequestExecutor);
+                HttpWorker httpWorker = createHttpWorker(inputStream, outputStream, httpRequestExecutor);
 
                 log.info("load request to thread.");
                 threadPoolExecutor.execute(httpWorker);
@@ -60,13 +60,13 @@ public class HttpService {
         }
     }
 
-    private static NewWorker createHttpWorker(InputStream inputStream, OutputStream outputStream, HttpRequestExecutor httpRequestExecutor) {
+    private static HttpWorker createHttpWorker(InputStream inputStream, OutputStream outputStream, HttpRequestExecutor httpRequestExecutor) {
         log.info("start to create requestWorker");
         HttpRequestReader httpRequestReader = new HttpRequestReader(inputStream);
         ResponseSender responseSender = new ResponseSender(outputStream);
-        NewWorker newWorker = new NewWorker(httpRequestReader, responseSender, httpRequestExecutor);
+        HttpWorker httpWorker = new HttpWorker(httpRequestReader, responseSender, httpRequestExecutor);
         log.info("created requestWorker");
-        return newWorker;
+        return httpWorker;
     }
 
     private Socket acceptSocket() throws IOException {

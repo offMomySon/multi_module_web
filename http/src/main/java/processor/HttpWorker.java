@@ -11,12 +11,12 @@ import vo.NewHttpHeader;
 import vo.RequestResult;
 import vo.ResponseSender;
 
-public class NewWorker implements Runnable {
+public class HttpWorker implements Runnable {
     private final HttpRequestReader requestReader;
     private final ResponseSender responseSender;
     private final HttpRequestExecutor httpRequestExecutor;
 
-    public NewWorker(HttpRequestReader requestReader, ResponseSender responseSender, HttpRequestExecutor httpRequestExecutor) {
+    public HttpWorker(HttpRequestReader requestReader, ResponseSender responseSender, HttpRequestExecutor httpRequestExecutor) {
         Objects.requireNonNull(requestReader);
         Objects.requireNonNull(responseSender);
         Objects.requireNonNull(httpRequestExecutor);

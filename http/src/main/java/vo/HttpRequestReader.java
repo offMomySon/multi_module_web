@@ -31,7 +31,7 @@ public class HttpRequestReader implements Closeable {
 
             HttpMethod httpMethod = HttpMethod.find(startLineElement[0]);
             HttpUri httpUri = HttpUri.from(startLineElement[1]);
-            NewHttpHeader httpHeader = createHttpHeader(reader);
+            HttpHeader httpHeader = createHttpHeader(reader);
             InputStream newRequestStream = combineRequestStream(reader, requestStream);
 
             return new HttpRequest(httpMethod, httpUri, httpHeader, newRequestStream);
@@ -55,8 +55,8 @@ public class HttpRequestReader implements Closeable {
         return new SequenceInputStream(headerInputStream, requestStream);
     }
 
-    private static NewHttpHeader createHttpHeader(BufferedReader reader) throws IOException {
-        NewHttpHeader.Builder httpHeaderBuilder = NewHttpHeader.builder();
+    private static HttpHeader createHttpHeader(BufferedReader reader) throws IOException {
+        HttpHeader.Builder httpHeaderBuilder = HttpHeader.builder();
         while (reader.ready()) {
             String headerLine = reader.readLine();
             if (headerLine.isEmpty()) {

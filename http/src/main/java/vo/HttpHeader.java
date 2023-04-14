@@ -7,13 +7,13 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class NewHttpHeader {
+public class HttpHeader {
     private static final String HEADER_KEY_VALUE_DELIMITER = ":";
     private static final String DEFAULT_VALUE = "";
 
     private final Map<String, String> values;
 
-    public NewHttpHeader(Map<String, String> values) {
+    public HttpHeader(Map<String, String> values) {
         Objects.requireNonNull(values);
 
         this.values = values.entrySet().stream()
@@ -33,7 +33,7 @@ public class NewHttpHeader {
         return values.keySet();
     }
 
-    public static NewHttpHeader.Builder builder() {
+    public static HttpHeader.Builder builder() {
         return new Builder();
     }
 
@@ -59,8 +59,8 @@ public class NewHttpHeader {
             return this;
         }
 
-        public NewHttpHeader build() {
-            return new NewHttpHeader(this.values);
+        public HttpHeader build() {
+            return new HttpHeader(this.values);
         }
     }
 
@@ -68,7 +68,7 @@ public class NewHttpHeader {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        NewHttpHeader that = (NewHttpHeader) o;
+        HttpHeader that = (HttpHeader) o;
         return Objects.equals(values, that.values);
     }
 

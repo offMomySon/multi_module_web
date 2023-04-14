@@ -6,10 +6,10 @@ import java.util.Objects;
 public class HttpRequest {
     private final HttpMethod httpMethod;
     private final HttpUri httpUri;
-    private final NewHttpHeader httpHeader;
+    private final HttpHeader httpHeader;
     private final InputStream requestStream;
 
-    public HttpRequest(HttpMethod httpMethod, HttpUri httpUri, NewHttpHeader httpHeader, InputStream requestStream) {
+    public HttpRequest(HttpMethod httpMethod, HttpUri httpUri, HttpHeader httpHeader, InputStream requestStream) {
         Objects.requireNonNull(httpMethod);
         Objects.requireNonNull(httpUri);
         Objects.requireNonNull(httpHeader);
@@ -29,7 +29,7 @@ public class HttpRequest {
         return httpUri;
     }
 
-    public NewHttpHeader getHttpHeader() {
+    public HttpHeader getHttpHeader() {
         return httpHeader;
     }
 

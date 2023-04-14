@@ -3,11 +3,11 @@ package processor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
+import vo.HttpHeader;
 import vo.HttpMethod;
 import vo.HttpRequest;
 import vo.HttpRequestReader;
 import vo.HttpUri;
-import vo.NewHttpHeader;
 import vo.RequestResult;
 import vo.ResponseSender;
 
@@ -33,7 +33,7 @@ public class HttpWorker implements Runnable {
 
             HttpMethod httpMethod = httpRequest.getHttpMethod();
             HttpUri httpUri = httpRequest.getHttpUri();
-            NewHttpHeader httpHeader = httpRequest.getHttpHeader();
+            HttpHeader httpHeader = httpRequest.getHttpHeader();
             InputStream requestStream = httpRequest.getRequestStream();
 
             RequestResult result = httpRequestExecutor.execute(httpMethod, httpUri, httpHeader, requestStream);

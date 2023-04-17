@@ -1,5 +1,6 @@
 package container;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -18,7 +19,7 @@ public class Container {
         this.values = values.entrySet().stream()
             .filter(entry -> !Objects.isNull(entry.getKey()))
             .filter(entry -> !Objects.isNull(entry.getValue()))
-            .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
     }
 
     public static Container empty() {
@@ -36,6 +37,10 @@ public class Container {
         return this;
     }
 
+    public Container lock() {
+        return new Container(Collections.unmodifiableMap(this.values));
+    }
+
     public Set<Class<?>> keySet() {
         return new HashSet<>(values.keySet());
     }
@@ -50,5 +55,16 @@ public class Container {
 
     public boolean containsKey(Class<?> key) {
         return values.containsKey(key);
+    }
+
+    public static class ReadOnlyContainer {
+        private final Map<Class<?>, Object> values;
+
+        public ReadOnlyContainer(Map<Class<?>, Object> values) {
+            this.values = values.entrySet().stream()
+                .filter(entry -> !Objects.isNull(entry.getKey()))
+                .filter(entry -> !Objects.isNull(entry.getValue()))
+                .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
+        }
     }
 }

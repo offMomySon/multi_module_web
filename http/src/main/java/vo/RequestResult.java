@@ -1,5 +1,6 @@
 package vo;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.SequenceInputStream;
@@ -7,8 +8,11 @@ import java.text.MessageFormat;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static util.IoUtils.createBufferedInputStream;
 
+@Slf4j
 public class RequestResult {
     private static final String END_OF_LINE = "\r\n";
 
@@ -35,10 +39,11 @@ public class RequestResult {
         headerMessageBuilder.append(statusLine).append(END_OF_LINE);
         headerMessageBuilder.append(getHeaderMessage()).append(END_OF_LINE);
         headerMessageBuilder.append(END_OF_LINE);
-
         InputStream headerInputStream = new ByteArrayInputStream(headerMessageBuilder.toString().getBytes(UTF_8));
 
-        return new SequenceInputStream(headerInputStream, resultStream);
+        BufferedInputStream newResultStream = createBufferedInputStream(resultStream);
+
+        return new SequenceInputStream(headerInputStream, newResultStream);
     }
 
     private String getHeaderMessage() {

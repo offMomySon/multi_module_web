@@ -2,11 +2,13 @@ package processor;
 
 import java.io.IOException;
 import java.util.Objects;
+import lombok.extern.slf4j.Slf4j;
 import vo.HttpRequest;
 import vo.HttpRequestReader;
 import vo.RequestResult;
 import vo.ResponseSender;
 
+@Slf4j
 public class HttpWorker implements Runnable {
     private final HttpRequestReader requestReader;
     private final ResponseSender responseSender;
@@ -28,7 +30,7 @@ public class HttpWorker implements Runnable {
             HttpRequest httpRequest = requestReader.read();
 
             RequestResult result = httpRequestExecutor.execute(httpRequest);
-
+            
             responseSender.send(result);
         } catch (IOException e) {
             throw new RuntimeException(e);

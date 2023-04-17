@@ -1,6 +1,7 @@
 package com.main.executor;
 
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -39,6 +40,8 @@ public class RequestExecutor implements HttpRequestExecutor {
 
     @Override
     public RequestResult execute(HttpRequest httpRequest) {
+        Objects.requireNonNull(httpRequest);
+
         try {
             RequestMethod method = RequestMethod.find(httpRequest.getHttpMethod().name());
             String url = httpRequest.getHttpUri().getUrl();
@@ -48,10 +51,15 @@ public class RequestExecutor implements HttpRequestExecutor {
             String result = doExecute(method, url, formVariable, bodyContent);
 
             String startLine = "HTTP/1.1 200 OK";
-            Map<String, String> header = Map.of("Host", "localhost:8080");
-            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(result.getBytes(UTF_8));
+            Map<String, String> header = Map.of(
+                "Date", "MON, 27 Jul 2023 12:28:53 GMT",
+                "Host", "localhost:8080",
+                "Content-Type", "text/html; charset=UTF-8",
+                "Content-Length", result.length() + ""
+            );
+            InputStream inputStream = new ByteArrayInputStream(result.getBytes(UTF_8));
 
-            return new RequestResult(startLine, header, byteArrayInputStream);
+            return new RequestResult(startLine, header, inputStream);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

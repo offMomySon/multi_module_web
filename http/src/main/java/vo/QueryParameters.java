@@ -6,7 +6,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class QueryParameters {
     private static final String KEY_VALUE_DELIMITER = "=";
     private static final String PARAMETER_DELIMITER = "&";
@@ -23,12 +25,17 @@ public class QueryParameters {
             .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> curr));
     }
 
+    public static QueryParameters empty() {
+        return new QueryParameters(new HashMap<>());
+    }
+
     public static QueryParameters from(String queryParams) {
         if (Objects.isNull(queryParams) || queryParams.isBlank()) {
             return new QueryParameters(new HashMap<>());
         }
 
         String[] splitQueryParams = queryParams.split(PARAMETER_DELIMITER);
+        log.info("splitQueryParams : {}", Arrays.toString(splitQueryParams));
 
         Map<String, String> newQueryParams = Arrays.stream(splitQueryParams)
             .map(QueryParameters::getQueryParamEntry)

@@ -43,4 +43,15 @@ public class HttpRequest {
     public QueryParameters getQueryParameters() {
         return queryParameters;
     }
+
+    @Override
+    public String toString() {
+        return "HttpRequest{" +
+            "httpMethod=" + httpMethod +
+            ", httpUri=" + httpUri +
+            ", queryParameters=" + queryParameters +
+            ", httpHeader=" + httpHeader +
+            ", requestStream=" + requestStream +
+            '}';
+    }
 }

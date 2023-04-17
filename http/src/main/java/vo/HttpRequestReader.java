@@ -12,7 +12,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class HttpRequestReader implements Closeable {
     private static final String REQUEST_LINE_DELIMITER = " ";
-    private static final String QUERY_PARAM_STARTER = "?";
+    private static final String QUERY_PARAM_STARTER = "\\?";
 
     private final InputStream requestStream;
 
@@ -33,7 +33,7 @@ public class HttpRequestReader implements Closeable {
 
             HttpMethod httpMethod = HttpMethod.find(startLineElements[0]);
             HttpUri httpUri = HttpUri.from(uriElements[0]);
-            QueryParameters queryParameters = QueryParameters.from(uriElements[1]);
+            QueryParameters queryParameters = getQueryParameters(uriElements);
             HttpHeader httpHeader = createHttpHeader(reader);
             InputStream newRequestStream = combineRequestStream(reader, requestStream);
 
@@ -41,6 +41,13 @@ public class HttpRequestReader implements Closeable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static QueryParameters getQueryParameters(String[] uriElements) {
+        if (uriElements.length == 1) {
+            return QueryParameters.empty();
+        }
+        return QueryParameters.from(uriElements[1]);
     }
 
     private static SequenceInputStream combineRequestStream(BufferedReader reader, InputStream requestStream) throws IOException {

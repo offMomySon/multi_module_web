@@ -19,6 +19,7 @@ public class ResponseSender implements Closeable {
 
     public void send(RequestResult result) {
         Objects.requireNonNull(result);
+
         InputStream inputStream = result.getInputStream();
 
         doSend(inputStream, outputStream);
@@ -29,10 +30,11 @@ public class ResponseSender implements Closeable {
 
         InputStream newInputStream = createBufferedInputStream(inputStream);
         OutputStream newOutputStream = createBufferedOutputStream(outputStream);
-        try {
-            while (newInputStream.available() != 0) {
-                int read = newInputStream.read(BUFFER);
-                newOutputStream.write(BUFFER, 0, read);
+
+        try (inputStream) {
+            int bytesRead;
+            while ((bytesRead = newInputStream.read(BUFFER)) != -1) {
+                newOutputStream.write(BUFFER, 0, bytesRead);
             }
             newOutputStream.flush();
         } catch (IOException e) {

@@ -18,4 +18,9 @@ public class DefaultSegment extends Segment {
 
         return Objects.equals(value, other);
     }
+
+    @Override
+    public boolean doesNotMatch(String other) {
+        return !match(other);
+    }
 }

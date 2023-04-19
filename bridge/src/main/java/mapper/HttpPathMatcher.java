@@ -84,8 +84,7 @@ public class HttpPathMatcher {
                 return false;
             }
 
-            boolean onlyRemainWildCard = thisPaths.size() == 1;
-            return onlyRemainWildCard;
+            return thisPaths.size() == 1;
         }
         boolean onlyRemainRequestPath = thisPaths.isEmpty();
         if (onlyRemainRequestPath) {

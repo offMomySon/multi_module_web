@@ -7,6 +7,8 @@ public abstract class Segment {
     private static final String PATH_VARIABLE_CLOSER = "}";
     private static final String WILD_CARD_PATTERN = "**";
 
+    public abstract boolean doesNotMatch(String other);
+
     public abstract boolean match(String other);
 
     public static Segment create(String value) {

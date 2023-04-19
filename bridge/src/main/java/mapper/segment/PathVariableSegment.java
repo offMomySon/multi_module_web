@@ -37,4 +37,9 @@ public class PathVariableSegment extends Segment {
 
         return true;
     }
+
+    @Override
+    public boolean doesNotMatch(String other) {
+        return !match(other);
+    }
 }

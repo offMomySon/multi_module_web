@@ -1,6 +1,5 @@
 package mapper.segment;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -50,11 +49,8 @@ public class SegmentsMatcher {
     }
 
     public List<MatchResult> match(String otherPath) {
-        if (Objects.isNull(otherPath) || otherPath.isBlank()) {
+        if (Objects.isNull(otherPath)) {
             throw new IllegalArgumentException("path is empty.");
-        }
-        if (!otherPath.startsWith(PATH_DELIMITER)) {
-            throw new IllegalArgumentException(MessageFormat.format("invalid path. path : `{0}`", otherPath));
         }
 
         List<String> otherSegments = splitToSegments(otherPath);
@@ -73,6 +69,11 @@ public class SegmentsMatcher {
         boolean doesNotWildCardFirst = firstSegment instanceof DefaultSegment || firstSegment instanceof PathVariableSegment;
         if (doesNotWildCardFirst) {
             int chunkSize = this.segments.size();
+            boolean doesNotPossibleChunk = otherSegments.size() < chunkSize;
+            if (doesNotPossibleChunk) {
+                return Collections.emptyList();
+            }
+
             SegmentChunk segmentChunk = partitionAsChunk(otherSegments, 0, chunkSize);
             List<String> segmentsForCompare = segmentChunk.getSegmentsForCompare();
 
@@ -84,6 +85,11 @@ public class SegmentsMatcher {
 
         List<Segment> segmentsExcludedWildCard = this.segments.subList(1, this.segments.size());
         int chunkSize = segmentsExcludedWildCard.size();
+        boolean doesNotPossibleChunk = otherSegments.size() < chunkSize;
+        if (doesNotPossibleChunk) {
+            return Collections.emptyList();
+        }
+
         int lastPossibleChunkIndex = otherSegments.size() - chunkSize;
         List<SegmentChunk> segmentChunks = IntStream.rangeClosed(0, lastPossibleChunkIndex)
             .mapToObj(chunkStartIndex -> partitionAsChunk(otherSegments, chunkStartIndex, chunkSize))
@@ -170,6 +176,14 @@ public class SegmentsMatcher {
 
             this.leftPath = leftPath;
             this.pathVariable = pathVariable;
+        }
+
+        public boolean isFinish() {
+            return leftPath.isBlank();
+        }
+
+        public boolean doesNotFinish() {
+            return !isFinish();
         }
 
         public static MatchResult empty() {

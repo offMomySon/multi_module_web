@@ -1,5 +1,6 @@
 package mapper.segment;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -97,6 +98,7 @@ class SegmentsMatcherTest {
 
     public static Stream<Arguments> providePathAndExpectPaths() {
         return Stream.of(
+            Arguments.of("/path1", "/", Collections.emptySet()),
             Arguments.of("/path1", "/path1", Set.of("")),
             Arguments.of("/path1", "/path1/path2", Set.of("/path2")),
             Arguments.of("/path1", "/path1/path2/path3", Set.of("/path2/path3")),
@@ -115,6 +117,7 @@ class SegmentsMatcherTest {
             Arguments.of("/**/path2/path3", "/path1/path2/path3", Set.of("")),
             Arguments.of("/**/path2/path3", "/path1/path2/path3/path4", Set.of("/path4")),
             Arguments.of("/{pv1}", "/pv1", Set.of("")),
+            Arguments.of("/path1/{pv1}", "/pv2", Collections.emptySet()),
             Arguments.of("/{pv1}", "/pv1/pv2", Set.of("/pv2")),
             Arguments.of("/{pv1}", "/pv1/pv2/pv3", Set.of("/pv2/pv3")),
             Arguments.of("/{pv1}/{pv2}", "/pv1/pv2", Set.of("")),
@@ -124,6 +127,7 @@ class SegmentsMatcherTest {
             Arguments.of("/**/{pv1}", "/pv1", Set.of("")),
             Arguments.of("/**/{pv1}/path1", "/pv1/path1", Set.of("")),
             Arguments.of("/**/{pv1}/path1", "/pv1/path1/path2", Set.of("/path2")),
+            Arguments.of("/**/{pv1}/path1", "/path1/path1/path1/path2", Set.of("/path1/path2", "/path2")),
             Arguments.of("/**/path1/{pv1}", "/path1/pv1", Set.of("")),
             Arguments.of("/**/path1/{pv1}", "/path1/pv1/path2", Set.of("/path2")),
             Arguments.of("/**/path2/{pv1}", "/path1/path2/pv1", Set.of("")),

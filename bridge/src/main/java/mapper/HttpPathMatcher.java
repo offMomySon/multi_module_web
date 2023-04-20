@@ -2,23 +2,17 @@ package mapper;
 
 import java.lang.reflect.Method;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import lombok.Getter;
-import mapper.segment.PathVariableSegment;
-import mapper.segment.Segment;
-import mapper.segment.WildCardSegment;
+import mapper.segment.SegmentsMatcher;
 import marker.RequestMethod;
 import vo.RequestValues;
 
 public class HttpPathMatcher {
-    private static final String PATH_DELIMITER = "/";
-    private static final String EMPTY_PATTERN = "";
+    private static final String SEGMENT_MATCHER_DELIMITER = "/**";
 
     private final RequestMethod requestMethod;
     private final String url;
@@ -38,101 +32,41 @@ public class HttpPathMatcher {
             return Optional.empty();
         }
 
-        RequestValues pathVariables = RequestValues.empty();
-        if (doesNotMatch(requestUrl, pathVariables)) {
+        Optional<RequestValues> matchResult = match(requestUrl);
+        if (matchResult.isEmpty()) {
             return Optional.empty();
         }
 
-        return Optional.of(new MatchedMethod(javaMethod, pathVariables));
+        RequestValues requestValues = matchResult.get();
+        return Optional.of(new MatchedMethod(javaMethod, requestValues));
     }
 
-    private boolean doesNotMatch(String requestUrl, RequestValues pathVariables) {
-        return !match(requestUrl, pathVariables);
-    }
-
-    private boolean match(String requestUrl, RequestValues pathVariables) {
+    private Optional<RequestValues> match(String requestUrl) {
         requestUrl = Paths.get(requestUrl).normalize().toString();
+        Deque<SegmentsMatcher> matchers = createSegmentsMatcher(this.url);
+        SequencialSegmentsMatcher segmentsMatcher = SequencialSegmentsMatcher.from(matchers, requestUrl);
 
-        List<String> thisPaths;
-        if (Objects.equals(this.url, PATH_DELIMITER)) {
-            thisPaths = List.of(EMPTY_PATTERN);
-        } else {
-            List<String> splitThisPath = Arrays.stream(this.url.split(PATH_DELIMITER)).collect(Collectors.toUnmodifiableList());
-            thisPaths = splitThisPath.subList(1, splitThisPath.size());
-        }
-
-        List<String> requestPaths;
-        if (Objects.equals(requestUrl, PATH_DELIMITER)) {
-            requestPaths = List.of(EMPTY_PATTERN);
-        } else {
-            List<String> splitRequestPaths = Arrays.stream(requestUrl.split(PATH_DELIMITER)).collect(Collectors.toUnmodifiableList());
-            requestPaths = splitRequestPaths.subList(1, splitRequestPaths.size());
-        }
-
-        return doMatch(thisPaths, requestPaths, pathVariables);
+        return segmentsMatcher.match();
     }
 
-    private boolean doMatch(List<String> thisPaths, List<String> requestPaths, RequestValues pathVariables) {
-        boolean finishMatch = thisPaths.isEmpty() && requestPaths.isEmpty();
-        if (finishMatch) {
-            return true;
-        }
-        boolean onlyRemainThisPath = requestPaths.isEmpty();
-        if (onlyRemainThisPath) {
-            Segment thisPath = Segment.create(thisPaths.get(0));
-            if (!(thisPath instanceof WildCardSegment)) {
-                return false;
-            }
+    private static Deque<SegmentsMatcher> createSegmentsMatcher(String thisUrl) {
+        Deque<SegmentsMatcher> matchers = new ArrayDeque<>();
 
-            return thisPaths.size() == 1;
-        }
-        boolean onlyRemainRequestPath = thisPaths.isEmpty();
-        if (onlyRemainRequestPath) {
-            return false;
+        int lastIndex;
+        while ((lastIndex = thisUrl.lastIndexOf(SEGMENT_MATCHER_DELIMITER)) != -1) {
+            String lastSubString = thisUrl.substring(lastIndex);
+            thisUrl = thisUrl.substring(0, lastIndex);
+
+            SegmentsMatcher segmentsMatcher = new SegmentsMatcher(lastSubString);
+            matchers.push(segmentsMatcher);
         }
 
-        Segment thisPath = Segment.create(thisPaths.get(0));
-        String requestPath = requestPaths.get(0);
-
-        boolean match = thisPath.match(requestPath);
-        if (match) {
-            if (thisPath instanceof PathVariableSegment) {
-                String key = ((PathVariableSegment) thisPath).getExtractBraceValue();
-                pathVariables.put(key, requestPath);
-
-                boolean doMatch = doNextMatch(thisPaths, requestPaths, pathVariables, 1);
-
-                if (!doMatch) {
-                    pathVariables.remove(key);
-                }
-
-                return doMatch;
-            }
-
-            if (thisPath instanceof WildCardSegment) {
-                boolean onlyRemainWildCard = thisPaths.size() == 1;
-                if (onlyRemainWildCard) {
-                    return true;
-                }
-
-                List<Integer> nextRequestIndexes = IntStream.range(0, requestPaths.size()).boxed().collect(Collectors.toUnmodifiableList());
-                return nextRequestIndexes.stream()
-                    .anyMatch(_nextRequestIndex -> doNextMatch(thisPaths, requestPaths, pathVariables, _nextRequestIndex));
-            }
-
-            return doNextMatch(thisPaths, requestPaths, pathVariables, 1);
+        if (!thisUrl.isBlank()) {
+            SegmentsMatcher segmentsMatcher = new SegmentsMatcher(thisUrl);
+            matchers.push(segmentsMatcher);
         }
-        return false;
-    }
 
-    private boolean doNextMatch(List<String> thisPaths, List<String> requestPaths, RequestValues pathVariables, Integer nextRequestIndex) {
-        List<String> nextThisPaths = 1 < thisPaths.size() ?
-            thisPaths.subList(1, thisPaths.size()).stream().filter(s -> !Objects.isNull(s)).collect(Collectors.toUnmodifiableList()) :
-            Collections.emptyList();
-        List<String> nextRequestPaths = nextRequestIndex < requestPaths.size() ?
-            requestPaths.subList(nextRequestIndex, requestPaths.size()).stream().filter(s -> !Objects.isNull(s)).collect(Collectors.toUnmodifiableList()) :
-            Collections.emptyList();
-        return doMatch(nextThisPaths, nextRequestPaths, pathVariables);
+        return matchers;
     }
 
     @Getter

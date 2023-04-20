@@ -1,6 +1,7 @@
 package vo;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -41,6 +42,15 @@ public class RequestValues {
             return defaultValue;
         }
         return valueOrNull;
+    }
+
+    public RequestValues merge(RequestValues other) {
+        Map<String, String> newValues = new HashMap<>();
+
+        values.forEach((key, value) -> newValues.merge(key, value, (prev, curr) -> prev));
+        other.values.forEach((key, value) -> newValues.merge(key, value, (prev, curr) -> prev));
+
+        return new RequestValues(newValues);
     }
 
     public static RequestValues empty() {

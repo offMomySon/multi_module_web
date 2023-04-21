@@ -37,10 +37,10 @@ public class SequentialSegmentMatcherV2 {
     }
 
     public List<MatchResult> match() {
-        return doMatch(this.provider, prevResults);
+        return doMatch(prevResults);
     }
 
-    private static List<MatchResult> doMatch(Deque<SegmentMatcher> provider, List<MatchResult> prevResults) {
+    private List<MatchResult> doMatch(List<MatchResult> prevResults) {
         boolean failMatch = !provider.isEmpty() && (Objects.isNull(prevResults) || prevResults.isEmpty());
         if (failMatch) {
             return Collections.emptyList();

@@ -65,7 +65,7 @@ public class RequestExecutor implements HttpRequestExecutor {
         }
     }
 
-    public String doExecute(RequestMethod method, String url, RequestValues formVariable, BodyContent bodyContent) {
+    private String doExecute(RequestMethod method, String url, RequestValues formVariable, BodyContent bodyContent) {
         MatchedMethod matchedMethod = httpPathMatcher.matchJavaMethod(method, url).orElseThrow(() -> new RuntimeException(""));
 
         Method javaMethod = matchedMethod.getJavaMethod();

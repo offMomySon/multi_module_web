@@ -28,10 +28,10 @@ public class SequentialSegmentMatcher {
         }
         List<MatchResult> bootStrapResult = List.of(new MatchResult(requestUrl, RequestValues.empty()));
 
-        return doMatch(this.provider, bootStrapResult);
+        return doMatch(bootStrapResult);
     }
 
-    private static List<MatchResult> doMatch(Deque<SegmentMatcher> provider, List<MatchResult> prevResults) {
+    private List<MatchResult> doMatch(List<MatchResult> prevResults) {
         boolean failMatch = !provider.isEmpty() && (Objects.isNull(prevResults) || prevResults.isEmpty());
         if (failMatch) {
             return Collections.emptyList();
@@ -51,7 +51,7 @@ public class SequentialSegmentMatcher {
             .flatMap(Collection::stream)
             .collect(Collectors.toUnmodifiableList());
 
-        return doMatch(provider, newResults);
+        return doMatch(newResults);
     }
 
     private static List<MatchResult> doMatch(SegmentMatcher matcher, MatchResult prevResult) {

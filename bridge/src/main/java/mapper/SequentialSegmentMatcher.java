@@ -11,10 +11,10 @@ import mapper.segment.SegmentMatcher;
 import mapper.segment.SegmentMatcher.MatchResult;
 import vo.RequestValues;
 
-public class SequentialSegmentsMatcher {
+public class SequentialSegmentMatcher {
     private final Deque<SegmentMatcher> provider;
 
-    public SequentialSegmentsMatcher(Deque<SegmentMatcher> provider) {
+    public SequentialSegmentMatcher(Deque<SegmentMatcher> provider) {
         if (Objects.isNull(provider)) {
             throw new RuntimeException("provider is null");
         }

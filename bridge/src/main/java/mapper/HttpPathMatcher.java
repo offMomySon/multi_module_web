@@ -50,7 +50,7 @@ public class HttpPathMatcher {
 
     private List<MatchResult> match(String requestUrl) {
         Deque<SegmentMatcher> matcherProvider = createMatchProvider(this.url);
-        SequentialSegmentsMatcher matcher = new SequentialSegmentsMatcher(matcherProvider);
+        SequentialSegmentMatcher matcher = new SequentialSegmentMatcher(matcherProvider);
 
         requestUrl = Paths.get(requestUrl).normalize().toString();
 

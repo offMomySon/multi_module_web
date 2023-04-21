@@ -34,7 +34,7 @@ public class HttpPathMatcher {
             return Optional.empty();
         }
 
-        List<MatchResult> matchResults = match(requestUrl);
+        List<MatchResult> matchResults = matchV2(requestUrl);
         if (matchResults.isEmpty()) {
             return Optional.empty();
         }
@@ -55,6 +55,14 @@ public class HttpPathMatcher {
         requestUrl = Paths.get(requestUrl).normalize().toString();
 
         return matcher.match(requestUrl);
+    }
+
+    private List<MatchResult> matchV2(String requestUrl) {
+        Deque<SegmentMatcher> matcherProvider = createMatchProvider(this.url);
+        requestUrl = Paths.get(requestUrl).normalize().toString();
+        SequentialSegmentMatcherV2 matcher = SequentialSegmentMatcherV2.bootStrap(matcherProvider, requestUrl);
+
+        return matcher.match();
     }
 
     private static Deque<SegmentMatcher> createMatchProvider(String url) {

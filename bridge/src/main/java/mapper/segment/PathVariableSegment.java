@@ -19,7 +19,7 @@ public class PathVariableSegment extends Segment {
         this.value = value;
     }
 
-    public String getExtractBraceValue() {
+    public String getExtractBraceKey() {
         return value.substring(
             value.indexOf(PATH_VARIABLE_OPENER) + 1,
             value.indexOf(PATH_VARIABLE_CLOSER)

@@ -13,24 +13,29 @@ import lombok.extern.slf4j.Slf4j;
 import vo.RequestValues;
 
 @Slf4j
-public class SegmentsMatcher {
+public class SegmentMatcher {
     private static final String WILD_CARD_PATTERN = "**";
     private static final String PATH_DELIMITER = "/";
 
     private final List<Segment> segments;
 
-    public SegmentsMatcher(String path) {
+    private SegmentMatcher(List<Segment> segments) {
+        this.segments = segments.stream()
+            .filter(Objects::nonNull)
+            .collect(Collectors.toUnmodifiableList());
+    }
+
+    public static SegmentMatcher from(String path) {
         if (Objects.isNull(path) || path.isBlank()) {
             throw new IllegalArgumentException("path is empty.");
         }
 
         boolean isRootPath = PATH_DELIMITER.equals(path);
         if (isRootPath) {
-            this.segments = Collections.emptyList();
-            return;
+            return new SegmentMatcher(Collections.emptyList());
         }
 
-        List<String> segments = splitToSegments(path);
+        List<String> segments = splitAsSegment(path);
 
         long wildCardCount = segments.stream().filter(WILD_CARD_PATTERN::equals).count();
         boolean hasMoreThanOneWildCard = wildCardCount >= 2;
@@ -43,9 +48,9 @@ public class SegmentsMatcher {
             throw new IllegalArgumentException("wildcard pattern 은 첫번째 segment 에 존재해야합니다.");
         }
 
-        this.segments = segments.stream()
-            .map(Segment::create)
-            .collect(Collectors.toUnmodifiableList());
+        return new SegmentMatcher(segments.stream()
+                                      .map(Segment::create)
+                                      .collect(Collectors.toUnmodifiableList()));
     }
 
     public List<MatchResult> match(String otherPath) {
@@ -53,10 +58,10 @@ public class SegmentsMatcher {
             throw new IllegalArgumentException("path is empty.");
         }
 
-        List<String> otherSegments = splitToSegments(otherPath);
+        List<String> otherSegments = splitAsSegment(otherPath);
 
-        boolean isBothPathRoot = this.segments.isEmpty() && otherSegments.isEmpty();
-        if (isBothPathRoot) {
+        boolean bothPathRoot = this.segments.isEmpty() && otherSegments.isEmpty();
+        if (bothPathRoot) {
             return List.of(MatchResult.empty());
         }
 
@@ -74,41 +79,41 @@ public class SegmentsMatcher {
                 return Collections.emptyList();
             }
 
-            SegmentChunk segmentChunk = partitionAsChunk(otherSegments, 0, chunkSize);
+            SegmentChunk segmentChunk = createSegmentChunk(otherSegments, 0, chunkSize);
             List<String> segmentsForCompare = segmentChunk.getSegmentsForCompare();
 
-            if (doesNotMatchSegments(this.segments, segmentsForCompare)) {
+            if (doesNotAllMatchSegment(this.segments, segmentsForCompare)) {
                 return Collections.emptyList();
             }
             return List.of(createMatchResult(this.segments, segmentChunk));
         }
 
-        List<Segment> segmentsExcludedWildCard = this.segments.subList(1, this.segments.size());
-        int chunkSize = segmentsExcludedWildCard.size();
+        List<Segment> segmentsExcludeWildCard = this.segments.subList(1, this.segments.size());
+        int chunkSize = segmentsExcludeWildCard.size();
         boolean doesNotPossibleChunk = otherSegments.size() < chunkSize;
         if (doesNotPossibleChunk) {
             return Collections.emptyList();
         }
 
-        int lastPossibleChunkIndex = otherSegments.size() - chunkSize;
-        List<SegmentChunk> segmentChunks = IntStream.rangeClosed(0, lastPossibleChunkIndex)
-            .mapToObj(chunkStartIndex -> partitionAsChunk(otherSegments, chunkStartIndex, chunkSize))
+        int lastPossibleChunkStartIndex = otherSegments.size() - chunkSize;
+        List<SegmentChunk> segmentChunks = IntStream.rangeClosed(0, lastPossibleChunkStartIndex)
+            .mapToObj(chunkStartIndex -> createSegmentChunk(otherSegments, chunkStartIndex, chunkSize))
             .collect(Collectors.toUnmodifiableList());
 
         return segmentChunks.stream()
-            .filter(segmentChunk -> matchSegment(segmentsExcludedWildCard, segmentChunk.getSegmentsForCompare()))
-            .map(segmentChunk -> createMatchResult(segmentsExcludedWildCard, segmentChunk))
+            .filter(segmentChunk -> allMatchSegment(segmentsExcludeWildCard, segmentChunk.getSegmentsForCompare()))
+            .map(segmentChunk -> createMatchResult(segmentsExcludeWildCard, segmentChunk))
             .collect(Collectors.toUnmodifiableList());
     }
 
     private static MatchResult createMatchResult(List<Segment> thisSegments, SegmentChunk segmentChunk) {
         List<String> segmentsForCompare = segmentChunk.getSegmentsForCompare();
-        String leftPath = segmentChunk.getLeftPath();
         RequestValues pathVariable = extractPathVariable(thisSegments, segmentsForCompare);
+        String leftPath = segmentChunk.getLeftPath();
         return new MatchResult(leftPath, pathVariable);
     }
 
-    private static List<String> splitToSegments(String path) {
+    private static List<String> splitAsSegment(String path) {
         List<String> segments = Arrays.asList(path.split(PATH_DELIMITER));
         if (segments.isEmpty()) {
             return segments;
@@ -116,11 +121,11 @@ public class SegmentsMatcher {
         return segments.subList(1, segments.size());
     }
 
-    private static boolean doesNotMatchSegments(List<Segment> segments, List<String> compareSegments) {
-        return !matchSegment(segments, compareSegments);
+    private static boolean doesNotAllMatchSegment(List<Segment> segments, List<String> compareSegments) {
+        return !allMatchSegment(segments, compareSegments);
     }
 
-    private static boolean matchSegment(List<Segment> segments, List<String> otherSegments) {
+    private static boolean allMatchSegment(List<Segment> segments, List<String> otherSegments) {
         for (int i = 0; i < otherSegments.size(); i++) {
             Segment segment = segments.get(i);
             String otherSegment = otherSegments.get(i);
@@ -132,11 +137,10 @@ public class SegmentsMatcher {
         return true;
     }
 
-    private static RequestValues extractPathVariable(List<Segment> segments, List<String> pathChunk) {
+    private static RequestValues extractPathVariable(List<Segment> segments, List<String> otherSegments) {
         Map<String, String> pathVariable = new HashMap<>();
-        for (int i = 0; i < pathChunk.size(); i++) {
+        for (int i = 0; i < otherSegments.size(); i++) {
             Segment segment = segments.get(i);
-            String partOfChunk = pathChunk.get(i);
 
             if (!(segment instanceof PathVariableSegment)) {
                 continue;
@@ -144,13 +148,14 @@ public class SegmentsMatcher {
 
             PathVariableSegment pathVariableSegment = (PathVariableSegment) segment;
 
-            String key = pathVariableSegment.getExtractBraceValue();
-            pathVariable.put(key, partOfChunk);
+            String key = pathVariableSegment.getExtractBraceKey();
+            String otherSegment = otherSegments.get(i);
+            pathVariable.put(key, otherSegment);
         }
         return new RequestValues(pathVariable);
     }
 
-    private static SegmentChunk partitionAsChunk(List<String> segments, int startIndex, int size) {
+    private static SegmentChunk createSegmentChunk(List<String> segments, int startIndex, int size) {
         List<String> segmentsForCompare = new ArrayList<>();
         for (int i = startIndex; i < startIndex + size; i++) {
             String segment = segments.get(i);

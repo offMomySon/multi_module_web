@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.Getter;
-import mapper.segment.SegmentsMatcher;
-import mapper.segment.SegmentsMatcher.MatchResult;
+import mapper.segment.SegmentMatcher;
+import mapper.segment.SegmentMatcher.MatchResult;
 import marker.RequestMethod;
 import vo.RequestValues;
 
@@ -49,7 +49,7 @@ public class HttpPathMatcher {
     }
 
     private List<MatchResult> match(String requestUrl) {
-        Deque<SegmentsMatcher> matcherProvider = createMatchProvider(this.url);
+        Deque<SegmentMatcher> matcherProvider = createMatchProvider(this.url);
         SequentialSegmentsMatcher matcher = new SequentialSegmentsMatcher(matcherProvider);
 
         requestUrl = Paths.get(requestUrl).normalize().toString();
@@ -57,21 +57,21 @@ public class HttpPathMatcher {
         return matcher.match(requestUrl);
     }
 
-    private static Deque<SegmentsMatcher> createMatchProvider(String url) {
-        Deque<SegmentsMatcher> matchers = new ArrayDeque<>();
+    private static Deque<SegmentMatcher> createMatchProvider(String url) {
+        Deque<SegmentMatcher> matchers = new ArrayDeque<>();
 
         int lastIndex;
         while ((lastIndex = url.lastIndexOf(SEGMENT_MATCHER_DELIMITER)) != -1) {
             String lastSubString = url.substring(lastIndex);
-            SegmentsMatcher segmentsMatcher = new SegmentsMatcher(lastSubString);
-            matchers.push(segmentsMatcher);
+            SegmentMatcher segmentMatcher = SegmentMatcher.from(lastSubString);
+            matchers.push(segmentMatcher);
 
             url = url.substring(0, lastIndex);
         }
 
         if (!url.isBlank()) {
-            SegmentsMatcher segmentsMatcher = new SegmentsMatcher(url);
-            matchers.push(segmentsMatcher);
+            SegmentMatcher segmentMatcher = SegmentMatcher.from(url);
+            matchers.push(segmentMatcher);
         }
 
         return matchers;

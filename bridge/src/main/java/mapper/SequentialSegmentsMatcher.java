@@ -7,14 +7,14 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import mapper.segment.SegmentsMatcher;
-import mapper.segment.SegmentsMatcher.MatchResult;
+import mapper.segment.SegmentMatcher;
+import mapper.segment.SegmentMatcher.MatchResult;
 import vo.RequestValues;
 
 public class SequentialSegmentsMatcher {
-    private final Deque<SegmentsMatcher> provider;
+    private final Deque<SegmentMatcher> provider;
 
-    public SequentialSegmentsMatcher(Deque<SegmentsMatcher> provider) {
+    public SequentialSegmentsMatcher(Deque<SegmentMatcher> provider) {
         if (Objects.isNull(provider)) {
             throw new RuntimeException("provider is null");
         }
@@ -31,7 +31,7 @@ public class SequentialSegmentsMatcher {
         return doMatch(this.provider, bootStrapResult);
     }
 
-    private static List<MatchResult> doMatch(Deque<SegmentsMatcher> provider, List<MatchResult> prevResults) {
+    private static List<MatchResult> doMatch(Deque<SegmentMatcher> provider, List<MatchResult> prevResults) {
         boolean failMatch = !provider.isEmpty() && (Objects.isNull(prevResults) || prevResults.isEmpty());
         if (failMatch) {
             return Collections.emptyList();
@@ -44,7 +44,7 @@ public class SequentialSegmentsMatcher {
                 .collect(Collectors.toUnmodifiableList());
         }
 
-        SegmentsMatcher matcher = provider.pop();
+        SegmentMatcher matcher = provider.pop();
 
         List<MatchResult> newResults = prevResults.stream()
             .map(prevResult -> doMatch(matcher, prevResult))
@@ -54,7 +54,7 @@ public class SequentialSegmentsMatcher {
         return doMatch(provider, newResults);
     }
 
-    private static List<MatchResult> doMatch(SegmentsMatcher matcher, MatchResult prevResult) {
+    private static List<MatchResult> doMatch(SegmentMatcher matcher, MatchResult prevResult) {
         String leftPath = prevResult.getLeftPath();
         List<MatchResult> matchResults = matcher.match(leftPath);
 

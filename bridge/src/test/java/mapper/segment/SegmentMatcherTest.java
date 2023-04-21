@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import mapper.segment.SegmentsMatcher.MatchResult;
+import mapper.segment.SegmentMatcher.MatchResult;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,7 +15,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import vo.RequestValues;
 
-class SegmentsMatcherTest {
+class SegmentMatcherTest {
 
     @DisplayName("WILD CARD 패턴은 0 번 혹은 첫번쨰 path segment 에 한번 들어가면 생성할 수 있습니다.")
     @ParameterizedTest
@@ -31,7 +31,7 @@ class SegmentsMatcherTest {
     void test(String path) throws Exception {
         //given
         //when
-        Throwable actual = Assertions.catchThrowable(() -> new SegmentsMatcher(path));
+        Throwable actual = Assertions.catchThrowable(() -> SegmentMatcher.from(path));
 
         //then
         Assertions.assertThat(actual).isNull();
@@ -50,7 +50,7 @@ class SegmentsMatcherTest {
     void test1(String path) throws Exception {
         //given
         //when
-        Throwable actual = Assertions.catchThrowable(() -> new SegmentsMatcher(path));
+        Throwable actual = Assertions.catchThrowable(() -> SegmentMatcher.from(path));
 
         //then
         Assertions.assertThat(actual).isNotNull();
@@ -73,7 +73,7 @@ class SegmentsMatcherTest {
     void test2(String path) throws Exception {
         //given
         //when
-        Throwable actual = Assertions.catchThrowable(() -> new SegmentsMatcher(path));
+        Throwable actual = Assertions.catchThrowable(() -> SegmentMatcher.from(path));
 
         //then
         Assertions.assertThat(actual).isNotNull();
@@ -84,7 +84,7 @@ class SegmentsMatcherTest {
     @MethodSource("providePathAndExpectPaths")
     void test3(String methodPath, String requestPath, Set<String> expect) throws Exception {
         //given
-        SegmentsMatcher matcher = new SegmentsMatcher(methodPath);
+        SegmentMatcher matcher = SegmentMatcher.from(methodPath);
 
         //when
         List<MatchResult> match = matcher.match(requestPath);
@@ -156,7 +156,7 @@ class SegmentsMatcherTest {
     @MethodSource("providePathAndExpectPathVariable")
     void test4(String methodPath, String requestPath, Set<RequestValues> expectPathVariable) throws Exception {
         //given
-        SegmentsMatcher matcher = new SegmentsMatcher(methodPath);
+        SegmentMatcher matcher = SegmentMatcher.from(methodPath);
 
         //when
         List<MatchResult> match = matcher.match(requestPath);

@@ -4,10 +4,12 @@ import java.lang.reflect.Method;
 import java.nio.file.Paths;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.Getter;
 import mapper.segment.SegmentsMatcher;
+import mapper.segment.SegmentsMatcher.MatchResult;
 import marker.RequestMethod;
 import vo.RequestValues;
 
@@ -32,37 +34,43 @@ public class HttpPathMatcher {
             return Optional.empty();
         }
 
-        Optional<RequestValues> matchResult = match(requestUrl);
-        if (matchResult.isEmpty()) {
+        List<MatchResult> matchResults = match(requestUrl);
+        if (matchResults.isEmpty()) {
             return Optional.empty();
         }
 
-        RequestValues requestValues = matchResult.get();
+        RequestValues requestValues = matchResults.stream()
+            .filter(MatchResult::isFinish)
+            .findFirst()
+            .map(MatchResult::getPathVariable)
+            .orElseThrow(() -> new RuntimeException("does not exist finish match result"));
+
         return Optional.of(new MatchedMethod(javaMethod, requestValues));
     }
 
-    private Optional<RequestValues> match(String requestUrl) {
-        requestUrl = Paths.get(requestUrl).normalize().toString();
-        Deque<SegmentsMatcher> matchers = createSegmentsMatcher(this.url);
-        SequencialSegmentsMatcher segmentsMatcher = SequencialSegmentsMatcher.from(matchers, requestUrl);
+    private List<MatchResult> match(String requestUrl) {
+        Deque<SegmentsMatcher> matcherProvider = createMatchProvider(this.url);
+        SequentialSegmentsMatcher matcher = new SequentialSegmentsMatcher(matcherProvider);
 
-        return segmentsMatcher.match();
+        requestUrl = Paths.get(requestUrl).normalize().toString();
+
+        return matcher.match(requestUrl);
     }
 
-    private static Deque<SegmentsMatcher> createSegmentsMatcher(String thisUrl) {
+    private static Deque<SegmentsMatcher> createMatchProvider(String url) {
         Deque<SegmentsMatcher> matchers = new ArrayDeque<>();
 
         int lastIndex;
-        while ((lastIndex = thisUrl.lastIndexOf(SEGMENT_MATCHER_DELIMITER)) != -1) {
-            String lastSubString = thisUrl.substring(lastIndex);
-            thisUrl = thisUrl.substring(0, lastIndex);
-
+        while ((lastIndex = url.lastIndexOf(SEGMENT_MATCHER_DELIMITER)) != -1) {
+            String lastSubString = url.substring(lastIndex);
             SegmentsMatcher segmentsMatcher = new SegmentsMatcher(lastSubString);
             matchers.push(segmentsMatcher);
+
+            url = url.substring(0, lastIndex);
         }
 
-        if (!thisUrl.isBlank()) {
-            SegmentsMatcher segmentsMatcher = new SegmentsMatcher(thisUrl);
+        if (!url.isBlank()) {
+            SegmentsMatcher segmentsMatcher = new SegmentsMatcher(url);
             matchers.push(segmentsMatcher);
         }
 

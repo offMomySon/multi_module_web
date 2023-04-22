@@ -1,6 +1,6 @@
 package com.main.executor;
 
-import java.io.ByteArrayInputStream;
+import converter.Converter;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -22,18 +22,19 @@ import vo.BodyContent;
 import vo.HttpRequest;
 import vo.RequestResult;
 import vo.RequestValues;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static mapper.HttpPathMatcher.MatchedMethod;
 
 @Slf4j
 public class RequestExecutor implements HttpRequestExecutor {
     private final MethodExecutor methodExecutor;
     private final HttpPathMatcherIf httpPathMatcher;
+    private final Converter converter;
 
-    public RequestExecutor(MethodExecutor methodExecutor, HttpPathMatcherIf httpPathMatcher) {
+    public RequestExecutor(MethodExecutor methodExecutor, HttpPathMatcherIf httpPathMatcher, Converter converter) {
         Objects.requireNonNull(methodExecutor, "methodExecutor require not null.");
         Objects.requireNonNull(httpPathMatcher, "httpPathMatcher require not null.");
 
+        this.converter = converter;
         this.methodExecutor = methodExecutor;
         this.httpPathMatcher = httpPathMatcher;
     }
@@ -48,16 +49,18 @@ public class RequestExecutor implements HttpRequestExecutor {
             RequestValues formVariable = new RequestValues(httpRequest.getQueryParameters().getParameterMap());
             BodyContent bodyContent = BodyContent.from(httpRequest.getRequestStream());
 
-            String result = doExecute(method, url, formVariable, bodyContent);
+            Object o = doExecute(method, url, formVariable, bodyContent);
+
+            InputStream inputStream = converter.convertToInputStream(o);
 
             String startLine = "HTTP/1.1 200 OK";
             Map<String, String> header = Map.of(
                 "Date", "MON, 27 Jul 2023 12:28:53 GMT",
                 "Host", "localhost:8080",
-                "Content-Type", "text/html; charset=UTF-8",
-                "Content-Length", result.length() + ""
+                "Content-Type", "text/html; charset=UTF-8"
+//                "Content-Length", result.length() + ""
             );
-            InputStream inputStream = new ByteArrayInputStream(result.getBytes(UTF_8));
+//            InputStream inputStream = new ByteArrayInputStream(result.getBytes(UTF_8));
 
             return new RequestResult(startLine, header, inputStream);
         } catch (Exception e) {
@@ -65,7 +68,7 @@ public class RequestExecutor implements HttpRequestExecutor {
         }
     }
 
-    private String doExecute(RequestMethod method, String url, RequestValues formVariable, BodyContent bodyContent) {
+    private Object doExecute(RequestMethod method, String url, RequestValues formVariable, BodyContent bodyContent) {
         MatchedMethod matchedMethod = httpPathMatcher.matchJavaMethod(method, url).orElseThrow(() -> new RuntimeException(""));
 
         Method javaMethod = matchedMethod.getJavaMethod();
@@ -78,9 +81,10 @@ public class RequestExecutor implements HttpRequestExecutor {
 
         Optional<Object> result = methodExecutor.execute(javaMethod, compositeParameterConverter);
 
-        if (result.isPresent()) {
-            return "success to execute";
+        if (result.isEmpty()) {
+            return "emtpy";
         }
-        return "failt to execute";
+
+        return result.get();
     }
 }

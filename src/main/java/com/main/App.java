@@ -4,6 +4,7 @@ import com.main.executor.MethodExecutor;
 import com.main.executor.RequestExecutor;
 import container.ComponentContainerCreator;
 import container.Container;
+import converter.CompositeConverter;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import mapper.ControllerPathMatcherCreator;
@@ -22,7 +23,8 @@ public class App {
         Container container = new ComponentContainerCreator(classes).create();
         MethodExecutor methodExecutor = new MethodExecutor(container);
         HttpPathMatcherIf httpPathMatcher = new ControllerPathMatcherCreator(classes).create();
-        RequestExecutor requestExecutor = new RequestExecutor(methodExecutor, httpPathMatcher);
+        CompositeConverter converter = new CompositeConverter();
+        RequestExecutor requestExecutor = new RequestExecutor(methodExecutor, httpPathMatcher, converter);
 
         HttpService httpService = new HttpService(requestExecutor);
         httpService.start();

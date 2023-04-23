@@ -21,6 +21,10 @@ public class SegmentProvider {
     public static SegmentProvider from(String path) {
         Objects.requireNonNull(path);
 
+        if (PATH_DELIMITER.equals(path)) {
+            return new SegmentProvider(new ArrayDeque<>(List.of("")));
+        }
+
         path = path.startsWith(PATH_DELIMITER) ? path.substring(1) : path;
 
         List<String> segments = Arrays.stream(path.split(PATH_DELIMITER)).collect(Collectors.toUnmodifiableList());

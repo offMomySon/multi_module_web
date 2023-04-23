@@ -68,7 +68,7 @@ public class SegmentChunkCreateStrategy {
         boolean hasWildCard = segmentChunk.startsWith(WILD_CARD);
 
         if (hasWildCard) {
-            return new WildCardSegmentChunk();
+            return new WildCardSegmentChunk(segments);
         }
         if (hasPathVariable) {
             return new PathVariableSegmentChunk();

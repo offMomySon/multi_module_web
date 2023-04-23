@@ -17,6 +17,11 @@ public class SegmentProvider {
         this.segments = segments;
     }
 
+    public static SegmentProvider from(List<String> segments) {
+        Objects.requireNonNull(segments);
+        return new SegmentProvider(new ArrayDeque<>(segments));
+    }
+
     public static SegmentProvider empty() {
         return new SegmentProvider(new ArrayDeque<>());
     }

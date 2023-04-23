@@ -2,38 +2,30 @@ package mapper.newsegment.chunk;
 
 import java.util.List;
 import java.util.Objects;
+import mapper.MatchSegment;
 import mapper.newsegment.SegmentProvider;
-import vo.RequestValues;
 
 public interface SegmentChunk {
-    List<MatchContext> match(MatchContext context);
+    List<Result> consume(SegmentProvider segmentProvider);
 
-    class MatchContext {
-        private final SegmentProvider nextSegments;
-        private final RequestValues matchedPathVariable;
+    class Result {
+        private final MatchSegment matchSegment;
+        private final SegmentProvider leftSegments;
 
-        public MatchContext(SegmentProvider nextSegments, RequestValues matchedPathVariable) {
-            Objects.requireNonNull(nextSegments);
-            Objects.requireNonNull(matchedPathVariable);
-            this.nextSegments = nextSegments;
-            this.matchedPathVariable = matchedPathVariable;
+        public Result(MatchSegment matchSegment, SegmentProvider leftSegments) {
+            Objects.requireNonNull(matchSegment);
+            Objects.requireNonNull(leftSegments);
+
+            this.matchSegment = matchSegment;
+            this.leftSegments = leftSegments;
         }
 
-        public static MatchContext create(SegmentProvider nextSegments) {
-            Objects.requireNonNull(nextSegments);
-            return new MatchContext(nextSegments, RequestValues.empty());
+        public MatchSegment getMatchSegment() {
+            return matchSegment;
         }
 
-        public boolean finish() {
-            return nextSegments.isEmpty();
-        }
-
-        public SegmentProvider getNextSegments() {
-            return nextSegments;
-        }
-
-        public RequestValues getMatchedPathVariable() {
-            return matchedPathVariable;
+        public SegmentProvider getLeftSegments() {
+            return leftSegments;
         }
     }
 }

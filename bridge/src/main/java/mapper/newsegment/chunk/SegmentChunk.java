@@ -20,6 +20,10 @@ public interface SegmentChunk {
             this.leftSegments = leftSegments;
         }
 
+        public static Result empty() {
+            return new Result(MatchSegment.empty(), SegmentProvider.empty());
+        }
+
         public MatchSegment getMatchSegment() {
             return matchSegment;
         }

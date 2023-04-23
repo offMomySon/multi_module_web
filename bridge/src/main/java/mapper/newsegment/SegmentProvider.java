@@ -12,10 +12,13 @@ public class SegmentProvider {
 
     private final Queue<String> segments;
 
-    private SegmentProvider(Queue<String> segments) {
+    public SegmentProvider(Queue<String> segments) {
         Objects.requireNonNull(segments);
-
         this.segments = segments;
+    }
+
+    public static SegmentProvider empty() {
+        return new SegmentProvider(new ArrayDeque<>());
     }
 
     public static SegmentProvider from(String path) {
@@ -32,11 +35,49 @@ public class SegmentProvider {
         return new SegmentProvider(new ArrayDeque<>(segments));
     }
 
+    public SegmentProvider copy() {
+        return new SegmentProvider(new ArrayDeque<>(segments));
+    }
+
+    public String peek() {
+        return segments.peek();
+    }
+
     public String poll() {
         return segments.poll();
     }
 
     public boolean isEmpty() {
         return segments.isEmpty();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SegmentProvider otherProvider = (SegmentProvider) o;
+        int otherSize = otherProvider.segments.size();
+        int thisSize = this.segments.size();
+
+        if (otherSize != thisSize) {
+            return false;
+        }
+
+        for (String thisSegment : this.segments) {
+            String otherSegment = otherProvider.segments.poll();
+
+            if (!Objects.equals(thisSegment, otherSegment)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "SegmentProvider{" +
+            "segments=" + segments +
+            '}';
     }
 }

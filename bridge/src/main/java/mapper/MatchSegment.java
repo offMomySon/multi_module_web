@@ -75,4 +75,17 @@ public class MatchSegment {
     private static boolean isPathVariable(String segment) {
         return segment.startsWith(PATH_VARIABLE_OPENER) && segment.endsWith(PATH_VARIABLE_CLOSER);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MatchSegment that = (MatchSegment) o;
+        return Objects.equals(values, that.values);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(values);
+    }
 }

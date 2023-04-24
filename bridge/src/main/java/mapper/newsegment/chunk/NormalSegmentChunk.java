@@ -27,6 +27,11 @@ public class NormalSegmentChunk implements SegmentChunk {
             throw new RuntimeException("provider is null.");
         }
 
+        boolean doesNotSufficientProvideSegment = segments.size() > provider.size();
+        if (doesNotSufficientProvideSegment) {
+            return Collections.emptyList();
+        }
+
         Queue<String> thisSegments = new ArrayDeque<>(segments);
         SegmentProvider otherProvider = provider.copy();
 

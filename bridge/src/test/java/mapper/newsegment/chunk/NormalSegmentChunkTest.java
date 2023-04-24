@@ -88,6 +88,21 @@ class NormalSegmentChunkTest {
         Assertions.assertThat(actualProvider).isEqualTo(expectProvider);
     }
 
+    @DisplayName("매칭할 segment 가 제공되는 segment 보다 많으면 빈 결과를 반환합니다.")
+    @Test
+    void test4() throws Exception {
+        //given
+        SegmentProvider provider = SegmentProvider.from("/pv1/pv2");
+        PathVariableSegmentChunk pathVariableSegmentChunk = new PathVariableSegmentChunk("pv1", "{pv2}", "{pv3}", "pv4");
+
+        //when
+        List<SegmentChunk.Result> actual = pathVariableSegmentChunk.consume(provider);
+
+        //then
+        Assertions.assertThat(actual.size()).isEqualTo(0);
+    }
+
+
     public static Stream<Arguments> provideChunkAndSegmentProviderAndExpectMatchSegment() {
         String[] chunk = new String[]{"pv1", "pv2", "pv3"};
         SegmentProvider successProvider = SegmentProvider.from(List.of("pv1", "pv2", "pv3"));

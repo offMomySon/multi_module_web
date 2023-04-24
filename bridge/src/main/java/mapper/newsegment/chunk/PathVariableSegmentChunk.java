@@ -27,6 +27,11 @@ public class PathVariableSegmentChunk implements SegmentChunk {
     public List<Result> consume(SegmentProvider provider) {
         Objects.requireNonNull(provider);
 
+        boolean doesNotSufficientProvideSegment = segments.size() > provider.size();
+        if (doesNotSufficientProvideSegment) {
+            return Collections.emptyList();
+        }
+
         Queue<String> thisSegments = new ArrayDeque<>(segments);
         SegmentProvider otherProvider = provider.copy();
 

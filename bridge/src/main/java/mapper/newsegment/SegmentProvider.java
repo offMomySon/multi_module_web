@@ -56,6 +56,10 @@ public class SegmentProvider {
         return segments.isEmpty();
     }
 
+    public int size() {
+        return segments.size();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -28,7 +28,7 @@ class NormalSegmentChunkTest {
         Assertions.assertThat(actual).isNotNull();
     }
 
-    @DisplayName("성공시 매핑된 결과값을 반환합니다.")
+    @DisplayName("모든 segment 가 일치하면 결과값을 반환합니다.")
     @ParameterizedTest
     @MethodSource("provideChunkAndSegmentProviderAndExpectMatchSegment")
     void test1(String[] chunk, SegmentProvider provider, MatchSegment expectMatchSegment) throws Exception {

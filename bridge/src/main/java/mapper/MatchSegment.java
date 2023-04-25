@@ -88,4 +88,11 @@ public class MatchSegment {
     public int hashCode() {
         return Objects.hash(values);
     }
+
+    @Override
+    public String toString() {
+        return "MatchSegment{" +
+            "values=" + values +
+            '}';
+    }
 }

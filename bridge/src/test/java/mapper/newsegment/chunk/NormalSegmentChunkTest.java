@@ -19,7 +19,7 @@ class NormalSegmentChunkTest {
     @Test
     void test0() throws Exception {
         //given
-        NormalSegmentChunk normalSegmentChunk = new NormalSegmentChunk("this");
+        NormalSegmentChunk normalSegmentChunk = NormalSegmentChunk.from("this");
 
         //when
         Throwable actual = Assertions.catchThrowable(() -> normalSegmentChunk.consume(null));
@@ -33,7 +33,7 @@ class NormalSegmentChunkTest {
     @MethodSource("provideChunkAndSegmentProviderAndExpectMatchSegment")
     void test1(String[] chunk, SegmentProvider provider, MatchSegment expectMatchSegment) throws Exception {
         //given
-        NormalSegmentChunk normalSegmentChunk = new NormalSegmentChunk(chunk);
+        NormalSegmentChunk normalSegmentChunk = NormalSegmentChunk.from(chunk);
 
         //when
         List<SegmentChunk.Result> actual = normalSegmentChunk.consume(provider);
@@ -51,7 +51,7 @@ class NormalSegmentChunkTest {
     @MethodSource("provideChunkAndSegmentProviderAndExpectMatchSegment")
     void test3() throws Exception {
         //given
-        NormalSegmentChunk normalSegmentChunk = new NormalSegmentChunk("pv1", "pv2");
+        NormalSegmentChunk normalSegmentChunk = NormalSegmentChunk.from("pv1", "pv2");
         SegmentProvider provider = SegmentProvider.from(List.of("pv1"));
 
         //when
@@ -93,10 +93,10 @@ class NormalSegmentChunkTest {
     void test4() throws Exception {
         //given
         SegmentProvider provider = SegmentProvider.from("/pv1/pv2");
-        PathVariableSegmentChunk pathVariableSegmentChunk = new PathVariableSegmentChunk("pv1", "{pv2}", "{pv3}", "pv4");
+        NormalSegmentChunk normalSegmentChunk = NormalSegmentChunk.from("pv1", "{pv2}", "{pv3}", "pv4");
 
         //when
-        List<SegmentChunk.Result> actual = pathVariableSegmentChunk.consume(provider);
+        List<SegmentChunk.Result> actual = normalSegmentChunk.consume(provider);
 
         //then
         Assertions.assertThat(actual.size()).isEqualTo(0);

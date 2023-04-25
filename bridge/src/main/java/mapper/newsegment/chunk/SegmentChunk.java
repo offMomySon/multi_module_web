@@ -31,5 +31,13 @@ public interface SegmentChunk {
         public SegmentProvider getLeftSegments() {
             return leftSegments;
         }
+
+        @Override
+        public String toString() {
+            return "Result{" +
+                "matchSegment=" + matchSegment +
+                ", leftSegments=" + leftSegments +
+                '}';
+        }
     }
 }

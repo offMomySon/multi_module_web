@@ -18,9 +18,21 @@ public class PathVariableSegmentChunk implements SegmentChunk {
 
     private final Queue<String> segments;
 
-    public PathVariableSegmentChunk(String... segments) {
+    public PathVariableSegmentChunk(Queue<String> segments) {
         Objects.requireNonNull(segments);
-        this.segments = Arrays.stream(segments).filter(Objects::nonNull).collect(Collectors.toCollection(ArrayDeque::new));
+        this.segments = segments.stream().filter(Objects::nonNull).collect(Collectors.toCollection(ArrayDeque::new));
+    }
+
+    public static PathVariableSegmentChunk from(List<String> segments) {
+        Objects.requireNonNull(segments);
+        ArrayDeque<String> newSegments = segments.stream().filter(Objects::nonNull).collect(Collectors.toCollection(ArrayDeque::new));
+        return new PathVariableSegmentChunk(newSegments);
+    }
+
+    public static PathVariableSegmentChunk from(String... segments) {
+        Objects.requireNonNull(segments);
+        ArrayDeque<String> newSegments = Arrays.stream(segments).filter(Objects::nonNull).collect(Collectors.toCollection(ArrayDeque::new));
+        return new PathVariableSegmentChunk(newSegments);
     }
 
     @Override
@@ -53,8 +65,8 @@ public class PathVariableSegmentChunk implements SegmentChunk {
             matchSegments.put(segment, otherSegment);
         }
 
-        boolean doesNotFinishMatch = !thisSegments.isEmpty();
-        if (doesNotFinishMatch) {
+        boolean doesNotMatch = !thisSegments.isEmpty();
+        if (doesNotMatch) {
             return Collections.emptyList();
         }
 

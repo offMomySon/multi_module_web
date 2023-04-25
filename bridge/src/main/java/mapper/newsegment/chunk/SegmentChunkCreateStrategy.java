@@ -2,12 +2,16 @@ package mapper.newsegment.chunk;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.stream.Collectors;
 
 public class SegmentChunkCreateStrategy {
+    private static final String EMPTY_SEGMENT_CHUNK = "";
+    private static final String EMPTY_SEGMENT = "";
     private static final String PATH_DELIMITER = "/";
     private static final String WILD_CARD = "**";
     private static final String PATH_VARIABLE_OPENER = "{";
@@ -23,14 +27,19 @@ public class SegmentChunkCreateStrategy {
             return new ArrayDeque<>(emptySegmentChunks);
         }
 
-        List<String> segmentChunks = splitSegmentChunks(path);
+        List<String> segmentChunks = splitSegmentChunkByWildCard(path);
 
         return segmentChunks.stream()
-            .map(SegmentChunkCreateStrategy::getSegmentChunk)
+            .map(SegmentChunkCreateStrategy::createSegmentChunk)
             .collect(Collectors.toCollection(ArrayDeque::new));
     }
 
-    private static List<String> splitSegmentChunks(String path) {
+    private static List<String> splitSegmentChunkByWildCard(String path) {
+        boolean onlyHasPathDelimiter = PATH_DELIMITER.equals(path);
+        if (onlyHasPathDelimiter) {
+            return List.of(EMPTY_SEGMENT_CHUNK);
+        }
+
         path = path.startsWith(PATH_DELIMITER) ? path.substring(1) : path;
 
         int firstWildCardIndex = path.indexOf(WILD_CARD);
@@ -61,22 +70,34 @@ public class SegmentChunkCreateStrategy {
         return segmentChunk;
     }
 
-    private static SegmentChunk getSegmentChunk(String segmentChunk) {
-        String[] segments = segmentChunk.split(PATH_DELIMITER);
+    private static SegmentChunk createSegmentChunk(String segmentChunk) {
+        if (EMPTY_SEGMENT_CHUNK.equals(segmentChunk)) {
+            return createSegmentChunk(Collections.emptyList());
+        }
+        List<String> segments = Arrays.stream(segmentChunk.split(PATH_DELIMITER)).collect(Collectors.toUnmodifiableList());
+        return createSegmentChunk(segments);
+    }
+
+    public static SegmentChunk createSegmentChunk(List<String> segments) {
+        Objects.requireNonNull(segments);
+
+        if (segments.isEmpty()) {
+            return new EmptySegmentChunk();
+        }
 
         boolean hasPathVariable = hasPathVariable(segments);
-        boolean hasWildCard = segmentChunk.startsWith(WILD_CARD);
+        boolean isFirstSegmentWildCard = segments.get(0).equals(WILD_CARD);
 
-        if (hasWildCard) {
+        if (isFirstSegmentWildCard) {
             return new WildCardSegmentChunk(segments);
         }
         if (hasPathVariable) {
-            return new PathVariableSegmentChunk();
+            return PathVariableSegmentChunk.from(segments);
         }
-        return new NormalSegmentChunk();
+        return NormalSegmentChunk.from(segments);
     }
 
-    private static boolean hasPathVariable(String[] segments) {
+    private static boolean hasPathVariable(List<String> segments) {
         for (String segment : segments) {
             boolean hasPathVariable = segment.startsWith(PATH_VARIABLE_OPENER) && segment.endsWith(PATH_VARIABLE_CLOSER);
             if (hasPathVariable) {

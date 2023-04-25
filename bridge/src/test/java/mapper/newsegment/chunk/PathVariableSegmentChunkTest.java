@@ -18,7 +18,7 @@ class PathVariableSegmentChunkTest {
     @Test
     void test0() throws Exception {
         //given
-        PathVariableSegmentChunk pathVariableSegmentChunk = new PathVariableSegmentChunk("this");
+        PathVariableSegmentChunk pathVariableSegmentChunk = PathVariableSegmentChunk.from("this");
 
         //when
         Throwable actual = Assertions.catchThrowable(() -> pathVariableSegmentChunk.consume(null));
@@ -33,7 +33,7 @@ class PathVariableSegmentChunkTest {
         //given
         String pathVariableSegment = "{pv1}";
         String provideSegment = "value1";
-        PathVariableSegmentChunk segmentChunk = new PathVariableSegmentChunk(pathVariableSegment);
+        PathVariableSegmentChunk segmentChunk = PathVariableSegmentChunk.from(pathVariableSegment);
         SegmentProvider provider = SegmentProvider.from(provideSegment);
 
         MatchSegment expectMatchSegment = new MatchSegment(Map.of(pathVariableSegment, provideSegment));
@@ -57,7 +57,7 @@ class PathVariableSegmentChunkTest {
     @MethodSource("provideChunkAndSegmentProviderAndExpectMatchSegment")
     void test1(String[] chunk, SegmentProvider provider, MatchSegment expectMatchSegment) throws Exception {
         //given
-        PathVariableSegmentChunk pathVariableSegmentChunk = new PathVariableSegmentChunk(chunk);
+        PathVariableSegmentChunk pathVariableSegmentChunk = PathVariableSegmentChunk.from(chunk);
 
         //when
         List<Result> actual = pathVariableSegmentChunk.consume(provider);
@@ -74,7 +74,7 @@ class PathVariableSegmentChunkTest {
     @Test
     void test3() throws Exception {
         //given
-        PathVariableSegmentChunk pathVariableSegmentChunk = new PathVariableSegmentChunk("pv1", "pv2");
+        PathVariableSegmentChunk pathVariableSegmentChunk = PathVariableSegmentChunk.from("pv1", "pv2");
         SegmentProvider provider = SegmentProvider.from(List.of("pv1"));
 
         //when
@@ -90,7 +90,7 @@ class PathVariableSegmentChunkTest {
     void test2() throws Exception {
         //given
         SegmentProvider provider = SegmentProvider.from("/pv1/pv2/pv3/pv4/pv5");
-        PathVariableSegmentChunk pathVariableSegmentChunk = new PathVariableSegmentChunk("pv1", "{pv2}", "{pv3}", "pv4");
+        PathVariableSegmentChunk pathVariableSegmentChunk = PathVariableSegmentChunk.from("pv1", "{pv2}", "{pv3}", "pv4");
 
         SegmentProvider expectProvider = SegmentProvider.from("pv5");
 
@@ -111,7 +111,7 @@ class PathVariableSegmentChunkTest {
     void test4() throws Exception {
         //given
         SegmentProvider provider = SegmentProvider.from("/pv1/pv2");
-        PathVariableSegmentChunk pathVariableSegmentChunk = new PathVariableSegmentChunk("pv1", "{pv2}", "{pv3}", "pv4");
+        PathVariableSegmentChunk pathVariableSegmentChunk = PathVariableSegmentChunk.from("pv1", "{pv2}", "{pv3}", "pv4");
 
         //when
         List<Result> actual = pathVariableSegmentChunk.consume(provider);

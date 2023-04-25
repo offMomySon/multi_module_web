@@ -16,9 +16,21 @@ public class NormalSegmentChunk implements SegmentChunk {
 
     private final Queue<String> segments;
 
-    public NormalSegmentChunk(String... segments) {
+    public NormalSegmentChunk(Queue<String> segments) {
         Objects.requireNonNull(segments);
-        this.segments = Arrays.stream(segments).filter(Objects::nonNull).collect(Collectors.toCollection(ArrayDeque::new));
+        this.segments = segments.stream().filter(Objects::nonNull).collect(Collectors.toCollection(ArrayDeque::new));
+    }
+
+    public static NormalSegmentChunk from(List<String> segments) {
+        Objects.requireNonNull(segments);
+        ArrayDeque<String> newSegments = segments.stream().filter(Objects::nonNull).collect(Collectors.toCollection(ArrayDeque::new));
+        return new NormalSegmentChunk(newSegments);
+    }
+
+    public static NormalSegmentChunk from(String... segments) {
+        Objects.requireNonNull(segments);
+        ArrayDeque<String> newSegments = Arrays.stream(segments).filter(Objects::nonNull).collect(Collectors.toCollection(ArrayDeque::new));
+        return new NormalSegmentChunk(newSegments);
     }
 
     @Override

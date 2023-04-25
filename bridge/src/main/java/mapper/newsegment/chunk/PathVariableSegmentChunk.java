@@ -15,11 +15,18 @@ import mapper.newsegment.SegmentProvider;
 public class PathVariableSegmentChunk implements SegmentChunk {
     private static final String PATH_VARIABLE_OPENER = "{";
     private static final String PATH_VARIABLE_CLOSER = "}";
+    private static final String EMPTY_SEGMENT = "";
 
     private final Queue<String> segments;
 
     public PathVariableSegmentChunk(Queue<String> segments) {
         Objects.requireNonNull(segments);
+
+        boolean doseNotHasAnyPathVariable = segments.stream().noneMatch(PathVariableSegmentChunk::isPathVariable);
+        if (doseNotHasAnyPathVariable) {
+            throw new RuntimeException("does not has any PathVariable");
+        }
+
         this.segments = segments.stream().filter(Objects::nonNull).collect(Collectors.toCollection(ArrayDeque::new));
     }
 
@@ -36,7 +43,7 @@ public class PathVariableSegmentChunk implements SegmentChunk {
     }
 
     @Override
-    public List<Result> consume(SegmentProvider provider) {
+    public List<MatchResult> match(SegmentProvider provider) {
         Objects.requireNonNull(provider);
 
         boolean doesNotSufficientProvideSegment = segments.size() > provider.size();
@@ -51,6 +58,10 @@ public class PathVariableSegmentChunk implements SegmentChunk {
         while (!thisSegments.isEmpty() && !otherProvider.isEmpty()) {
             String segment = thisSegments.poll();
             String otherSegment = otherProvider.poll();
+
+            if (EMPTY_SEGMENT.equals(otherSegment)) {
+                return Collections.emptyList();
+            }
 
             if (isPathVariable(segment)) {
                 matchSegments.put(segment, otherSegment);
@@ -71,7 +82,7 @@ public class PathVariableSegmentChunk implements SegmentChunk {
         }
 
         MatchSegment matchSegment = new MatchSegment(matchSegments);
-        return List.of(new Result(matchSegment, otherProvider.copy()));
+        return List.of(new MatchResult(matchSegment, otherProvider.copy()));
     }
 
     private static boolean isPathVariable(String segment) {

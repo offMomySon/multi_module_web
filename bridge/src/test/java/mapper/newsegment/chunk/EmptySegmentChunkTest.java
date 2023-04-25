@@ -6,7 +6,7 @@ import java.util.Queue;
 import java.util.stream.Stream;
 import mapper.MatchSegment;
 import mapper.newsegment.SegmentProvider;
-import mapper.newsegment.chunk.SegmentChunk.Result;
+import mapper.newsegment.chunk.SegmentChunk.MatchResult;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,7 +22,7 @@ class EmptySegmentChunkTest {
         EmptySegmentChunk emptySegmentChunk = new EmptySegmentChunk();
 
         //when
-        Throwable actual = Assertions.catchThrowable(() -> emptySegmentChunk.consume(null));
+        Throwable actual = Assertions.catchThrowable(() -> emptySegmentChunk.match(null));
 
         //then
         Assertions.assertThat(actual).isNotNull();
@@ -36,7 +36,7 @@ class EmptySegmentChunkTest {
         EmptySegmentChunk emptySegmentChunk = new EmptySegmentChunk();
 
         //when
-        List<Result> actual = emptySegmentChunk.consume(provider);
+        List<MatchResult> actual = emptySegmentChunk.match(provider);
 
         //then
         Assertions.assertThat(actual.size()).isEqualTo(expectResultSize);
@@ -57,13 +57,13 @@ class EmptySegmentChunkTest {
         SegmentProvider expectProvider = new SegmentProvider(expectQueue);
 
         //when
-        List<Result> actual = emptySegmentChunk.consume(provider);
+        List<MatchResult> actual = emptySegmentChunk.match(provider);
 
         //then
         Assertions.assertThat(actual.size()).isEqualTo(1);
 
-        Result actualResult = actual.get(0);
-        SegmentProvider actualProvider = actualResult.getLeftSegments();
+        MatchResult actualMatchResult = actual.get(0);
+        SegmentProvider actualProvider = actualMatchResult.getLeftSegments();
 
         Assertions.assertThat(actualProvider).isEqualTo(expectProvider);
     }
@@ -81,13 +81,13 @@ class EmptySegmentChunkTest {
         MatchSegment expectMatchSegment = MatchSegment.empty();
 
         //when
-        List<Result> actual = emptySegmentChunk.consume(provider);
+        List<MatchResult> actual = emptySegmentChunk.match(provider);
 
         //then
         Assertions.assertThat(actual.size()).isEqualTo(1);
 
-        Result actualResult = actual.get(0);
-        MatchSegment matchSegment = actualResult.getMatchSegment();
+        MatchResult actualMatchResult = actual.get(0);
+        MatchSegment matchSegment = actualMatchResult.getMatchSegment();
 
         Assertions.assertThat(matchSegment).isEqualTo(expectMatchSegment);
     }

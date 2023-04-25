@@ -6,13 +6,13 @@ import mapper.MatchSegment;
 import mapper.newsegment.SegmentProvider;
 
 public interface SegmentChunk {
-    List<Result> consume(SegmentProvider segmentProvider);
+    List<MatchResult> match(SegmentProvider segmentProvider);
 
-    class Result {
+    class MatchResult {
         private final MatchSegment matchSegment;
         private final SegmentProvider leftSegments;
 
-        public Result(MatchSegment matchSegment, SegmentProvider leftSegments) {
+        public MatchResult(MatchSegment matchSegment, SegmentProvider leftSegments) {
             Objects.requireNonNull(matchSegment);
             Objects.requireNonNull(leftSegments);
 
@@ -20,8 +20,8 @@ public interface SegmentChunk {
             this.leftSegments = leftSegments;
         }
 
-        public static Result empty() {
-            return new Result(MatchSegment.empty(), SegmentProvider.empty());
+        public static MatchResult empty() {
+            return new MatchResult(MatchSegment.empty(), SegmentProvider.empty());
         }
 
         public MatchSegment getMatchSegment() {

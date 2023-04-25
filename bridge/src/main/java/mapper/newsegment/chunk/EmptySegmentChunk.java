@@ -8,7 +8,7 @@ import mapper.newsegment.SegmentProvider;
 
 public class EmptySegmentChunk implements SegmentChunk {
     @Override
-    public List<Result> consume(SegmentProvider segmentProvider) {
+    public List<MatchResult> match(SegmentProvider segmentProvider) {
         if (Objects.isNull(segmentProvider)) {
             throw new RuntimeException("segmentProvider is null.");
         }
@@ -26,8 +26,7 @@ public class EmptySegmentChunk implements SegmentChunk {
         }
 
         MatchSegment emptyMatchSegment = MatchSegment.empty();
-
-        Result result = new Result(emptyMatchSegment, newSegmentProvider);
-        return List.of(result);
+        MatchResult matchResult = new MatchResult(emptyMatchSegment, newSegmentProvider);
+        return List.of(matchResult);
     }
 }

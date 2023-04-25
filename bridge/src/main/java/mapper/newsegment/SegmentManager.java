@@ -8,21 +8,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import mapper.MatchSegment;
 import mapper.newsegment.chunk.SegmentChunk;
-import mapper.newsegment.chunk.SegmentChunk.Result;
+import mapper.newsegment.chunk.SegmentChunk.MatchResult;
 import mapper.newsegment.chunk.SegmentChunkCreateStrategy;
 import vo.RequestValues;
 
 public class SegmentManager {
-    private static final String WILD_CARD = "/\\*\\*";
-    private static final String PATH_DELIMITER = "/";
-
-    public static void main(String[] args) {
-        String methodPath = "/**/p1/p2/p3/**/p4/p5";
-        String requestPath = "/p1/p2/p3/p4/p5";
-    }
-
-    public static Optional<RequestValues> consume(String methodPath, String requestPath) {
-        Queue<SegmentChunk> segmentChunks = SegmentChunkCreateStrategy.create(methodPath);
+    public static Optional<RequestValues> doMatch(String methodPath, String requestPath) {
+        Queue<SegmentChunk> segmentChunks = SegmentChunkCreateStrategy.createSegmentChunks(methodPath);
         List<MatchContext> matchContexts = Stream.of(SegmentProvider.from(requestPath))
             .map(MatchContext::create)
             .collect(Collectors.toUnmodifiableList());
@@ -31,7 +23,7 @@ public class SegmentManager {
             SegmentChunk chunk = segmentChunks.poll();
 
             matchContexts = matchContexts.stream()
-                .map(context -> consume(chunk, context))
+                .map(context -> doMatch(chunk, context))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toUnmodifiableList());
         }
@@ -47,22 +39,22 @@ public class SegmentManager {
         return Optional.of(pathVariable);
     }
 
-    private static List<MatchContext> consume(SegmentChunk chunk, MatchContext context) {
+    private static List<MatchContext> doMatch(SegmentChunk chunk, MatchContext context) {
         SegmentProvider segmentProvider = context.getProvider();
-        List<Result> results = chunk.consume(segmentProvider);
+        List<MatchResult> matchResults = chunk.match(segmentProvider);
 
-        return results.stream()
-            .map(result -> getNextMatchContext(context, result))
+        return matchResults.stream()
+            .map(result -> createNextMatchContext(context, result))
             .collect(Collectors.toUnmodifiableList());
     }
 
-    private static MatchContext getNextMatchContext(MatchContext context, Result result) {
-        SegmentProvider nextSegment = result.getLeftSegments();
+    private static MatchContext createNextMatchContext(MatchContext context, MatchResult matchResult) {
+        SegmentProvider nextSegments = matchResult.getLeftSegments();
 
         MatchSegment prevMatchSegment = context.getMatchSegment();
-        MatchSegment resultMatchSegment = result.getMatchSegment();
+        MatchSegment resultMatchSegment = matchResult.getMatchSegment();
         MatchSegment mergeMatchSegment = prevMatchSegment.merge(resultMatchSegment);
 
-        return new MatchContext(nextSegment, mergeMatchSegment);
+        return new MatchContext(nextSegments, mergeMatchSegment);
     }
 }

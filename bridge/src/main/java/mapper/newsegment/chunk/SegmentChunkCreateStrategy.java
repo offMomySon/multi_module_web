@@ -11,13 +11,12 @@ import java.util.stream.Collectors;
 
 public class SegmentChunkCreateStrategy {
     private static final String EMPTY_SEGMENT_CHUNK = "";
-    private static final String EMPTY_SEGMENT = "";
     private static final String PATH_DELIMITER = "/";
     private static final String WILD_CARD = "**";
     private static final String PATH_VARIABLE_OPENER = "{";
     private static final String PATH_VARIABLE_CLOSER = "}";
 
-    public static Queue<SegmentChunk> create(String path) {
+    public static Queue<SegmentChunk> createSegmentChunks(String path) {
         if (Objects.isNull(path) || path.isBlank()) {
             throw new RuntimeException("path is empty.");
         }

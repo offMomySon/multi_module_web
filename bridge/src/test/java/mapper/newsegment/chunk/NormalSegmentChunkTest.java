@@ -22,7 +22,7 @@ class NormalSegmentChunkTest {
         NormalSegmentChunk normalSegmentChunk = NormalSegmentChunk.from("this");
 
         //when
-        Throwable actual = Assertions.catchThrowable(() -> normalSegmentChunk.consume(null));
+        Throwable actual = Assertions.catchThrowable(() -> normalSegmentChunk.match(null));
 
         //then
         Assertions.assertThat(actual).isNotNull();
@@ -36,12 +36,12 @@ class NormalSegmentChunkTest {
         NormalSegmentChunk normalSegmentChunk = NormalSegmentChunk.from(chunk);
 
         //when
-        List<SegmentChunk.Result> actual = normalSegmentChunk.consume(provider);
+        List<SegmentChunk.MatchResult> actual = normalSegmentChunk.match(provider);
 
         //then
         Assertions.assertThat(actual.size()).isEqualTo(1);
-        SegmentChunk.Result result = actual.get(0);
-        MatchSegment actualMatchSegment = result.getMatchSegment();
+        SegmentChunk.MatchResult matchResult = actual.get(0);
+        MatchSegment actualMatchSegment = matchResult.getMatchSegment();
 
         Assertions.assertThat(actualMatchSegment).isEqualTo(expectMatchSegment);
     }
@@ -55,7 +55,7 @@ class NormalSegmentChunkTest {
         SegmentProvider provider = SegmentProvider.from(List.of("pv1"));
 
         //when
-        List<SegmentChunk.Result> actual = normalSegmentChunk.consume(provider);
+        List<SegmentChunk.MatchResult> actual = normalSegmentChunk.match(provider);
 
         //then
         Assertions.assertThat(actual.size()).isEqualTo(0);
@@ -77,13 +77,13 @@ class NormalSegmentChunkTest {
         SegmentProvider expectProvider = new SegmentProvider(expectQueue);
 
         //when
-        List<SegmentChunk.Result> actual = emptySegmentChunk.consume(provider);
+        List<SegmentChunk.MatchResult> actual = emptySegmentChunk.match(provider);
 
         //then
         Assertions.assertThat(actual.size()).isEqualTo(1);
 
-        SegmentChunk.Result actualResult = actual.get(0);
-        SegmentProvider actualProvider = actualResult.getLeftSegments();
+        SegmentChunk.MatchResult actualMatchResult = actual.get(0);
+        SegmentProvider actualProvider = actualMatchResult.getLeftSegments();
 
         Assertions.assertThat(actualProvider).isEqualTo(expectProvider);
     }
@@ -96,7 +96,7 @@ class NormalSegmentChunkTest {
         NormalSegmentChunk normalSegmentChunk = NormalSegmentChunk.from("pv1", "{pv2}", "{pv3}", "pv4");
 
         //when
-        List<SegmentChunk.Result> actual = normalSegmentChunk.consume(provider);
+        List<SegmentChunk.MatchResult> actual = normalSegmentChunk.match(provider);
 
         //then
         Assertions.assertThat(actual.size()).isEqualTo(0);

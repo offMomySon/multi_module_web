@@ -13,7 +13,8 @@ import mapper.MatchSegment;
 import mapper.newsegment.SegmentProvider;
 
 public class NormalSegmentChunk implements SegmentChunk {
-
+    private static final String EMPTY_SEGMENT = "";
+    
     private final Queue<String> segments;
 
     public NormalSegmentChunk(Queue<String> segments) {
@@ -34,7 +35,7 @@ public class NormalSegmentChunk implements SegmentChunk {
     }
 
     @Override
-    public List<Result> consume(SegmentProvider provider) {
+    public List<MatchResult> match(SegmentProvider provider) {
         if (Objects.isNull(provider)) {
             throw new RuntimeException("provider is null.");
         }
@@ -52,6 +53,10 @@ public class NormalSegmentChunk implements SegmentChunk {
             String segment = thisSegments.poll();
             String otherSegment = otherProvider.poll();
 
+            if (EMPTY_SEGMENT.equals(otherSegment)) {
+                return Collections.emptyList();
+            }
+
             boolean doesNotMatch = !Objects.equals(segment, otherSegment);
             if (doesNotMatch) {
                 return Collections.emptyList();
@@ -66,6 +71,6 @@ public class NormalSegmentChunk implements SegmentChunk {
         }
 
         MatchSegment matchSegment = new MatchSegment(matchSegments);
-        return List.of(new Result(matchSegment, otherProvider.copy()));
+        return List.of(new MatchResult(matchSegment, otherProvider.copy()));
     }
 }

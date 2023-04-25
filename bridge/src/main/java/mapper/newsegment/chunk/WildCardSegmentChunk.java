@@ -17,6 +17,12 @@ public class WildCardSegmentChunk implements SegmentChunk {
 
     public WildCardSegmentChunk(List<String> segments) {
         Objects.requireNonNull(segments);
+
+        boolean doseNotHasAnyWildCard = segments.stream().noneMatch(WILD_CARD::equals);
+        if (doseNotHasAnyWildCard) {
+            throw new RuntimeException("does not has any Wild card.");
+        }
+
         this.segments = segments.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableList());
     }
 
@@ -26,7 +32,7 @@ public class WildCardSegmentChunk implements SegmentChunk {
     }
 
     @Override
-    public List<Result> consume(SegmentProvider provider) {
+    public List<MatchResult> match(SegmentProvider provider) {
         Objects.requireNonNull(provider);
 
         List<String> newProvider = provider.toList();
@@ -43,49 +49,46 @@ public class WildCardSegmentChunk implements SegmentChunk {
 
         boolean onlyWildCard = wildCardExcludeSegments.isEmpty();
         if (onlyWildCard) {
-            System.out.println("only");
             return wildCardMatches.stream()
                 .map(wildCardMatch -> {
-                    List<String> wildCardMatchSegments = wildCardMatch.getMatchSegments();
-                    String newWildCardMatchSegments = String.join("/", wildCardMatchSegments);
-                    MatchSegment wildCardMatchSegment = new MatchSegment(Map.of(WILD_CARD, newWildCardMatchSegments));
-
                     List<String> doesNotMatchSegments = wildCardMatch.doesNotMatchSegments;
                     SegmentProvider leftSegments = SegmentProvider.from(doesNotMatchSegments);
 
-                    return new Result(wildCardMatchSegment, leftSegments);
+                    MatchSegment wildCardMatchSegment = createWildCardSegment(wildCardMatch);
+                    return new MatchResult(wildCardMatchSegment, leftSegments);
                 })
                 .collect(Collectors.toUnmodifiableList());
         }
 
-        System.out.println("does not only");
         SegmentChunk wildCardExcludeChunk = SegmentChunkCreateStrategy.createSegmentChunk(wildCardExcludeSegments);
-        System.out.println(wildCardExcludeChunk);
 
         return wildCardMatches.stream()
             .map(wildCardMatch -> {
                 List<String> doesNotWildCardMatchSegments = wildCardMatch.getDoesNotMatchSegments();
                 SegmentProvider segmentProvider = SegmentProvider.from(doesNotWildCardMatchSegments);
-                List<Result> results = wildCardExcludeChunk.consume(segmentProvider);
+                List<MatchResult> matchResults = wildCardExcludeChunk.match(segmentProvider);
 
-                List<String> wildCardMatchSegments = wildCardMatch.getMatchSegments();
-                String newWildCardMatchSegments = String.join("/", wildCardMatchSegments);
-                MatchSegment wildCardMatchSegment = new MatchSegment(Map.of(WILD_CARD, newWildCardMatchSegments));
-
-                return mergeWildCardMatchSegment(results, wildCardMatchSegment);
+                MatchSegment wildCardMatchSegment = createWildCardSegment(wildCardMatch);
+                return mergeWildCardMatchSegment(matchResults, wildCardMatchSegment);
             })
             .flatMap(Collection::stream)
             .collect(Collectors.toUnmodifiableList());
     }
 
-    private static List<Result> mergeWildCardMatchSegment(List<Result> results, MatchSegment wildCardMatchSegment) {
-        return results.stream()
+    private static MatchSegment createWildCardSegment(WildCardMatch wildCardMatch) {
+        List<String> wildCardMatchSegments = wildCardMatch.getMatchSegments();
+        String newWildCardMatchSegments = String.join("/", wildCardMatchSegments);
+        return new MatchSegment(Map.of(WILD_CARD, newWildCardMatchSegments));
+    }
+
+    private static List<MatchResult> mergeWildCardMatchSegment(List<MatchResult> matchResults, MatchSegment wildCardMatchSegment) {
+        return matchResults.stream()
             .map(result -> {
                 MatchSegment matchSegment = result.getMatchSegment();
                 MatchSegment newMatchSegment = matchSegment.merge(wildCardMatchSegment);
 
                 SegmentProvider leftSegments = result.getLeftSegments();
-                return new Result(newMatchSegment, leftSegments);
+                return new MatchResult(newMatchSegment, leftSegments);
             })
             .collect(Collectors.toUnmodifiableList());
     }

@@ -23,7 +23,7 @@ class SegmentChunkCreateStrategyTest {
         Queue<SegmentChunk> expect = new ArrayDeque<>(List.of(new EmptySegmentChunk()));
 
         //when
-        Queue<SegmentChunk> actual = SegmentChunkCreateStrategy.create(rootPath);
+        Queue<SegmentChunk> actual = SegmentChunkCreateStrategy.createSegmentChunks(rootPath);
 
         //then
         Assertions.assertThat(actual).isNotEmpty();
@@ -54,7 +54,7 @@ class SegmentChunkCreateStrategyTest {
         Class<?> expectClazz = NormalSegmentChunk.class;
 
         //when
-        Queue<SegmentChunk> actualQueue = SegmentChunkCreateStrategy.create(path);
+        Queue<SegmentChunk> actualQueue = SegmentChunkCreateStrategy.createSegmentChunks(path);
 
         //then
         Assertions.assertThat(actualQueue.size()).isEqualTo(1);
@@ -79,7 +79,7 @@ class SegmentChunkCreateStrategyTest {
         Class<?> expectClazz = PathVariableSegmentChunk.class;
 
         //when
-        Queue<SegmentChunk> actualQueue = SegmentChunkCreateStrategy.create(path);
+        Queue<SegmentChunk> actualQueue = SegmentChunkCreateStrategy.createSegmentChunks(path);
 
         //then
         Assertions.assertThat(actualQueue.size()).isEqualTo(1);
@@ -115,7 +115,7 @@ class SegmentChunkCreateStrategyTest {
         Class<?> expectClazz = WildCardSegmentChunk.class;
 
         //when
-        Queue<SegmentChunk> actualQueue = SegmentChunkCreateStrategy.create(path);
+        Queue<SegmentChunk> actualQueue = SegmentChunkCreateStrategy.createSegmentChunks(path);
 
         //then
         Assertions.assertThat(actualQueue.size()).isEqualTo(1);
@@ -129,7 +129,7 @@ class SegmentChunkCreateStrategyTest {
     void test4(String path, Queue<Class<?>> expect) throws Exception {
         //given
         //when
-        Queue<SegmentChunk> actual = SegmentChunkCreateStrategy.create(path);
+        Queue<SegmentChunk> actual = SegmentChunkCreateStrategy.createSegmentChunks(path);
 
         //then
         Assertions.assertThat(actual.size()).isEqualTo(expect.size());

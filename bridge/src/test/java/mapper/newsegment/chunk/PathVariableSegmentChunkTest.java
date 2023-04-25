@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 import mapper.MatchSegment;
 import mapper.newsegment.SegmentProvider;
-import mapper.newsegment.chunk.SegmentChunk.Result;
+import mapper.newsegment.chunk.SegmentChunk.MatchResult;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,10 +18,10 @@ class PathVariableSegmentChunkTest {
     @Test
     void test0() throws Exception {
         //given
-        PathVariableSegmentChunk pathVariableSegmentChunk = PathVariableSegmentChunk.from("this");
+        PathVariableSegmentChunk pathVariableSegmentChunk = PathVariableSegmentChunk.from("{pv}", "this");
 
         //when
-        Throwable actual = Assertions.catchThrowable(() -> pathVariableSegmentChunk.consume(null));
+        Throwable actual = Assertions.catchThrowable(() -> pathVariableSegmentChunk.match(null));
 
         //then
         Assertions.assertThat(actual).isNotNull();
@@ -39,13 +39,13 @@ class PathVariableSegmentChunkTest {
         MatchSegment expectMatchSegment = new MatchSegment(Map.of(pathVariableSegment, provideSegment));
 
         //when
-        List<Result> actual = segmentChunk.consume(provider);
+        List<MatchResult> actual = segmentChunk.match(provider);
 
         //then
         Assertions.assertThat(actual.size()).isEqualTo(1);
-        Result result = actual.get(0);
-        MatchSegment actualMatchSegment = result.getMatchSegment();
-        SegmentProvider actualProvider = result.getLeftSegments();
+        MatchResult matchResult = actual.get(0);
+        MatchSegment actualMatchSegment = matchResult.getMatchSegment();
+        SegmentProvider actualProvider = matchResult.getLeftSegments();
 
         Assertions.assertThat(actualMatchSegment).isEqualTo(expectMatchSegment);
         Assertions.assertThat(actualProvider).isEqualTo(SegmentProvider.empty());
@@ -60,12 +60,12 @@ class PathVariableSegmentChunkTest {
         PathVariableSegmentChunk pathVariableSegmentChunk = PathVariableSegmentChunk.from(chunk);
 
         //when
-        List<Result> actual = pathVariableSegmentChunk.consume(provider);
+        List<MatchResult> actual = pathVariableSegmentChunk.match(provider);
 
         //then
         Assertions.assertThat(actual.size()).isEqualTo(1);
-        Result result = actual.get(0);
-        MatchSegment actualMatchSegment = result.getMatchSegment();
+        MatchResult matchResult = actual.get(0);
+        MatchSegment actualMatchSegment = matchResult.getMatchSegment();
 
         Assertions.assertThat(actualMatchSegment).isEqualTo(expectMatchSegment);
     }
@@ -74,11 +74,11 @@ class PathVariableSegmentChunkTest {
     @Test
     void test3() throws Exception {
         //given
-        PathVariableSegmentChunk pathVariableSegmentChunk = PathVariableSegmentChunk.from("pv1", "pv2");
+        PathVariableSegmentChunk pathVariableSegmentChunk = PathVariableSegmentChunk.from("{pv1}", "pv1", "pv2");
         SegmentProvider provider = SegmentProvider.from(List.of("pv1"));
 
         //when
-        List<Result> actual = pathVariableSegmentChunk.consume(provider);
+        List<MatchResult> actual = pathVariableSegmentChunk.match(provider);
 
         //then
         Assertions.assertThat(actual.size()).isEqualTo(0);
@@ -95,13 +95,13 @@ class PathVariableSegmentChunkTest {
         SegmentProvider expectProvider = SegmentProvider.from("pv5");
 
         //when
-        List<Result> actual = pathVariableSegmentChunk.consume(provider);
+        List<MatchResult> actual = pathVariableSegmentChunk.match(provider);
 
         //then
         Assertions.assertThat(actual.size()).isEqualTo(1);
 
-        Result actualResult = actual.get(0);
-        SegmentProvider actualProvider = actualResult.getLeftSegments();
+        MatchResult actualMatchResult = actual.get(0);
+        SegmentProvider actualProvider = actualMatchResult.getLeftSegments();
 
         Assertions.assertThat(actualProvider).isEqualTo(expectProvider);
     }
@@ -114,7 +114,7 @@ class PathVariableSegmentChunkTest {
         PathVariableSegmentChunk pathVariableSegmentChunk = PathVariableSegmentChunk.from("pv1", "{pv2}", "{pv3}", "pv4");
 
         //when
-        List<Result> actual = pathVariableSegmentChunk.consume(provider);
+        List<MatchResult> actual = pathVariableSegmentChunk.match(provider);
 
         //then
         Assertions.assertThat(actual.size()).isEqualTo(0);

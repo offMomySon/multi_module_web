@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.Getter;
-import mapper.newsegment.SegmentManager;
 import mapper.segment.SegmentMatcher;
 import mapper.segment.SegmentMatcher.MatchResult;
 import marker.RequestMethod;
@@ -35,17 +34,25 @@ public class HttpPathMatcher {
             return Optional.empty();
         }
 
-//        List<MatchResult> matchResults = matchV2(requestUrl);
-//        if (matchResults.isEmpty()) {
-//            return Optional.empty();
-//        }
-
-        Optional<RequestValues> matchResult = SegmentManager.doMatch(this.url, requestUrl);
-        if (matchResult.isEmpty()) {
+        List<MatchResult> matchResults = matchV2(requestUrl);
+        if (matchResults.isEmpty()) {
             return Optional.empty();
         }
 
-        RequestValues requestValues = matchResult.get();
+//        Optional<RequestValues> matchResult = SegmentManager.doMatch(this.url, requestUrl);
+//        if (matchResult.isEmpty()) {
+//            return Optional.empty();
+//        }
+
+//        RequestValues requestValues = matchResult.get();
+//        return Optional.of(new MatchedMethod(javaMethod, requestValues));
+
+        RequestValues requestValues = matchResults.stream()
+            .filter(MatchResult::isFinish)
+            .findFirst()
+            .map(MatchResult::getPathVariable)
+            .orElseThrow(() -> new RuntimeException("does not exist finish match result"));
+
         return Optional.of(new MatchedMethod(javaMethod, requestValues));
     }
 

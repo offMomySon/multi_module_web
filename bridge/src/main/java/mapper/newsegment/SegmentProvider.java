@@ -12,10 +12,17 @@ public class SegmentProvider {
     private static final String PATH_DELIMITER = "/";
 
     private final Queue<String> segments;
+    private final StringBuilder newSegments;
+
+    public SegmentProvider(StringBuilder newSegments) {
+        this.segments = null;
+        this.newSegments = newSegments;
+    }
 
     public SegmentProvider(Queue<String> segments) {
         Objects.requireNonNull(segments);
         this.segments = segments;
+        this.newSegments = null;
     }
 
     public static SegmentProvider from(List<String> segments) {

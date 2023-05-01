@@ -13,7 +13,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class SegmentChunkCreateStrategyTest {
+class SegmentChunkV2CreateStrategyTest {
 
     @DisplayName("path 가 루트만 존재하면 emptySegmentChunk 를 생성합니다.")
     @Test
@@ -112,7 +112,7 @@ class SegmentChunkCreateStrategyTest {
     })
     void test(String path) throws Exception {
         //given
-        Class<?> expectClazz = WildCardSegmentChunk.class;
+        Class<?> expectClazz = RegacyWildCardSegmentChunk.class;
 
         //when
         Queue<SegmentChunk> actualQueue = SegmentChunkCreateStrategy.createSegmentChunks(path);
@@ -147,31 +147,31 @@ class SegmentChunkCreateStrategyTest {
 
     public static Stream<Arguments> provideSinglePathAndExpectClasses() {
         return Stream.of(
-            Arguments.of("/normalPath/**", new ArrayDeque<>(List.of(NormalSegmentChunk.class, WildCardSegmentChunk.class))),
-            Arguments.of("normalPath/**", new ArrayDeque<>(List.of(NormalSegmentChunk.class, WildCardSegmentChunk.class))),
-            Arguments.of("/{pathVariable}/**", new ArrayDeque<>(List.of(PathVariableSegmentChunk.class, WildCardSegmentChunk.class))),
-            Arguments.of("{pathVariable}/**", new ArrayDeque<>(List.of(PathVariableSegmentChunk.class, WildCardSegmentChunk.class))),
-            Arguments.of("/**/**", new ArrayDeque<>(List.of(WildCardSegmentChunk.class, WildCardSegmentChunk.class))),
-            Arguments.of("**/**", new ArrayDeque<>(List.of(WildCardSegmentChunk.class, WildCardSegmentChunk.class))),
-            Arguments.of("/**/normalPath/**", new ArrayDeque<>(List.of(WildCardSegmentChunk.class, WildCardSegmentChunk.class))),
-            Arguments.of("**/normalPath/**", new ArrayDeque<>(List.of(WildCardSegmentChunk.class, WildCardSegmentChunk.class))),
-            Arguments.of("/**/{pathVariable}/**", new ArrayDeque<>(List.of(WildCardSegmentChunk.class, WildCardSegmentChunk.class))),
-            Arguments.of("**/{pathVariable}/**", new ArrayDeque<>(List.of(WildCardSegmentChunk.class, WildCardSegmentChunk.class))),
-            Arguments.of("/**/normalPath/{pathVariable}/**", new ArrayDeque<>(List.of(WildCardSegmentChunk.class, WildCardSegmentChunk.class))),
-            Arguments.of("**/normalPath/{pathVariable}/**", new ArrayDeque<>(List.of(WildCardSegmentChunk.class, WildCardSegmentChunk.class))),
-            Arguments.of("/**/normalPath/{pathVariable}/normalPath1/**", new ArrayDeque<>(List.of(WildCardSegmentChunk.class, WildCardSegmentChunk.class))),
-            Arguments.of("**/normalPath/{pathVariable}/normalPath1/**", new ArrayDeque<>(List.of(WildCardSegmentChunk.class, WildCardSegmentChunk.class))),
-            Arguments.of("/**/normalPath/{pathVariable}/normalPath1/p2/**", new ArrayDeque<>(List.of(WildCardSegmentChunk.class, WildCardSegmentChunk.class))),
-            Arguments.of("**/normalPath/{pathVariable}/normalPath1/p2/**", new ArrayDeque<>(List.of(WildCardSegmentChunk.class, WildCardSegmentChunk.class))),
-            Arguments.of("/**/{pathVariable}/normalPath/**", new ArrayDeque<>(List.of(WildCardSegmentChunk.class, WildCardSegmentChunk.class))),
-            Arguments.of("**/{pathVariable}/normalPath/**", new ArrayDeque<>(List.of(WildCardSegmentChunk.class, WildCardSegmentChunk.class))),
-            Arguments.of("/**/{pathVariable}/normalPath/p2/**", new ArrayDeque<>(List.of(WildCardSegmentChunk.class, WildCardSegmentChunk.class))),
-            Arguments.of("**/{pathVariable}/normalPath/p2/**", new ArrayDeque<>(List.of(WildCardSegmentChunk.class, WildCardSegmentChunk.class))),
-            Arguments.of("/**/{pathVariable}/normalPath/{pv2}/**", new ArrayDeque<>(List.of(WildCardSegmentChunk.class, WildCardSegmentChunk.class))),
-            Arguments.of("**/{pathVariable}/normalPath/{pv2}/**", new ArrayDeque<>(List.of(WildCardSegmentChunk.class, WildCardSegmentChunk.class))),
-            Arguments.of("/**/{pathVariable}/normalPath/{pv2}/**", new ArrayDeque<>(List.of(WildCardSegmentChunk.class, WildCardSegmentChunk.class))),
+            Arguments.of("/normalPath/**", new ArrayDeque<>(List.of(NormalSegmentChunk.class, RegacyWildCardSegmentChunk.class))),
+            Arguments.of("normalPath/**", new ArrayDeque<>(List.of(NormalSegmentChunk.class, RegacyWildCardSegmentChunk.class))),
+            Arguments.of("/{pathVariable}/**", new ArrayDeque<>(List.of(PathVariableSegmentChunk.class, RegacyWildCardSegmentChunk.class))),
+            Arguments.of("{pathVariable}/**", new ArrayDeque<>(List.of(PathVariableSegmentChunk.class, RegacyWildCardSegmentChunk.class))),
+            Arguments.of("/**/**", new ArrayDeque<>(List.of(RegacyWildCardSegmentChunk.class, RegacyWildCardSegmentChunk.class))),
+            Arguments.of("**/**", new ArrayDeque<>(List.of(RegacyWildCardSegmentChunk.class, RegacyWildCardSegmentChunk.class))),
+            Arguments.of("/**/normalPath/**", new ArrayDeque<>(List.of(RegacyWildCardSegmentChunk.class, RegacyWildCardSegmentChunk.class))),
+            Arguments.of("**/normalPath/**", new ArrayDeque<>(List.of(RegacyWildCardSegmentChunk.class, RegacyWildCardSegmentChunk.class))),
+            Arguments.of("/**/{pathVariable}/**", new ArrayDeque<>(List.of(RegacyWildCardSegmentChunk.class, RegacyWildCardSegmentChunk.class))),
+            Arguments.of("**/{pathVariable}/**", new ArrayDeque<>(List.of(RegacyWildCardSegmentChunk.class, RegacyWildCardSegmentChunk.class))),
+            Arguments.of("/**/normalPath/{pathVariable}/**", new ArrayDeque<>(List.of(RegacyWildCardSegmentChunk.class, RegacyWildCardSegmentChunk.class))),
+            Arguments.of("**/normalPath/{pathVariable}/**", new ArrayDeque<>(List.of(RegacyWildCardSegmentChunk.class, RegacyWildCardSegmentChunk.class))),
+            Arguments.of("/**/normalPath/{pathVariable}/normalPath1/**", new ArrayDeque<>(List.of(RegacyWildCardSegmentChunk.class, RegacyWildCardSegmentChunk.class))),
+            Arguments.of("**/normalPath/{pathVariable}/normalPath1/**", new ArrayDeque<>(List.of(RegacyWildCardSegmentChunk.class, RegacyWildCardSegmentChunk.class))),
+            Arguments.of("/**/normalPath/{pathVariable}/normalPath1/p2/**", new ArrayDeque<>(List.of(RegacyWildCardSegmentChunk.class, RegacyWildCardSegmentChunk.class))),
+            Arguments.of("**/normalPath/{pathVariable}/normalPath1/p2/**", new ArrayDeque<>(List.of(RegacyWildCardSegmentChunk.class, RegacyWildCardSegmentChunk.class))),
+            Arguments.of("/**/{pathVariable}/normalPath/**", new ArrayDeque<>(List.of(RegacyWildCardSegmentChunk.class, RegacyWildCardSegmentChunk.class))),
+            Arguments.of("**/{pathVariable}/normalPath/**", new ArrayDeque<>(List.of(RegacyWildCardSegmentChunk.class, RegacyWildCardSegmentChunk.class))),
+            Arguments.of("/**/{pathVariable}/normalPath/p2/**", new ArrayDeque<>(List.of(RegacyWildCardSegmentChunk.class, RegacyWildCardSegmentChunk.class))),
+            Arguments.of("**/{pathVariable}/normalPath/p2/**", new ArrayDeque<>(List.of(RegacyWildCardSegmentChunk.class, RegacyWildCardSegmentChunk.class))),
+            Arguments.of("/**/{pathVariable}/normalPath/{pv2}/**", new ArrayDeque<>(List.of(RegacyWildCardSegmentChunk.class, RegacyWildCardSegmentChunk.class))),
+            Arguments.of("**/{pathVariable}/normalPath/{pv2}/**", new ArrayDeque<>(List.of(RegacyWildCardSegmentChunk.class, RegacyWildCardSegmentChunk.class))),
+            Arguments.of("/**/{pathVariable}/normalPath/{pv2}/**", new ArrayDeque<>(List.of(RegacyWildCardSegmentChunk.class, RegacyWildCardSegmentChunk.class))),
             Arguments.of("/**/{pathVariable}/normalPath/{pv2}/**/p1/p2/{pv2}/**/p3/**",
-                         new ArrayDeque<>(List.of(WildCardSegmentChunk.class, WildCardSegmentChunk.class, WildCardSegmentChunk.class, WildCardSegmentChunk.class)))
+                         new ArrayDeque<>(List.of(RegacyWildCardSegmentChunk.class, RegacyWildCardSegmentChunk.class, RegacyWildCardSegmentChunk.class, RegacyWildCardSegmentChunk.class)))
         );
 
     }

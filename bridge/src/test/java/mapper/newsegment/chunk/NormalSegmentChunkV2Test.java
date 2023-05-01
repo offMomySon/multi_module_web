@@ -14,7 +14,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class NormalSegmentChunkTest {
+class NormalSegmentChunkV2Test {
     @DisplayName("null 입력시 exception 이 발생합니다.")
     @Test
     void test0() throws Exception {

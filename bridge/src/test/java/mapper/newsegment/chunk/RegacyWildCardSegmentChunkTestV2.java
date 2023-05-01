@@ -11,15 +11,15 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class WildCardSegmentChunkTest {
+class RegacyWildCardSegmentChunkTestV2 {
     @DisplayName("null 입력시 exception 이 발생합니다.")
     @Test
     void test0() throws Exception {
         //given
-        WildCardSegmentChunk wildCardSegmentChunk = new WildCardSegmentChunk(List.of("**", "this"));
+        RegacyWildCardSegmentChunk regacyWildCardSegmentChunk = new RegacyWildCardSegmentChunk(List.of("**", "this"));
 
         //when
-        Throwable actual = Assertions.catchThrowable(() -> wildCardSegmentChunk.match(null));
+        Throwable actual = Assertions.catchThrowable(() -> regacyWildCardSegmentChunk.match(null));
 
         //then
         Assertions.assertThat(actual).isNotNull();
@@ -31,7 +31,7 @@ class WildCardSegmentChunkTest {
         //given
         String pathVariableSegment = "**";
         String provideSegment = "p1/p2/p3/p4";
-        WildCardSegmentChunk segmentChunk = new WildCardSegmentChunk(List.of(pathVariableSegment));
+        RegacyWildCardSegmentChunk segmentChunk = new RegacyWildCardSegmentChunk(List.of(pathVariableSegment));
         SegmentProvider provider = SegmentProvider.from(provideSegment);
 
         Set<MatchSegment> expects = Set.of(
@@ -58,7 +58,7 @@ class WildCardSegmentChunkTest {
         //given
         List<String> segments = List.of("**", "{pv2}", "p6");
         String provideSegment = "p1/p2/p6/p4/p5/p6";
-        WildCardSegmentChunk segmentChunk = new WildCardSegmentChunk(segments);
+        RegacyWildCardSegmentChunk segmentChunk = new RegacyWildCardSegmentChunk(segments);
         SegmentProvider provider = SegmentProvider.from(provideSegment);
 
         Set<MatchSegment> expects = Set.of(

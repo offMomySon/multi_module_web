@@ -16,7 +16,7 @@ public class MatchSegment {
         this.values = values.entrySet().stream()
             .filter(entry -> Objects.nonNull(entry.getKey()))
             .filter(entry -> Objects.nonNull(entry.getValue()))
-            .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (curr, prev) -> prev));
+            .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
     }
 
     public static MatchSegment empty() {

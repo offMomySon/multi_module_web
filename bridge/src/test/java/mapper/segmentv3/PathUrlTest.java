@@ -2,6 +2,7 @@ package mapper.segmentv3;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,7 +44,6 @@ class PathUrlTest {
         List<String> actual = new ArrayList<>();
         while (pathUrl.doesNotEmpty()) {
             String segment = pathUrl.popSegment();
-            System.out.println(segment);
             actual.add(segment);
         }
 
@@ -51,4 +51,47 @@ class PathUrlTest {
         assertThat(actual).containsSequence("test", "p1", "p2");
     }
 
+    @DisplayName("첫번째 segment 를 peek 합니다.")
+    @Test
+    void ttttest() throws Exception {
+        //given
+        PathUrl pathUrl = PathUrl.from("/test/p1/p2");
+
+        //when
+        List<String> actual = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            String segment = pathUrl.peekSegment();
+            actual.add(segment);
+        }
+
+        //then
+        assertThat(actual).containsOnly("test");
+    }
+
+    @DisplayName("PathUrl 의 segment size 를 가져옵니다.")
+    @Test
+    void tttttest() throws Exception {
+        //given
+        PathUrl pathUrl = new PathUrl(new StringBuilder("test/p1/p2"), "test/p1/".length());
+
+        //when
+        int size = pathUrl.size();
+
+        //then
+        assertThat(size).isEqualTo(1);
+    }
+
+    @DisplayName("PathUrl 을 list 형태로 복사합니다.")
+    @Test
+    void ttttttest() throws Exception {
+        //given
+        PathUrl pathUrl = new PathUrl(new StringBuilder("p1/p2/p3"), "p1/".length());
+        List<String> expect = List.of("p2", "p3");
+
+        //when
+        List<String> actual = pathUrl.toList();
+
+        //then
+        Assertions.assertThat(actual).containsSequence(expect);
+    }
 }

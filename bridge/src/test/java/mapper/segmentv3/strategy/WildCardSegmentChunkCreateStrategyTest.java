@@ -32,8 +32,8 @@ class WildCardSegmentChunkCreateStrategyTest {
         // todo 어떻게 테스트하지 아래 cotainSequences 로 테스트하고 싶은데
         // Assertions.assertThat(actualInstances).containsSequences(expects);
         for (int i = 0; i < expectInstances.size(); i++) {
-            Class<? extends SegmentChunk> actual = actualInstances.get(0);
-            Class<? extends SegmentChunk> expect = expectInstances.get(0);
+            Class<? extends SegmentChunk> actual = actualInstances.get(i);
+            Class<? extends SegmentChunk> expect = expectInstances.get(i);
 
             Assertions.assertThat(actual).isEqualTo(expect);
         }

@@ -25,11 +25,24 @@ public class WildCardSegmentChunk implements SegmentChunk {
         Objects.requireNonNull(requestUrl);
 
         PathUrl copiedBaseUrl = baseUrl.copy();
+        PathUrl copiedRequestUrl = requestUrl.copy();
+
         copiedBaseUrl.popSegment();
+
+        boolean onlyHasWildCard = copiedBaseUrl.isEmtpy();
+        if (onlyHasWildCard) {
+            List<PathUrl> resultPathUrls = new ArrayList<>();
+
+            while (copiedRequestUrl.doesNotEmpty()) {
+                resultPathUrls.add(copiedRequestUrl.copy());
+                copiedRequestUrl.popSegment();
+            }
+            resultPathUrls.add(copiedRequestUrl.copy());
+            return resultPathUrls;
+        }
+
         PathUrl wildCardDeletedBaseUrl = copiedBaseUrl.copy();
         NormalSegmentChunk normalSegmentChunk = new NormalSegmentChunk(wildCardDeletedBaseUrl);
-
-        PathUrl copiedRequestUrl = requestUrl.copy();
 
         List<PathUrl> resultPathUrls = new ArrayList<>();
         while (copiedRequestUrl.doesNotEmpty()) {

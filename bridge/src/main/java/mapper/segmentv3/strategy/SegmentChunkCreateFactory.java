@@ -18,7 +18,7 @@ public class SegmentChunkCreateFactory {
             return Collections.emptyList();
         }
 
-        String baseUrl = _basePathUrl.toValue();
+        String baseUrl = _basePathUrl.toAbsolutePath();
         int wildCardIndex = baseUrl.indexOf(WILD_CARD);
         boolean onlyExistGeneralSegmentChunk = wildCardIndex == -1;
         if (onlyExistGeneralSegmentChunk) {

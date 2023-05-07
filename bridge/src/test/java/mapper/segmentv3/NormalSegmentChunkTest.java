@@ -30,7 +30,7 @@ class NormalSegmentChunkTest {
         PathUrl baseUrl = PathUrl.from("/path1/path2");
         NormalSegmentChunk normalSegmentChunk = new NormalSegmentChunk(baseUrl);
 
-        PathUrl expectUrl = new PathUrl(new StringBuilder("/path1/path2/path3/path4"), 12);
+        PathUrl expectUrl = new PathUrl(new StringBuilder("/path1/path2/path3/path4"), "/path1/path2/".length());
 
         //when
         List<PathUrl> actuals = normalSegmentChunk.consume(requestUrl);

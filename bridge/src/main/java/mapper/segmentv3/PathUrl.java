@@ -15,10 +15,7 @@ public class PathUrl {
     public PathUrl(StringBuilder value, int beginIndex) {
         Objects.requireNonNull(value);
 
-        String normalizedPath = Path.of(value.toString()).normalize().toString();
-        String firstDelimiterDeletedPath = Objects.equals(String.valueOf(normalizedPath.charAt(0)), DELIMITER) ? normalizedPath.substring(1) : normalizedPath;
-
-        this.value = new StringBuilder(firstDelimiterDeletedPath);
+        this.value = value;
         this.beginIndex = beginIndex;
     }
 
@@ -27,12 +24,20 @@ public class PathUrl {
             throw new RuntimeException("path is empty.");
         }
 
+        String normalizedPath = Path.of(path).normalize().toString();
+
+        boolean isStartWithDelimiter = Objects.equals(String.valueOf(normalizedPath.charAt(0)), DELIMITER);
+        if (isStartWithDelimiter) {
+            StringBuilder value = new StringBuilder(normalizedPath);
+            return new PathUrl(value, 1);
+        }
+
         StringBuilder value = new StringBuilder(path);
         return new PathUrl(value, 0);
     }
 
     public static PathUrl empty() {
-        return new PathUrl(new StringBuilder("/"), 0);
+        return PathUrl.from("/");
     }
 
     public boolean isEmtpy() {
@@ -107,8 +112,15 @@ public class PathUrl {
         return new PathUrl(this.value, this.beginIndex);
     }
 
-    public String toValue() {
-        return "/" + value.toString();
+    public String toAbsolutePath() {
+        String value = this.value.toString();
+
+        boolean isStartWithDelimiter = value.startsWith(DELIMITER);
+        if (isStartWithDelimiter) {
+            return value;
+        }
+
+        return "/" + value;
     }
 
     public List<String> toList() {
@@ -124,17 +136,10 @@ public class PathUrl {
         if (o == null || getClass() != o.getClass()) return false;
         PathUrl otherPathUrl = (PathUrl) o;
 
-        boolean doesNotSameBeginIndex = this.beginIndex != otherPathUrl.beginIndex;
-        if (doesNotSameBeginIndex) {
-            return false;
-        }
+        String thisSubString = this.value.substring(beginIndex);
+        String otherSubString = otherPathUrl.value.substring(otherPathUrl.beginIndex);
 
-        boolean doesNotSameUrlLength = this.value.length() != otherPathUrl.value.length();
-        if (doesNotSameUrlLength) {
-            return false;
-        }
-
-        return Objects.equals(this.value.toString(), otherPathUrl.value.toString());
+        return Objects.equals(thisSubString, otherSubString);
     }
 
     @Override

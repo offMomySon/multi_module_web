@@ -21,7 +21,7 @@ public class WildCardSegmentChunkCreateStrategy {
             return Collections.emptyList();
         }
 
-        String basePathUrl = _basePathUrl.toValue();
+        String basePathUrl = _basePathUrl.toAbsolutePath();
 
         if (!basePathUrl.startsWith(WILD_CARD)) {
             throw new RuntimeException("wildcard 가 처음에 위치해야 합니다.");

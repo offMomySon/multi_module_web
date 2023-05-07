@@ -79,15 +79,14 @@ class WildCardPathVariableSegmentChunkTest {
         WildCardPathVariableSegmentChunk wildCardPathVariableSegmentChunk = new WildCardPathVariableSegmentChunk(baseUrl);
 
         PathUrl requestUrl = PathUrl.from(_requestUrl);
-        wildCardPathVariableSegmentChunk.consume(requestUrl);
 
         //when
-        List<MatchedPathVariable> actuals = wildCardPathVariableSegmentChunk.getMatchPathVaraible();
+        List<MatchedPathVariable> actuals = wildCardPathVariableSegmentChunk.internalConsume(requestUrl);
 
         //then
         Assertions.assertThat(actuals).containsAll(expects);
     }
-    
+
     public static Stream<Arguments> provideConsumeResult() {
         return Stream.of(
             Arguments.of("**/{pv1}", "path1/path2/path3", List.of(

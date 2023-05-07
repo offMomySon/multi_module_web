@@ -25,5 +25,5 @@ public abstract class AbstractPathVariableSegmentChunk implements SegmentChunk {
         return new ArrayList<>(matchedPathVariables);
     }
 
-    protected abstract List<MatchedPathVariable> internalConsume(PathUrl pathUrl);
+    public abstract List<MatchedPathVariable> internalConsume(PathUrl pathUrl);
 }

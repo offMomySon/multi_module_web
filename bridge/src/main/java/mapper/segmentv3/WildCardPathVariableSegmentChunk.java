@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
+import mapper.segmentv3.pathvariable.AbstractPathVariableSegmentChunk;
 import mapper.segmentv3.pathvariable.MatchedPathVariable;
 
 @Slf4j
-public class WildCardPathVariableSegmentChunk implements SegmentChunk {
+public class WildCardPathVariableSegmentChunk extends AbstractPathVariableSegmentChunk {
     private static final String WILD_CARD = "**";
 
     private final PathUrl baseUrl;
-    private final List<MatchedPathVariable> matchedPathVariables = new ArrayList<>();
 
     public WildCardPathVariableSegmentChunk(PathUrl baseUrl) {
         Objects.requireNonNull(baseUrl);
@@ -32,7 +32,7 @@ public class WildCardPathVariableSegmentChunk implements SegmentChunk {
     }
 
     @Override
-    public List<PathUrl> consume(PathUrl requestUrl) {
+    public List<MatchedPathVariable> internalConsume(PathUrl requestUrl) {
         Objects.requireNonNull(requestUrl);
 
         PathUrl copiedBaseUrl = baseUrl.copy();
@@ -41,37 +41,27 @@ public class WildCardPathVariableSegmentChunk implements SegmentChunk {
 
         PathUrl copiedRequestUrl = requestUrl.copy();
 
-        List<PathUrl> resultPathUrls = new ArrayList<>();
+        List<MatchedPathVariable> matchedPathVariables = new ArrayList<>();
         while (copiedRequestUrl.doesNotEmpty()) {
             boolean doesNotSufficientRequestUrl = copiedBaseUrl.size() > copiedRequestUrl.size();
             if (doesNotSufficientRequestUrl) {
                 break;
             }
 
-            List<PathUrl> leftPathUrls = pathVariableSegmentChunk.consume(copiedRequestUrl);
+            List<MatchedPathVariable> subChunkMatchedPathVariables = pathVariableSegmentChunk.internalConsume(copiedRequestUrl);
 
-            boolean doesNotMatch = leftPathUrls.isEmpty();
+            boolean doesNotMatch = subChunkMatchedPathVariables.isEmpty();
             if (doesNotMatch) {
                 copiedRequestUrl.popSegment();
                 continue;
             }
 
-            PathUrl leftPathUrl = leftPathUrls.get(0);
-            resultPathUrls.add(leftPathUrl);
-
-            PathVariable matchPathVariable = pathVariableSegmentChunk.getPathVariable();
-            MatchedPathVariable pathUrlPathVariable = new MatchedPathVariable(leftPathUrl, matchPathVariable);
-
-            matchedPathVariables.add(pathUrlPathVariable);
+            MatchedPathVariable subChunkMatchedPathVariable = subChunkMatchedPathVariables.get(0);
+            matchedPathVariables.add(subChunkMatchedPathVariable);
 
             copiedRequestUrl.popSegment();
         }
 
-
-        return resultPathUrls;
-    }
-
-    public List<MatchedPathVariable> getMatchPathVaraible() {
         return matchedPathVariables;
     }
 }

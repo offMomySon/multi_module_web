@@ -2,6 +2,7 @@ package mapper.segmentv3;
 
 import java.util.List;
 import java.util.Map;
+import mapper.segmentv3.pathvariable.MatchedPathVariable;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,10 +14,10 @@ class PathVariableSegmentChunkTest {
         //given
         PathUrl requestUrl = PathUrl.from("/path1/diffPath1/diffPath2");
         PathUrl baseUrl = PathUrl.from("/path1/{pv1}/path2");
-        NormalSegmentChunk normalSegmentChunk = new NormalSegmentChunk(baseUrl);
+        PathVariableSegmentChunk pathVariableSegmentChunk = new PathVariableSegmentChunk(baseUrl);
 
         //when
-        List<PathUrl> actual = normalSegmentChunk.consume(requestUrl);
+        List<PathUrl> actual = pathVariableSegmentChunk.consume(requestUrl);
 
         //then
         Assertions.assertThat(actual).hasSize(0);
@@ -67,15 +68,17 @@ class PathVariableSegmentChunkTest {
         PathUrl requestUrl = PathUrl.from("path1/path2/path3/path4");
         PathUrl baseUrl = PathUrl.from("{pv1}/{pv2}/{pv3}");
         PathVariableSegmentChunk pathVariableSegmentChunk = new PathVariableSegmentChunk(baseUrl);
-        List<PathUrl> consumeResult = pathVariableSegmentChunk.consume(requestUrl);
         PathVariable expect = new PathVariable(Map.of("pv1", "path1",
                                                       "pv2", "path2",
                                                       "pv3", "path3"));
 
         //when
-        PathVariable actual = pathVariableSegmentChunk.getPathVariable();
+        List<MatchedPathVariable> actuals = pathVariableSegmentChunk.internalConsume(requestUrl);
 
         //then
+        Assertions.assertThat(actuals).hasSize(1);
+        MatchedPathVariable matchedPathVariable = actuals.get(0);
+        PathVariable actual = matchedPathVariable.getPathVariable();
         Assertions.assertThat(actual).isEqualTo(expect);
     }
 }

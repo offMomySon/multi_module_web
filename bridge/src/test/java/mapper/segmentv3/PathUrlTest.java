@@ -94,4 +94,17 @@ class PathUrlTest {
         //then
         Assertions.assertThat(actual).containsSequence(expect);
     }
+
+    @DisplayName("비어있는 pathUrl 을 생성합니다.")
+    @Test
+    void tttttttest() throws Exception {
+        //given
+        PathUrl emptyPathUrl = PathUrl.empty();
+
+        //when
+        boolean actual = emptyPathUrl.isEmtpy();
+
+        //then
+        Assertions.assertThat(actual).isTrue();
+    }
 }

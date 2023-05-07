@@ -35,11 +35,6 @@ public class HttpPathMatcher {
             return Optional.empty();
         }
 
-//        List<MatchResult> matchResults = matchV2(requestUrl);
-//        if (matchResults.isEmpty()) {
-//            return Optional.empty();
-//        }
-
         Optional<RequestValues> matchResult = SegmentManager.doMatch(this.url, requestUrl);
         if (matchResult.isEmpty()) {
             return Optional.empty();

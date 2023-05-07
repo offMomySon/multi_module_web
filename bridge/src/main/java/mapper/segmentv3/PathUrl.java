@@ -31,6 +31,10 @@ public class PathUrl {
         return new PathUrl(value, 0);
     }
 
+    public static PathUrl empty() {
+        return new PathUrl(new StringBuilder("/"), 0);
+    }
+
     public boolean isEmtpy() {
         return beginIndex >= value.length();
     }
@@ -101,6 +105,10 @@ public class PathUrl {
 
     public PathUrl copy() {
         return new PathUrl(this.value, this.beginIndex);
+    }
+
+    public String toValue() {
+        return "/" + value.toString();
     }
 
     public List<String> toList() {

@@ -7,9 +7,6 @@ import static mapper.segmentv3.PathVariableUtil.isPathVariable;
 import static mapper.segmentv3.PathVariableUtil.parsePathVariable;
 
 public class PathVariableSegmentChunk implements SegmentChunk {
-    private static final String PATH_VARIABLE_OPENER = "{";
-    private static final String PATH_VARIABLE_CLOSER = "}";
-
     private final PathUrl baseUrl;
     private final PathVariable pathVariable = PathVariable.empty();
 

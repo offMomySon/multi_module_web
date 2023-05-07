@@ -4,13 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
+import mapper.segmentv3.pathvariable.MatchedPathVariable;
 
 @Slf4j
 public class WildCardPathVariableSegmentChunk implements SegmentChunk {
     private static final String WILD_CARD = "**";
 
     private final PathUrl baseUrl;
-    private final List<MatchPathVariable> matchPathVariables = new ArrayList<>();
+    private final List<MatchedPathVariable> matchedPathVariables = new ArrayList<>();
 
     public WildCardPathVariableSegmentChunk(PathUrl baseUrl) {
         Objects.requireNonNull(baseUrl);
@@ -59,9 +60,9 @@ public class WildCardPathVariableSegmentChunk implements SegmentChunk {
             resultPathUrls.add(leftPathUrl);
 
             PathVariable matchPathVariable = pathVariableSegmentChunk.getPathVariable();
-            MatchPathVariable pathUrlPathVariable = new MatchPathVariable(leftPathUrl, matchPathVariable);
+            MatchedPathVariable pathUrlPathVariable = new MatchedPathVariable(leftPathUrl, matchPathVariable);
 
-            matchPathVariables.add(pathUrlPathVariable);
+            matchedPathVariables.add(pathUrlPathVariable);
 
             copiedRequestUrl.popSegment();
         }
@@ -70,49 +71,7 @@ public class WildCardPathVariableSegmentChunk implements SegmentChunk {
         return resultPathUrls;
     }
 
-    public List<MatchPathVariable> getMatchPathVaraible() {
-        return matchPathVariables;
-    }
-
-    public static class MatchPathVariable {
-        private final PathUrl leftPathUrl;
-        private final PathVariable pathVariable;
-
-        public MatchPathVariable(PathUrl leftPathUrl, PathVariable pathVariable) {
-            Objects.requireNonNull(leftPathUrl);
-            Objects.requireNonNull(pathVariable);
-
-            this.leftPathUrl = leftPathUrl;
-            this.pathVariable = pathVariable;
-        }
-
-        public PathUrl getLeftPathUrl() {
-            return leftPathUrl;
-        }
-
-        public PathVariable getPathVariable() {
-            return pathVariable;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            MatchPathVariable that = (MatchPathVariable) o;
-            return Objects.equals(leftPathUrl, that.leftPathUrl) && Objects.equals(pathVariable, that.pathVariable);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(leftPathUrl, pathVariable);
-        }
-
-        @Override
-        public String toString() {
-            return "MatchPathVariable{" +
-                "leftPathUrl=" + leftPathUrl +
-                ", pathVariable=" + pathVariable +
-                '}';
-        }
+    public List<MatchedPathVariable> getMatchPathVaraible() {
+        return matchedPathVariables;
     }
 }

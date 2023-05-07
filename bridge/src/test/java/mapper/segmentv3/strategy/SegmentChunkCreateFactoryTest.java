@@ -15,9 +15,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class WildCardSegmentChunkCreateStrategyTest {
+class SegmentChunkCreateFactoryTest {
 
-    @DisplayName("PathUrl 에 따른 segmentchunks 를 반환합니다.")
+    @DisplayName("PathUrl 에 따른 생성된 segmentchunks 를 반환합니다.")
     @ParameterizedTest
     @MethodSource("provideSegmentChunks")
     void ttest(String baseUrl, List<? extends Class<? extends SegmentChunk>> expectInstances) throws Exception {
@@ -25,7 +25,7 @@ class WildCardSegmentChunkCreateStrategyTest {
         PathUrl pathUrl = PathUrl.from(baseUrl);
 
         //when
-        List<SegmentChunk> actuals = WildCardSegmentChunkCreateStrategy.create(pathUrl);
+        List<SegmentChunk> actuals = SegmentChunkCreateFactory.create(pathUrl);
         List<? extends Class<? extends SegmentChunk>> actualInstances = actuals.stream().map(SegmentChunk::getClass).collect(Collectors.toUnmodifiableList());
 
         //then
@@ -41,6 +41,8 @@ class WildCardSegmentChunkCreateStrategyTest {
 
     public static Stream<Arguments> provideSegmentChunks() {
         return Stream.of(
+            Arguments.of("/**", List.of(WildCardSegmentChunk.class)),
+            Arguments.of("/**/{pv}", List.of(WildCardPathVariableSegmentChunk.class)),
             Arguments.of("/path1", List.of(NormalSegmentChunk.class)),
             Arguments.of("/path1/{pv}", List.of(PathVariableSegmentChunk.class)),
             Arguments.of("/path1/**", List.of(NormalSegmentChunk.class, WildCardSegmentChunk.class)),

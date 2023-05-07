@@ -10,12 +10,12 @@ class SegmentManagerTest {
     @DisplayName("methodPath 와 requestUrl 가 매칭되면 pathvariable 을 가져옵니다.")
     @ParameterizedTest
     @CsvSource({
-//        "/path1, /path1, true",
-//        "/path1, /path2, false",
-//        "/path1/path2, /path1/path2, true",
-//        "/path1/path2, /path1/path3, false",
-//        "/path1/path2/path3, /path1/path2/path3, true",
-//        "/path1/path2/path3, /path1/path2/path4, false",
+        "/path1, /path1, true",
+        "/path1, /path2, false",
+        "/path1/path2, /path1/path2, true",
+        "/path1/path2, /path1/path3, false",
+        "/path1/path2/path3, /path1/path2/path3, true",
+        "/path1/path2/path3, /path1/path2/path4, false",
         "/path1/**, /path1/path2, true",
         "/path2/**, /path1/path2, false",
         "/path1/**, /path1/path2/path3, true",

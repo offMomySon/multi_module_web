@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import mapper.segmentv3.PathUrl;
 import mapper.segmentv3.PathVariableUtil;
 import mapper.segmentv3.SegmentChunk;
@@ -22,35 +21,27 @@ public class WildCardSegmentChunkCreateStrategy {
             return Collections.emptyList();
         }
 
-        String baseUrl = _basePathUrl.toValue();
-        int wildCardIndex = baseUrl.indexOf(WILD_CARD);
-        boolean onlyExistGeneralSegmentChunk = wildCardIndex == -1;
-        if (onlyExistGeneralSegmentChunk) {
-            return GeneralSegmentChunkCreateCreateStrategy.create(_basePathUrl);
+        String basePathUrl = _basePathUrl.toValue();
+
+        if (!basePathUrl.startsWith(WILD_CARD)) {
+            throw new RuntimeException("wildcard 가 처음에 위치해야 합니다.");
         }
 
-        PathUrl normalPathUrl = PathUrl.from(baseUrl.substring(0, wildCardIndex));
-        List<SegmentChunk> normalSegmentChunks = GeneralSegmentChunkCreateCreateStrategy.create(normalPathUrl);
+        List<String> wildCardPathUrls = splitWildCardPathUrls(basePathUrl);
 
-        List<String> wildCardPathUrls = parseWildCardPathUrls(baseUrl, wildCardIndex);
-        List<SegmentChunk> wildCardSegmentChunks = createWildCardSegmentChunks(wildCardPathUrls);
-
-        return Stream.concat(normalSegmentChunks.stream(), wildCardSegmentChunks.stream()).collect(Collectors.toUnmodifiableList());
+        return wildCardPathUrls.stream()
+            .map(PathUrl::from)
+            .map(pathUrl -> {
+                if (hasPathVariableSegment(pathUrl)) {
+                    return new WildCardPathVariableSegmentChunk(pathUrl);
+                }
+                return new WildCardSegmentChunk(pathUrl);
+            })
+            .collect(Collectors.toUnmodifiableList());
     }
 
-    private static List<SegmentChunk> createWildCardSegmentChunks(List<String> wildCardPathUrls) {
-        List<SegmentChunk> segmentChunks = new ArrayList<>();
-        for (String wildCardPathUrl : wildCardPathUrls) {
-            if (hasPathVariableSegment(wildCardPathUrl)) {
-                segmentChunks.add(new WildCardPathVariableSegmentChunk(PathUrl.from(wildCardPathUrl)));
-                continue;
-            }
-            segmentChunks.add(new WildCardSegmentChunk(PathUrl.from(wildCardPathUrl)));
-        }
-        return segmentChunks;
-    }
-
-    private static List<String> parseWildCardPathUrls(String baseUrl, int wildCardIndex) {
+    private static List<String> splitWildCardPathUrls(String baseUrl) {
+        int wildCardIndex = 0;
         List<String> wildCardPathUrls = new ArrayList<>();
         while (true) {
             int nextWildCardIndex = baseUrl.indexOf(WILD_CARD, wildCardIndex + 1);
@@ -66,11 +57,10 @@ public class WildCardSegmentChunkCreateStrategy {
         return wildCardPathUrls;
     }
 
-    private static boolean hasPathVariableSegment(String pathUrl) {
-        PathUrl wildCardPathUrl = PathUrl.from(pathUrl);
-
-        while (wildCardPathUrl.doesNotEmpty()) {
-            String segment = wildCardPathUrl.popSegment();
+    private static boolean hasPathVariableSegment(PathUrl wildCardPathUrl) {
+        PathUrl copiedWildCardPathUrl = wildCardPathUrl.copy();
+        while (copiedWildCardPathUrl.doesNotEmpty()) {
+            String segment = copiedWildCardPathUrl.popSegment();
             if (PathVariableUtil.isPathVariable(segment)) {
                 return true;
             }

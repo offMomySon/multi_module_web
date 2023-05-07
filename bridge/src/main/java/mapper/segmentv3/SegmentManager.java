@@ -8,7 +8,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 import mapper.segmentv3.pathvariable.AbstractPathVariableSegmentChunk;
-import mapper.segmentv3.strategy.WildCardSegmentChunkCreateStrategy;
+import mapper.segmentv3.strategy.SegmentChunkCreateFactory;
 
 public class SegmentManager {
     public static Optional<PathVariable> consume(String _baseUrl, String _requestUrl) {
@@ -20,7 +20,7 @@ public class SegmentManager {
         }
 
         PathUrl baseUrl = PathUrl.from(_baseUrl);
-        List<SegmentChunk> segmentChunks = WildCardSegmentChunkCreateStrategy.create(baseUrl);
+        List<SegmentChunk> segmentChunks = SegmentChunkCreateFactory.create(baseUrl);
 
         PathUrl requestUrl = PathUrl.from(_requestUrl);
         PathUrl[] usedPathUrls = new PathUrl[segmentChunks.size()];

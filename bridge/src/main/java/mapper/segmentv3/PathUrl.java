@@ -24,6 +24,7 @@ public class PathUrl {
             throw new RuntimeException("path is empty.");
         }
 
+        path = path.trim();
         String normalizedPath = Path.of(path).normalize().toString();
 
         boolean isStartWithDelimiter = Objects.equals(String.valueOf(normalizedPath.charAt(0)), DELIMITER);

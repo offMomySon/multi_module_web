@@ -27,6 +27,8 @@ class SegmentChunkCreateFactoryTest {
         //when
         List<SegmentChunk> actuals = SegmentChunkCreateFactory.create(pathUrl);
         List<? extends Class<? extends SegmentChunk>> actualInstances = actuals.stream().map(SegmentChunk::getClass).collect(Collectors.toUnmodifiableList());
+        System.out.println(actualInstances);
+        System.out.println(expectInstances);
 
         //then
         // todo 어떻게 테스트하지 아래 cotainSequences 로 테스트하고 싶은데
@@ -41,6 +43,7 @@ class SegmentChunkCreateFactoryTest {
 
     public static Stream<Arguments> provideSegmentChunks() {
         return Stream.of(
+            Arguments.of("/", List.of(WildCardSegmentChunk.class)),
             Arguments.of("/**", List.of(WildCardSegmentChunk.class)),
             Arguments.of("/**/{pv}", List.of(WildCardPathVariableSegmentChunk.class)),
             Arguments.of("/path1", List.of(NormalSegmentChunk.class)),

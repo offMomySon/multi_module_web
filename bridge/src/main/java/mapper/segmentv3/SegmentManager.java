@@ -1,6 +1,5 @@
 package mapper.segmentv3;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -22,9 +21,10 @@ public class SegmentManager {
         PathUrl baseUrl = PathUrl.from(_baseUrl);
         List<SegmentChunk> segmentChunks = SegmentChunkCreateFactory.create(baseUrl);
 
-        PathUrl requestUrl = PathUrl.from(_requestUrl);
         PathUrl[] usedPathUrls = new PathUrl[segmentChunks.size()];
-        Stream<PathUrl> requestUrlStream = new ArrayList<>(List.of(requestUrl)).stream();
+
+        PathUrl requestUrl = PathUrl.from(_requestUrl);
+        Stream<PathUrl> requestUrlStream = Stream.of(requestUrl);
         for (int i = 0; i < segmentChunks.size(); i++) {
             SegmentChunk segmentChunk = segmentChunks.get(i);
 
@@ -34,7 +34,6 @@ public class SegmentManager {
                 .flatMap(Collection::stream)
                 .peek(usedPathUrl -> usedPathUrls[finalI] = usedPathUrl);
         }
-
         Optional<PathUrl> optionalAllConsumed = requestUrlStream.filter(PathUrl::isEmtpy).findFirst();
 
         boolean doesNotAllConsumed = optionalAllConsumed.isEmpty();

@@ -9,238 +9,18 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import vo.RequestValues;
 
 class HttpPathMatcherTest {
 
     @DisplayName("http path 와 일치하면 resolve 데이터를 가져옵니다.")
-    @ParameterizedTest
-    @CsvSource({
-        "/path1, /path1, true",
-        "/path1, /path2, false",
-        "/path1/path2, /path1/path2, true",
-        "/path1/path2, /path1/path3, false",
-        "/path1/path2/path3, /path1/path2/path3, true",
-        "/path1/path2/path3, /path1/path2/path4, false",
-        "/path1/**, /path1/path2, true",
-        "/path2/**, /path1/path2, false",
-        "/path1/**, /path1/path2/path3, true",
-        "/path2/**, /path1/path2/path3, false",
-        "/path1/**/path2, /path1/path2/path2, true",
-        "/path1/**/path2, /path1/path2, true",
-        "/path1/**/path2, /path1/path2/path3, false",
-        "/path1/**/path2/path3, /path1/path2/path3, true",
-        "/path1/**/path2/path3/path4, /path1/path2/path3/path4, true",
-        "/path1/**/path2/path3, /path1/path2/path4, false",
-        "/path1/**/path2/**/path3, /path1/w1/path2/w1/path3, true",
-        "/path1/**/path2/**/path3, /path1/w1/w2/path2/w1/w2/path3, true",
-        "/path1/**/path2/**/path3, /path1/path2/path2/path2/path3/path3/path3, true",
-        "/path1/**/path2/**/path3, /path1/path2/path2/path2/path3/path4/path3, true",
-        "/path1/**/path2/**/path3, /path1/path2/path2/path2/path3/path3/path4, false",
-        "/path1/**/path2/path3/**/path4, /path1/path2/path2/path2/path3/path3/path3/path4/path4, true",
-        "/path1/**/path2/path3/**/path4, /path1/path2/path2/path2/path3/path3/path2/path4/path4, true",
-        "/path1/**/path2/path3/**/path4, /path1/path2/path2/path2/path3/path3/path2/path3/path4/path4, true",
-        "/path1/**/path2/path3/**/path4, /path1/path2/path2/path2/path3/p1/p2/path2/path4, true",
-        "/p1/**/p2/**/p3/**/p4/**/p5/**/p6, " +
-            "/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6," +
-            "true",
-
-        "/path1, /path1, true",
-        "/path1, /path2, false",
-        "/{pv1}, /path1, true",
-        "/path1/path2, /path1/path2, true",
-        "/path1/path2, /path1/path3, false",
-        "/{pv1}/path2, /path1/path2, true",
-        "/path1/{pv1}, /path1/path3, true",
-        "/{pv1}/{pv2}, /path1/path2, true",
-        "/path1/path2/path3, /path1/path2/path3, true",
-        "/path1/path2/path3, /path1/path2/path4, false",
-        "/{pv1}/{pv2}/{pv3}, /path1/path2/path3, true",
-        "/{pv1}/path1/path2, /path1/path1/path2, true",
-        "/{pv1}/{pv2}/path2, /path1/path1/path2, true",
-        "/{pv1}/path1/{pv2}, /path1/path1/path2, true",
-        "/path1/{pv1}/{pv2}, /path1/path1/path2, true",
-        "/path1/{pv1}/path2, /path1/path1/path2, true",
-        "/path1/{pv1}/{pv2}, /path1/path2/path3, true",
-        "/path1/path2/{pv1}, /path1/path2/path4, true",
-
-        "/**, /, true",
-        "/**, /path1, true",
-        "/**, /path1, true",
-        "/**, /path1/path2, true",
-        "/**, /path1/path2/path3, true",
-        "/**, /path1/path2/path3/path4, true",
-        "/**, /path1/path2/path3/path4/path5, true",
-
-        "/path1/**, /, false",
-        "/path1/**, /path1, true",
-        "/path1/**, /path1/path2, true",
-        "/path1/**, /path1/path2/path3, true",
-        "/path1/**, /path1/path2/path3/path4, true",
-        "/path1/**, /path2, false",
-        "/path1/**, /path2/path2, false",
-        "/path1/**, /path2/path2/path3, false",
-        "/path1/**, /path2/path2/path3/path4, false",
-
-        "/**/{pv1}, /, false",
-        "/**/{pv1}, /path1, true",
-        "/**/{pv1}, /path1/path2, true",
-        "/**/{pv1}, /path1/path2/path3, true",
-        "/**/{pv1}, /path1/path2/path3/path4, true",
-
-        "/**/{pv1}/path1, /, false",
-        "/**/{pv1}/path1, /path1, false",
-        "/**/{pv1}/path1, /path1/path1, true",
-        "/**/{pv1}/path1, /path1/path1/path1, true",
-        "/**/{pv1}/path1, /path1/path1/path1/path1, true",
-        "/**/{pv1}/path1, /path1/path1/path1/path1/path1, true",
-
-        "/**/path1/{pv1}, /, false",
-        "/**/path1/{pv1}, /path1, false",
-        "/**/path1/{pv1}, /path1/path1, true",
-        "/**/path1/{pv1}, /path1/path1/path1, true",
-        "/**/path1/{pv1}, /path1/path2, true",
-        "/**/path1/{pv1}, /path1/path1/path3, true",
-        "/**/path1/{pv1}, /path1/path1/path1/path3, true",
-        "/**/path1/{pv1}, /path1/path2/path3, false",
-        "/**/path1/{pv1}, /path1/path2/path3/path4, false",
-
-        "/path1/**/{pv1}, /, false",
-        "/path1/**/{pv1}, /path1, false",
-        "/path1/**/{pv1}, /path1/path1, true",
-        "/path1/**/{pv1}, /path1/path2, true",
-        "/path1/**/{pv1}, /path1/path1/path1, true",
-        "/path1/**/{pv1}, /path2/path1, false",
-        "/path1/**/{pv1}, /path2/path1/path1, false",
-
-        "/path1/**/{pv1}/path1, /, false",
-        "/path1/**/{pv1}/path1, /path1, false",
-        "/path1/**/{pv1}/path1, /path1/path1, false",
-        "/path1/**/{pv1}/path1, /path1/path1/path1, true",
-        "/path1/**/{pv1}/path1, /path1/path1/path1/path1, true",
-        "/path1/**/{pv1}/path1, /path1/path1/path1/path1/path1, true",
-        "/path1/**/{pv1}/path1, /path2/path1/path1/path1/path1, false",
-        "/path1/**/{pv1}/path1, /path1/path1/path1/path1/path2, false",
-
-        "/path1/**/path1/{pv1}, /, false",
-        "/path1/**/path1/{pv1}, /path1, false",
-        "/path1/**/path1/{pv1}, /path1/path1, false",
-        "/path1/**/path1/{pv1}, /path1/path1/path1, true",
-        "/path1/**/path1/{pv1}, /path1/path1/path1/path1, true",
-        "/path1/**/path1/{pv1}, /path1/path1/path2/path1, false",
-        "/path1/**/path1/{pv1}, /path1/path1/path1, true",
-        "/path1/**/path1/{pv1}, /path1/path1/path1/path1/path1, true",
-        "/path1/**/path1/{pv1}, /path2/path1/path1, false",
-        "/path1/**/path1/{pv1}, /path1/path2/path1, false",
-
-        "/path1/**/path1/{pv1}/path1, /, false",
-        "/path1/**/path1/{pv1}/path1, /path1, false",
-        "/path1/**/path1/{pv1}/path1, /path1/path1, false",
-        "/path1/**/path1/{pv1}/path1, /path1/path1/path1, false",
-        "/path1/**/path1/{pv1}/path1, /path1/path1/path1/path1, true",
-        "/path1/**/path1/{pv1}/path1, /path1/path1/path2/path1, true",
-        "/path1/**/path1/{pv1}/path1, /path1/path1/path1/path1/path1, true",
-        "/path1/**/path1/{pv1}/path1, /path1/path1/path1/path1/path1/path1, true",
-        "/path1/**/path1/{pv1}/path1, /path1/path2/path1/path1, false",
-        "/path1/**/path1/{pv1}/path1, /path1/path1/path1/path2, false",
-        "/path1/**/path1/{pv1}/path1, /path2/path1/path1/path1, false",
-        "/path1/**/path1/{pv1}/path1, /path2/path1/path1/path1/path1, false",
-
-        "/path1/**/path1/**/{pv1}/path1, /path1/path1/path1, false",
-        "/path1/**/path1/**/{pv1}/path1, /path1/path1/path1/path1, true",
-        "/path1/**/path1/**/{pv1}/path1, /path1/path1/path1/path1/path1, true",
-        "/path1/**/path2/**/{pv1}/path1, /path1/path2/path1/path1/path1/path1, true",
-        "/path1/**/path1/**/{pv1}/path1, /path1/path2/path2/path1/path1/path1, true",
-        "/path1/**/path1/**/{pv1}/path1, /path1/path2/path2/path1/path2/path1/path1, true",
-        "/path1/**/path1/**/{pv1}/path1, /path1/path2/path2/path1/path2/path2/path1/path1, true",
-        "/path1/**/path1/**/{pv1}/path1, /path1/path2/path2/path1/path2/path2/path2/path1, true",
-        "/path1/**/path1/**/{pv1}/path1, /path1/path2/path2/path1/path2/path2/path2/path2, false",
-        "/path1/**/path1/**/{pv1}/path1, /path1/path2/path2/path2/path2/path2/path2/path1, false",
-        "/path1/**/path1/**/{pv1}/path1, /path1/path2/path2/path2/path2/path2/path2/path1, false",
-        "/path1/**/path1/**/{pv1}/path1, /path2/path2/path2/path2/path2/path2/path2/path1, false",
-
-        "/path1/**/path1/{pv1}/**/{pv2}/path1, /path1/path1/path1/path1/path1, true",
-        "/path1/**/path1/{pv1}/**/{pv2}/path1, /path1/path1/path1/path1/path1/path1, true",
-        "/path1/**/path1/{pv1}/**/{pv2}/path1, /path1/path1/path1/path1/path1/path1/path1, true",
-        "/path1/**/path1/{pv1}/**/{pv2}/path1, /path1/path2/path1/path1/path1/path1, true",
-        "/path1/**/path1/{pv1}/**/{pv2}/path1, /path1/path2/path2/path1/path1/path1/path1, true",
-        "/path1/**/path1/{pv1}/**/{pv2}/path1, /path1/path2/path2/path1, false",
-        "/path1/**/path1/{pv1}/**/{pv2}/path1, /path1/path2/path2/path1/path1, false",
-        "/path1/**/path1/{pv1}/**/{pv2}/path1, /path1/path2/path2/path1/path1/path1, false",
-
-        "/path1/**/path1/**/{pv1}/**/{pv2}/path1, /path1/path1/path1/path1/path1, true",
-        "/path1/**/path1/**/{pv1}/**/{pv2}/path1, /path1/path1/path1/path1/path1/path1, true",
-        "/path1/**/path1/**/{pv1}/**/{pv2}/path1, /path1/path1/path1/path1/path1, true",
-        "/path1/**/path1/**/{pv1}/**/{pv2}/path1, /path1/path2/path1/path1/path1/path1, true",
-        "/path1/**/path1/**/{pv1}/**/{pv2}/path1, /path1/path2/path2/path1/path1/path1/path1, true",
-        "/path1/**/path1/**/{pv1}/**/{pv2}/path1, /path1/path2/path2/path1/path2/path1/path1/path1, true",
-        "/path1/**/path1/**/{pv1}/**/{pv2}/path1, /path1/path2/path2/path1/path2/path2/path1/path1/path1, true",
-        "/path1/**/path1/**/{pv1}/**/{pv2}/path1, /path1/path2/path2/path1/path2/path2/path1/path2/path1/path1, true",
-        "/path1/**/path1/**/{pv1}/**/{pv2}/path1, /path1/path2/path2/path1/path2/path2/path1/path2/path1/path2/path1, true",
-        "/path1/**/path1/**/{pv1}/**/{pv2}/path1, /path1/path1/path1/path1/path2, false",
-        "/path1/**/path1/**/{pv1}/**/{pv2}/path1, /path1/path2/path2/path1/path1/path1, false",
-
-        "/path1/{pv1}/**/path1/**/{pv2}/**/{pv3}/path1, /path1/path1/path1/path1/path1, false",
-        "/path1/{pv1}/**/path1/**/{pv2}/**/{pv3}/path1, /path1/path1/path1/path1/path1/path1, true",
-        "/path1/{pv1}/**/path1/**/{pv2}/**/{pv3}/path1, /path1/path1/path1/path1/path1/path1, true",
-        "/path1/{pv1}/**/path1/**/{pv2}/**/{pv3}/path1, /path1/path2/path1/path1/path1/path1, true",
-        "/path1/{pv1}/**/path1/**/{pv2}/**/{pv3}/path1, /path1/path2/path2/path1/path1/path1/path1, true",
-        "/path1/{pv1}/**/path1/**/{pv2}/**/{pv3}/path1, /path1/path2/path2/path1/path1/path1, false",
-
-
-        "/{pv1}, /, false",
-        "/{pv1}/**, /, false",
-        "/{pv1}/**, /path1, true",
-        "/{pv1}/**, /path1/path2, true",
-        "/{pv1}/**, /path1/path2/path3, true",
-        "/{pv1}/**, /path1/path2/path3/path4, true",
-
-        "/{pv1}/**/path1, /, false",
-        "/{pv1}/**/path1, /path1, false",
-        "/{pv1}/**/path1, /path1/path1, true",
-        "/{pv1}/**/path1, /path1/path1/path1, true",
-        "/{pv1}/**/path1, /path1/path1/path1/path1, true",
-        "/{pv1}/**/path1, /path2, false",
-        "/{pv1}/**/path1, /path1/path2, false",
-
-        "/{pv1}/path1/**, /, false",
-        "/{pv1}/path1/**, /path1, false",
-        "/{pv1}/path1/**, /path1/path1, true",
-        "/{pv1}/path1/**, /path1/path1/path1, true",
-        "/{pv1}/path1/**, /path1/path1/path1/path1, true",
-        "/{pv1}/path1/**, /path1/path2, false",
-        "/{pv1}/path1/**, /path1/path2/path1, false",
-        "/{pv1}/path1/**, /path1/path2/path1/path1, false",
-
-        "/path1/{pv1}/**, /, false",
-        "/path1/{pv1}/**, /path1, false",
-        "/path1/{pv1}/**, /path1/path1, true",
-        "/path1/{pv1}/**, /path1/path1/path1, true",
-        "/path1/{pv1}/**, /path1/path1/path1/path1, true",
-        "/path1/{pv1}/**, /path2, false",
-        "/path1/{pv1}/**, /path2/path2, false",
-        "/path1/{pv1}/**, /path2/path2/path2, false",
-        "/path1/{pv1}/**, /path2/path2/path2/path2, false",
-
-        "/p1/{pv1}/**/p2/{pv2}/**/p3/{pv3}/**/p4/{pv4}/**/p5/{pv5}/**/p6, " +
-            "/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6, " +
-            "true",
-
-        "/p1/**/p2/**/p3/**/p4/**/p5/**/p6, " +
-            "/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6/r6/p1/r1/p2/r2/p3/r3/p4/r4/p5/r5/p6," +
-            "true",
-
-        "/, /, true",
-        "/, /path1, false"
-    })
-    void test1(String registerPath, String requestPath, boolean expect) throws Exception {
+    @PathMatchTestSuite.PathMatchTest
+    void test1(String baseUrl, String requestPath, boolean expect) throws Exception {
         //given
-        HttpPathMatcher httpPathMatcher = new HttpPathMatcher(RequestMethod.GET, registerPath, TestClass.class.getDeclaredMethod("method"));
+        HttpPathMatcher httpPathMatcher = HttpPathMatcher.from(RequestMethod.GET, PathUrl.from(baseUrl), TestClass.class.getDeclaredMethod("method"));
 
         //when
-        boolean actual = httpPathMatcher.matchMethod(RequestMethod.GET, requestPath).isPresent();
+        boolean actual = httpPathMatcher.matchMethod(RequestMethod.GET, PathUrl.from(requestPath)).isPresent();
 
         //then
         Assertions.assertThat(actual).isEqualTo(expect);
@@ -248,22 +28,22 @@ class HttpPathMatcherTest {
 
     @DisplayName("pathVariable 로 부터 값을 가져옵니다.")
     @ParameterizedTest
-    @MethodSource("provideResult")
+    @MethodSource("providePathVariable")
     void test1(String registerPath, String requestPath, Map<String, String> expectMap) throws Exception {
         //given
-        RequestValues expect = new RequestValues(expectMap);
-        HttpPathMatcher httpPathMatcher = new HttpPathMatcher(RequestMethod.GET, registerPath, TestClass.class.getDeclaredMethod("method"));
+        PathVariableValue expect = new PathVariableValue(expectMap);
+        HttpPathMatcher httpPathMatcher = HttpPathMatcher.from(RequestMethod.GET, PathUrl.from(registerPath), TestClass.class.getDeclaredMethod("method"));
 
         //when
-        Optional<HttpPathMatcher.MatchedMethod> optionalResolvedMethod = httpPathMatcher.matchMethod(RequestMethod.GET, requestPath);
+        Optional<HttpPathMatcher.MatchedMethod> optionalResolvedMethod = httpPathMatcher.matchMethod(RequestMethod.GET, PathUrl.from(requestPath));
 
         //then
         Assertions.assertThat(optionalResolvedMethod).isPresent();
-        RequestValues actual = optionalResolvedMethod.get().getPathVariable();
+        PathVariableValue actual = optionalResolvedMethod.get().getPathVariableValue();
         Assertions.assertThat(actual).isEqualTo(expect);
     }
 
-    public static Stream<Arguments> provideResult() {
+    public static Stream<Arguments> providePathVariable() {
         return Stream.of(
             Arguments.of("/{pv1}/{pv2}/{pv3}", "/path1/path2/path3", Map.of("pv1", "path1", "pv2", "path2", "pv3", "path3")),
             Arguments.of("/{pv1}/path2/path3", "/path1/path2/path3", Map.of("pv1", "path1")),

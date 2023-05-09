@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import mapper.segmentv3.PathUrl;
 import marker.RequestMethod;
 import static mapper.HttpPathMatcher.MatchedMethod;
 
@@ -27,8 +28,7 @@ public class CompositedHttpPathMatcher implements HttpPathMatcherIf {
         this.httpPathMatchers = newJavaMethodResolver;
     }
 
-    @Override
-    public Optional<MatchedMethod> matchJavaMethod(RequestMethod requestMethod, String requestUrl) {
+    public Optional<MatchedMethod> matchJavaMethod(RequestMethod requestMethod, PathUrl requestUrl) {
         return httpPathMatchers.stream()
             .map(methodResolver -> methodResolver.matchMethod(requestMethod, requestUrl))
             .filter(Optional::isPresent)

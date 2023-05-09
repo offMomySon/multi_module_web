@@ -10,7 +10,7 @@ import mapper.segmentv3.pathvariable.AbstractPathVariableSegmentChunk;
 import mapper.segmentv3.strategy.SegmentChunkFactory;
 
 public class SegmentManager {
-    public static Optional<PathVariable> consume(String _baseUrl, String _requestUrl) {
+    public static Optional<PathVariableValue> consume(String _baseUrl, String _requestUrl) {
         if (Objects.isNull(_requestUrl) || _requestUrl.isBlank()) {
             throw new RuntimeException("path url is empty.");
         }
@@ -41,27 +41,27 @@ public class SegmentManager {
             return Optional.empty();
         }
 
-        PathVariable pathVariable = getPathVariable(segmentChunks, usedPathUrls);
-        return Optional.of(pathVariable);
+        PathVariableValue pathVariableValue = getPathVariable(segmentChunks, usedPathUrls);
+        return Optional.of(pathVariableValue);
     }
 
-    private static PathVariable getPathVariable(List<SegmentChunk> segmentChunks, PathUrl[] usedPath) {
-        PathVariable pathVariable = PathVariable.empty();
+    private static PathVariableValue getPathVariable(List<SegmentChunk> segmentChunks, PathUrl[] usedPath) {
+        PathVariableValue pathVariableValue = PathVariableValue.empty();
         for (int i = 0; i < segmentChunks.size(); i++) {
             SegmentChunk segmentChunk = segmentChunks.get(i);
 
             if (segmentChunk instanceof AbstractPathVariableSegmentChunk) {
                 PathUrl pathUrl = usedPath[i];
-                Map<PathUrl, PathVariable> matchedPathVariables = ((AbstractPathVariableSegmentChunk) segmentChunk).getMatchedPathVariables();
+                Map<PathUrl, PathVariableValue> matchedPathVariables = ((AbstractPathVariableSegmentChunk) segmentChunk).getMatchedPathVariables();
 
                 if (!matchedPathVariables.containsKey(pathUrl)) {
                     throw new RuntimeException("does not exist pathUrl.");
                 }
 
-                PathVariable matchedPathVariable = matchedPathVariables.get(pathUrl);
-                pathVariable = pathVariable.merge(matchedPathVariable);
+                PathVariableValue matchedPathVariableValue = matchedPathVariables.get(pathUrl);
+                pathVariableValue = pathVariableValue.merge(matchedPathVariableValue);
             }
         }
-        return pathVariable;
+        return pathVariableValue;
     }
 }

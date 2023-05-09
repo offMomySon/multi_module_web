@@ -35,14 +35,14 @@ public class PathVariableSegmentChunk extends AbstractPathVariableSegmentChunk {
         PathUrl copiedBaseUrl = baseUrl.copy();
         PathUrl copiedRequestUrl = requestUrl.copy();
 
-        PathVariable pathVariable = PathVariable.empty();
+        PathVariableValue pathVariableValue = PathVariableValue.empty();
         while (copiedBaseUrl.doesNotEmpty()) {
             String baseSegment = copiedBaseUrl.popSegment();
             String requestSegment = copiedRequestUrl.popSegment();
 
             if (isPathVariable(baseSegment)) {
                 String key = parsePathVariable(baseSegment);
-                pathVariable.put(key, requestSegment);
+                pathVariableValue.put(key, requestSegment);
                 continue;
             }
 
@@ -52,6 +52,6 @@ public class PathVariableSegmentChunk extends AbstractPathVariableSegmentChunk {
             }
         }
 
-        return List.of(new MatchedPathVariable(copiedRequestUrl, pathVariable));
+        return List.of(new MatchedPathVariable(copiedRequestUrl, pathVariableValue));
     }
 }

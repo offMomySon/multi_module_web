@@ -31,7 +31,7 @@ public class PathUrlMatcher {
         return new PathUrlMatcher(segmentChunkChain);
     }
 
-    public Optional<PathVariable> match(PathUrl requestUrl) {
+    public Optional<PathVariableValue> match(PathUrl requestUrl) {
         if (Objects.isNull(requestUrl)) {
             throw new RuntimeException("path url is empty.");
         }
@@ -43,7 +43,7 @@ public class PathUrlMatcher {
             return Optional.empty();
         }
 
-        PathVariable pathVariable = segmentChunkChain.getPathVariable();
-        return Optional.of(pathVariable);
+        PathVariableValue pathVariableValue = segmentChunkChain.getPathVariable();
+        return Optional.of(pathVariableValue);
     }
 }

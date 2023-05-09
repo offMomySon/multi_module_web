@@ -7,7 +7,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class PathVariableSegmentChunkTest {
+class PathVariableValueSegmentChunkTest {
     @DisplayName("일치하지 않으면 빈값을 반환합니다.")
     @Test
     void test() throws Exception {
@@ -68,9 +68,9 @@ class PathVariableSegmentChunkTest {
         PathUrl requestUrl = PathUrl.from("path1/path2/path3/path4");
         PathUrl baseUrl = PathUrl.from("{pv1}/{pv2}/{pv3}");
         PathVariableSegmentChunk pathVariableSegmentChunk = new PathVariableSegmentChunk(baseUrl);
-        PathVariable expect = new PathVariable(Map.of("pv1", "path1",
-                                                      "pv2", "path2",
-                                                      "pv3", "path3"));
+        PathVariableValue expect = new PathVariableValue(Map.of("pv1", "path1",
+                                                                "pv2", "path2",
+                                                                "pv3", "path3"));
 
         //when
         List<MatchedPathVariable> actuals = pathVariableSegmentChunk.internalConsume(requestUrl);
@@ -78,7 +78,7 @@ class PathVariableSegmentChunkTest {
         //then
         Assertions.assertThat(actuals).hasSize(1);
         MatchedPathVariable matchedPathVariable = actuals.get(0);
-        PathVariable actual = matchedPathVariable.getPathVariable();
+        PathVariableValue actual = matchedPathVariable.getPathVariable();
         Assertions.assertThat(actual).isEqualTo(expect);
     }
 }

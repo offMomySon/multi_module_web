@@ -9,6 +9,8 @@ import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import mapper.HttpPathMatcherIf;
+import mapper.segmentv3.PathUrl;
+import mapper.segmentv3.PathVariableValue;
 import marker.PathVariable;
 import marker.RequestBody;
 import marker.RequestMethod;
@@ -45,11 +47,11 @@ public class RequestExecutor implements HttpRequestExecutor {
 
         try {
             RequestMethod method = RequestMethod.find(httpRequest.getHttpMethod().name());
-            String url = httpRequest.getHttpUri().getUrl();
+            String requestUrl = httpRequest.getHttpUri().getUrl();
             RequestValues formVariable = new RequestValues(httpRequest.getQueryParameters().getParameterMap());
             BodyContent bodyContent = BodyContent.from(httpRequest.getRequestStream());
 
-            Object o = doExecute(method, url, formVariable, bodyContent);
+            Object o = doExecute(method, requestUrl, formVariable, bodyContent);
 
             InputStream inputStream = converter.convertToInputStream(o);
 
@@ -68,14 +70,15 @@ public class RequestExecutor implements HttpRequestExecutor {
         }
     }
 
-    private Object doExecute(RequestMethod method, String url, RequestValues formVariable, BodyContent bodyContent) {
-        MatchedMethod matchedMethod = httpPathMatcher.matchJavaMethod(method, url).orElseThrow(() -> new RuntimeException(""));
+    private Object doExecute(RequestMethod method, String requestUrl, RequestValues formVariable, BodyContent bodyContent) {
+        PathUrl requestPathUrl = PathUrl.from(requestUrl);
+        MatchedMethod matchedMethod = httpPathMatcher.matchJavaMethod(method, requestPathUrl).orElseThrow(() -> new RuntimeException(""));
 
         Method javaMethod = matchedMethod.getJavaMethod();
-        RequestValues pathVariable = matchedMethod.getPathVariable();
+        PathVariableValue pathVariableValue = matchedMethod.getPathVariableValue();
 
         Map<Class<? extends Annotation>, ParameterConverter> classParameterConverterMap = Map.of(RequestParam.class, new RequestParameterConverter(RequestParam.class, formVariable),
-                                                                                                 PathVariable.class, new RequestParameterConverter(PathVariable.class, pathVariable),
+                                                                                                 PathVariable.class, RequestParameterConverter.from(PathVariable.class, pathVariableValue),
                                                                                                  RequestBody.class, new RequestBodyParameterConverter(bodyContent));
         CompositeParameterConverter compositeParameterConverter = new CompositeParameterConverter(classParameterConverterMap);
 

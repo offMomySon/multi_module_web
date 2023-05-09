@@ -30,29 +30,29 @@ public class SegmentChunkChain implements SegmentChunk {
         return new SegmentChunkChain(segmentChunk, null);
     }
 
-    public PathVariable getPathVariable() {
+    public PathVariableValue getPathVariable() {
         if (Objects.isNull(nextPathUrl)) {
-            return PathVariable.empty();
+            return PathVariableValue.empty();
         }
 
         if (!(segmentChunk instanceof AbstractPathVariableSegmentChunk)) {
             if (Objects.isNull(nextSegmentChunkChain)) {
-                return PathVariable.empty();
+                return PathVariableValue.empty();
             }
             return nextSegmentChunkChain.getPathVariable();
         }
-        
-        Map<PathUrl, PathVariable> matchedPathVariables = ((AbstractPathVariableSegmentChunk) segmentChunk).getMatchedPathVariables();
-        PathVariable pathVariable = matchedPathVariables.getOrDefault(nextPathUrl, PathVariable.empty());
+
+        Map<PathUrl, PathVariableValue> matchedPathVariables = ((AbstractPathVariableSegmentChunk) segmentChunk).getMatchedPathVariables();
+        PathVariableValue pathVariableValue = matchedPathVariables.getOrDefault(nextPathUrl, PathVariableValue.empty());
 
         boolean doesNotLeftChain = Objects.isNull(nextSegmentChunkChain);
         if (doesNotLeftChain) {
-            return pathVariable;
+            return pathVariableValue;
         }
 
-        PathVariable nextPathVariable = nextSegmentChunkChain.getPathVariable();
+        PathVariableValue nextPathVariableValue = nextSegmentChunkChain.getPathVariable();
 
-        return pathVariable.merge(nextPathVariable);
+        return pathVariableValue.merge(nextPathVariableValue);
     }
 
     @Override

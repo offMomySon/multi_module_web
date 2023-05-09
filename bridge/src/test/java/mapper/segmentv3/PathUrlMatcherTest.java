@@ -18,7 +18,7 @@ class PathUrlMatcherTest {
         //given
         PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(PathUrl.from(baseUrl));
         //whenD
-        Optional<PathVariable> optionalActual = pathUrlMatcher.match(PathUrl.from(requestUrl));
+        Optional<PathVariableValue> optionalActual = pathUrlMatcher.match(PathUrl.from(requestUrl));
 
         //then
         Assertions.assertThat(optionalActual.isPresent()).isEqualTo(expect);
@@ -27,33 +27,33 @@ class PathUrlMatcherTest {
     @DisplayName("처음 일치한 pathVariable 을 찾아온다.")
     @ParameterizedTest
     @MethodSource("providePathVariable")
-    void test(String _baseUrl, String _requestUrl, PathVariable expect) throws Exception {
+    void test(String _baseUrl, String _requestUrl, PathVariableValue expect) throws Exception {
         //given
         PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(PathUrl.from(_baseUrl));
         //when
-        Optional<PathVariable> optionalActual = pathUrlMatcher.match(PathUrl.from(_requestUrl));
+        Optional<PathVariableValue> optionalActual = pathUrlMatcher.match(PathUrl.from(_requestUrl));
 
         //then
         Assertions.assertThat(optionalActual).isPresent();
-        PathVariable actual = optionalActual.get();
+        PathVariableValue actual = optionalActual.get();
         Assertions.assertThat(actual).isEqualTo(expect);
     }
 
     public static Stream<Arguments> providePathVariable() {
         return Stream.of(
-            Arguments.of("/{pv1}/{pv2}/{pv3}", "/path1/path2/path3", new PathVariable(Map.of("pv1", "path1", "pv2", "path2", "pv3", "path3"))),
-            Arguments.of("/{pv1}/path1/{pv2}", "/path1/path1/path2", new PathVariable(Map.of("pv1", "path1", "pv2", "path2"))),
-            Arguments.of("/**/{pv1}", "/path1/path2/path3", new PathVariable(Map.of("pv1", "path3"))),
-            Arguments.of("/**/{pv1}/**/{pv2}/**/{pv3}", "/path1/path2/path3/path4/path5/path6", new PathVariable(Map.of("pv1", "path1", "pv2", "path2", "pv3", "path6"))),
-            Arguments.of("/**/{pv1}/path1", "/path1/path1/path1", new PathVariable(Map.of("pv1", "path1"))),
-            Arguments.of("/path1/**/{pv1}", "/path1/path1/path2", new PathVariable(Map.of("pv1", "path2"))),
-            Arguments.of("/path1/**/{pv1}/**/{pv2}", "/path1/path2/path3/path4/path5/path6", new PathVariable(Map.of("pv1", "path2", "pv2", "path6"))),
-            Arguments.of("/path1/**/{pv1}/path1", "/path1/path2/path1/path2/path1", new PathVariable(Map.of("pv1", "path2"))),
-            Arguments.of("/path1/**/path1/{pv1}", "/path1/path1/path3/path1/path1", new PathVariable(Map.of("pv1", "path1"))),
-            Arguments.of("/path1/**/path1/{pv1}/**/{pv2}/path1", "/path1/path2/path2/path1/path3/path2/path1", new PathVariable(Map.of("pv1", "path3", "pv2", "path2"))),
-            Arguments.of("/path1/**/path1/**/{pv1}/**/{pv2}/path1", "/path1/path2/path1/path3/path5/path1", new PathVariable(Map.of("pv1", "path3", "pv2", "path5"))),
-            Arguments.of("/path1/{pv1}/**/path1/**/{pv2}/**/{pv3}/path1", "/path1/path2/path1/path3/path5/path1", new PathVariable(Map.of("pv1", "path2", "pv2", "path3", "pv3", "path5"))),
-            Arguments.of("/{pv1}/**/path1", "/path4/path1", new PathVariable(Map.of("pv1", "path4")))
+            Arguments.of("/{pv1}/{pv2}/{pv3}", "/path1/path2/path3", new PathVariableValue(Map.of("pv1", "path1", "pv2", "path2", "pv3", "path3"))),
+            Arguments.of("/{pv1}/path1/{pv2}", "/path1/path1/path2", new PathVariableValue(Map.of("pv1", "path1", "pv2", "path2"))),
+            Arguments.of("/**/{pv1}", "/path1/path2/path3", new PathVariableValue(Map.of("pv1", "path3"))),
+            Arguments.of("/**/{pv1}/**/{pv2}/**/{pv3}", "/path1/path2/path3/path4/path5/path6", new PathVariableValue(Map.of("pv1", "path1", "pv2", "path2", "pv3", "path6"))),
+            Arguments.of("/**/{pv1}/path1", "/path1/path1/path1", new PathVariableValue(Map.of("pv1", "path1"))),
+            Arguments.of("/path1/**/{pv1}", "/path1/path1/path2", new PathVariableValue(Map.of("pv1", "path2"))),
+            Arguments.of("/path1/**/{pv1}/**/{pv2}", "/path1/path2/path3/path4/path5/path6", new PathVariableValue(Map.of("pv1", "path2", "pv2", "path6"))),
+            Arguments.of("/path1/**/{pv1}/path1", "/path1/path2/path1/path2/path1", new PathVariableValue(Map.of("pv1", "path2"))),
+            Arguments.of("/path1/**/path1/{pv1}", "/path1/path1/path3/path1/path1", new PathVariableValue(Map.of("pv1", "path1"))),
+            Arguments.of("/path1/**/path1/{pv1}/**/{pv2}/path1", "/path1/path2/path2/path1/path3/path2/path1", new PathVariableValue(Map.of("pv1", "path3", "pv2", "path2"))),
+            Arguments.of("/path1/**/path1/**/{pv1}/**/{pv2}/path1", "/path1/path2/path1/path3/path5/path1", new PathVariableValue(Map.of("pv1", "path3", "pv2", "path5"))),
+            Arguments.of("/path1/{pv1}/**/path1/**/{pv2}/**/{pv3}/path1", "/path1/path2/path1/path3/path5/path1", new PathVariableValue(Map.of("pv1", "path2", "pv2", "path3", "pv3", "path5"))),
+            Arguments.of("/{pv1}/**/path1", "/path4/path1", new PathVariableValue(Map.of("pv1", "path4")))
         );
     }
 }

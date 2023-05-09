@@ -6,11 +6,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import mapper.segmentv3.PathUrl;
-import mapper.segmentv3.PathVariable;
+import mapper.segmentv3.PathVariableValue;
 import mapper.segmentv3.SegmentChunk;
 
 public abstract class AbstractPathVariableSegmentChunk implements SegmentChunk {
-    private Map<PathUrl, PathVariable> matchedPathVariables;
+    private Map<PathUrl, PathVariableValue> matchedPathVariables;
 
     @Override
     public List<PathUrl> consume(PathUrl pathUrl) {
@@ -25,7 +25,7 @@ public abstract class AbstractPathVariableSegmentChunk implements SegmentChunk {
         return matchedPathVariables.stream().map(MatchedPathVariable::getLeftPathUrl).collect(Collectors.toUnmodifiableList());
     }
 
-    public Map<PathUrl, PathVariable> getMatchedPathVariables() {
+    public Map<PathUrl, PathVariableValue> getMatchedPathVariables() {
         return new HashMap<>(matchedPathVariables);
     }
 

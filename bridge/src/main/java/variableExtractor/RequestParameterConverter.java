@@ -5,6 +5,7 @@ import java.lang.reflect.Parameter;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
+import mapper.segmentv3.PathVariableValue;
 import marker.PathVariable;
 import marker.RequestParam;
 import util.AnnotationUtils;
@@ -22,6 +23,13 @@ public class RequestParameterConverter implements ParameterConverter {
 
         this.targetAnnotationClazz = targetAnnotationClazz;
         this.requestValues = requestValues;
+    }
+
+    public static RequestParameterConverter from(Class<?> targetAnnotationClazz, PathVariableValue pathVariableValue) {
+        Objects.requireNonNull(targetAnnotationClazz);
+        Objects.requireNonNull(pathVariableValue);
+
+        return new RequestParameterConverter(targetAnnotationClazz, new RequestValues(pathVariableValue.getValues()));
     }
 
     @Override

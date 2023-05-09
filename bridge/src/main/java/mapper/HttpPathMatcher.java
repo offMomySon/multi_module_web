@@ -1,16 +1,10 @@
 package mapper;
 
 import java.lang.reflect.Method;
-import java.nio.file.Paths;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.Getter;
 import mapper.newsegment.SegmentManager;
-import mapper.segment.SegmentMatcher;
-import mapper.segment.SegmentMatcher.MatchResult;
 import marker.RequestMethod;
 import vo.RequestValues;
 
@@ -43,45 +37,7 @@ public class HttpPathMatcher {
         RequestValues requestValues = matchResult.get();
         return Optional.of(new MatchedMethod(javaMethod, requestValues));
     }
-
-    private List<MatchResult> match(String requestUrl) {
-        Deque<SegmentMatcher> matcherProvider = createMatchProvider(this.baseUrl);
-        SequentialSegmentMatcher matcher = new SequentialSegmentMatcher(matcherProvider);
-
-        requestUrl = Paths.get(requestUrl).normalize().toString();
-
-        return matcher.match(requestUrl);
-    }
-
-    private List<MatchResult> matchV2(String requestUrl) {
-        Deque<SegmentMatcher> matcherProvider = createMatchProvider(this.baseUrl);
-        requestUrl = Paths.get(requestUrl).normalize().toString();
-        SequentialSegmentMatcherV2 matcher = SequentialSegmentMatcherV2.bootStrap(matcherProvider, requestUrl);
-
-        return matcher.match();
-    }
-
-
-    private static Deque<SegmentMatcher> createMatchProvider(String url) {
-        Deque<SegmentMatcher> matchers = new ArrayDeque<>();
-
-        int lastIndex;
-        while ((lastIndex = url.lastIndexOf(SEGMENT_MATCHER_DELIMITER)) != -1) {
-            String lastSubString = url.substring(lastIndex);
-            SegmentMatcher segmentMatcher = SegmentMatcher.from(lastSubString);
-            matchers.push(segmentMatcher);
-
-            url = url.substring(0, lastIndex);
-        }
-
-        if (!url.isBlank()) {
-            SegmentMatcher segmentMatcher = SegmentMatcher.from(url);
-            matchers.push(segmentMatcher);
-        }
-
-        return matchers;
-    }
-
+    
     @Getter
     public static class MatchedMethod {
         private final Method javaMethod;

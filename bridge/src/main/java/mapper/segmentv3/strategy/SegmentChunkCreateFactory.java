@@ -1,6 +1,5 @@
 package mapper.segmentv3.strategy;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -13,11 +12,7 @@ public class SegmentChunkCreateFactory {
 
     public static List<SegmentChunk> create(PathUrl _basePathUrl) {
         Objects.requireNonNull(_basePathUrl);
-
-        if (_basePathUrl.isEmtpy()) {
-            return Collections.emptyList();
-        }
-
+        
         String baseUrl = _basePathUrl.toAbsolutePath();
         int wildCardIndex = baseUrl.indexOf(WILD_CARD);
         boolean onlyExistGeneralSegmentChunk = wildCardIndex == -1;

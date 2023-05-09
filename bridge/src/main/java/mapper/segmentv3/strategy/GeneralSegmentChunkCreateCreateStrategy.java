@@ -1,8 +1,8 @@
 package mapper.segmentv3.strategy;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import mapper.segmentv3.EmptySegmentChunk;
 import mapper.segmentv3.NormalSegmentChunk;
 import mapper.segmentv3.PathUrl;
 import mapper.segmentv3.PathVariableSegmentChunk;
@@ -14,7 +14,7 @@ public class GeneralSegmentChunkCreateCreateStrategy {
         Objects.requireNonNull(basePathUrl);
 
         if (basePathUrl.isEmtpy()) {
-            return Collections.emptyList();
+            return List.of(new EmptySegmentChunk());
         }
 
         PathUrl copiedBasePathUrl = basePathUrl.copy();

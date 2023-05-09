@@ -59,7 +59,7 @@ public class SegmentManager {
                 }
 
                 PathVariable matchedPathVariable = matchedPathVariables.get(pathUrl);
-                pathVariable.merge(matchedPathVariable);
+                pathVariable = pathVariable.merge(matchedPathVariable);
             }
         }
         return pathVariable;

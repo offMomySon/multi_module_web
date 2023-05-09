@@ -54,11 +54,14 @@ public class PathVariable {
         return Objects.hash(values);
     }
 
-    public void merge(PathVariable otherPathVariable) {
+    public PathVariable merge(PathVariable otherPathVariable) {
         Objects.requireNonNull(otherPathVariable);
 
+        Map<String, String> newMap = new HashMap<>(this.values);
         otherPathVariable.values
-            .forEach((key, value) -> this.values.merge(key, value, (prev, curr) -> prev));
+            .forEach((key, value) -> newMap.merge(key, value, (prev, curr) -> prev));
+
+        return new PathVariable(newMap);
     }
 
     @Override

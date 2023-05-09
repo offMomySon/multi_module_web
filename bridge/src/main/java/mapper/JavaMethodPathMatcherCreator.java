@@ -32,10 +32,10 @@ public class JavaMethodPathMatcherCreator {
         return requestMappedMethods.stream()
             .map(requestMappedMethod -> {
                 RequestMethod requestMethod = requestMappedMethod.getRequestMethod();
-                String requestUrl = requestMappedMethod.getUrl();
+                String baseUrl = requestMappedMethod.getUrl();
                 Method javaMethod = requestMappedMethod.getJavaMethod();
 
-                return new HttpPathMatcher(requestMethod, requestUrl, javaMethod);
+                return new HttpPathMatcher(requestMethod, baseUrl, javaMethod);
             })
             .collect(Collectors.toUnmodifiableList());
     }

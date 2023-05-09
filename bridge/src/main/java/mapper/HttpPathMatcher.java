@@ -18,12 +18,12 @@ public class HttpPathMatcher {
     private static final String SEGMENT_MATCHER_DELIMITER = "/**";
 
     private final RequestMethod requestMethod;
-    private final String url;
+    private final String baseUrl;
     private final Method javaMethod;
 
-    public HttpPathMatcher(RequestMethod requestMethod, String url, Method javaMethod) {
+    public HttpPathMatcher(RequestMethod requestMethod, String baseUrl, Method javaMethod) {
         this.requestMethod = requestMethod;
-        this.url = url;
+        this.baseUrl = baseUrl;
         this.javaMethod = javaMethod;
     }
 
@@ -35,7 +35,7 @@ public class HttpPathMatcher {
             return Optional.empty();
         }
 
-        Optional<RequestValues> matchResult = SegmentManager.doMatch(this.url, requestUrl);
+        Optional<RequestValues> matchResult = SegmentManager.doMatch(this.baseUrl, requestUrl);
         if (matchResult.isEmpty()) {
             return Optional.empty();
         }
@@ -45,7 +45,7 @@ public class HttpPathMatcher {
     }
 
     private List<MatchResult> match(String requestUrl) {
-        Deque<SegmentMatcher> matcherProvider = createMatchProvider(this.url);
+        Deque<SegmentMatcher> matcherProvider = createMatchProvider(this.baseUrl);
         SequentialSegmentMatcher matcher = new SequentialSegmentMatcher(matcherProvider);
 
         requestUrl = Paths.get(requestUrl).normalize().toString();
@@ -54,7 +54,7 @@ public class HttpPathMatcher {
     }
 
     private List<MatchResult> matchV2(String requestUrl) {
-        Deque<SegmentMatcher> matcherProvider = createMatchProvider(this.url);
+        Deque<SegmentMatcher> matcherProvider = createMatchProvider(this.baseUrl);
         requestUrl = Paths.get(requestUrl).normalize().toString();
         SequentialSegmentMatcherV2 matcher = SequentialSegmentMatcherV2.bootStrap(matcherProvider, requestUrl);
 

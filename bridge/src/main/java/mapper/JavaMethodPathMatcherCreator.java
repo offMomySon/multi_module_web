@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import mapper.RequestMappingValueExtractor.RequestMappedMethod;
-import mapper.segmentv3.PathUrl;
+import mapper.segment.PathUrl;
 import marker.RequestMapping;
 import marker.RequestMethod;
 import util.AnnotationUtils;

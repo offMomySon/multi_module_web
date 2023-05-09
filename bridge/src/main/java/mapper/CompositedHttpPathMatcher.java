@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import mapper.segmentv3.PathUrl;
+import mapper.segment.PathUrl;
 import marker.RequestMethod;
 import static mapper.HttpPathMatcher.MatchedMethod;
 

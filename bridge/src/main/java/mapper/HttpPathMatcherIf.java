@@ -1,7 +1,7 @@
 package mapper;
 
 import java.util.Optional;
-import mapper.segmentv3.PathUrl;
+import mapper.segment.PathUrl;
 import marker.RequestMethod;
 
 /**

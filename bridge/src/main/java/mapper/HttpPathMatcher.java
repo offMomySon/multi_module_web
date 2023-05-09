@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.Getter;
-import mapper.segmentv3.PathUrl;
-import mapper.segmentv3.PathVariableValue;
-import mapper.segmentv3.SegmentChunk;
-import mapper.segmentv3.SegmentChunkChain;
-import mapper.segmentv3.strategy.SegmentChunkFactory;
+import mapper.segment.PathUrl;
+import mapper.segment.PathVariableValue;
+import mapper.segment.SegmentChunk;
+import mapper.segment.SegmentChunkChain;
+import mapper.segment.strategy.SegmentChunkFactory;
 import marker.RequestMethod;
 
 public class HttpPathMatcher {

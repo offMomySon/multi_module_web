@@ -5,7 +5,7 @@ import java.lang.reflect.Parameter;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import mapper.segmentv3.PathVariableValue;
+import mapper.segment.PathVariableValue;
 import marker.PathVariable;
 import marker.RequestParam;
 import util.AnnotationUtils;

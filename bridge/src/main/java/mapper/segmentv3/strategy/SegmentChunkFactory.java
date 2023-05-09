@@ -7,12 +7,12 @@ import java.util.stream.Stream;
 import mapper.segmentv3.PathUrl;
 import mapper.segmentv3.SegmentChunk;
 
-public class SegmentChunkCreateFactory {
+public class SegmentChunkFactory {
     private static final String WILD_CARD = "/**";
 
     public static List<SegmentChunk> create(PathUrl _basePathUrl) {
         Objects.requireNonNull(_basePathUrl);
-        
+
         String baseUrl = _basePathUrl.toAbsolutePath();
         int wildCardIndex = baseUrl.indexOf(WILD_CARD);
         boolean onlyExistGeneralSegmentChunk = wildCardIndex == -1;
@@ -24,8 +24,7 @@ public class SegmentChunkCreateFactory {
         if (onlyHasWildCardSegmentChunk) {
             return WildCardSegmentChunkCreateStrategy.create(_basePathUrl);
         }
-
-
+        
         PathUrl normalPathUrl = PathUrl.from(baseUrl.substring(0, wildCardIndex));
         List<SegmentChunk> normalSegmentChunks = GeneralSegmentChunkCreateCreateStrategy.create(normalPathUrl);
 

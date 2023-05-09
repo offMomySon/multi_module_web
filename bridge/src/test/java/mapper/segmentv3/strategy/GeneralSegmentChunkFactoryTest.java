@@ -9,7 +9,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class GeneralSegmentChunkCreateFactoryTest {
+class GeneralSegmentChunkFactoryTest {
 
     @DisplayName("basepath url 이 비어있으면 빈 결과를 반환합니다.")
     @Test

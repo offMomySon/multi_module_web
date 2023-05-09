@@ -1,42 +1,39 @@
 package mapper.segmentv3;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import mapper.segmentv3.strategy.SegmentChunkCreateFactory;
+import mapper.segmentv3.strategy.SegmentChunkFactory;
 
 public class PathUrlMatcher {
-    private final PathUrl baseUrl;
+    private final SegmentChunkChain segmentChunkChain;
 
-    public PathUrlMatcher(PathUrl baseUrl) {
+    private PathUrlMatcher(SegmentChunkChain segmentChunkChain) {
+        Objects.requireNonNull(segmentChunkChain);
+        this.segmentChunkChain = segmentChunkChain;
+    }
+
+    public static PathUrlMatcher from(PathUrl baseUrl) {
         Objects.requireNonNull(baseUrl);
-        this.baseUrl = baseUrl;
+
+        List<SegmentChunk> segmentChunks = SegmentChunkFactory.create(baseUrl);
+        if (segmentChunks.isEmpty()) {
+            throw new RuntimeException("segmentChunk is empty.");
+        }
+
+        SegmentChunk lastSegmentChunk = segmentChunks.get(segmentChunks.size() - 1);
+        SegmentChunkChain segmentChunkChain = SegmentChunkChain.last(lastSegmentChunk);
+        for (int index = segmentChunks.size() - 2; 0 <= index; index--) {
+            SegmentChunk prevSegmentChunk = segmentChunks.get(index);
+            segmentChunkChain = SegmentChunkChain.link(prevSegmentChunk, segmentChunkChain);
+        }
+
+        return new PathUrlMatcher(segmentChunkChain);
     }
 
     public Optional<PathVariable> match(PathUrl requestUrl) {
         if (Objects.isNull(requestUrl)) {
             throw new RuntimeException("path url is empty.");
-        }
-
-        List<SegmentChunk> segmentChunks = SegmentChunkCreateFactory.create(this.baseUrl);
-        if (segmentChunks.isEmpty()) {
-            return Optional.empty();
-        }
-
-        List<SegmentChunk> newSegmentChunks = new ArrayList<>();
-        for (int i = segmentChunks.size() - 1; 0 <= i; i--) {
-            newSegmentChunks.add(segmentChunks.get(i));
-        }
-
-        Iterator<SegmentChunk> iterator = newSegmentChunks.iterator();
-        SegmentChunk lastSegmentChunk = iterator.next();
-        SegmentChunkChain segmentChunkChain = SegmentChunkChain.last(lastSegmentChunk);
-
-        while (iterator.hasNext()) {
-            SegmentChunk prevSegmentChunk = iterator.next();
-            segmentChunkChain = SegmentChunkChain.link(prevSegmentChunk, segmentChunkChain);
         }
 
         List<PathUrl> leftPathUrls = segmentChunkChain.consume(requestUrl);

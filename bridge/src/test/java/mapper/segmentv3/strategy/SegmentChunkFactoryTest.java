@@ -15,7 +15,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class SegmentChunkCreateFactoryTest {
+class SegmentChunkFactoryTest {
 
     @DisplayName("PathUrl 에 따른 생성된 segmentchunks 를 반환합니다.")
     @ParameterizedTest
@@ -25,7 +25,7 @@ class SegmentChunkCreateFactoryTest {
         PathUrl pathUrl = PathUrl.from(baseUrl);
 
         //when
-        List<SegmentChunk> actuals = SegmentChunkCreateFactory.create(pathUrl);
+        List<SegmentChunk> actuals = SegmentChunkFactory.create(pathUrl);
         List<? extends Class<? extends SegmentChunk>> actualInstances = actuals.stream().map(SegmentChunk::getClass).collect(Collectors.toUnmodifiableList());
         System.out.println(actualInstances);
         System.out.println(expectInstances);

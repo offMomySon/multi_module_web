@@ -13,7 +13,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class SegmentChunkCreateFactoryTest {
+class SegmentChunkFactoryTest {
 
     @DisplayName("path 가 루트만 존재하면 emptySegmentChunk 를 생성합니다.")
     @Test

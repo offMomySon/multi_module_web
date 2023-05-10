@@ -1,8 +1,10 @@
 package mapper.segment.strategy;
 
+import java.util.Deque;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import mapper.segment.EmptySegmentChunk;
 import mapper.segment.NormalSegmentChunk;
 import mapper.segment.PathUrl;
 import mapper.segment.PathVariableSegmentChunk;
@@ -25,10 +27,8 @@ class SegmentChunkFactoryTest {
         PathUrl pathUrl = PathUrl.from(baseUrl);
 
         //when
-        List<SegmentChunk> actuals = SegmentChunkFactory.create(pathUrl);
+        Deque<SegmentChunk> actuals = SegmentChunkFactory.create(pathUrl);
         List<? extends Class<? extends SegmentChunk>> actualInstances = actuals.stream().map(SegmentChunk::getClass).collect(Collectors.toUnmodifiableList());
-        System.out.println(actualInstances);
-        System.out.println(expectInstances);
 
         //then
         // todo 어떻게 테스트하지 아래 cotainSequences 로 테스트하고 싶은데
@@ -43,7 +43,7 @@ class SegmentChunkFactoryTest {
 
     public static Stream<Arguments> provideSegmentChunks() {
         return Stream.of(
-            Arguments.of("/", List.of(WildCardSegmentChunk.class)),
+            Arguments.of("/", List.of(EmptySegmentChunk.class)),
             Arguments.of("/**", List.of(WildCardSegmentChunk.class)),
             Arguments.of("/**/{pv}", List.of(WildCardPathVariableSegmentChunk.class)),
             Arguments.of("/path1", List.of(NormalSegmentChunk.class)),

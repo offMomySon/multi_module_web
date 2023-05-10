@@ -1,6 +1,6 @@
 package mapper.segment.strategy;
 
-import java.util.List;
+import java.util.Deque;
 import mapper.segment.NormalSegmentChunk;
 import mapper.segment.PathUrl;
 import mapper.segment.PathVariableSegmentChunk;
@@ -19,7 +19,7 @@ class GeneralSegmentChunkFactoryTest {
         GeneralSegmentChunkCreateCreateStrategy generalSegmentChunkCreateStrategy = new GeneralSegmentChunkCreateCreateStrategy();
 
         //when
-        List<SegmentChunk> actuals = generalSegmentChunkCreateStrategy.create(emptyPathUrl);
+        Deque<SegmentChunk> actuals = generalSegmentChunkCreateStrategy.create(emptyPathUrl);
 
         //then
         Assertions.assertThat(actuals).hasSize(0);
@@ -33,11 +33,11 @@ class GeneralSegmentChunkFactoryTest {
         GeneralSegmentChunkCreateCreateStrategy generalSegmentChunkCreateStrategy = new GeneralSegmentChunkCreateCreateStrategy();
 
         //when
-        List<SegmentChunk> actuals = generalSegmentChunkCreateStrategy.create(pathUrl);
+        Deque<SegmentChunk> actuals = generalSegmentChunkCreateStrategy.create(pathUrl);
 
         //then
         Assertions.assertThat(actuals).hasSize(1);
-        SegmentChunk actual = actuals.get(0);
+        SegmentChunk actual = actuals.pop();
         Assertions.assertThat(actual).isInstanceOf(PathVariableSegmentChunk.class);
     }
 
@@ -49,11 +49,11 @@ class GeneralSegmentChunkFactoryTest {
         GeneralSegmentChunkCreateCreateStrategy generalSegmentChunkCreateStrategy = new GeneralSegmentChunkCreateCreateStrategy();
 
         //when
-        List<SegmentChunk> actuals = generalSegmentChunkCreateStrategy.create(pathUrl);
+        Deque<SegmentChunk> actuals = generalSegmentChunkCreateStrategy.create(pathUrl);
 
         //then
         Assertions.assertThat(actuals).hasSize(1);
-        SegmentChunk actual = actuals.get(0);
+        SegmentChunk actual = actuals.pop();
         Assertions.assertThat(actual).isInstanceOf(NormalSegmentChunk.class);
     }
 }

@@ -1,26 +1,27 @@
-package mapper.segment;
+package mapper;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
-import mapper.HttpPathMatcher;
-import marker.RequestMethod;
+import mapper.segment.PathMatchTestSuite;
+import mapper.segment.PathUrl;
+import mapper.segment.PathVariableValue;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class HttpPathMatcherTest {
+class PathUrlMatcherTest {
 
     @DisplayName("http path 와 일치하면 resolve 데이터를 가져옵니다.")
     @PathMatchTestSuite.PathMatchTest
     void test1(String baseUrl, String requestPath, boolean expect) throws Exception {
         //given
-        HttpPathMatcher httpPathMatcher = HttpPathMatcher.from(RequestMethod.GET, baseUrl, TestClass.class.getDeclaredMethod("method"));
+        PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(baseUrl);
 
         //when
-        boolean actual = httpPathMatcher.matchMethod(RequestMethod.GET, PathUrl.from(requestPath)).isPresent();
+        boolean actual = pathUrlMatcher.match(PathUrl.from(requestPath)).isPresent();
 
         //then
         Assertions.assertThat(actual).isEqualTo(expect);
@@ -32,14 +33,14 @@ class HttpPathMatcherTest {
     void test1(String baseUrl, String requestPath, Map<String, String> expectMap) throws Exception {
         //given
         PathVariableValue expect = new PathVariableValue(expectMap);
-        HttpPathMatcher httpPathMatcher = HttpPathMatcher.from(RequestMethod.GET, baseUrl, TestClass.class.getDeclaredMethod("method"));
+        PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(baseUrl);
 
         //when
-        Optional<HttpPathMatcher.MatchedMethod> optionalResolvedMethod = httpPathMatcher.matchMethod(RequestMethod.GET, PathUrl.from(requestPath));
+        Optional<PathVariableValue> optionalResolvedMethod = pathUrlMatcher.match(PathUrl.from(requestPath));
 
         //then
         Assertions.assertThat(optionalResolvedMethod).isPresent();
-        PathVariableValue actual = optionalResolvedMethod.get().getPathVariableValue();
+        PathVariableValue actual = optionalResolvedMethod.get();
         Assertions.assertThat(actual).isEqualTo(expect);
     }
 

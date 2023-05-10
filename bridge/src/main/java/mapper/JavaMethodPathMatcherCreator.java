@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import mapper.RequestMappingValueExtractor.RequestMappedMethod;
-import mapper.segment.PathUrl;
 import marker.RequestMapping;
 import marker.RequestMethod;
 import util.AnnotationUtils;
@@ -33,7 +32,7 @@ public class JavaMethodPathMatcherCreator {
         return requestMappedMethods.stream()
             .map(requestMappedMethod -> {
                 RequestMethod requestMethod = requestMappedMethod.getRequestMethod();
-                PathUrl baseUrl = PathUrl.from(requestMappedMethod.getUrl());
+                String baseUrl = requestMappedMethod.getUrl();
                 Method javaMethod = requestMappedMethod.getJavaMethod();
 
                 return HttpPathMatcher.from(requestMethod, baseUrl, javaMethod);

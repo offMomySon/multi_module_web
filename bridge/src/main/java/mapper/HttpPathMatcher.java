@@ -1,47 +1,59 @@
 package mapper;
 
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.Getter;
 import mapper.segment.PathUrl;
 import mapper.segment.PathVariableValue;
-import mapper.segment.SegmentChunk;
-import mapper.segment.SegmentChunkChain;
-import mapper.segment.strategy.SegmentChunkFactory;
 import marker.RequestMethod;
 
 public class HttpPathMatcher {
     private final RequestMethod requestMethod;
-    private final SegmentChunkChain baseSegmentChunkChain;
+    private final PathUrlMatcher baseUrlPathMatcher;
     private final Method javaMethod;
 
-    private HttpPathMatcher(RequestMethod requestMethod, SegmentChunkChain baseSegmentChunkChain, Method javaMethod) {
+    public HttpPathMatcher(RequestMethod requestMethod, PathUrlMatcher baseUrlPathMatcher, Method javaMethod) {
+        Objects.requireNonNull(requestMethod);
+        Objects.requireNonNull(baseUrlPathMatcher);
+        Objects.requireNonNull(javaMethod);
         this.requestMethod = requestMethod;
-        this.baseSegmentChunkChain = baseSegmentChunkChain;
+        this.baseUrlPathMatcher = baseUrlPathMatcher;
         this.javaMethod = javaMethod;
     }
 
-    public static HttpPathMatcher from(RequestMethod requestMethod, PathUrl baseUrl, Method javaMethod) {
+    public static HttpPathMatcher from(RequestMethod requestMethod, String basePathUrl, Method javaMethod) {
+        if (Objects.isNull(basePathUrl) || basePathUrl.isBlank()) {
+            throw new RuntimeException("basePathUrl is empty.");
+        }
         Objects.requireNonNull(requestMethod);
-        Objects.requireNonNull(baseUrl);
         Objects.requireNonNull(javaMethod);
 
-        List<SegmentChunk> segmentChunks = SegmentChunkFactory.create(baseUrl);
-        if (segmentChunks.isEmpty()) {
-            throw new RuntimeException("segmentChunk is empty.");
-        }
-
-        SegmentChunk lastSegmentChunk = segmentChunks.get(segmentChunks.size() - 1);
-        SegmentChunkChain segmentChunkChain = SegmentChunkChain.last(lastSegmentChunk);
-        for (int index = segmentChunks.size() - 2; 0 <= index; index--) {
-            SegmentChunk prevSegmentChunk = segmentChunks.get(index);
-            segmentChunkChain = SegmentChunkChain.link(prevSegmentChunk, segmentChunkChain);
-        }
-
-        return new HttpPathMatcher(requestMethod, segmentChunkChain, javaMethod);
+        PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(basePathUrl);
+        return new HttpPathMatcher(requestMethod, pathUrlMatcher, javaMethod);
     }
+
+    // TODO 변환이 어디까지 허용되는지 모르겠다.
+    // 변환. 클래스를 생성하기 위해 어떤 인자에서
+//    public static HttpPathMatcher from(RequestMethod requestMethod, PathUrl baseUrl, Method javaMethod) {
+//        Objects.requireNonNull(requestMethod);
+//        Objects.requireNonNull(baseUrl);
+//        Objects.requireNonNull(javaMethod);
+//
+//        Deque<SegmentChunk> segmentChunks = SegmentChunkFactory.create(baseUrl);
+//        if (segmentChunks.isEmpty()) {
+//            throw new RuntimeException("segmentChunk is empty.");
+//        }
+//
+//        SegmentChunk lastSegmentChunk = segmentChunks.pop();
+//        SegmentChunkChain segmentChunkChain = SegmentChunkChain.last(lastSegmentChunk);
+//        while (!segmentChunks.isEmpty()) {
+//            SegmentChunk segmentChunk = segmentChunks.pop();
+//            segmentChunkChain = SegmentChunkChain.link(segmentChunk, segmentChunkChain);
+//        }
+//
+//        return new HttpPathMatcher(requestMethod, segmentChunkChain, javaMethod);
+//    }
 
     public Optional<MatchedMethod> matchMethod(RequestMethod requestMethod, PathUrl requestUrl) {
         if (Objects.isNull(requestUrl)) {
@@ -51,13 +63,13 @@ public class HttpPathMatcher {
             return Optional.empty();
         }
 
-        List<PathUrl> leftPathUrl = baseSegmentChunkChain.consume(requestUrl);
-        boolean doesNotMatch = leftPathUrl.isEmpty();
+        Optional<PathVariableValue> optionalPathVariableValue = baseUrlPathMatcher.match(requestUrl);
+        boolean doesNotMatch = optionalPathVariableValue.isEmpty();
         if (doesNotMatch) {
             return Optional.empty();
         }
 
-        PathVariableValue pathVariableValue = baseSegmentChunkChain.getPathVariable();
+        PathVariableValue pathVariableValue = optionalPathVariableValue.get();
         return Optional.of(new MatchedMethod(javaMethod, pathVariableValue));
     }
 

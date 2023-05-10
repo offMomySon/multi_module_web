@@ -1,7 +1,8 @@
 package mapper.segment.strategy;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -14,11 +15,11 @@ import mapper.segment.WildCardSegmentChunk;
 public class WildCardSegmentChunkCreateStrategy {
     private static final String WILD_CARD = "/**";
 
-    public static List<SegmentChunk> create(PathUrl _basePathUrl) {
+    public static Deque<SegmentChunk> create(PathUrl _basePathUrl) {
         Objects.requireNonNull(_basePathUrl);
 
         if (_basePathUrl.isEmtpy()) {
-            return Collections.emptyList();
+            return new ArrayDeque<>();
         }
 
         String basePathUrl = _basePathUrl.toAbsolutePath();
@@ -37,7 +38,7 @@ public class WildCardSegmentChunkCreateStrategy {
                 }
                 return new WildCardSegmentChunk(pathUrl);
             })
-            .collect(Collectors.toUnmodifiableList());
+            .collect(Collectors.toCollection(ArrayDeque::new));
     }
 
     private static List<String> splitWildCardPathUrls(String baseUrl) {

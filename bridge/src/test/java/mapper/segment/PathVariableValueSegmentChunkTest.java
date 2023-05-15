@@ -2,7 +2,6 @@ package mapper.segment;
 
 import java.util.List;
 import java.util.Map;
-import mapper.segment.pathvariable.MatchedPathVariable;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -68,17 +67,18 @@ class PathVariableValueSegmentChunkTest {
         PathUrl requestUrl = PathUrl.from("path1/path2/path3/path4");
         PathUrl baseUrl = PathUrl.from("{pv1}/{pv2}/{pv3}");
         PathVariableSegmentChunk pathVariableSegmentChunk = new PathVariableSegmentChunk(baseUrl);
-        PathVariableValue expect = new PathVariableValue(Map.of("pv1", "path1",
-                                                                "pv2", "path2",
-                                                                "pv3", "path3"));
+
+        Map<PathUrl, PathVariableValue> expect = Map.of(new PathUrl(new StringBuilder("path1/path2/path3/path4"), 18)
+            , new PathVariableValue(Map.of("pv1", "path1",
+                                           "pv2", "path2",
+                                           "pv3", "path3")));
 
         //when
-        List<MatchedPathVariable> actuals = pathVariableSegmentChunk.internalConsume(requestUrl);
+        Map<PathUrl, PathVariableValue> actual = pathVariableSegmentChunk.internalConsume(requestUrl);
+//        List<MatchedPathVariable> actuals = (List<MatchedPathVariable>) pathUrlPathVariableValueMap;
 
         //then
-        Assertions.assertThat(actuals).hasSize(1);
-        MatchedPathVariable matchedPathVariable = actuals.get(0);
-        PathVariableValue actual = matchedPathVariable.getPathVariable();
+        Assertions.assertThat(actual).hasSize(1);
         Assertions.assertThat(actual).isEqualTo(expect);
     }
 }

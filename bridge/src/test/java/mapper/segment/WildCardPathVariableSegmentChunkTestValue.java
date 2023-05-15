@@ -3,7 +3,6 @@ package mapper.segment;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-import mapper.segment.pathvariable.MatchedPathVariable;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -73,7 +72,7 @@ class WildCardPathVariableSegmentChunkTestValue {
     @DisplayName("pathVaraible 에 매칭된 segment 들을 반환합니다.")
     @ParameterizedTest
     @MethodSource("providePathUrlPathVariable")
-    void ttttest(String _baseUrl, String _requestUrl, List<MatchedPathVariable> expects) throws Exception {
+    void ttttest(String _baseUrl, String _requestUrl, Map<PathUrl, PathVariableValue> expects) throws Exception {
         //given
         PathUrl baseUrl = PathUrl.from(_baseUrl);
         WildCardPathVariableSegmentChunk wildCardPathVariableSegmentChunk = new WildCardPathVariableSegmentChunk(baseUrl);
@@ -81,10 +80,10 @@ class WildCardPathVariableSegmentChunkTestValue {
         PathUrl requestUrl = PathUrl.from(_requestUrl);
 
         //when
-        List<MatchedPathVariable> actuals = wildCardPathVariableSegmentChunk.internalConsume(requestUrl);
+        Map<PathUrl, PathVariableValue> actuals = wildCardPathVariableSegmentChunk.internalConsume(requestUrl);
 
         //then
-        Assertions.assertThat(actuals).containsAll(expects);
+        Assertions.assertThat(actuals).isEqualTo(expects);
     }
 
     public static Stream<Arguments> provideConsumeResult() {
@@ -113,26 +112,25 @@ class WildCardPathVariableSegmentChunkTestValue {
 
     public static Stream<Arguments> providePathUrlPathVariable() {
         return Stream.of(
-            Arguments.of("**/{pv1}", "path1/path2/path3", List.of(
-                new MatchedPathVariable(new PathUrl(new StringBuilder("path1/path2/path3"), "path1/".length()), new PathVariableValue(Map.of("pv1", "path1"))),
-                new MatchedPathVariable(new PathUrl(new StringBuilder("path1/path2/path3"), "path1/path2/".length()), new PathVariableValue(Map.of("pv1", "path2"))),
-                new MatchedPathVariable(new PathUrl(new StringBuilder("path1/path2/path3"), "path1/path2/path3".length()), new PathVariableValue(Map.of("pv1", "path3")))
+            Arguments.of("**/{pv1}", "path1/path2/path3", Map.of(
+                new PathUrl(new StringBuilder("path1/path2/path3"), "path1/".length()), new PathVariableValue(Map.of("pv1", "path1")),
+                new PathUrl(new StringBuilder("path1/path2/path3"), "path1/path2/".length()), new PathVariableValue(Map.of("pv1", "path2")),
+                new PathUrl(new StringBuilder("path1/path2/path3"), "path1/path2/path3".length()), new PathVariableValue(Map.of("pv1", "path3"))
             )),
-            Arguments.of("**/{pv1}/path1", "path1/path1/path1/path2/path1/path3", List.of(
-                new MatchedPathVariable(new PathUrl(new StringBuilder("path1/path1/path1/path2/path1/path3"), "path1/path1/".length()), new PathVariableValue(Map.of("pv1", "path1"))),
-                new MatchedPathVariable(new PathUrl(new StringBuilder("path1/path1/path1/path2/path1/path3"), "path1/path1/path1/".length()), new PathVariableValue(Map.of("pv1", "path1"))),
-                new MatchedPathVariable(new PathUrl(new StringBuilder("path1/path1/path1/path2/path1/path3"), "path1/path1/path1/path2/path1/".length()),
-                                        new PathVariableValue(Map.of("pv1", "path2")))
+
+            Arguments.of("**/{pv1}/path1", "path1/path1/path1/path2/path1/path3", Map.of(
+                new PathUrl(new StringBuilder("path1/path1/path1/path2/path1/path3"), "path1/path1/".length()), new PathVariableValue(Map.of("pv1", "path1")),
+                new PathUrl(new StringBuilder("path1/path1/path1/path2/path1/path3"), "path1/path1/path1/".length()), new PathVariableValue(Map.of("pv1", "path1")),
+                new PathUrl(new StringBuilder("path1/path1/path1/path2/path1/path3"), "path1/path1/path1/path2/path1/".length()), new PathVariableValue(Map.of("pv1", "path2"))
             )),
-            Arguments.of("**/path1/{pv1}", "path1/path1/path1/path2/path1/path3", List.of(
-                new MatchedPathVariable(new PathUrl(new StringBuilder("path1/path1/path1/path2/path1/path3"), "path1/path1/".length()), new PathVariableValue(Map.of("pv1", "path1"))),
-                new MatchedPathVariable(new PathUrl(new StringBuilder("path1/path1/path1/path2/path1/path3"), "path1/path1/path1/".length()), new PathVariableValue(Map.of("pv1", "path1"))),
-                new MatchedPathVariable(new PathUrl(new StringBuilder("path1/path1/path1/path2/path1/path3"), "path1/path1/path1/path2/".length()), new PathVariableValue(Map.of("pv1", "path2"))),
-                new MatchedPathVariable(new PathUrl(new StringBuilder("path1/path1/path1/path2/path1/path3"), "path1/path1/path1/path2/path1/path3".length()),
-                                        new PathVariableValue(Map.of("pv1", "path3")))
+            Arguments.of("**/path1/{pv1}", "path1/path1/path1/path2/path1/path3", Map.of(
+                new PathUrl(new StringBuilder("path1/path1/path1/path2/path1/path3"), "path1/path1/".length()), new PathVariableValue(Map.of("pv1", "path1")),
+                new PathUrl(new StringBuilder("path1/path1/path1/path2/path1/path3"), "path1/path1/path1/".length()), new PathVariableValue(Map.of("pv1", "path1")),
+                new PathUrl(new StringBuilder("path1/path1/path1/path2/path1/path3"), "path1/path1/path1/path2/".length()), new PathVariableValue(Map.of("pv1", "path2")),
+                new PathUrl(new StringBuilder("path1/path1/path1/path2/path1/path3"), "path1/path1/path1/path2/path1/path3".length()), new PathVariableValue(Map.of("pv1", "path3"))
             )),
-            Arguments.of("**/path1/{pv1}/path2", "path1/path1/path1/path2/path1/path3", List.of(
-                new MatchedPathVariable(new PathUrl(new StringBuilder("path1/path1/path1/path2/path1/path3"), "path1/path1/path1/path2/".length()), new PathVariableValue(Map.of("pv1", "path1")))
+            Arguments.of("**/path1/{pv1}/path2", "path1/path1/path1/path2/path1/path3", Map.of(
+                new PathUrl(new StringBuilder("path1/path1/path1/path2/path1/path3"), "path1/path1/path1/path2/".length()), new PathVariableValue(Map.of("pv1", "path1"))
             ))
         );
     }

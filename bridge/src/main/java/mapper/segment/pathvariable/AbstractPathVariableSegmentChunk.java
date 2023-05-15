@@ -16,18 +16,19 @@ public abstract class AbstractPathVariableSegmentChunk implements SegmentChunk {
     public List<PathUrl> consume(PathUrl pathUrl) {
         Objects.requireNonNull(pathUrl);
 
-        List<MatchedPathVariable> matchedPathVariables = internalConsume(pathUrl);
+        Map<PathUrl, PathVariableValue> pathUrlPathVariableValueMap = internalConsume(pathUrl);
 
-        this.matchedPathVariables = matchedPathVariables.stream()
-            .map(matchedPathVariable -> Map.entry(matchedPathVariable.getLeftPathUrl(), matchedPathVariable.getPathVariable()))
-            .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> curr));
-
-        return matchedPathVariables.stream().map(MatchedPathVariable::getLeftPathUrl).collect(Collectors.toUnmodifiableList());
+        this.matchedPathVariables = pathUrlPathVariableValueMap.entrySet().stream()
+            .filter(entry -> Objects.nonNull(entry.getKey()))
+            .filter(entry -> Objects.nonNull(entry.getValue()))
+            .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
+        
+        return matchedPathVariables.keySet().stream().collect(Collectors.toUnmodifiableList());
     }
 
     public Map<PathUrl, PathVariableValue> getMatchedPathVariables() {
         return new HashMap<>(matchedPathVariables);
     }
 
-    public abstract List<MatchedPathVariable> internalConsume(PathUrl pathUrl);
+    public abstract Map<PathUrl, PathVariableValue> internalConsume(PathUrl pathUrl);
 }

@@ -1,11 +1,11 @@
 package mapper.segment;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import mapper.segment.pathvariable.AbstractPathVariableSegmentChunk;
-import mapper.segment.pathvariable.MatchedPathVariable;
 
 @Slf4j
 public class WildCardPathVariableSegmentChunk extends AbstractPathVariableSegmentChunk {
@@ -32,7 +32,7 @@ public class WildCardPathVariableSegmentChunk extends AbstractPathVariableSegmen
     }
 
     @Override
-    public List<MatchedPathVariable> internalConsume(PathUrl requestUrl) {
+    public Map<PathUrl, PathVariableValue> internalConsume(PathUrl requestUrl) {
         Objects.requireNonNull(requestUrl);
 
         PathUrl copiedBaseUrl = baseUrl.copy();
@@ -41,27 +41,26 @@ public class WildCardPathVariableSegmentChunk extends AbstractPathVariableSegmen
 
         PathUrl copiedRequestUrl = requestUrl.copy();
 
-        List<MatchedPathVariable> matchedPathVariables = new ArrayList<>();
+        Map<PathUrl, PathVariableValue> pathUrlPathVariableValueMap = new HashMap<>();
         while (copiedRequestUrl.doesNotEmpty()) {
             boolean doesNotSufficientRequestUrl = copiedBaseUrl.segmentSize() > copiedRequestUrl.segmentSize();
             if (doesNotSufficientRequestUrl) {
                 break;
             }
 
-            List<MatchedPathVariable> subChunkMatchedPathVariables = pathVariableSegmentChunk.internalConsume(copiedRequestUrl);
+            Map<PathUrl, PathVariableValue> pathVariableValueMap = pathVariableSegmentChunk.internalConsume(copiedRequestUrl);
 
-            boolean doesNotMatch = subChunkMatchedPathVariables.isEmpty();
+            boolean doesNotMatch = pathVariableValueMap.isEmpty();
             if (doesNotMatch) {
                 copiedRequestUrl.popSegment();
                 continue;
             }
 
-            MatchedPathVariable subChunkMatchedPathVariable = subChunkMatchedPathVariables.get(0);
-            matchedPathVariables.add(subChunkMatchedPathVariable);
+            pathUrlPathVariableValueMap.putAll(pathVariableValueMap);
 
             copiedRequestUrl.popSegment();
         }
 
-        return matchedPathVariables;
+        return pathUrlPathVariableValueMap;
     }
 }

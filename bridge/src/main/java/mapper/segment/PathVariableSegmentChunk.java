@@ -2,9 +2,9 @@ package mapper.segment;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import mapper.segment.pathvariable.AbstractPathVariableSegmentChunk;
-import mapper.segment.pathvariable.MatchedPathVariable;
 import static mapper.segment.PathVariableUtil.isPathVariable;
 import static mapper.segment.PathVariableUtil.parsePathVariable;
 
@@ -24,12 +24,12 @@ public class PathVariableSegmentChunk extends AbstractPathVariableSegmentChunk {
     }
 
     @Override
-    public List<MatchedPathVariable> internalConsume(PathUrl requestUrl) {
+    public Map<PathUrl, PathVariableValue> internalConsume(PathUrl requestUrl) {
         Objects.requireNonNull(requestUrl);
 
         boolean doesNotSufficientRequestUrl = baseUrl.segmentSize() > requestUrl.segmentSize();
         if (doesNotSufficientRequestUrl) {
-            return Collections.emptyList();
+            return Collections.emptyMap();
         }
 
         PathUrl copiedBaseUrl = baseUrl.copy();
@@ -48,10 +48,10 @@ public class PathVariableSegmentChunk extends AbstractPathVariableSegmentChunk {
 
             boolean doesNotMatch = !Objects.equals(baseSegment, requestSegment);
             if (doesNotMatch) {
-                return Collections.emptyList();
+                return Collections.emptyMap();
             }
         }
 
-        return List.of(new MatchedPathVariable(copiedRequestUrl, pathVariableValue));
+        return Map.of(copiedRequestUrl, pathVariableValue);
     }
 }

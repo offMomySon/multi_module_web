@@ -10,6 +10,19 @@ import mapper.segment.SegmentChunk;
 import mapper.segment.SegmentChunkChain;
 import mapper.segment.strategy.SegmentChunkFactory;
 
+// TODO
+// SegmentChunkChain 을 생성자로 선택
+// 장.
+// 단.
+//      테스트 어렵다.
+//      SegmentChunkChain 의 의존성이 PathUrlMatcher 뿐 아니라 PathUrlMatcher 을 사용하는 모든곳에 퍼진다.
+//
+// SegmentChunkFactory 을 생성자로 선택
+// 장.
+//      생성이 쉽다.
+// 단.
+//      호출 될 때 마다 SegmentChunkChain 을 생성해야한다.
+
 public class PathUrlMatcher {
     private final SegmentChunkFactory segmentChunkFactory;
 

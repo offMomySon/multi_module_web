@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 import mapper.HttpPathMatcher;
+import mapper.PathUrlMatcher;
 import marker.RequestMethod;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -17,7 +18,9 @@ class HttpPathMatcherTest {
     @PathMatchTestSuite.PathMatchTest
     void test1(String baseUrl, String requestPath, boolean expect) throws Exception {
         //given
-        HttpPathMatcher httpPathMatcher = HttpPathMatcher.from(RequestMethod.GET, PathUrl.from(baseUrl), TestClass.class.getDeclaredMethod("method"));
+        PathUrl basePathUrl = PathUrl.from(baseUrl);
+        PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(basePathUrl);
+        HttpPathMatcher httpPathMatcher = new HttpPathMatcher(RequestMethod.GET, pathUrlMatcher, TestClass.class.getDeclaredMethod("method"));
 
         //when
         boolean actual = httpPathMatcher.matchMethod(RequestMethod.GET, PathUrl.from(requestPath)).isPresent();
@@ -32,7 +35,9 @@ class HttpPathMatcherTest {
     void test1(String baseUrl, String requestPath, Map<String, String> expectMap) throws Exception {
         //given
         PathVariableValue expect = new PathVariableValue(expectMap);
-        HttpPathMatcher httpPathMatcher = HttpPathMatcher.from(RequestMethod.GET, PathUrl.from(baseUrl), TestClass.class.getDeclaredMethod("method"));
+        PathUrl basePathUrl = PathUrl.from(baseUrl);
+        PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(basePathUrl);
+        HttpPathMatcher httpPathMatcher = new HttpPathMatcher(RequestMethod.GET, pathUrlMatcher, TestClass.class.getDeclaredMethod("method"));
 
         //when
         Optional<HttpPathMatcher.MatchedMethod> optionalResolvedMethod = httpPathMatcher.matchMethod(RequestMethod.GET, PathUrl.from(requestPath));

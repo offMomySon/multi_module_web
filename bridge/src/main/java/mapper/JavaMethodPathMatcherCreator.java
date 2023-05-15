@@ -34,9 +34,10 @@ public class JavaMethodPathMatcherCreator {
             .map(requestMappedMethod -> {
                 RequestMethod requestMethod = requestMappedMethod.getRequestMethod();
                 PathUrl baseUrl = PathUrl.from(requestMappedMethod.getUrl());
+                PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(baseUrl);
                 Method javaMethod = requestMappedMethod.getJavaMethod();
 
-                return HttpPathMatcher.from(requestMethod, baseUrl, javaMethod);
+                return new HttpPathMatcher(requestMethod, pathUrlMatcher, javaMethod);
             })
             .collect(Collectors.toUnmodifiableList());
     }

@@ -11,29 +11,29 @@ import mapper.segment.SegmentChunkChain;
 import mapper.segment.strategy.SegmentChunkFactory;
 
 public class PathUrlMatcher {
-    private final SegmentChunkChain baseSegmentChunkChain;
+    private final SegmentChunkFactory segmentChunkFactory;
 
-    public PathUrlMatcher(SegmentChunkChain baseSegmentChunkChain) {
-        this.baseSegmentChunkChain = baseSegmentChunkChain;
+    private PathUrlMatcher(SegmentChunkFactory segmentChunkFactory) {
+        Objects.requireNonNull(segmentChunkFactory);
+        this.segmentChunkFactory = segmentChunkFactory;
     }
 
     public static PathUrlMatcher from(PathUrl baseUrl) {
         if (Objects.isNull(baseUrl)) {
             throw new RuntimeException("_baseUrl is empty.");
         }
-        List<SegmentChunk> segmentChunks = new SegmentChunkFactory(baseUrl).create();
 
-        Collections.reverse(segmentChunks);
-        SegmentChunkChain segmentChunkChain = segmentChunks.stream()
-            .reduce(SegmentChunkChain.empty(),
-                    SegmentChunkChain::link,
-                    SegmentChunkChain::link);
-
-        return new PathUrlMatcher(segmentChunkChain);
+        SegmentChunkFactory segmentChunkFactory = new SegmentChunkFactory(baseUrl);
+        return new PathUrlMatcher(segmentChunkFactory);
     }
 
     public Optional<PathVariableValue> match(PathUrl requestUrl) {
         Objects.requireNonNull(requestUrl);
+
+        List<SegmentChunk> segmentChunks = segmentChunkFactory.create();
+        Collections.reverse(segmentChunks);
+        SegmentChunkChain baseSegmentChunkChain = segmentChunks.stream()
+            .reduce(SegmentChunkChain.empty(), SegmentChunkChain::link, SegmentChunkChain::link);
 
         List<PathUrl> leftPathUrl = baseSegmentChunkChain.consume(requestUrl);
         boolean doesNotMatch = leftPathUrl.isEmpty();

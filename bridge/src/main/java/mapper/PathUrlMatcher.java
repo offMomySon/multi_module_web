@@ -7,7 +7,7 @@ import java.util.Optional;
 import mapper.segment.PathUrl;
 import mapper.segment.PathVariableValue;
 import mapper.segment.SegmentChunk;
-import mapper.segment.SegmentChunkChain;
+import mapper.segment.SegmentChunkChainV2;
 import mapper.segment.strategy.SegmentChunkFactory;
 
 // TODO
@@ -45,16 +45,17 @@ public class PathUrlMatcher {
 
         List<SegmentChunk> segmentChunks = segmentChunkFactory.create();
         Collections.reverse(segmentChunks);
-        SegmentChunkChain baseSegmentChunkChain = segmentChunks.stream()
-            .reduce(SegmentChunkChain.empty(), SegmentChunkChain::link, SegmentChunkChain::link);
+        SegmentChunkChainV2 baseSegmentChunkChain = segmentChunks.stream().reduce(SegmentChunkChainV2.empty(),
+                                                                                  SegmentChunkChainV2::chaining,
+                                                                                  (sc1, sc2) -> null);
 
-        List<PathUrl> leftPathUrl = baseSegmentChunkChain.consume(requestUrl);
-        boolean doesNotMatch = leftPathUrl.isEmpty();
+        Optional<PathVariableValue> optionalMatchPathVariableValue = baseSegmentChunkChain.consume(requestUrl);
+        boolean doesNotMatch = optionalMatchPathVariableValue.isEmpty();
         if (doesNotMatch) {
             return Optional.empty();
         }
 
-        PathVariableValue pathVariableValue = baseSegmentChunkChain.getPathVariable();
+        PathVariableValue pathVariableValue = optionalMatchPathVariableValue.get();
         return Optional.of(pathVariableValue);
     }
 }

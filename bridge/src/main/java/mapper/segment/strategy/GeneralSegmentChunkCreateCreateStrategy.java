@@ -1,10 +1,7 @@
 package mapper.segment.strategy;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import mapper.segment.EmptySegmentChunk;
 import mapper.segment.NormalSegmentChunk;
 import mapper.segment.PathUrl;
@@ -13,11 +10,11 @@ import mapper.segment.PathVariableUtil;
 import mapper.segment.SegmentChunk;
 
 public class GeneralSegmentChunkCreateCreateStrategy {
-    public static Deque<SegmentChunk> create(PathUrl basePathUrl) {
+    public static List<SegmentChunk> create(PathUrl basePathUrl) {
         Objects.requireNonNull(basePathUrl);
 
         if (basePathUrl.isEmtpy()) {
-            return Stream.of(new EmptySegmentChunk()).collect(Collectors.toCollection(ArrayDeque::new));
+            return List.of(new EmptySegmentChunk());
         }
 
         PathUrl copiedBasePathUrl = basePathUrl.copy();
@@ -26,8 +23,8 @@ public class GeneralSegmentChunkCreateCreateStrategy {
             .anyMatch(PathVariableUtil::isPathVariable);
 
         if (hasPathVariable) {
-            return Stream.of(new PathVariableSegmentChunk(copiedBasePathUrl)).collect(Collectors.toCollection(ArrayDeque::new));
+            return List.of(new PathVariableSegmentChunk(copiedBasePathUrl));
         }
-        return Stream.of(new NormalSegmentChunk(copiedBasePathUrl)).collect(Collectors.toCollection(ArrayDeque::new));
+        return List.of(new NormalSegmentChunk(copiedBasePathUrl));
     }
 }

@@ -1,6 +1,5 @@
 package mapper.segment.strategy;
 
-import java.util.Deque;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -38,7 +37,7 @@ class WildCardSegmentChunkFactoryTest {
         PathUrl pathUrl = PathUrl.from(baseUrl);
 
         //when
-        Deque<SegmentChunk> actuals = WildCardSegmentChunkCreateStrategy.create(pathUrl);
+        List<SegmentChunk> actuals = WildCardSegmentChunkCreateStrategy.create(pathUrl);
         List<? extends Class<? extends SegmentChunk>> actualInstances = actuals.stream().map(SegmentChunk::getClass).collect(Collectors.toUnmodifiableList());
 
         //then

@@ -8,8 +8,8 @@ import java.util.Optional;
 import mapper.segment.pathvariable.AbstractPathVariableSegmentChunk;
 
 public class SegmentChunkChain implements SegmentChunk {
-    private final SegmentChunk segmentChunk;
     private final SegmentChunkChain nextSegmentChunkChain;
+    private final SegmentChunk segmentChunk;
 
     private PathUrl nextPathUrl;
 
@@ -19,10 +19,18 @@ public class SegmentChunkChain implements SegmentChunk {
         this.nextSegmentChunkChain = nextSegmentChunkChain;
     }
 
-    public static SegmentChunkChain link(SegmentChunk segmentChunk, SegmentChunkChain segmentChunkChain) {
+    public static SegmentChunkChain empty() {
+        return new SegmentChunkChain(new EmptySegmentChunk(), null);
+    }
+
+    public static SegmentChunkChain link(SegmentChunkChain segmentChunkChain, SegmentChunk segmentChunk) {
         Objects.requireNonNull(segmentChunk);
         Objects.requireNonNull(segmentChunkChain);
         return new SegmentChunkChain(segmentChunk, segmentChunkChain);
+    }
+
+    public static SegmentChunkChain link(SegmentChunkChain segmentChunkChain, SegmentChunkChain segmentChunkChain2) {
+        return null;
     }
 
     public static SegmentChunkChain last(SegmentChunk segmentChunk) {

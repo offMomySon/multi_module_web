@@ -1,6 +1,6 @@
 package mapper.segment.strategy;
 
-import java.util.Deque;
+import java.util.List;
 import mapper.segment.EmptySegmentChunk;
 import mapper.segment.NormalSegmentChunk;
 import mapper.segment.PathUrl;
@@ -20,11 +20,11 @@ class GeneralSegmentChunkFactoryTest {
         GeneralSegmentChunkCreateCreateStrategy generalSegmentChunkCreateStrategy = new GeneralSegmentChunkCreateCreateStrategy();
 
         //when
-        Deque<SegmentChunk> actuals = generalSegmentChunkCreateStrategy.create(emptyPathUrl);
+        List<SegmentChunk> actuals = generalSegmentChunkCreateStrategy.create(emptyPathUrl);
 
         //then
         Assertions.assertThat(actuals).hasSize(1);
-        SegmentChunk actual = actuals.pop();
+        SegmentChunk actual = actuals.get(0);
         Assertions.assertThat(actual).isInstanceOf(EmptySegmentChunk.class);
     }
 
@@ -36,11 +36,11 @@ class GeneralSegmentChunkFactoryTest {
         GeneralSegmentChunkCreateCreateStrategy generalSegmentChunkCreateStrategy = new GeneralSegmentChunkCreateCreateStrategy();
 
         //when
-        Deque<SegmentChunk> actuals = generalSegmentChunkCreateStrategy.create(pathUrl);
+        List<SegmentChunk> actuals = generalSegmentChunkCreateStrategy.create(pathUrl);
 
         //then
         Assertions.assertThat(actuals).hasSize(1);
-        SegmentChunk actual = actuals.pop();
+        SegmentChunk actual = actuals.get(0);
         Assertions.assertThat(actual).isInstanceOf(PathVariableSegmentChunk.class);
     }
 
@@ -52,11 +52,11 @@ class GeneralSegmentChunkFactoryTest {
         GeneralSegmentChunkCreateCreateStrategy generalSegmentChunkCreateStrategy = new GeneralSegmentChunkCreateCreateStrategy();
 
         //when
-        Deque<SegmentChunk> actuals = generalSegmentChunkCreateStrategy.create(pathUrl);
+        List<SegmentChunk> actuals = generalSegmentChunkCreateStrategy.create(pathUrl);
 
         //then
         Assertions.assertThat(actuals).hasSize(1);
-        SegmentChunk actual = actuals.pop();
+        SegmentChunk actual = actuals.get(0);
         Assertions.assertThat(actual).isInstanceOf(NormalSegmentChunk.class);
     }
 }

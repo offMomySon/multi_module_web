@@ -1,6 +1,7 @@
 package mapper;
 
-import java.util.Deque;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -28,7 +29,7 @@ public class PathUrlMatcher {
     public Optional<PathVariableValue> match(PathUrl requestUrl) {
         Objects.requireNonNull(requestUrl);
 
-        Deque<SegmentChunk> baseSegmentChunks = SegmentChunkFactory.create(baseUrl);
+        List<SegmentChunk> baseSegmentChunks = SegmentChunkFactory.create(baseUrl);
         SegmentChunkChain baseSegmentChunkChain = createSegmentChunkChain(baseSegmentChunks);
 
         List<PathUrl> leftPathUrl = baseSegmentChunkChain.consume(requestUrl);
@@ -41,17 +42,18 @@ public class PathUrlMatcher {
         return Optional.of(pathVariableValue);
     }
 
-    private static SegmentChunkChain createSegmentChunkChain(Deque<SegmentChunk> segmentChunks) {
+    private static SegmentChunkChain createSegmentChunkChain(List<SegmentChunk> segmentChunks) {
         if (segmentChunks.isEmpty()) {
             throw new RuntimeException("segmentChunk is empty.");
         }
 
-        SegmentChunk lastSegmentChunk = segmentChunks.removeLast();
-        SegmentChunkChain baseSegmentChunkChain = SegmentChunkChain.last(lastSegmentChunk);
-        while (!segmentChunks.isEmpty()) {
-            SegmentChunk segmentChunk = segmentChunks.removeLast();
-            baseSegmentChunkChain = SegmentChunkChain.link(segmentChunk, baseSegmentChunkChain);
-        }
-        return baseSegmentChunkChain;
+        List<SegmentChunk> copiedSegmentChunks = new ArrayList<>(segmentChunks);
+        Collections.reverse(copiedSegmentChunks);
+
+        return copiedSegmentChunks.stream()
+            .reduce(SegmentChunkChain.empty(),
+                    SegmentChunkChain::link,
+                    SegmentChunkChain::link
+            );
     }
 }

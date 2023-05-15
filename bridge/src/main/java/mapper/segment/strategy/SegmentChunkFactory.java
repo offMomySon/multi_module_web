@@ -1,7 +1,6 @@
 package mapper.segment.strategy;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -11,7 +10,7 @@ import mapper.segment.SegmentChunk;
 public class SegmentChunkFactory {
     private static final String WILD_CARD = "/**";
 
-    public static Deque<SegmentChunk> create(PathUrl _basePathUrl) {
+    public static List<SegmentChunk> create(PathUrl _basePathUrl) {
         Objects.requireNonNull(_basePathUrl);
 
         String baseUrl = _basePathUrl.toAbsolutePath();
@@ -27,12 +26,12 @@ public class SegmentChunkFactory {
         }
 
         PathUrl normalPathUrl = PathUrl.from(baseUrl.substring(0, wildCardIndex));
-        Deque<SegmentChunk> normalSegmentChunks = GeneralSegmentChunkCreateCreateStrategy.create(normalPathUrl);
+        List<SegmentChunk> normalSegmentChunks = GeneralSegmentChunkCreateCreateStrategy.create(normalPathUrl);
 
         PathUrl wildCardPathUrl = PathUrl.from(baseUrl.substring(wildCardIndex));
-        Deque<SegmentChunk> wildCardSegmentChunks = WildCardSegmentChunkCreateStrategy.create(wildCardPathUrl);
+        List<SegmentChunk> wildCardSegmentChunks = WildCardSegmentChunkCreateStrategy.create(wildCardPathUrl);
 
-        return Stream.concat(normalSegmentChunks.stream(), wildCardSegmentChunks.stream()).collect(Collectors.toCollection(ArrayDeque::new));
+        return Stream.concat(normalSegmentChunks.stream(), wildCardSegmentChunks.stream()).collect(Collectors.toUnmodifiableList());
     }
 
 }

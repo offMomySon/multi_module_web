@@ -1,6 +1,5 @@
 package mapper.segment.strategy;
 
-import java.util.Deque;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -27,7 +26,7 @@ class SegmentChunkFactoryTest {
         PathUrl pathUrl = PathUrl.from(baseUrl);
 
         //when
-        Deque<SegmentChunk> actuals = SegmentChunkFactory.create(pathUrl);
+        List<SegmentChunk> actuals = SegmentChunkFactory.create(pathUrl);
         List<? extends Class<? extends SegmentChunk>> actualInstances = actuals.stream().map(SegmentChunk::getClass).collect(Collectors.toUnmodifiableList());
 
         //then

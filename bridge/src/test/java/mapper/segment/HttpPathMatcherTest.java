@@ -17,7 +17,7 @@ class HttpPathMatcherTest {
     @PathMatchTestSuite.PathMatchTest
     void test1(String baseUrl, String requestPath, boolean expect) throws Exception {
         //given
-        HttpPathMatcher httpPathMatcher = HttpPathMatcher.from(RequestMethod.GET, baseUrl, TestClass.class.getDeclaredMethod("method"));
+        HttpPathMatcher httpPathMatcher = HttpPathMatcher.from(RequestMethod.GET, PathUrl.from(baseUrl), TestClass.class.getDeclaredMethod("method"));
 
         //when
         boolean actual = httpPathMatcher.matchMethod(RequestMethod.GET, PathUrl.from(requestPath)).isPresent();
@@ -32,7 +32,7 @@ class HttpPathMatcherTest {
     void test1(String baseUrl, String requestPath, Map<String, String> expectMap) throws Exception {
         //given
         PathVariableValue expect = new PathVariableValue(expectMap);
-        HttpPathMatcher httpPathMatcher = HttpPathMatcher.from(RequestMethod.GET, baseUrl, TestClass.class.getDeclaredMethod("method"));
+        HttpPathMatcher httpPathMatcher = HttpPathMatcher.from(RequestMethod.GET, PathUrl.from(baseUrl), TestClass.class.getDeclaredMethod("method"));
 
         //when
         Optional<HttpPathMatcher.MatchedMethod> optionalResolvedMethod = httpPathMatcher.matchMethod(RequestMethod.GET, PathUrl.from(requestPath));

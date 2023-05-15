@@ -1,6 +1,5 @@
 package mapper;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -12,25 +11,29 @@ import mapper.segment.SegmentChunkChain;
 import mapper.segment.strategy.SegmentChunkFactory;
 
 public class PathUrlMatcher {
-    private final PathUrl baseUrl;
+    private final SegmentChunkChain baseSegmentChunkChain;
 
-    public PathUrlMatcher(PathUrl baseUrl) {
-        Objects.requireNonNull(baseUrl);
-        this.baseUrl = baseUrl;
+    public PathUrlMatcher(SegmentChunkChain baseSegmentChunkChain) {
+        this.baseSegmentChunkChain = baseSegmentChunkChain;
     }
 
-    public static PathUrlMatcher from(String baseUrl) {
-        if (Objects.isNull(baseUrl) || baseUrl.isBlank()) {
+    public static PathUrlMatcher from(PathUrl baseUrl) {
+        if (Objects.isNull(baseUrl)) {
             throw new RuntimeException("_baseUrl is empty.");
         }
-        return new PathUrlMatcher(PathUrl.from(baseUrl));
+        List<SegmentChunk> segmentChunks = SegmentChunkFactory.create(baseUrl);
+
+        Collections.reverse(segmentChunks);
+        SegmentChunkChain segmentChunkChain = segmentChunks.stream()
+            .reduce(SegmentChunkChain.empty(),
+                    SegmentChunkChain::link,
+                    SegmentChunkChain::link);
+
+        return new PathUrlMatcher(segmentChunkChain);
     }
 
     public Optional<PathVariableValue> match(PathUrl requestUrl) {
         Objects.requireNonNull(requestUrl);
-
-        List<SegmentChunk> baseSegmentChunks = SegmentChunkFactory.create(baseUrl);
-        SegmentChunkChain baseSegmentChunkChain = createSegmentChunkChain(baseSegmentChunks);
 
         List<PathUrl> leftPathUrl = baseSegmentChunkChain.consume(requestUrl);
         boolean doesNotMatch = leftPathUrl.isEmpty();
@@ -40,20 +43,5 @@ public class PathUrlMatcher {
 
         PathVariableValue pathVariableValue = baseSegmentChunkChain.getPathVariable();
         return Optional.of(pathVariableValue);
-    }
-
-    private static SegmentChunkChain createSegmentChunkChain(List<SegmentChunk> segmentChunks) {
-        if (segmentChunks.isEmpty()) {
-            throw new RuntimeException("segmentChunk is empty.");
-        }
-
-        List<SegmentChunk> copiedSegmentChunks = new ArrayList<>(segmentChunks);
-        Collections.reverse(copiedSegmentChunks);
-
-        return copiedSegmentChunks.stream()
-            .reduce(SegmentChunkChain.empty(),
-                    SegmentChunkChain::link,
-                    SegmentChunkChain::link
-            );
     }
 }

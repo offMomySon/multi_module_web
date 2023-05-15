@@ -22,8 +22,8 @@ public class HttpPathMatcher {
         this.javaMethod = javaMethod;
     }
 
-    public static HttpPathMatcher from(RequestMethod requestMethod, String basePathUrl, Method javaMethod) {
-        if (Objects.isNull(basePathUrl) || basePathUrl.isBlank()) {
+    public static HttpPathMatcher from(RequestMethod requestMethod, PathUrl basePathUrl, Method javaMethod) {
+        if (Objects.isNull(basePathUrl)) {
             throw new RuntimeException("basePathUrl is empty.");
         }
         Objects.requireNonNull(requestMethod);

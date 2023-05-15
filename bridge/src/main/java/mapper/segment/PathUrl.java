@@ -31,20 +31,7 @@ public class PathUrl {
         StringBuilder value = new StringBuilder(path);
         return new PathUrl(value, 0);
     }
-
-    public static PathUrl from2(String path) {
-        if (Objects.isNull(path) || path.isBlank()) {
-            throw new RuntimeException("path is empty.");
-        }
-
-        path = path.trim();
-        path = Path.of(path).normalize().toString();
-        path = path.startsWith(DELIMITER) ? path.substring(1) : path;
-
-        StringBuilder value = new StringBuilder(path);
-        return new PathUrl(value, 0);
-    }
-
+    
     public static PathUrl empty() {
         return PathUrl.from("");
     }

@@ -20,25 +20,33 @@ public class PathUrl {
     }
 
     public static PathUrl from(String path) {
+        if (Objects.isNull(path)) {
+            throw new RuntimeException("path is empty.");
+        }
+
+        path = path.trim();
+        path = Path.of(path).normalize().toString();
+        path = path.startsWith(DELIMITER) ? path.substring(1) : path;
+
+        StringBuilder value = new StringBuilder(path);
+        return new PathUrl(value, 0);
+    }
+
+    public static PathUrl from2(String path) {
         if (Objects.isNull(path) || path.isBlank()) {
             throw new RuntimeException("path is empty.");
         }
 
         path = path.trim();
-        String normalizedPath = Path.of(path).normalize().toString();
-
-        boolean isStartWithDelimiter = Objects.equals(String.valueOf(normalizedPath.charAt(0)), DELIMITER);
-        if (isStartWithDelimiter) {
-            StringBuilder value = new StringBuilder(normalizedPath);
-            return new PathUrl(value, 1);
-        }
+        path = Path.of(path).normalize().toString();
+        path = path.startsWith(DELIMITER) ? path.substring(1) : path;
 
         StringBuilder value = new StringBuilder(path);
         return new PathUrl(value, 0);
     }
 
     public static PathUrl empty() {
-        return PathUrl.from("/");
+        return PathUrl.from("");
     }
 
     public boolean isEmtpy() {
@@ -49,7 +57,7 @@ public class PathUrl {
         return !isEmtpy();
     }
 
-    public int size() {
+    public int segmentSize() {
         if (isEmtpy()) {
             return 0;
         }
@@ -79,13 +87,8 @@ public class PathUrl {
         }
 
         int foundIndex = value.indexOf(DELIMITER, beginIndex);
-
         boolean lastSegment = foundIndex == -1;
-        if (lastSegment) {
-            return value.subSequence(beginIndex, value.length()).toString();
-        }
-
-        return value.subSequence(beginIndex, foundIndex).toString();
+        return lastSegment ? value.substring(beginIndex, value.length()) : value.substring(beginIndex, foundIndex);
     }
 
     public String popSegment() {
@@ -94,19 +97,11 @@ public class PathUrl {
         }
 
         int foundIndex = value.indexOf(DELIMITER, beginIndex);
-
         boolean lastSegment = foundIndex == -1;
-        if (lastSegment) {
-            String segment = value.subSequence(beginIndex, value.length()).toString();
-            beginIndex = value.length();
+        String popSegment = lastSegment ? value.substring(beginIndex, value.length()) : value.substring(beginIndex, foundIndex);
+        beginIndex = lastSegment ? value.length() : foundIndex + 1;
 
-            return segment;
-        }
-
-        String segment = value.subSequence(beginIndex, foundIndex).toString();
-        beginIndex = foundIndex + 1;
-
-        return segment;
+        return popSegment;
     }
 
     public PathUrl copy() {
@@ -114,20 +109,12 @@ public class PathUrl {
     }
 
     public String toAbsolutePath() {
-        String value = this.value.toString();
-
-        boolean isStartWithDelimiter = value.startsWith(DELIMITER);
-        if (isStartWithDelimiter) {
-            return value;
-        }
-
-        return "/" + value;
+        return DELIMITER + this.value;
     }
 
     public List<String> toList() {
-        String leftPath = value.substring(beginIndex);
-
-        return Arrays.stream(leftPath.split(DELIMITER))
+        String remainPath = value.substring(beginIndex);
+        return Arrays.stream(remainPath.split(DELIMITER))
             .collect(Collectors.toUnmodifiableList());
     }
 

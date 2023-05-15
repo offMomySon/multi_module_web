@@ -75,7 +75,7 @@ class PathUrlTest {
         PathUrl pathUrl = new PathUrl(new StringBuilder("test/p1/p2"), "test/p1/".length());
 
         //when
-        int size = pathUrl.size();
+        int size = pathUrl.segmentSize();
 
         //then
         assertThat(size).isEqualTo(1);

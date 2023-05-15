@@ -46,7 +46,7 @@ public class WildCardSegmentChunk implements SegmentChunk {
 
         List<PathUrl> resultPathUrls = new ArrayList<>();
         while (copiedRequestUrl.doesNotEmpty()) {
-            boolean doesNotSufficientRequestSegment = copiedBaseUrl.size() > copiedRequestUrl.size();
+            boolean doesNotSufficientRequestSegment = copiedBaseUrl.segmentSize() > copiedRequestUrl.segmentSize();
             if (doesNotSufficientRequestSegment) {
                 break;
             }

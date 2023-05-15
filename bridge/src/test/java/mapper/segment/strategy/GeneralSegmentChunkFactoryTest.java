@@ -1,6 +1,7 @@
 package mapper.segment.strategy;
 
 import java.util.Deque;
+import mapper.segment.EmptySegmentChunk;
 import mapper.segment.NormalSegmentChunk;
 import mapper.segment.PathUrl;
 import mapper.segment.PathVariableSegmentChunk;
@@ -22,7 +23,9 @@ class GeneralSegmentChunkFactoryTest {
         Deque<SegmentChunk> actuals = generalSegmentChunkCreateStrategy.create(emptyPathUrl);
 
         //then
-        Assertions.assertThat(actuals).hasSize(0);
+        Assertions.assertThat(actuals).hasSize(1);
+        SegmentChunk actual = actuals.pop();
+        Assertions.assertThat(actual).isInstanceOf(EmptySegmentChunk.class);
     }
 
     @DisplayName("PathUrl 에 pathVariable 이 존재하면 pathVariableSegmentChunk 를 생성합니다.")

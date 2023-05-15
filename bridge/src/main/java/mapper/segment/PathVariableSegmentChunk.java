@@ -27,7 +27,7 @@ public class PathVariableSegmentChunk extends AbstractPathVariableSegmentChunk {
     public List<MatchedPathVariable> internalConsume(PathUrl requestUrl) {
         Objects.requireNonNull(requestUrl);
 
-        boolean doesNotSufficientRequestUrl = baseUrl.size() > requestUrl.size();
+        boolean doesNotSufficientRequestUrl = baseUrl.segmentSize() > requestUrl.segmentSize();
         if (doesNotSufficientRequestUrl) {
             return Collections.emptyList();
         }

@@ -43,7 +43,7 @@ public class WildCardPathVariableSegmentChunk extends AbstractPathVariableSegmen
 
         List<MatchedPathVariable> matchedPathVariables = new ArrayList<>();
         while (copiedRequestUrl.doesNotEmpty()) {
-            boolean doesNotSufficientRequestUrl = copiedBaseUrl.size() > copiedRequestUrl.size();
+            boolean doesNotSufficientRequestUrl = copiedBaseUrl.segmentSize() > copiedRequestUrl.segmentSize();
             if (doesNotSufficientRequestUrl) {
                 break;
             }

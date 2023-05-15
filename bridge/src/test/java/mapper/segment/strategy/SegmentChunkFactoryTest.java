@@ -26,7 +26,7 @@ class SegmentChunkFactoryTest {
         PathUrl pathUrl = PathUrl.from(baseUrl);
 
         //when
-        List<SegmentChunk> actuals = SegmentChunkFactory.create(pathUrl);
+        List<SegmentChunk> actuals = new SegmentChunkFactory(pathUrl).create();
         List<? extends Class<? extends SegmentChunk>> actualInstances = actuals.stream().map(SegmentChunk::getClass).collect(Collectors.toUnmodifiableList());
 
         //then

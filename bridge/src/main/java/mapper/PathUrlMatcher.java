@@ -21,7 +21,7 @@ public class PathUrlMatcher {
         if (Objects.isNull(baseUrl)) {
             throw new RuntimeException("_baseUrl is empty.");
         }
-        List<SegmentChunk> segmentChunks = SegmentChunkFactory.create(baseUrl);
+        List<SegmentChunk> segmentChunks = new SegmentChunkFactory(baseUrl).create();
 
         Collections.reverse(segmentChunks);
         SegmentChunkChain segmentChunkChain = segmentChunks.stream()

@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import mapper.segment.PathUrl;
+import mapper.segment.PathVariableCollectChainV2;
 import mapper.segment.PathVariableValue;
 import mapper.segment.SegmentChunk;
-import mapper.segment.SegmentChunkChainV2;
 import mapper.segment.strategy.SegmentChunkFactory;
 
 // TODO
@@ -43,11 +43,20 @@ public class PathUrlMatcher {
     public Optional<PathVariableValue> match(PathUrl requestUrl) {
         Objects.requireNonNull(requestUrl);
 
+        // TODO
+        // combiner 처리를 고민해봤지만 떠오르지 않는다.
+        // merge 느낌이아니라 link 느낌이기 때문에 안되는것 같다.
+//        List<SegmentChunk> segmentChunks = segmentChunkFactory.create();
+//        Collections.reverse(segmentChunks);
+//        PathVariableCollectChainV2 baseSegmentChunkChain = segmentChunks.stream().reduce(PathVariableCollectChainV2.empty(),
+//                                                                                         PathVariableCollectChainV2::chaining,
+//                                                                                         (sc1, sc2) -> null);
         List<SegmentChunk> segmentChunks = segmentChunkFactory.create();
         Collections.reverse(segmentChunks);
-        SegmentChunkChainV2 baseSegmentChunkChain = segmentChunks.stream().reduce(SegmentChunkChainV2.empty(),
-                                                                                  SegmentChunkChainV2::chaining,
-                                                                                  (sc1, sc2) -> null);
+        PathVariableCollectChainV2 baseSegmentChunkChain = PathVariableCollectChainV2.empty();
+        for (SegmentChunk segmentChunk : segmentChunks) {
+            baseSegmentChunkChain = baseSegmentChunkChain.chaining(segmentChunk);
+        }
 
         Optional<PathVariableValue> optionalMatchPathVariableValue = baseSegmentChunkChain.consume(requestUrl);
         boolean doesNotMatch = optionalMatchPathVariableValue.isEmpty();

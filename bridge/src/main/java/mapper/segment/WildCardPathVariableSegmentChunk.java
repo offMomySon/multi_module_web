@@ -1,6 +1,6 @@
 package mapper.segment;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -32,16 +32,16 @@ public class WildCardPathVariableSegmentChunk extends AbstractPathVariableSegmen
     }
 
     @Override
-    public Map<PathUrl, PathVariableValue> internalConsume(PathUrl requestUrl) {
+    public LinkedHashMap<PathUrl, PathVariableValue> internalConsume(PathUrl requestUrl) {
         Objects.requireNonNull(requestUrl);
 
         PathUrl copiedBaseUrl = baseUrl.copy();
         copiedBaseUrl.popSegment();
-        PathVariableSegmentChunk pathVariableSegmentChunk = new PathVariableSegmentChunk(copiedBaseUrl);
-
         PathUrl copiedRequestUrl = requestUrl.copy();
 
-        Map<PathUrl, PathVariableValue> pathUrlPathVariableValueMap = new HashMap<>();
+        PathVariableSegmentChunk pathVariableSegmentChunk = new PathVariableSegmentChunk(copiedBaseUrl.copy());
+
+        LinkedHashMap<PathUrl, PathVariableValue> matchedPathVariableValue = new LinkedHashMap<>();
         while (copiedRequestUrl.doesNotEmpty()) {
             boolean doesNotSufficientRequestUrl = copiedBaseUrl.segmentSize() > copiedRequestUrl.segmentSize();
             if (doesNotSufficientRequestUrl) {
@@ -56,11 +56,11 @@ public class WildCardPathVariableSegmentChunk extends AbstractPathVariableSegmen
                 continue;
             }
 
-            pathUrlPathVariableValueMap.putAll(pathVariableValueMap);
+            matchedPathVariableValue.putAll(pathVariableValueMap);
 
             copiedRequestUrl.popSegment();
         }
 
-        return pathUrlPathVariableValueMap;
+        return matchedPathVariableValue;
     }
 }

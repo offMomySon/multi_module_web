@@ -5,23 +5,22 @@ import java.util.Objects;
 import java.util.Optional;
 import mapper.segment.pathvariable.AbstractPathVariableSegmentChunk;
 
-public class SegmentChunkChainV2 implements PathVariableSegmentChunkChain {
-    private final PathVariableSegmentChunkChain segmentChunkChain;
+public class PathVariableCollectChainV2 implements SegmentChunkChain {
+    private final PathVariableCollectChainV2 segmentChunkChain;
     private final SegmentChunk segmentChunk;
 
-    public SegmentChunkChainV2(PathVariableSegmentChunkChain segmentChunkChain, SegmentChunk segmentChunk) {
+    public PathVariableCollectChainV2(PathVariableCollectChainV2 segmentChunkChain, SegmentChunk segmentChunk) {
         this.segmentChunkChain = segmentChunkChain;
         this.segmentChunk = segmentChunk;
     }
 
-    public static SegmentChunkChainV2 empty() {
-        return new SegmentChunkChainV2(null, new EmptySegmentChunk());
+    public static PathVariableCollectChainV2 empty() {
+        return new PathVariableCollectChainV2(null, new EmptySegmentChunk());
     }
 
-    public static SegmentChunkChainV2 chaining(PathVariableSegmentChunkChain segmentChunkChain, SegmentChunk segmentChunk) {
-        Objects.requireNonNull(segmentChunkChain);
+    public PathVariableCollectChainV2 chaining(SegmentChunk segmentChunk) {
         Objects.requireNonNull(segmentChunk);
-        return new SegmentChunkChainV2(segmentChunkChain, segmentChunk);
+        return new PathVariableCollectChainV2(this, segmentChunk);
     }
 
     @Override
@@ -63,9 +62,9 @@ public class SegmentChunkChainV2 implements PathVariableSegmentChunkChain {
 
         if (segmentChunk instanceof AbstractPathVariableSegmentChunk) {
             PathVariableValue pathVariableValue = ((AbstractPathVariableSegmentChunk) segmentChunk).find(remainPathUrl);
-            PathVariableValue mergePathVariableValue = pathVariableValue.merge(nextChainPathVariableValue);
-            return Optional.of(mergePathVariableValue);
+            nextChainPathVariableValue = pathVariableValue.merge(nextChainPathVariableValue);
         }
+
         return Optional.of(nextChainPathVariableValue);
     }
 

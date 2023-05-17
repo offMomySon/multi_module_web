@@ -1,8 +1,7 @@
 package mapper.segment;
 
-import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import mapper.segment.pathvariable.AbstractPathVariableSegmentChunk;
 import static mapper.segment.PathVariableUtil.isPathVariable;
@@ -24,12 +23,12 @@ public class PathVariableSegmentChunk extends AbstractPathVariableSegmentChunk {
     }
 
     @Override
-    public Map<PathUrl, PathVariableValue> internalConsume(PathUrl requestUrl) {
+    public LinkedHashMap<PathUrl, PathVariableValue> internalConsume(PathUrl requestUrl) {
         Objects.requireNonNull(requestUrl);
 
         boolean doesNotSufficientRequestUrl = baseUrl.segmentSize() > requestUrl.segmentSize();
         if (doesNotSufficientRequestUrl) {
-            return Collections.emptyMap();
+            return new LinkedHashMap<>();
         }
 
         PathUrl copiedBaseUrl = baseUrl.copy();
@@ -48,10 +47,12 @@ public class PathVariableSegmentChunk extends AbstractPathVariableSegmentChunk {
 
             boolean doesNotMatch = !Objects.equals(baseSegment, requestSegment);
             if (doesNotMatch) {
-                return Collections.emptyMap();
+                return new LinkedHashMap<>();
             }
         }
 
-        return Map.of(copiedRequestUrl, pathVariableValue);
+        LinkedHashMap<PathUrl, PathVariableValue> result = new LinkedHashMap<>();
+        result.put(copiedRequestUrl, pathVariableValue);
+        return result;
     }
 }

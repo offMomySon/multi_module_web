@@ -1,6 +1,7 @@
 package mapper.segment.pathvariable;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -10,20 +11,22 @@ import mapper.segment.PathVariableValue;
 import mapper.segment.SegmentChunk;
 
 public abstract class AbstractPathVariableSegmentChunk implements SegmentChunk {
-    private Map<PathUrl, PathVariableValue> matchedPathVariables;
+    private final LinkedHashMap<PathUrl, PathVariableValue> matchedPathVariables = new LinkedHashMap<>();
 
     @Override
     public List<PathUrl> consume(PathUrl pathUrl) {
         Objects.requireNonNull(pathUrl);
 
+        matchedPathVariables.clear();
+
         Map<PathUrl, PathVariableValue> pathUrlPathVariableValueMap = internalConsume(pathUrl);
 
-        this.matchedPathVariables = pathUrlPathVariableValueMap.entrySet().stream()
+        pathUrlPathVariableValueMap.entrySet().stream()
             .filter(entry -> Objects.nonNull(entry.getKey()))
             .filter(entry -> Objects.nonNull(entry.getValue()))
-            .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
+            .forEach(entry -> matchedPathVariables.putIfAbsent(entry.getKey(), entry.getValue()));
 
-        return matchedPathVariables.keySet().stream().collect(Collectors.toUnmodifiableList());
+        return pathUrlPathVariableValueMap.keySet().stream().collect(Collectors.toUnmodifiableList());
     }
 
     public PathVariableValue find(PathUrl remainPathUrl) {
@@ -35,5 +38,5 @@ public abstract class AbstractPathVariableSegmentChunk implements SegmentChunk {
         return new HashMap<>(matchedPathVariables);
     }
 
-    public abstract Map<PathUrl, PathVariableValue> internalConsume(PathUrl pathUrl);
+    public abstract LinkedHashMap<PathUrl, PathVariableValue> internalConsume(PathUrl pathUrl);
 }

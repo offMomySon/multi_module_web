@@ -7,10 +7,10 @@ import container.Container;
 import converter.CompositeConverter;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import mapper.ControllerPathMatcherCreator;
-import mapper.FileSystemUtil;
-import mapper.HttpPathMatcherIf;
+import mapper.HttpPathMatcher;
+import mapper.support.ControllerPathMatcherCreator;
 import processor.HttpService;
+import util.FileSystemUtil;
 
 @Slf4j
 public class App {
@@ -22,7 +22,7 @@ public class App {
 
         Container container = new ComponentContainerCreator(classes).create();
         MethodExecutor methodExecutor = new MethodExecutor(container);
-        HttpPathMatcherIf httpPathMatcher = new ControllerPathMatcherCreator(classes).create();
+        HttpPathMatcher httpPathMatcher = new ControllerPathMatcherCreator(classes).create();
         CompositeConverter converter = new CompositeConverter();
         RequestExecutor requestExecutor = new RequestExecutor(methodExecutor, httpPathMatcher, converter);
 

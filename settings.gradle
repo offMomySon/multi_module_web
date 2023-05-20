@@ -1,7 +1,6 @@
 rootProject.name = 'multi_module_web_server'
 
 include 'http'
-include 'bridge'
-include 'container'
+include 'binder'
 include 'marker'
 

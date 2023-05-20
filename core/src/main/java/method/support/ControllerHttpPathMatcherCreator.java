@@ -12,12 +12,12 @@ import method.HttpPathMatcher;
 import util.AnnotationUtils;
 
 @Slf4j
-public class ControllerPathMatcherCreator {
+public class ControllerHttpPathMatcherCreator {
     private static final Class<Controller> CONTROLLER_CLASS = Controller.class;
 
     private final List<Class<?>> controllerClazzs;
 
-    public ControllerPathMatcherCreator(List<Class<?>> classes) {
+    public ControllerHttpPathMatcherCreator(List<Class<?>> classes) {
         Objects.requireNonNull(classes, "classes is null.");
 
         this.controllerClazzs = classes.stream()

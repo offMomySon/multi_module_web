@@ -2,7 +2,6 @@ package com.main.executor;
 
 import annotation.PathVariable;
 import annotation.RequestBody;
-import annotation.RequestMethod;
 import annotation.RequestParam;
 import converter.CompositeParameterConverter;
 import converter.Converter;
@@ -22,8 +21,10 @@ import method.segment.PathVariableValue;
 import processor.HttpRequestExecutor;
 import vo.BodyContent;
 import vo.HttpRequest;
+import vo.QueryParameters;
 import vo.RequestResult;
 import vo.RequestValues;
+import web.RequestMethod;
 import static method.BaseHttpPathMatcher.MatchedMethod;
 
 @Slf4j
@@ -36,9 +37,9 @@ public class RequestExecutor implements HttpRequestExecutor {
         Objects.requireNonNull(methodExecutor, "methodExecutor require not null.");
         Objects.requireNonNull(httpPathMatcher, "httpPathMatcher require not null.");
 
-        this.converter = converter;
         this.methodExecutor = methodExecutor;
         this.httpPathMatcher = httpPathMatcher;
+        this.converter = converter;
     }
 
     @Override
@@ -48,10 +49,10 @@ public class RequestExecutor implements HttpRequestExecutor {
         try {
             RequestMethod method = RequestMethod.find(httpRequest.getHttpMethod().name());
             String requestUrl = httpRequest.getHttpUri().getUrl();
-            RequestValues formVariable = new RequestValues(httpRequest.getQueryParameters().getParameterMap());
+            QueryParameters queryParameters = httpRequest.getQueryParameters();
             BodyContent bodyContent = BodyContent.from(httpRequest.getRequestStream());
 
-            Object o = doExecute(method, requestUrl, formVariable, bodyContent);
+            Object o = doExecute(method, requestUrl, queryParameters, bodyContent);
 
             InputStream inputStream = converter.convertToInputStream(o);
 
@@ -60,9 +61,7 @@ public class RequestExecutor implements HttpRequestExecutor {
                 "Date", "MON, 27 Jul 2023 12:28:53 GMT",
                 "Host", "localhost:8080",
                 "Content-Type", "text/html; charset=UTF-8"
-//                "Content-Length", result.length() + ""
             );
-//            InputStream inputStream = new ByteArrayInputStream(result.getBytes(UTF_8));
 
             return new RequestResult(startLine, header, inputStream);
         } catch (Exception e) {
@@ -70,14 +69,16 @@ public class RequestExecutor implements HttpRequestExecutor {
         }
     }
 
-    private Object doExecute(RequestMethod method, String requestUrl, RequestValues formVariable, BodyContent bodyContent) {
+    private Object doExecute(RequestMethod method, String requestUrl, QueryParameters queryParameters, BodyContent bodyContent) {
         PathUrl requestPathUrl = PathUrl.from(requestUrl);
+        RequestValues queryParamValues = new RequestValues(queryParameters.getParameterMap());
+
         MatchedMethod matchedMethod = httpPathMatcher.matchJavaMethod(method, requestPathUrl).orElseThrow(() -> new RuntimeException(""));
 
         Method javaMethod = matchedMethod.getJavaMethod();
         PathVariableValue pathVariableValue = matchedMethod.getPathVariableValue();
 
-        Map<Class<? extends Annotation>, ParameterConverter> classParameterConverterMap = Map.of(RequestParam.class, new RequestParameterConverter(RequestParam.class, formVariable),
+        Map<Class<? extends Annotation>, ParameterConverter> classParameterConverterMap = Map.of(RequestParam.class, new RequestParameterConverter(RequestParam.class, queryParamValues),
                                                                                                  PathVariable.class, RequestParameterConverter.from(PathVariable.class, pathVariableValue),
                                                                                                  RequestBody.class, new RequestBodyParameterConverter(bodyContent));
         CompositeParameterConverter compositeParameterConverter = new CompositeParameterConverter(classParameterConverterMap);

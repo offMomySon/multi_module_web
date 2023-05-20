@@ -1,6 +1,6 @@
 package method.segment;
 
-import annotation.RequestMethod;
+import web.RequestMethod;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;

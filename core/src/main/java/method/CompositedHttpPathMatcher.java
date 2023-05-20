@@ -1,6 +1,6 @@
 package method;
 
-import annotation.RequestMethod;
+import web.RequestMethod;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;

@@ -3,7 +3,7 @@ package com.main.controller;
 import annotation.Controller;
 import annotation.PathVariable;
 import annotation.RequestMapping;
-import annotation.RequestMethod;
+import web.RequestMethod;
 import annotation.RequestParam;
 import com.main.domain.SampleDomain1;
 import lombok.extern.slf4j.Slf4j;

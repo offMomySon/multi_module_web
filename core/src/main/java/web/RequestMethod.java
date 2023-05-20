@@ -1,4 +1,4 @@
-package annotation;
+package web;
 
 import java.text.MessageFormat;
 import java.util.Arrays;

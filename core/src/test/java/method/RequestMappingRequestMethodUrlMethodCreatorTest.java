@@ -1,7 +1,7 @@
 package method;
 
 import annotation.RequestMapping;
-import annotation.RequestMethod;
+import web.RequestMethod;
 import java.lang.reflect.Method;
 import java.util.List;
 import method.support.RequestMappingValueExtractor;

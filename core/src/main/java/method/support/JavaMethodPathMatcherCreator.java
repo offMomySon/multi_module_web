@@ -1,7 +1,6 @@
 package method.support;
 
 import annotation.RequestMapping;
-import annotation.RequestMethod;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -11,6 +10,7 @@ import method.PathUrlMatcher;
 import method.segment.PathUrl;
 import method.support.RequestMappingValueExtractor.RequestMappedMethod;
 import util.AnnotationUtils;
+import web.RequestMethod;
 
 public class JavaMethodPathMatcherCreator {
     private final static Class<RequestMapping> REQUEST_MAPPING_CLASS = RequestMapping.class;

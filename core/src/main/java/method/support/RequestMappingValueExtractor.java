@@ -1,7 +1,6 @@
 package method.support;
 
 import annotation.RequestMapping;
-import annotation.RequestMethod;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,6 +13,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 import util.AnnotationUtils;
+import web.RequestMethod;
 
 public class RequestMappingValueExtractor {
     private static final Class<RequestMapping> REQUEST_MAPPING_CLASS = RequestMapping.class;

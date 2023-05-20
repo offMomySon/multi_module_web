@@ -4,7 +4,11 @@ import annotation.PathVariable;
 import annotation.RequestBody;
 import annotation.RequestMethod;
 import annotation.RequestParam;
+import converter.CompositeParameterConverter;
 import converter.Converter;
+import converter.ParameterConverter;
+import converter.RequestBodyParameterConverter;
+import converter.RequestParameterConverter;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -12,19 +16,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import mapper.HttpPathMatcher;
-import mapper.segment.PathUrl;
-import mapper.segment.PathVariableValue;
+import method.HttpPathMatcher;
+import method.segment.PathUrl;
+import method.segment.PathVariableValue;
 import processor.HttpRequestExecutor;
-import variableExtractor.CompositeParameterConverter;
-import variableExtractor.ParameterConverter;
-import variableExtractor.RequestBodyParameterConverter;
-import variableExtractor.RequestParameterConverter;
 import vo.BodyContent;
 import vo.HttpRequest;
 import vo.RequestResult;
 import vo.RequestValues;
-import static mapper.BaseHttpPathMatcher.MatchedMethod;
+import static method.BaseHttpPathMatcher.MatchedMethod;
 
 @Slf4j
 public class RequestExecutor implements HttpRequestExecutor {

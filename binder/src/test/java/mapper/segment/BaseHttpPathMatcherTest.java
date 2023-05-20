@@ -1,11 +1,11 @@
 package mapper.segment;
 
+import annotation.RequestMethod;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 import mapper.BaseHttpPathMatcher;
 import mapper.PathUrlMatcher;
-import marker.RequestMethod;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;

@@ -1,11 +1,11 @@
 package mapper;
 
+import annotation.RequestMapping;
+import annotation.RequestMethod;
 import java.lang.reflect.Method;
 import java.util.List;
 import mapper.support.RequestMappingValueExtractor;
 import mapper.support.RequestMappingValueExtractor.RequestMappedMethod;
-import marker.RequestMapping;
-import marker.RequestMethod;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

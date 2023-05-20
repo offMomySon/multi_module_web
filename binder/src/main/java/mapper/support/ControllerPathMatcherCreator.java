@@ -1,5 +1,6 @@
 package mapper.support;
 
+import annotation.Controller;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -8,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import mapper.BaseHttpPathMatcher;
 import mapper.CompositedHttpPathMatcher;
 import mapper.HttpPathMatcher;
-import marker.Controller;
 import util.AnnotationUtils;
 
 @Slf4j

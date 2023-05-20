@@ -1,8 +1,8 @@
 package com.main.domain;
 
+import annotation.Domain;
 import com.main.repository.SampleRepository;
 import com.main.service.SampleService2;
-import marker.Domain;
 
 @Domain
 public class SampleDomain1 {

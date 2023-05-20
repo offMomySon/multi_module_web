@@ -1,5 +1,7 @@
 package mapper.support;
 
+import annotation.RequestMapping;
+import annotation.RequestMethod;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,8 +13,6 @@ import java.util.stream.Collectors;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
-import marker.RequestMapping;
-import marker.RequestMethod;
 import util.AnnotationUtils;
 
 public class RequestMappingValueExtractor {

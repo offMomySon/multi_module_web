@@ -1,11 +1,11 @@
 package variableExtractor;
 
+import annotation.RequestBody;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import java.lang.reflect.Parameter;
 import java.util.Objects;
 import java.util.Optional;
-import marker.RequestBody;
 import util.AnnotationUtils;
 import vo.BodyContent;
 

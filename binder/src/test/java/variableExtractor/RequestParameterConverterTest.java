@@ -1,5 +1,8 @@
 package variableExtractor;
 
+import annotation.PathVariable;
+import annotation.RequestBody;
+import annotation.RequestParam;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
@@ -7,9 +10,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
-import marker.PathVariable;
-import marker.RequestBody;
-import marker.RequestParam;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

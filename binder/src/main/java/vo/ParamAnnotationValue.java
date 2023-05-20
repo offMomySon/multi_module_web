@@ -1,10 +1,10 @@
 package vo;
 
+import annotation.PathVariable;
+import annotation.RequestParam;
+import annotation.ValueConstants;
 import java.util.Objects;
 import java.util.Optional;
-import marker.PathVariable;
-import marker.RequestParam;
-import marker.ValueConstants;
 
 public class ParamAnnotationValue {
     private final Class<?> annotationType;

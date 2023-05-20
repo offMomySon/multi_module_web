@@ -1,4 +1,4 @@
-package marker;
+package annotation;
 
 import java.text.MessageFormat;
 import java.util.Arrays;

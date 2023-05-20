@@ -1,5 +1,8 @@
 package variableExtractor;
 
+import annotation.PathVariable;
+import annotation.RequestBody;
+import annotation.RequestParam;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -7,9 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import marker.PathVariable;
-import marker.RequestBody;
-import marker.RequestParam;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,7 +1,7 @@
 package com.main.domain;
 
+import annotation.Domain;
 import com.main.service.SampleService;
-import marker.Domain;
 
 @Domain
 public class SampleDomain {

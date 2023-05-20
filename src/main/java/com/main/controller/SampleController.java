@@ -1,12 +1,12 @@
 package com.main.controller;
 
+import annotation.Controller;
+import annotation.PathVariable;
+import annotation.RequestMapping;
+import annotation.RequestMethod;
+import annotation.RequestParam;
 import com.main.domain.SampleDomain;
 import lombok.extern.slf4j.Slf4j;
-import marker.Controller;
-import marker.PathVariable;
-import marker.RequestMapping;
-import marker.RequestMethod;
-import marker.RequestParam;
 
 
 @Slf4j

@@ -1,13 +1,13 @@
 package variableExtractor;
 
+import annotation.PathVariable;
+import annotation.RequestParam;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import mapper.segment.PathVariableValue;
-import marker.PathVariable;
-import marker.RequestParam;
 import util.AnnotationUtils;
 import vo.RequestValues;
 

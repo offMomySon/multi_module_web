@@ -1,12 +1,12 @@
 package beanContainer;
 
+import annotation.Controller;
+import annotation.Repository;
+import annotation.Service;
 import container.ComponentClassLoader;
 import container.Container;
 import java.util.Set;
 import java.util.stream.Stream;
-import marker.Controller;
-import marker.Repository;
-import marker.Service;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

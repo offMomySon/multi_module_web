@@ -1,6 +1,6 @@
 package com.main.repository;
 
-import marker.Repository;
+import annotation.Repository;
 
 @Repository
 public class SampleRepository2 {

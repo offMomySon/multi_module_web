@@ -1,5 +1,7 @@
 package mapper.support;
 
+import annotation.RequestMapping;
+import annotation.RequestMethod;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -8,8 +10,6 @@ import mapper.BaseHttpPathMatcher;
 import mapper.PathUrlMatcher;
 import mapper.segment.PathUrl;
 import mapper.support.RequestMappingValueExtractor.RequestMappedMethod;
-import marker.RequestMapping;
-import marker.RequestMethod;
 import util.AnnotationUtils;
 
 public class JavaMethodPathMatcherCreator {

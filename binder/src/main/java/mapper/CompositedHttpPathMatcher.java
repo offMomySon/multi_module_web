@@ -1,11 +1,11 @@
 package mapper;
 
+import annotation.RequestMethod;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import mapper.segment.PathUrl;
-import marker.RequestMethod;
 import static mapper.BaseHttpPathMatcher.MatchedMethod;
 
 // n 개의 methodResolver 를 1개 처럼 다룬다.

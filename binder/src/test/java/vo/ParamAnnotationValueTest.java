@@ -1,10 +1,10 @@
 package vo;
 
+import annotation.PathVariable;
+import annotation.RequestParam;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
-import marker.PathVariable;
-import marker.RequestParam;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

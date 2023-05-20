@@ -1,5 +1,9 @@
 package com.main.executor;
 
+import annotation.PathVariable;
+import annotation.RequestBody;
+import annotation.RequestMethod;
+import annotation.RequestParam;
 import converter.Converter;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
@@ -11,10 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import mapper.HttpPathMatcher;
 import mapper.segment.PathUrl;
 import mapper.segment.PathVariableValue;
-import marker.PathVariable;
-import marker.RequestBody;
-import marker.RequestMethod;
-import marker.RequestParam;
 import processor.HttpRequestExecutor;
 import variableExtractor.CompositeParameterConverter;
 import variableExtractor.ParameterConverter;

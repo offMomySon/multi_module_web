@@ -1,12 +1,12 @@
 package mapper;
 
+import annotation.RequestMethod;
 import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.Getter;
 import mapper.segment.PathUrl;
 import mapper.segment.PathVariableValue;
-import marker.RequestMethod;
 
 public class BaseHttpPathMatcher implements HttpPathMatcher {
     private final RequestMethod requestMethod;

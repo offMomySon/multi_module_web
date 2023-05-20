@@ -10,9 +10,8 @@ repositories {
 }
 
 dependencies {
-    implementation project(':bridge')
+    implementation project(':binder')
     implementation project(':http')
-    implementation project(':container')
     implementation project(':marker')
 
     //logback

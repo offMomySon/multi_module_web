@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import mapper.HttpPathMatcherIf;
+import mapper.HttpPathMatcher;
 import mapper.segment.PathUrl;
 import mapper.segment.PathVariableValue;
 import marker.PathVariable;
@@ -24,15 +24,15 @@ import vo.BodyContent;
 import vo.HttpRequest;
 import vo.RequestResult;
 import vo.RequestValues;
-import static mapper.HttpPathMatcher.MatchedMethod;
+import static mapper.BaseHttpPathMatcher.MatchedMethod;
 
 @Slf4j
 public class RequestExecutor implements HttpRequestExecutor {
     private final MethodExecutor methodExecutor;
-    private final HttpPathMatcherIf httpPathMatcher;
+    private final HttpPathMatcher httpPathMatcher;
     private final Converter converter;
 
-    public RequestExecutor(MethodExecutor methodExecutor, HttpPathMatcherIf httpPathMatcher, Converter converter) {
+    public RequestExecutor(MethodExecutor methodExecutor, HttpPathMatcher httpPathMatcher, Converter converter) {
         Objects.requireNonNull(methodExecutor, "methodExecutor require not null.");
         Objects.requireNonNull(httpPathMatcher, "httpPathMatcher require not null.");
 

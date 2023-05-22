@@ -21,6 +21,8 @@ import method.segment.PathVariableValue;
 import processor.HttpRequestExecutor;
 import vo.BodyContent;
 import vo.HttpRequest;
+import vo.HttpRequestReader;
+import vo.HttpResponseSender;
 import vo.QueryParameters;
 import vo.RequestResult;
 import vo.RequestValues;
@@ -43,9 +45,10 @@ public class RequestExecutor implements HttpRequestExecutor {
     }
 
     @Override
-    public RequestResult execute(HttpRequest httpRequest) {
-        Objects.requireNonNull(httpRequest);
+    public RequestResult execute(HttpRequestReader httpRequestReader, HttpResponseSender httpResponseSender) {
+        Objects.requireNonNull(httpRequestReader);
 
+        HttpRequest httpRequest = httpRequestReader.read();
         try {
             RequestMethod method = RequestMethod.find(httpRequest.getHttpMethod().name());
             String requestUrl = httpRequest.getHttpUri().getUrl();

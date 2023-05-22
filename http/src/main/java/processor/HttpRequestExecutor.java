@@ -1,9 +1,10 @@
 package processor;
 
-import vo.HttpRequest;
+import vo.HttpRequestReader;
+import vo.HttpResponseSender;
 import vo.RequestResult;
 
 public interface HttpRequestExecutor {
-    RequestResult execute(HttpRequest httpRequest);
+    RequestResult execute(HttpRequestReader httpRequest, HttpResponseSender httpResponseSender);
 }
 

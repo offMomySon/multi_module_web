@@ -9,10 +9,10 @@ import util.IoUtils;
 import static util.IoUtils.createBufferedInputStream;
 import static util.IoUtils.createBufferedOutputStream;
 
-public class ResponseSender implements Closeable {
+public class HttpResponseSender implements Closeable {
     private final OutputStream outputStream;
 
-    public ResponseSender(OutputStream outputStream) {
+    public HttpResponseSender(OutputStream outputStream) {
         Objects.requireNonNull(outputStream);
         this.outputStream = IoUtils.createBufferedOutputStream(outputStream);
     }

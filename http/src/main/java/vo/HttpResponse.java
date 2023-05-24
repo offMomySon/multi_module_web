@@ -1,47 +1,43 @@
 package vo;
 
-import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.commons.lang3.ObjectUtils;
 
 public class HttpResponse {
     private final OutputStream outputStream;
+    private final Map<String, String> header;
 
-    private String startline;
-    private Map<String, String> header;
-    private InputStream inputStream;
+    private String startLine;
 
     public HttpResponse(OutputStream outputStream) {
         if (ObjectUtils.isEmpty(outputStream)) {
             throw new RuntimeException("outputStream is empty.");
         }
         this.outputStream = outputStream;
+        this.header = new HashMap<>();
     }
 
-    public void setStartline(String startline) {
-        this.startline = startline;
+    public void setStartLine(String startLine) {
+        Objects.requireNonNull(startLine);
+        this.startLine = startLine;
     }
 
-    public void setHeader(Map<String, String> header) {
-        this.header = header;
+    public void appendHeader(String key, String value) {
+        this.header.put(key, value);
     }
 
-    public void setInputStream(InputStream inputStream) {
-        this.inputStream = inputStream;
-    }
-
-    public String getStartline() {
-        return startline;
+    public String getStartLine() {
+        return startLine;
     }
 
     public Map<String, String> getHeader() {
         return header;
     }
 
-    public InputStream getInputStream() {
-        return inputStream;
+    public HttpResponseSender getSender() {
+        return new HttpResponseSender(outputStream, startLine, header);
     }
-
-
 }

@@ -23,7 +23,7 @@ public class RequestExecuteFilter implements Filter {
 
         RequestResult result = httpRequestExecutor.execute(httpRequestReader, httpResponseSender);
 
-        httpResponseSender.send(result);
+//        httpResponseSender.send(result);
 
         chain.doChain(httpRequestReader, httpResponseSender);
     }

@@ -28,7 +28,7 @@ public class HttpWorker implements Runnable {
         try (requestReader; httpResponseSender) {
             RequestResult result = httpRequestExecutor.execute(requestReader, httpResponseSender);
 
-            httpResponseSender.send(result);
+//            httpResponseSender.send(result);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -50,9 +50,7 @@ public class HttpRequest {
         return queryParameters;
     }
 
-    public static String convertToString(InputStream inputStream) {
-        Objects.requireNonNull(inputStream);
-
+    private static String convertToString(InputStream inputStream) {
         try {
             inputStream = createBufferedInputStream(inputStream);
             byte[] BUFFER = new byte[8192];

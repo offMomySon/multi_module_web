@@ -13,7 +13,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import vo.HttpRequestReader;
-import vo.HttpResponseSender;
 
 /***
  * 역할.
@@ -63,8 +62,8 @@ public class HttpService {
     private static HttpWorker createHttpWorker(InputStream inputStream, OutputStream outputStream, HttpRequestExecutor httpRequestExecutor) {
         log.info("start to create requestWorker");
         HttpRequestReader httpRequestReader = new HttpRequestReader(inputStream);
-        HttpResponseSender httpResponseSender = new HttpResponseSender(outputStream);
-        HttpWorker httpWorker = new HttpWorker(httpRequestReader, httpResponseSender, httpRequestExecutor);
+//        HttpResponseSender httpResponseSender = new HttpResponseSender(outputStream);
+        HttpWorker httpWorker = new HttpWorker(httpRequestReader, null, httpRequestExecutor);
         log.info("created requestWorker");
         return httpWorker;
     }

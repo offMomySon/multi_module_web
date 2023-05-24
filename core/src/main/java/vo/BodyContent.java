@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
-import util.IoUtils;
+import static util.IoUtils.createBufferedInputStream;
 
 @Slf4j
 public class BodyContent {
@@ -22,7 +22,7 @@ public class BodyContent {
     public static BodyContent from(InputStream inputStream) {
         Objects.requireNonNull(inputStream);
         try {
-            BufferedInputStream newInputStream = IoUtils.createBufferedInputStream(inputStream);
+            BufferedInputStream newInputStream = createBufferedInputStream(inputStream);
 
             String bodyContent = readBodyContent(newInputStream);
 

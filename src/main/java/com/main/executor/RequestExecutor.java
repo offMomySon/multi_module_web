@@ -53,7 +53,7 @@ public class RequestExecutor implements HttpRequestExecutor {
             RequestMethod method = RequestMethod.find(httpRequest.getHttpMethod().name());
             String requestUrl = httpRequest.getHttpUri().getUrl();
             QueryParameters queryParameters = httpRequest.getQueryParameters();
-            BodyContent bodyContent = BodyContent.from(httpRequest.getRequestStream());
+            BodyContent bodyContent = BodyContent.from(httpRequest.getBodyInputStream());
 
             Object o = doExecute(method, requestUrl, queryParameters, bodyContent);
 

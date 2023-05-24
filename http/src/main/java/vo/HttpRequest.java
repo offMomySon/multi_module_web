@@ -1,7 +1,9 @@
 package vo;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
+import static util.IoUtils.createBufferedInputStream;
 
 public class HttpRequest {
     private final HttpMethod httpMethod;
@@ -36,12 +38,35 @@ public class HttpRequest {
         return httpHeader;
     }
 
-    public InputStream getRequestStream() {
+    public InputStream getBodyInputStream() {
         return requestStream;
+    }
+
+    public String getBodyString() {
+        return convertToString(requestStream);
     }
 
     public QueryParameters getQueryParameters() {
         return queryParameters;
+    }
+
+    public static String convertToString(InputStream inputStream) {
+        Objects.requireNonNull(inputStream);
+
+        try {
+            inputStream = createBufferedInputStream(inputStream);
+            byte[] BUFFER = new byte[8192];
+
+            StringBuilder contentBuilder = new StringBuilder();
+            while (inputStream.available() != 0) {
+                int read = inputStream.read(BUFFER);
+                String partOfContent = new String(BUFFER, 0, read);
+                contentBuilder.append(partOfContent);
+            }
+            return contentBuilder.toString();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

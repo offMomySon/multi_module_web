@@ -121,6 +121,10 @@ public class HttpResponse implements Closeable {
         return isClosed;
     }
 
+    public boolean doesNotClosed() {
+        return !isClosed();
+    }
+
     @Override
     public void close() throws IOException {
         flush();

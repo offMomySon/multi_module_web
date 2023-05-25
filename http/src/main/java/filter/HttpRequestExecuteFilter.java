@@ -15,6 +15,11 @@ public class HttpRequestExecuteFilter implements Filter {
     }
 
     @Override
+    public boolean isPossibleFilterPattern(String pathUrl) {
+        return true;
+    }
+
+    @Override
     public void doChain(HttpRequest request, HttpResponse response, FilterChain chain) {
         Objects.requireNonNull(request);
         Objects.requireNonNull(response);

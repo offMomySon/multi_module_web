@@ -11,6 +11,11 @@ public class HttpResponseSendFilter implements Filter {
     }
 
     @Override
+    public boolean isPossibleFilterPattern(String pathUrl) {
+        return true;
+    }
+
+    @Override
     public void doChain(HttpRequest request, HttpResponse response, FilterChain chain) {
         chain.doChain(request, response);
 

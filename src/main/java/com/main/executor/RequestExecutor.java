@@ -22,7 +22,7 @@ import processor.HttpRequestExecutor;
 import vo.BodyContent;
 import vo.HttpRequest;
 import vo.HttpResponse;
-import vo.HttpResponseSender;
+import vo.HttpResponseWriter;
 import vo.QueryParameters;
 import vo.RequestValues;
 import web.RequestMethod;
@@ -63,9 +63,8 @@ public class RequestExecutor implements HttpRequestExecutor {
                 "Date", "MON, 27 Jul 2023 12:28:53 GMT",
                 "Host", "localhost:8080",
                 "Content-Type", "text/html; charset=UTF-8"));
-            HttpResponseSender sender = response.getSender();
+            HttpResponseWriter sender = response.getSender();
             sender.send(inputStream);
-            sender.close();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

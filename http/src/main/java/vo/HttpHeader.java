@@ -29,6 +29,13 @@ public class HttpHeader {
         return values.getOrDefault(key, DEFAULT_VALUE);
     }
 
+    @Override
+    public String toString() {
+        return "HttpHeader{" +
+            "values=" + values +
+            '}';
+    }
+
     public Set<String> keySet() {
         return values.keySet();
     }

@@ -125,6 +125,14 @@ public class HttpResponse implements Closeable {
         return !isClosed();
     }
 
+    public Map<String, String> getHeader() {
+        return new HashMap<>(header);
+    }
+
+    public String getStartLine() {
+        return startLine;
+    }
+
     @Override
     public void close() throws IOException {
         flush();

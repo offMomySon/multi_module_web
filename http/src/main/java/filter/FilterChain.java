@@ -1,8 +1,8 @@
 package filter;
 
-import vo.HttpRequestReader;
-import vo.HttpResponseSender;
+import vo.HttpRequest;
+import vo.HttpResponse;
 
 public interface FilterChain {
-    void doChain(HttpRequestReader requestReader, HttpResponseSender httpResponseSender);
+    void doChain(HttpRequest request, HttpResponse response);
 }

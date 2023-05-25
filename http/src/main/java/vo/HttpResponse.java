@@ -28,6 +28,15 @@ public class HttpResponse {
     public void appendHeader(String key, String value) {
         this.header.put(key, value);
     }
+    
+    public void appendHeader(Map<String, String> otherHeader) {
+        Objects.requireNonNull(otherHeader);
+
+        otherHeader.entrySet().stream()
+            .filter(entry -> Objects.nonNull(entry.getKey()))
+            .filter(entry -> Objects.nonNull(entry.getValue()))
+            .forEach(entry -> header.put(entry.getKey(), entry.getValue()));
+    }
 
     public String getStartLine() {
         return startLine;

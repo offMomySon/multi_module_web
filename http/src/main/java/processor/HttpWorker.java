@@ -5,7 +5,6 @@ import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import vo.HttpRequestReader;
 import vo.HttpResponseSender;
-import vo.RequestResult;
 
 @Slf4j
 public class HttpWorker implements Runnable {
@@ -26,8 +25,7 @@ public class HttpWorker implements Runnable {
     @Override
     public void run() {
         try (requestReader; httpResponseSender) {
-            RequestResult result = httpRequestExecutor.execute(requestReader, httpResponseSender);
-
+//            RequestResult result = httpRequestExecutor.execute(requestReader, httpResponseSender);
 //            httpResponseSender.send(result);
         } catch (IOException e) {
             throw new RuntimeException(e);

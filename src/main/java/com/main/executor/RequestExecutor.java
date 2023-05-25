@@ -21,10 +21,9 @@ import method.segment.PathVariableValue;
 import processor.HttpRequestExecutor;
 import vo.BodyContent;
 import vo.HttpRequest;
-import vo.HttpRequestReader;
+import vo.HttpResponse;
 import vo.HttpResponseSender;
 import vo.QueryParameters;
-import vo.RequestResult;
 import vo.RequestValues;
 import web.RequestMethod;
 import static method.BaseHttpPathMatcher.MatchedMethod;
@@ -45,28 +44,28 @@ public class RequestExecutor implements HttpRequestExecutor {
     }
 
     @Override
-    public RequestResult execute(HttpRequestReader httpRequestReader, HttpResponseSender httpResponseSender) {
-        Objects.requireNonNull(httpRequestReader);
+    public void execute(HttpRequest request, HttpResponse response) {
+        Objects.requireNonNull(request);
+        Objects.requireNonNull(response);
 
-        HttpRequest httpRequest = httpRequestReader.read();
         try {
-            RequestMethod method = RequestMethod.find(httpRequest.getHttpMethod().name());
-            String requestUrl = httpRequest.getHttpUri().getUrl();
-            QueryParameters queryParameters = httpRequest.getQueryParameters();
-            BodyContent bodyContent = BodyContent.from(httpRequest.getBodyInputStream());
+            RequestMethod method = RequestMethod.find(request.getHttpMethod().name());
+            String requestUrl = request.getHttpUri().getUrl();
+            QueryParameters queryParameters = request.getQueryParameters();
+            BodyContent bodyContent = BodyContent.from(request.getBodyInputStream());
 
             Object o = doExecute(method, requestUrl, queryParameters, bodyContent);
 
             InputStream inputStream = converter.convertToInputStream(o);
 
-            String startLine = "HTTP/1.1 200 OK";
-            Map<String, String> header = Map.of(
+            response.setStartLine("HTTP/1.1 200 OK");
+            response.appendHeader(Map.of(
                 "Date", "MON, 27 Jul 2023 12:28:53 GMT",
                 "Host", "localhost:8080",
-                "Content-Type", "text/html; charset=UTF-8"
-            );
-
-            return new RequestResult(startLine, header, inputStream);
+                "Content-Type", "text/html; charset=UTF-8"));
+            HttpResponseSender sender = response.getSender();
+            sender.send(inputStream);
+            sender.close();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

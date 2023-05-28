@@ -52,10 +52,6 @@ public class HttpResponse implements Closeable {
             .forEach(entry -> header.put(entry.getKey(), entry.getValue()));
     }
 
-    // todo
-    // outputstream 이 close 체크를 할 텐데
-    // httpResponse 도 close 체크할 필요가 있을까?
-    // outputstream 의 역할을 굳이 httpResponse 단에서 가져와 처리할 필요가 있을까?
     public void send(InputStream body) {
         if (isClosed) {
             throw new RuntimeException("socket is close.");

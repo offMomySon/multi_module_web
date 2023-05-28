@@ -1,14 +1,17 @@
 package method.segment;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-public class PathVariableCollectChainV2 implements SegmentChunkChain {
+public class PathVariableCollectChainV2 {
     private final PathVariableCollectChainV2 segmentChunkChain;
     private final SegmentChunk segmentChunk;
 
     public PathVariableCollectChainV2(PathVariableCollectChainV2 segmentChunkChain, SegmentChunk segmentChunk) {
+        Objects.requireNonNull(segmentChunk);
         this.segmentChunkChain = segmentChunkChain;
         this.segmentChunk = segmentChunk;
     }
@@ -22,7 +25,6 @@ public class PathVariableCollectChainV2 implements SegmentChunkChain {
         return new PathVariableCollectChainV2(this, segmentChunk);
     }
 
-    @Override
     public Optional<PathVariableValue> consume(PathUrl requestPathUrl) {
         Objects.requireNonNull(requestPathUrl);
 
@@ -33,41 +35,52 @@ public class PathVariableCollectChainV2 implements SegmentChunkChain {
             return Optional.empty();
         }
 
+        Map<PathUrl, PathVariableValue> matchedPathVariables = getMatchedPathVariables(segmentChunk);
+
         boolean doesNotExistNextChain = Objects.isNull(segmentChunkChain);
         if (doesNotExistNextChain) {
-            if (segmentChunk instanceof AbstractPathVariableSegmentChunk) {
-                AbstractPathVariableSegmentChunk abstractPathVariableSegmentChunk = (AbstractPathVariableSegmentChunk) segmentChunk;
-                PathVariableValue mergedPathVariableValue = remainPathUrls.stream()
-                    .reduce(PathVariableValue.empty(), (pv, pu) -> pv.merge(abstractPathVariableSegmentChunk.find(pu)), PathVariableValue::merge);
-                return Optional.of(mergedPathVariableValue);
+            Optional<PathUrl> optionalAllConsumedPathUrl = remainPathUrls.stream().filter(PathUrl::isEmtpy).findFirst();
+
+            boolean doesNotExistAllConsumedPathUrl = optionalAllConsumedPathUrl.isEmpty();
+            if (doesNotExistAllConsumedPathUrl) {
+                return Optional.empty();
             }
-            return Optional.of(PathVariableValue.empty());
+
+            PathUrl allConsumedPathUrl = optionalAllConsumedPathUrl.get();
+
+            PathVariableValue pathVariableValue = matchedPathVariables.getOrDefault(allConsumedPathUrl, PathVariableValue.empty());
+            return Optional.of(pathVariableValue);
         }
 
         Optional<MatchedPathVariableValue> optionalNextChainMatchPathVariableValue = remainPathUrls.stream()
-            .map(this::doConsume)
+            .map(this::nextConsume)
             .filter(Optional::isPresent)
             .map(Optional::get)
             .findFirst();
 
-        boolean doesNotMatchNextChain = optionalNextChainMatchPathVariableValue.isEmpty();
-        if (doesNotMatchNextChain) {
+        boolean doesNotExistAllConsumedNextChain = optionalNextChainMatchPathVariableValue.isEmpty();
+        if (doesNotExistAllConsumedNextChain) {
             return Optional.empty();
         }
 
         MatchedPathVariableValue matchedPathVariableValue = optionalNextChainMatchPathVariableValue.get();
         PathVariableValue nextChainPathVariableValue = matchedPathVariableValue.getPathVariableValue();
         PathUrl remainPathUrl = matchedPathVariableValue.getRemainPathUrl();
-
-        if (segmentChunk instanceof AbstractPathVariableSegmentChunk) {
-            PathVariableValue pathVariableValue = ((AbstractPathVariableSegmentChunk) segmentChunk).find(remainPathUrl);
-            nextChainPathVariableValue = pathVariableValue.merge(nextChainPathVariableValue);
-        }
-
-        return Optional.of(nextChainPathVariableValue);
+        
+        PathVariableValue pathVariableValue = matchedPathVariables.getOrDefault(remainPathUrl, PathVariableValue.empty());
+        pathVariableValue = pathVariableValue.merge(nextChainPathVariableValue);
+        return Optional.of(pathVariableValue);
     }
 
-    private Optional<MatchedPathVariableValue> doConsume(PathUrl remainPathUrl) {
+    private static Map<PathUrl, PathVariableValue> getMatchedPathVariables(SegmentChunk segmentChunk) {
+        if (segmentChunk instanceof AbstractPathVariableSegmentChunk) {
+            AbstractPathVariableSegmentChunk abstractPathVariableSegmentChunk = (AbstractPathVariableSegmentChunk) segmentChunk;
+            return abstractPathVariableSegmentChunk.getMatchedPathVariables();
+        }
+        return new HashMap<>();
+    }
+
+    private Optional<MatchedPathVariableValue> nextConsume(PathUrl remainPathUrl) {
         Optional<PathVariableValue> optionalPathVariableValue = segmentChunkChain.consume(remainPathUrl);
         if (optionalPathVariableValue.isEmpty()) {
             return Optional.empty();

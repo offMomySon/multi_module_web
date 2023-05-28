@@ -42,7 +42,6 @@ class WildCardSegmentChunkFactoryTest {
         List<? extends Class<? extends SegmentChunk>> actualInstances = actuals.stream().map(SegmentChunk::getClass).collect(Collectors.toUnmodifiableList());
 
         //then
-        // todo 어떻게 테스트하지 아래 cotainSequences 로 테스트하고 싶은데
         // Assertions.assertThat(actualInstances).containsSequences(expects);
         for (int i = 0; i < expectInstances.size(); i++) {
             Class<? extends SegmentChunk> actual = actualInstances.get(i);

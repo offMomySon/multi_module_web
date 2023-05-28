@@ -9,6 +9,7 @@ import method.segment.PathVariableCollectChainV2;
 import method.segment.PathVariableValue;
 import method.segment.SegmentChunk;
 import method.segment.SegmentChunkFactory;
+import static method.segment.PathVariableCollectChainV2.ConsumeResult;
 
 // TODO
 // SegmentChunkChain 을 생성자로 선택
@@ -57,13 +58,12 @@ public class PathUrlMatcher {
             baseSegmentChunkChain = baseSegmentChunkChain.chaining(segmentChunk);
         }
 
-        Optional<PathVariableValue> optionalMatchPathVariableValue = baseSegmentChunkChain.consume(requestUrl);
-        boolean doesNotMatch = optionalMatchPathVariableValue.isEmpty();
-        if (doesNotMatch) {
+        ConsumeResult consumeResult = baseSegmentChunkChain.consume(requestUrl);
+        if (consumeResult.doesNotAllConsumed()) {
             return Optional.empty();
         }
 
-        PathVariableValue pathVariableValue = optionalMatchPathVariableValue.get();
+        PathVariableValue pathVariableValue = consumeResult.getPathVariableValue();
         return Optional.of(pathVariableValue);
     }
 }

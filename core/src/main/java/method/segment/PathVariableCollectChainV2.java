@@ -108,11 +108,6 @@ public class PathVariableCollectChainV2 {
         }
     }
 
-    /**
-     * 고려해야하는 결과 값들.
-     * 1. 매치된 pathVariable
-     * 2. 매치여부.
-     */
     public static class ConsumeResult {
         private final boolean isAllConsumed;
         private final PathVariableValue pathVariableValue;

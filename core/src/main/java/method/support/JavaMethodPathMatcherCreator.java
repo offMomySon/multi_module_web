@@ -8,6 +8,7 @@ import lombok.NonNull;
 import method.BaseHttpPathMatcher;
 import method.PathUrlMatcher;
 import method.segment.PathUrl;
+import method.segment.SegmentChunkFactory;
 import method.support.RequestMappingValueExtractor.RequestMappedMethod;
 import util.AnnotationUtils;
 import web.RequestMethod;
@@ -36,7 +37,8 @@ public class JavaMethodPathMatcherCreator {
             .map(requestMappedMethod -> {
                 RequestMethod requestMethod = requestMappedMethod.getRequestMethod();
                 PathUrl baseUrl = PathUrl.from(requestMappedMethod.getUrl());
-                PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(baseUrl);
+                SegmentChunkFactory segmentChunkFactory = new SegmentChunkFactory(baseUrl);
+                PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(segmentChunkFactory);
                 Method javaMethod = requestMappedMethod.getJavaMethod();
 
                 return new BaseHttpPathMatcher(requestMethod, pathUrlMatcher, javaMethod);

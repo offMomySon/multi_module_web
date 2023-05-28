@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 import method.segment.PathMatchTestSuite;
 import method.segment.PathUrl;
 import method.segment.PathVariableValue;
+import method.segment.SegmentChunkFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -18,7 +19,8 @@ class PathUrlMatcherTest {
     @PathMatchTestSuite.PathMatchTest
     void test1(String baseUrl, String requestPath, boolean expect) throws Exception {
         //given
-        PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(PathUrl.from(baseUrl));
+        SegmentChunkFactory segmentChunkFactory = new SegmentChunkFactory(PathUrl.from(baseUrl));
+        PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(segmentChunkFactory);
 
         //when
         boolean actual = pathUrlMatcher.match(PathUrl.from(requestPath)).isPresent();
@@ -33,7 +35,8 @@ class PathUrlMatcherTest {
     void test1(String baseUrl, String requestPath, Map<String, String> expectMap) throws Exception {
         //given
         PathVariableValue expect = new PathVariableValue(expectMap);
-        PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(PathUrl.from(baseUrl));
+        SegmentChunkFactory segmentChunkFactory = new SegmentChunkFactory(PathUrl.from(baseUrl));
+        PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(segmentChunkFactory);
 
         //when
         Optional<PathVariableValue> optionalResolvedMethod = pathUrlMatcher.match(PathUrl.from(requestPath));

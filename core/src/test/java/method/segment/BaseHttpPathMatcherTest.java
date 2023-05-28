@@ -1,6 +1,5 @@
 package method.segment;
 
-import web.RequestMethod;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -11,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import web.RequestMethod;
 
 class BaseHttpPathMatcherTest {
 
@@ -19,7 +19,8 @@ class BaseHttpPathMatcherTest {
     void test1(String baseUrl, String requestPath, boolean expect) throws Exception {
         //given
         PathUrl basePathUrl = PathUrl.from(baseUrl);
-        PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(basePathUrl);
+        SegmentChunkFactory segmentChunkFactory = new SegmentChunkFactory(basePathUrl);
+        PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(segmentChunkFactory);
         BaseHttpPathMatcher baseHttpPathMatcher = new BaseHttpPathMatcher(RequestMethod.GET, pathUrlMatcher, TestClass.class.getDeclaredMethod("method"));
 
         //when
@@ -35,8 +36,10 @@ class BaseHttpPathMatcherTest {
     void test1(String baseUrl, String requestPath, Map<String, String> expectMap) throws Exception {
         //given
         PathVariableValue expect = new PathVariableValue(expectMap);
+
         PathUrl basePathUrl = PathUrl.from(baseUrl);
-        PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(basePathUrl);
+        SegmentChunkFactory segmentChunkFactory = new SegmentChunkFactory(basePathUrl);
+        PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(segmentChunkFactory);
         BaseHttpPathMatcher baseHttpPathMatcher = new BaseHttpPathMatcher(RequestMethod.GET, pathUrlMatcher, TestClass.class.getDeclaredMethod("method"));
 
         //when

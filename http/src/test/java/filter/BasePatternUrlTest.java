@@ -1,11 +1,12 @@
 package filter;
 
+import filter.pattern.BasePatternUrl;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-class PatternUrlTest {
+class BasePatternUrlTest {
 
     @DisplayName("match 여부를 확인합니다.")
     @ParameterizedTest
@@ -23,10 +24,10 @@ class PatternUrlTest {
         "*.text,/test/fff.text,true",
         "*.text,/test/fff.notText,false",
     })
-    void test(PatternUrl patternUrl, String requestUrl, boolean expect) throws Exception {
+    void test(BasePatternUrl basePatternUrl, String requestUrl, boolean expect) throws Exception {
         //given
         //when
-        boolean actual = patternUrl.isMatch(requestUrl);
+        boolean actual = basePatternUrl.isMatch(requestUrl);
 
         //then
         Assertions.assertThat(actual).isEqualTo(expect);

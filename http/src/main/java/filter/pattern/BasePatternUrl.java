@@ -1,18 +1,19 @@
-package filter;
+package filter.pattern;
 
 import java.util.Objects;
 
-public class PatternUrl {
+public class BasePatternUrl implements PatternUrl {
 
     private final String baseUrl;
 
-    public PatternUrl(String baseUrl) {
+    public BasePatternUrl(String baseUrl) {
         if (Objects.isNull(baseUrl) || baseUrl.isBlank()) {
             throw new RuntimeException("value is empty.");
         }
         this.baseUrl = baseUrl;
     }
 
+    @Override
     public boolean isMatch(String requestUrl) {
         if (Objects.isNull(requestUrl) || requestUrl.isBlank()) {
             return false;

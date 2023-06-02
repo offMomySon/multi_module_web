@@ -8,4 +8,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface WebFilter {
+    String[] patterns() default {"/*"};
+
+    long order() default Long.MAX_VALUE;
+
+    String filterName();
 }

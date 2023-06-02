@@ -1,27 +1,33 @@
 package filter;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class FilterDef {
     private final String name;
-    private final String pattern;
+    private final List<String> patterns;
 
-    public FilterDef(String name, String pattern) {
+    public FilterDef(String name, List<String> patterns) {
         if (Objects.isNull(name) || name.isBlank()) {
             throw new RuntimeException("name is empty.");
         }
-        if (Objects.isNull(pattern) || pattern.isBlank()) {
-            throw new RuntimeException("name is empty.");
+        Objects.requireNonNull(patterns);
+        patterns = patterns.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableList());
+
+        if (patterns.isEmpty()) {
+            throw new RuntimeException("patterns is empty.");
         }
+
         this.name = name;
-        this.pattern = pattern;
+        this.patterns = patterns;
     }
 
     public String getName() {
         return name;
     }
 
-    public String getPattern() {
-        return pattern;
+    public List<String> getPatterns() {
+        return patterns;
     }
 }

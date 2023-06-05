@@ -1,23 +1,23 @@
 package filter;
 
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
-public class FilterRegistration {
+public class FilterRegistration2 {
     private final String filterName;
-    private final List<String> patterns;
+    private final String pattern;
     private final FilterWorker filterWorker;
 
-    public FilterRegistration(String filterName, List<String> patterns, FilterWorker filterWorker) {
+    public FilterRegistration2(String filterName, String pattern, FilterWorker filterWorker) {
         if (Objects.isNull(filterName) || filterName.isBlank()) {
             throw new RuntimeException("filterName is empty.");
         }
-        Objects.requireNonNull(patterns);
+        if (Objects.isNull(pattern) || pattern.isBlank()) {
+            throw new RuntimeException("pattern is empty.");
+        }
         Objects.requireNonNull(filterWorker);
 
         this.filterName = filterName;
-        this.patterns = patterns.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableList());
+        this.pattern = pattern;
         this.filterWorker = filterWorker;
     }
 
@@ -25,9 +25,8 @@ public class FilterRegistration {
         return filterName;
     }
 
-
-    public List<String> getPatterns() {
-        return patterns;
+    public String getPattern() {
+        return pattern;
     }
 
     public FilterWorker getFilterWorker() {

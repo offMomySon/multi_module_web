@@ -1,5 +1,6 @@
 package filter;
 
+import filter.pattern.BasePatternUrl;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -11,29 +12,29 @@ public class WebFilterRegistrationCreator extends AbstractFilterRegistrationCrea
     private static final Class<WebFilter> WEB_FILTER_CLASS = WebFilter.class;
 
     private final WebFilter webFilter;
-    private final Filter filter;
+    private final FilterWorker filterWorker;
 
-    public WebFilterRegistrationCreator(Filter filter) {
-        Objects.requireNonNull(filter);
+    public WebFilterRegistrationCreator(FilterWorker filterWorker) {
+        Objects.requireNonNull(filterWorker);
 
-        Class<? extends Filter> filterClazz = filter.getClass();
+        Class<? extends FilterWorker> filterClazz = filterWorker.getClass();
+        WebFilter webFilter = AnnotationUtils.find(filterClazz, WEB_FILTER_CLASS)
+            .orElseThrow(() -> new RuntimeException("filter does not annotated WebFilter."));
 
-        Optional<WebFilter> optionalWebFilter = AnnotationUtils.find(filterClazz, WEB_FILTER_CLASS);
-        boolean doesNotExistWebFilter = optionalWebFilter.isEmpty();
-        if (doesNotExistWebFilter) {
-            throw new RuntimeException("filter does not annotated WebFilter.");
-        }
-
-        this.webFilter = optionalWebFilter.get();
-        this.filter = filter;
+        this.webFilter = webFilter;
+        this.filterWorker = filterWorker;
     }
 
     @Override
-    public FilterRegistration create() {
+    public Filters create() {
         String filterName = Optional.of(webFilter.filterName())
             .orElseGet(() -> webFilter.getClass().getSimpleName());
         List<String> patterns = Arrays.stream(webFilter.patterns()).collect(Collectors.toUnmodifiableList());
 
-        return new FilterRegistration(filterName, patterns, filter);
+        List<Filter2> filter2s = patterns.stream()
+            .map(pattern -> new Filter2(filterName, new BasePatternUrl(pattern), filterWorker))
+            .collect(Collectors.toUnmodifiableList());
+
+        return Filters.from(filter2s);
     }
 }

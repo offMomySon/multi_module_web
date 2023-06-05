@@ -1,19 +1,14 @@
 package com.main.filter;
 
 import filter.FilterChain;
-import filter.OrderFilter;
-import filter.WebFilter;
+import filter.OrderFilterWorker;
 import lombok.extern.slf4j.Slf4j;
 import vo.HttpRequest;
 import vo.HttpResponse;
 
 @Slf4j
-@WebFilter
-public class TestFilter extends OrderFilter {
-    @Override
-    public boolean isPossibleFilterPattern(String pathUrl) {
-        return false;
-    }
+//@WebFilter()
+public class TestFilterWorker extends OrderFilterWorker {
 
     @Override
     public void doChain(HttpRequest request, HttpResponse response, FilterChain chain) {

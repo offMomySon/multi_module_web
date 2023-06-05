@@ -21,14 +21,6 @@ public class PathUrlMatcher {
     public static PathUrlMatcher from(SegmentChunkFactory segmentChunkFactory) {
         Objects.requireNonNull(segmentChunkFactory);
 
-        // TODO
-        // combiner 처리를 고민해봤지만 떠오르지 않는다.
-        // merge 느낌이아니라 link 느낌이기 때문에 안되는것 같다.
-//        List<SegmentChunk> segmentChunks = segmentChunkFactory.create();
-//        Collections.reverse(segmentChunks);
-//        PathVariableCollectChainV2 baseSegmentChunkChain = segmentChunks.stream().reduce(PathVariableCollectChainV2.empty(),
-//                                                                                         PathVariableCollectChainV2::chaining,
-//                                                                                         (sc1, sc2) -> null);
         List<SegmentChunk> segmentChunks = segmentChunkFactory.create();
         Collections.reverse(segmentChunks);
         PathVariableCollectChainV2 baseSegmentChunkChain = PathVariableCollectChainV2.empty();

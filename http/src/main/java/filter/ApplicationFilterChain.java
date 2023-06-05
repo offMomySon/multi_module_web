@@ -8,14 +8,14 @@ import vo.HttpResponse;
 
 public class ApplicationFilterChain implements FilterChain {
     private final HttpRequestExecutor executor;
-    private final Filter[] filters;
+    private final FilterWorker[] filterWorkers;
     private int index = 0;
 
-    public ApplicationFilterChain(HttpRequestExecutor executor, Filter[] filters) {
+    public ApplicationFilterChain(HttpRequestExecutor executor, FilterWorker[] filterWorkers) {
         Objects.requireNonNull(executor);
-        Objects.requireNonNull(filters);
+        Objects.requireNonNull(filterWorkers);
         this.executor = executor;
-        this.filters = Arrays.stream(filters).filter(Objects::nonNull).toArray(Filter[]::new);
+        this.filterWorkers = Arrays.stream(filterWorkers).filter(Objects::nonNull).toArray(FilterWorker[]::new);
     }
 
     @Override
@@ -23,9 +23,9 @@ public class ApplicationFilterChain implements FilterChain {
         Objects.requireNonNull(request);
         Objects.requireNonNull(response);
 
-        if (index < filters.length) {
-            Filter filter = filters[index++];
-            filter.doChain(request, response, this);
+        if (index < filterWorkers.length) {
+            FilterWorker filterWorker = filterWorkers[index++];
+            filterWorker.doChain(request, response, this);
         }
 
         executor.execute(request, response);

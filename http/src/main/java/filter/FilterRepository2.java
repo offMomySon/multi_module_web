@@ -6,23 +6,22 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class FilterRepository {
+public class FilterRepository2 {
     private final List<FilterDef> filterDefs;
     private final Map<String, FilterWorker> filtersMapByName;
 
-    public FilterRepository(List<FilterDef> filterDefs, Map<String, FilterWorker> filtersMapByName) {
+    public FilterRepository2(List<FilterDef> filterDefs, Map<String, FilterWorker> filtersMapByName) {
         Objects.requireNonNull(filterDefs);
         Objects.requireNonNull(filtersMapByName);
 
         filterDefs = filterDefs.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableList());
+        if (filterDefs.isEmpty()) {
+            throw new RuntimeException("filterDefs is empty.");
+        }
         filtersMapByName = filtersMapByName.entrySet().stream()
             .filter(entry -> Objects.nonNull(entry.getKey()))
             .filter(entry -> Objects.nonNull(entry.getValue()))
             .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
-
-        if (filterDefs.isEmpty()) {
-            throw new RuntimeException("filterDefs is empty.");
-        }
         if (filtersMapByName.isEmpty()) {
             throw new RuntimeException("filterDefs is empty.");
         }
@@ -31,7 +30,7 @@ public class FilterRepository {
         this.filtersMapByName = filtersMapByName;
     }
 
-    public static FilterRepository from(List<FilterRegistration> filterRegistrations) {
+    public static FilterRepository2 from(List<FilterRegistration> filterRegistrations) {
         Objects.requireNonNull(filterRegistrations);
         filterRegistrations = filterRegistrations.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableList());
 
@@ -42,7 +41,7 @@ public class FilterRepository {
             .map(r -> Map.entry(r.getFilterName(), r.getFilter()))
             .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
 
-        return new FilterRepository(filterDefs, filtersMapByName);
+        return new FilterRepository2(filterDefs, filtersMapByName);
     }
 
     public List<String> findUrlMatchFilterNames(String requestUrl) {

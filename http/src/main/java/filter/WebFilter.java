@@ -10,7 +10,5 @@ import java.lang.annotation.Target;
 public @interface WebFilter {
     String[] patterns() default {"/*"};
 
-    long order() default Long.MAX_VALUE;
-
     String filterName();
 }

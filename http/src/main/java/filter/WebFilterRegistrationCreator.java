@@ -1,6 +1,5 @@
 package filter;
 
-import filter.pattern.BasePatternUrl;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -31,10 +30,10 @@ public class WebFilterRegistrationCreator extends AbstractFilterRegistrationCrea
             .orElseGet(() -> webFilter.getClass().getSimpleName());
         List<String> patterns = Arrays.stream(webFilter.patterns()).collect(Collectors.toUnmodifiableList());
 
-        List<Filter2> filter2s = patterns.stream()
-            .map(pattern -> new Filter2(filterName, new BasePatternUrl(pattern), filterWorker))
+        List<Filter> filters = patterns.stream()
+            .map(pattern -> new Filter(filterName, new PatternUrl(pattern), filterWorker))
             .collect(Collectors.toUnmodifiableList());
 
-        return Filters.from(filter2s);
+        return Filters.from(filters);
     }
 }

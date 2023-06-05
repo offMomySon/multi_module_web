@@ -1,15 +1,14 @@
 package filter;
 
-import filter.pattern.PatternUrl;
 import java.util.Objects;
 import java.util.Optional;
 
-public class Filter2 {
+public class Filter {
     private final String name;
     private final PatternUrl patternUrl;
     private final FilterWorker filterWorker;
 
-    public Filter2(String name, PatternUrl patternUrl, FilterWorker filterWorker) {
+    public Filter(String name, PatternUrl patternUrl, FilterWorker filterWorker) {
         if (Objects.isNull(name) || name.isBlank()) {
             throw new RuntimeException("name is empty.");
         }

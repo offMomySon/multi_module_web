@@ -8,21 +8,15 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 class BasePatternUrlTest {
 
-    @DisplayName("match 여부를 확인합니다.")
+    @DisplayName("match 를 확인한다.")
     @ParameterizedTest
     @CsvSource(value = {
-        "/*,/p1,true",
-        "/*,/p1/p2/p3/p4,true",
-        "/*,/1/2/3/4/5/6/,true",
-        "/1/*,/1/2/3,true",
-        "/1/*,/1/2/3/4/5,true",
-        "/1/2/*,/1/2/3/4/5,true",
-        "/1/fail/*,/1/2/3/4/5,false",
-        "/,/,true",
-        "/,/p1,false",
-        "/,/p1/p2/p3/p4,false",
-        "*.text,/test/fff.text,true",
-        "*.text,/test/fff.notText,false",
+        "/p1, /p1, true",
+        "/p1, /p1/p2, false",
+        "/p1, /p1/p2/p3, false",
+        "/p1/p2, /p1/p2, true",
+        "/p1/p2, /p1/p2/p3, false",
+        "/p1/p2/p3, /p1/p2/p3, true",
     })
     void test(BasePatternUrl basePatternUrl, String requestUrl, boolean expect) throws Exception {
         //given

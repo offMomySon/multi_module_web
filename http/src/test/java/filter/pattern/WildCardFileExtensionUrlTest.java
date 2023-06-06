@@ -13,7 +13,7 @@ class WildCardFileExtensionUrlTest {
     void test() throws Exception {
         //given
         //when
-        Throwable actual = Assertions.catchThrowable(() -> new WildCardFileExtensionUrl("aaa.text"));
+        Throwable actual = Assertions.catchThrowable(() -> new WildCardFileExtensionMatcher("aaa.text"));
 
         //then
         Assertions.assertThat(actual).isNotNull();
@@ -35,7 +35,7 @@ class WildCardFileExtensionUrlTest {
     })
     void test(String baseFileExtension, String requestPath, boolean expect) throws Exception {
         //given
-        WildCardFileExtensionUrl wildCardFileExtensionUrl = new WildCardFileExtensionUrl(baseFileExtension);
+        WildCardFileExtensionMatcher wildCardFileExtensionUrl = new WildCardFileExtensionMatcher(baseFileExtension);
 
         //when
         boolean actual = wildCardFileExtensionUrl.isMatch(requestPath);
@@ -53,7 +53,7 @@ class WildCardFileExtensionUrlTest {
     })
     void test2(String baseFileExtension, String requestPath, boolean expect) throws Exception {
         //given
-        WildCardFileExtensionUrl wildCardFileExtensionUrl = new WildCardFileExtensionUrl(baseFileExtension);
+        WildCardFileExtensionMatcher wildCardFileExtensionUrl = new WildCardFileExtensionMatcher(baseFileExtension);
 
         //when
         boolean actual = wildCardFileExtensionUrl.isMatch(requestPath);
@@ -71,7 +71,7 @@ class WildCardFileExtensionUrlTest {
     })
     void test3(String baseFileExtension, String requestPath, boolean expect) throws Exception {
         //given
-        WildCardFileExtensionUrl wildCardFileExtensionUrl = new WildCardFileExtensionUrl(baseFileExtension);
+        WildCardFileExtensionMatcher wildCardFileExtensionUrl = new WildCardFileExtensionMatcher(baseFileExtension);
 
         //when
         boolean actual = wildCardFileExtensionUrl.isMatch(requestPath);

@@ -1,5 +1,5 @@
 package filter.pattern;
 
-public interface PatternUrl {
+public interface PatternMatcher {
     boolean isMatch(String requestPath);
 }

@@ -7,7 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class PatternUrlStrategyTest {
+class PatternMatcherStrategyTest {
 
     @DisplayName("baseurl 에 따라 적절한 PatternMatcher 를 생성합니다.")
     @ParameterizedTest
@@ -15,7 +15,7 @@ class PatternUrlStrategyTest {
     void test(String basePath, Class<?> expect) throws Exception {
         //given
         //when
-        PatternUrl actual = PatternUrlStrategy.create(basePath);
+        PatternMatcher actual = PatternMatcherStrategy.create(basePath);
 
         //then
         Assertions.assertThat(actual).isInstanceOf(expect);
@@ -23,9 +23,9 @@ class PatternUrlStrategyTest {
 
     public static Stream<Arguments> provideBaseUrlAndExpectClass() {
         return Stream.of(
-            Arguments.of("/basic", BasePatternUrl.class),
-            Arguments.of("/basic/*", WildCardPathUrl.class),
-            Arguments.of("*.text", WildCardFileExtensionUrl.class)
+            Arguments.of("/basic", BasePatternMatcher.class),
+            Arguments.of("/basic/*", WildCardPathMatcher.class),
+            Arguments.of("*.text", WildCardFileExtensionMatcher.class)
         );
     }
 

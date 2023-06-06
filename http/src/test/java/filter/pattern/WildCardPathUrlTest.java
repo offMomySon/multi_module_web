@@ -15,7 +15,7 @@ class WildCardPathUrlTest {
     void test() throws Exception {
         //given
         //when
-        Throwable actual = Assertions.catchThrowable(() -> new WildCardPathUrl("/test"));
+        Throwable actual = Assertions.catchThrowable(() -> new WildCardPathMatcher("/test"));
 
         //then
         Assertions.assertThat(actual).isNotNull();
@@ -37,7 +37,7 @@ class WildCardPathUrlTest {
     })
     void test(String requestPath) throws Exception {
         //given
-        WildCardPathUrl wildCardPathUrl = new WildCardPathUrl(WILD_CARD);
+        WildCardPathMatcher wildCardPathUrl = new WildCardPathMatcher(WILD_CARD);
 
         //when
         boolean actual = wildCardPathUrl.isMatch(requestPath);
@@ -62,7 +62,7 @@ class WildCardPathUrlTest {
     })
     void test2(String basePath, String requestPath, boolean expect) throws Exception {
         //given
-        WildCardPathUrl wildCardPathUrl = new WildCardPathUrl(basePath);
+        WildCardPathMatcher wildCardPathUrl = new WildCardPathMatcher(basePath);
 
         //when
         boolean actual = wildCardPathUrl.isMatch(requestPath);

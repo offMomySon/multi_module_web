@@ -2,7 +2,7 @@ package filter.pattern;
 
 import java.util.Objects;
 
-public class WildCardFileExtensionUrl implements PatternUrl {
+public class WildCardFileExtensionMatcher implements PatternMatcher {
     private static final String FILE_NAME_WILD_CARD = "*.";
 
     private static final String PATH_DELIMITER = "/";
@@ -10,7 +10,7 @@ public class WildCardFileExtensionUrl implements PatternUrl {
 
     private final String fileExtension;
 
-    public WildCardFileExtensionUrl(String fileExtension) {
+    public WildCardFileExtensionMatcher(String fileExtension) {
         if (Objects.isNull(fileExtension) || fileExtension.isBlank()) {
             throw new RuntimeException("fileExtension is emtpy.");
         }

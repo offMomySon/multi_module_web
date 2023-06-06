@@ -29,6 +29,10 @@ public class Filter {
         return filterWorker;
     }
 
+    public PatternMatcher getPatternMatcher() {
+        return patternMatcher;
+    }
+
     public boolean isMatchUrl(String requestUrl) {
         return matchUrl(requestUrl).isPresent();
     }

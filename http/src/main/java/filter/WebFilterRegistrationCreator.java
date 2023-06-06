@@ -1,6 +1,7 @@
 package filter;
 
-import filter.pattern.BasePatternMatcher;
+import filter.pattern.PatternMatcher;
+import filter.pattern.PatternMatcherStrategy;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -27,14 +28,18 @@ public class WebFilterRegistrationCreator extends AbstractFilterRegistrationCrea
 
     @Override
     public Filters create() {
-        String filterName = Optional.of(webFilter.filterName())
-            .orElseGet(() -> webFilter.getClass().getSimpleName());
-        List<String> patterns = Arrays.stream(webFilter.patterns()).collect(Collectors.toUnmodifiableList());
+        String filterName = Optional.of(webFilter.filterName()).orElseGet(() -> webFilter.getClass().getSimpleName());
+        List<String> basePaths = Arrays.stream(webFilter.patterns()).collect(Collectors.toUnmodifiableList());
 
-        List<Filter> filters = patterns.stream()
-            .map(pattern -> new Filter(filterName, new BasePatternMatcher(pattern), filterWorker))
+        List<Filter> filters = basePaths.stream()
+            .map(basePath -> createFilter(filterName, basePath, filterWorker))
             .collect(Collectors.toUnmodifiableList());
 
         return Filters.from(filters);
+    }
+
+    private Filter createFilter(String filterName, String basePath, FilterWorker filterWorker) {
+        PatternMatcher patternMatcher = PatternMatcherStrategy.create(basePath);
+        return new Filter(filterName, patternMatcher, filterWorker);
     }
 }

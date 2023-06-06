@@ -1,5 +1,6 @@
 package filter;
 
+import filter.pattern.PatternUrl;
 import java.util.Objects;
 import java.util.Optional;
 

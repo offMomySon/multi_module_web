@@ -1,5 +1,6 @@
 package filter;
 
+import filter.pattern.PatternUrl;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;

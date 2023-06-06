@@ -1,14 +1,25 @@
 package filter.pattern;
 
-public class PatternUrlStrategy {
-    private static final String PATH_DELIMITER = "/";
-    private static final String FILE_DELIMITER = ".";
+import java.util.Objects;
 
-//    public PatternUrl create(String baseUrl) {
-//        if (Objects.isNull(baseUrl)) {
-//            throw new RuntimeException("baseUrl is null.");
-//        }
-//
-//
-//    }
+public class PatternUrlStrategy {
+    private static final String WILD_CARD_PATH_MATTER = "/*";
+    private static final String WILD_CARD_FILE_NAME = "*.";
+
+    public static PatternUrl create(String basePath) {
+        if (Objects.isNull(basePath)) {
+            throw new RuntimeException("baseUrl is null.");
+        }
+
+        if (basePath.startsWith(WILD_CARD_FILE_NAME)) {
+            return new WildCardFileExtensionUrl(basePath);
+        }
+
+        boolean wildCardPathMatch = basePath.endsWith(WILD_CARD_PATH_MATTER);
+        if (wildCardPathMatch) {
+            return new WildCardPathUrl(basePath);
+        }
+
+        return new BasePatternUrl(basePath);
+    }
 }

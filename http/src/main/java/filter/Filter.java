@@ -1,23 +1,23 @@
 package filter;
 
-import filter.pattern.PatternUrl;
+import filter.pattern.BasePatternUrl;
 import java.util.Objects;
 import java.util.Optional;
 
 public class Filter {
     private final String name;
-    private final PatternUrl patternUrl;
+    private final BasePatternUrl basePatternUrl;
     private final FilterWorker filterWorker;
 
-    public Filter(String name, PatternUrl patternUrl, FilterWorker filterWorker) {
+    public Filter(String name, BasePatternUrl basePatternUrl, FilterWorker filterWorker) {
         if (Objects.isNull(name) || name.isBlank()) {
             throw new RuntimeException("name is empty.");
         }
-        Objects.requireNonNull(patternUrl);
+        Objects.requireNonNull(basePatternUrl);
         Objects.requireNonNull(filterWorker);
 
         this.name = name;
-        this.patternUrl = patternUrl;
+        this.basePatternUrl = basePatternUrl;
         this.filterWorker = filterWorker;
     }
 
@@ -38,7 +38,7 @@ public class Filter {
             throw new RuntimeException("requestUrl is empty.");
         }
 
-        if (patternUrl.isMatch(requestUrl)) {
+        if (basePatternUrl.isMatch(requestUrl)) {
             return Optional.of(filterWorker);
         }
         return Optional.empty();

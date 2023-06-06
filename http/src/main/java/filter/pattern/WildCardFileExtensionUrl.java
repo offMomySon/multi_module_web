@@ -3,27 +3,30 @@ package filter.pattern;
 import java.util.Objects;
 
 public class WildCardFileExtensionUrl implements PatternUrl {
+    private static final String FILE_NAME_WILD_CARD = "*.";
+
     private static final String PATH_DELIMITER = "/";
     private static final String FILE_DELIMITER = ".";
 
-    private final String baseFileExtension;
+    private final String fileExtension;
 
-    public WildCardFileExtensionUrl(String baseFileExtension) {
-        if (Objects.isNull(baseFileExtension) || baseFileExtension.isBlank()) {
+    public WildCardFileExtensionUrl(String fileExtension) {
+        if (Objects.isNull(fileExtension) || fileExtension.isBlank()) {
             throw new RuntimeException("fileExtension is emtpy.");
         }
 
-        boolean doesNotSinglePath = baseFileExtension.contains(PATH_DELIMITER);
+        boolean doesNotSinglePath = fileExtension.contains(PATH_DELIMITER);
         if (doesNotSinglePath) {
             throw new RuntimeException("fileExtension must be single path.");
         }
 
-        boolean doesNotExistFileDelimiter = !baseFileExtension.contains(FILE_DELIMITER);
-        if (doesNotExistFileDelimiter) {
-            throw new RuntimeException("file extension has file delimiter.");
+        boolean doesNotStartWithWildCard = !fileExtension.startsWith(FILE_NAME_WILD_CARD);
+        if (doesNotStartWithWildCard) {
+            throw new RuntimeException("does not start with wild card.");
         }
 
-        this.baseFileExtension = baseFileExtension;
+        int fileExtensionIndex = fileExtension.indexOf(FILE_NAME_WILD_CARD) + FILE_NAME_WILD_CARD.length() - 1;
+        this.fileExtension = fileExtension.substring(fileExtensionIndex);
     }
 
     @Override
@@ -46,6 +49,6 @@ public class WildCardFileExtensionUrl implements PatternUrl {
 
         String requestFileExtension = requestPath.substring(fileDelimiterIndex);
 
-        return Objects.equals(baseFileExtension, requestFileExtension);
+        return Objects.equals(fileExtension, requestFileExtension);
     }
 }

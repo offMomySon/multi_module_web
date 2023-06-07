@@ -101,5 +101,10 @@ public class Filters {
             MatchedFilter that = (MatchedFilter) o;
             return Objects.equals(filterName, that.filterName);
         }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(filterName);
+        }
     }
 }

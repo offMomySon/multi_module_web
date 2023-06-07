@@ -23,7 +23,7 @@ class WebFilterAnnotatedFilterCreatorTest {
         WebFilterAnnotatedFilterCreator filterCreator = new WebFilterAnnotatedFilterCreator(filterWorker);
 
         //when
-        List<Filter> actuals = filterCreator.create();
+        List<Filter> actuals = filterCreator.create().getValues();
 
         //then
         Assertions.assertThat(actuals).hasSize(3);

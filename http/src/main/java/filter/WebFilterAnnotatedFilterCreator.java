@@ -31,16 +31,18 @@ public class WebFilterAnnotatedFilterCreator extends AbstractFilterCreator {
     }
 
     @Override
-    public List<Filter> create() {
+    public Filters create() {
         String filterName = Optional.of(webFilter.filterName()).orElseGet(() -> webFilter.getClass().getSimpleName());
         List<String> basePaths = Arrays.stream(webFilter.patterns()).collect(Collectors.toUnmodifiableList());
 
-        return basePaths.stream()
+        List<Filter> filters = basePaths.stream()
             .map(basePath -> createFilter(filterName, basePath, filterWorker))
             .collect(Collectors.toUnmodifiableList());
+
+        return new Filters(filters);
     }
 
-    private Filter createFilter(String filterName, String basePath, FilterWorker filterWorker) {
+    private static Filter createFilter(String filterName, String basePath, FilterWorker filterWorker) {
         PatternMatcher patternMatcher = PatternMatcherStrategy.create(basePath);
         return new Filter(filterName, patternMatcher, filterWorker);
     }

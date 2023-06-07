@@ -1,6 +1,7 @@
 package filter;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -60,6 +61,10 @@ public class Filters {
         return matchedFilters.stream()
             .map(MatchedFilter::getFilterWorker)
             .collect(Collectors.toUnmodifiableList());
+    }
+
+    public List<Filter> getValues() {
+        return new ArrayList<>(values);
     }
 
     private static class MatchedFilter {

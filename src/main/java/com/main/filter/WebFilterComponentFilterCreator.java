@@ -2,7 +2,6 @@ package com.main.filter;
 
 import annotation.Component;
 import container.Container;
-import filter.AbstractFilterCreator;
 import filter.FilterWorker;
 import filter.Filters;
 import filter.WebFilterAnnotatedFilterCreator;
@@ -12,36 +11,32 @@ import java.util.Arrays;
 import java.util.Objects;
 import util.AnnotationUtils;
 
-public class WebFilterComponentFilterCreator extends AbstractFilterCreator {
-    private static final Class<Component> COMPONENT_CLASS = Component.class;
+public class WebFilterComponentFilterCreator {
     private static final Class<WebFilter> WEB_FILTER_CLASS = WebFilter.class;
+    private static final Class<Component> COMPONENT_CLASS = Component.class;
 
     private final Container container;
-    private final Class<?> filterWorkerClazz;
 
-    public WebFilterComponentFilterCreator(Container container, Class<?> filterWorkerClazz) {
+    public WebFilterComponentFilterCreator(Container container) {
         Objects.requireNonNull(container);
-        Objects.requireNonNull(filterWorkerClazz);
+        this.container = container;
+    }
 
+    public Filters create(Class<?> filterWorkerClazz) {
+        Objects.requireNonNull(filterWorkerClazz);
         if (AnnotationUtils.doesNotExist(filterWorkerClazz, WEB_FILTER_CLASS)) {
             throw new RuntimeException("does not exist component annotation");
         }
 
-        this.container = container;
-        this.filterWorkerClazz = filterWorkerClazz;
-    }
-
-    @Override
-    public Filters create() {
         Class<?>[] memberClasses = AnnotationUtils.peekFieldsType(filterWorkerClazz, COMPONENT_CLASS).toArray(Class<?>[]::new);
         Object[] memberObjects = Arrays.stream(memberClasses).map(container::get).toArray(Object[]::new);
-        FilterWorker filterWorker = (FilterWorker) newObject(memberClasses, memberObjects);
+        FilterWorker filterWorker = (FilterWorker) newObject(filterWorkerClazz, memberClasses, memberObjects);
 
         WebFilterAnnotatedFilterCreator filterCreator = new WebFilterAnnotatedFilterCreator(filterWorker);
         return filterCreator.create();
     }
-    
-    private Object newObject(Class<?>[] memberClasses, Object[] memberObjects) {
+
+    private static Object newObject(Class<?> filterWorkerClazz, Class<?>[] memberClasses, Object[] memberObjects) {
         try {
             Constructor<?> constructor = filterWorkerClazz.getConstructor(memberClasses);
             return constructor.newInstance(memberObjects);

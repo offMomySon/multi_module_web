@@ -16,12 +16,11 @@ public class Filters {
 
     public Filters(List<Filter> values) {
         Objects.requireNonNull(values);
-        values = values.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableList());
-        if (values.isEmpty()) {
-            throw new RuntimeException("filters is empty.");
-        }
+        this.values = values.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableList());
+    }
 
-        this.values = values;
+    public static Filters empty() {
+        return new Filters(Collections.emptyList());
     }
 
     public Filters merge(Filters otherFilters) {

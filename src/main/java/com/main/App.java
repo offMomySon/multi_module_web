@@ -5,6 +5,7 @@ import com.main.executor.RequestExecutor;
 import container.ComponentContainerCreator;
 import container.Container;
 import converter.CompositeConverter;
+import filter.WebFilterAnnotatedFilterCreator;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import method.HttpPathMatcher;
@@ -21,6 +22,7 @@ public class App {
         List<Class<?>> classes = FileSystemUtil.findClass(App.class, "com.main");
 
         Container container = new ComponentContainerCreator(classes).create();
+        WebFilterAnnotatedFilterCreator
         MethodExecutor methodExecutor = new MethodExecutor(container);
         HttpPathMatcher httpPathMatcher = new ControllerHttpPathMatcherCreator(classes).create();
         CompositeConverter converter = new CompositeConverter();

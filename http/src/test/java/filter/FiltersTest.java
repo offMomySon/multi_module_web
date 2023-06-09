@@ -51,7 +51,7 @@ class FiltersTest {
         Filters allFilters = new Filters(combinedFilters);
 
         //when
-        List<FilterWorker> actuals = allFilters.findMatchFilterWorkers(pattern);
+        List<FilterWorker> actuals = allFilters.findFilterWorkers(pattern);
 
         //then
         Assertions.assertThat(actuals).hasSize(expectSize);
@@ -77,7 +77,7 @@ class FiltersTest {
         Filters allFilters = new Filters(combinedFilters);
 
         //when
-        List<FilterWorker> actuals = allFilters.findMatchFilterWorkers(pattern);
+        List<FilterWorker> actuals = allFilters.findFilterWorkers(pattern);
 
         //then
         Assertions.assertThat(actuals).hasSize(2);

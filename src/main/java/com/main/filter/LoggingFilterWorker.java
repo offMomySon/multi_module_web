@@ -1,14 +1,15 @@
 package com.main.filter;
 
 import filter.FilterChain;
-import filter.OrderFilterWorker;
+import filter.FilterWorker;
+import filter.annotation.WebFilter;
 import lombok.extern.slf4j.Slf4j;
 import vo.HttpRequest;
 import vo.HttpResponse;
 
 @Slf4j
-//@WebFilter
-public class LoggingFilterWorker extends OrderFilterWorker {
+@WebFilter
+public class LoggingFilterWorker implements FilterWorker {
 
 
     @Override
@@ -22,10 +23,5 @@ public class LoggingFilterWorker extends OrderFilterWorker {
 
         log.info("response startLine : {}", response.getStartLine());
         log.info("response headerMap : {}", response.getHeader());
-    }
-
-    @Override
-    public int getOrder() {
-        return 0;
     }
 }

@@ -47,7 +47,7 @@ public class Filters {
 
     // todo
     // 받은 입력이 null 이면 excpeiton 이 좋을까?, emtpy 가 좋을까?
-    public List<FilterWorker> findMatchFilterWorkers(String requestUrl) {
+    public List<FilterWorker> findFilterWorkers(String requestUrl) {
         if (Objects.isNull(requestUrl) || requestUrl.isBlank()) {
             return Collections.emptyList();
         }

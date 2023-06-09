@@ -6,7 +6,6 @@ import filter.pattern.PatternMatcherStrategy;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import util.AnnotationUtils;
 
@@ -32,7 +31,7 @@ public class WebFilterAnnotatedFilterCreator extends AbstractFilterCreator {
 
     @Override
     public Filters create() {
-        String filterName = Optional.of(webFilter.filterName()).orElseGet(() -> webFilter.getClass().getSimpleName());
+        String filterName = webFilter.filterName().isEmpty() ? filterWorker.getClass().getSimpleName() : webFilter.filterName();
         List<String> basePaths = Arrays.stream(webFilter.patterns()).collect(Collectors.toUnmodifiableList());
 
         List<Filter> filters = basePaths.stream()

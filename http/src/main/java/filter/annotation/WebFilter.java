@@ -10,5 +10,5 @@ import java.lang.annotation.Target;
 public @interface WebFilter {
     String[] patterns() default {"/*"};
 
-    String filterName();
+    String filterName() default "";
 }

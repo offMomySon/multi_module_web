@@ -16,8 +16,8 @@ public class ApplicationFilterChainCreator {
             throw new RuntimeException("filters is empty.");
         }
 
-        this.filters = filters;
         this.requestExecutor = requestExecutor;
+        this.filters = filters;
     }
 
     public ApplicationFilterChain create(String requestUrl) {

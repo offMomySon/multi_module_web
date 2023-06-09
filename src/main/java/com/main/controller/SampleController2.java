@@ -3,14 +3,14 @@ package com.main.controller;
 import annotation.Controller;
 import annotation.PathVariable;
 import annotation.RequestMapping;
-import web.RequestMethod;
 import annotation.RequestParam;
 import com.main.domain.SampleDomain1;
 import lombok.extern.slf4j.Slf4j;
+import web.RequestMethod;
 
 @Slf4j
 @Controller
-@RequestMapping(value = "/basic/{payMethod}")
+@RequestMapping(value = "/basic2/{payMethod}")
 public class SampleController2 {
     public final SampleDomain1 sampleDomain1;
 

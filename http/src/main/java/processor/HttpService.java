@@ -1,6 +1,7 @@
 package processor;
 
 import config.Config;
+import filter.ApplicationFilterChainCreator;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -13,6 +14,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import vo.HttpRequestReader;
+import vo.HttpResponse;
 
 /***
  * 역할.
@@ -22,10 +24,10 @@ import vo.HttpRequestReader;
 public class HttpService {
     private final ThreadPoolExecutor threadPoolExecutor;
     private final ServerSocket serverSocket;
-    private final HttpRequestExecutor httpRequestExecutor;
+    private final ApplicationFilterChainCreator applicationFilterChainCreator;
 
-    public HttpService(HttpRequestExecutor httpRequestExecutor) {
-        Objects.requireNonNull(httpRequestExecutor);
+    public HttpService(ApplicationFilterChainCreator applicationFilterChainCreator) {
+        Objects.requireNonNull(applicationFilterChainCreator);
 
         try {
             this.threadPoolExecutor = new ThreadPoolExecutor(Config.INSTANCE.getMaxConnection(),
@@ -34,7 +36,7 @@ public class HttpService {
                                                              TimeUnit.MILLISECONDS,
                                                              new LinkedBlockingQueue<>(Config.INSTANCE.getWaitConnection()));
             this.serverSocket = new ServerSocket(Config.INSTANCE.getPort());
-            this.httpRequestExecutor = httpRequestExecutor;
+            this.applicationFilterChainCreator = applicationFilterChainCreator;
         } catch (IOException e) {
             throw new RuntimeException(MessageFormat.format("fail to active server. Reason : `{0}`", e.getCause()), e);
         }
@@ -49,7 +51,7 @@ public class HttpService {
                 InputStream inputStream = socket.getInputStream();
                 OutputStream outputStream = socket.getOutputStream();
 
-                HttpWorker httpWorker = createHttpWorker(inputStream, outputStream, httpRequestExecutor);
+                HttpWorker httpWorker = createHttpWorker(inputStream, outputStream, applicationFilterChainCreator);
 
                 log.info("load request to thread.");
                 threadPoolExecutor.execute(httpWorker);
@@ -59,11 +61,11 @@ public class HttpService {
         }
     }
 
-    private static HttpWorker createHttpWorker(InputStream inputStream, OutputStream outputStream, HttpRequestExecutor httpRequestExecutor) {
+    private static HttpWorker createHttpWorker(InputStream inputStream, OutputStream outputStream, ApplicationFilterChainCreator applicationFilterChainCreator) {
         log.info("start to create requestWorker");
         HttpRequestReader httpRequestReader = new HttpRequestReader(inputStream);
-//        HttpResponseSender httpResponseSender = new HttpResponseSender(outputStream);
-        HttpWorker httpWorker = new HttpWorker(httpRequestReader, null, httpRequestExecutor);
+        HttpResponse httpResponse = new HttpResponse(outputStream);
+        HttpWorker httpWorker = new HttpWorker(httpRequestReader, httpResponse, applicationFilterChainCreator);
         log.info("created requestWorker");
         return httpWorker;
     }

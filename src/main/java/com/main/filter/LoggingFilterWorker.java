@@ -10,8 +10,7 @@ import vo.HttpResponse;
 @Slf4j
 @WebFilter
 public class LoggingFilterWorker implements FilterWorker {
-
-
+    
     @Override
     public void doChain(HttpRequest request, HttpResponse response, FilterChain chain) {
         log.info("request method : {}", request.getHttpMethod());

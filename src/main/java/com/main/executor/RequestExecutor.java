@@ -72,12 +72,11 @@ public class RequestExecutor implements HttpRequestExecutor {
 
     private Object doExecute(RequestMethod method, String requestUrl, QueryParameters queryParameters, BodyContent bodyContent) {
         PathUrl requestPathUrl = PathUrl.from(requestUrl);
-        RequestValues queryParamValues = new RequestValues(queryParameters.getParameterMap());
-
         MatchedMethod matchedMethod = httpPathMatcher.matchJavaMethod(method, requestPathUrl).orElseThrow(() -> new RuntimeException(""));
 
         Method javaMethod = matchedMethod.getJavaMethod();
         PathVariableValue pathVariableValue = matchedMethod.getPathVariableValue();
+        RequestValues queryParamValues = new RequestValues(queryParameters.getParameterMap());
 
         Map<Class<? extends Annotation>, ParameterConverter> classParameterConverterMap = Map.of(RequestParam.class, new RequestParameterConverter(RequestParam.class, queryParamValues),
                                                                                                  PathVariable.class, RequestParameterConverter.from(PathVariable.class, pathVariableValue),

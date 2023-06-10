@@ -27,9 +27,13 @@ public class MethodExecutor {
         Class<?> declaringClass = javaMethod.getDeclaringClass();
 
         Object instance = container.get(declaringClass);
+        log.info("instance : {}", instance);
+        log.info("javaMethod : {}", javaMethod);
 
         Object[] values = Arrays.stream(javaMethod.getParameters())
+            .peek(parameter -> log.info("parameter : `{}`, param class : `{}`", parameter, parameter.getClass()))
             .map(parameterConverter::convertAsValue)
+            .peek(op -> log.info("parameterConverter : {}, {}", op.get(), op.get().getClass()))
             .map(optionalValue -> optionalValue.orElse(EMPTY_VALUE))
             .toArray();
 

@@ -9,11 +9,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import util.AnnotationUtils;
 
-//todo
-// filterWorker class 로만 filter 를 생성하기 위해서는 (to be),
-// filterWorker 내부의 instance class 들을 생성할 수 있어야한다.
-// 생성된 filterWorker 를 가져와서 filter 를 생성한다 (as is).
-// 이런 단점 때문에 tomcat 에서는 FilterDep 만 가지고 있다 필요한 순간 instance 를 가져오는듯.
 public class WebFilterAnnotatedFilterCreator extends AbstractFilterCreator {
     private static final Class<WebFilter> WEB_FILTER_CLASS = WebFilter.class;
 

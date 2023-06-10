@@ -1,6 +1,7 @@
 package processor;
 
 import config.Config;
+import filter.ApplicationFilterChain;
 import filter.ApplicationFilterChainCreator;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,6 +14,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
+import vo.HttpRequest;
 import vo.HttpRequestReader;
 import vo.HttpResponse;
 
@@ -54,11 +56,37 @@ public class HttpService {
                 HttpWorker httpWorker = createHttpWorker(inputStream, outputStream, applicationFilterChainCreator);
 
                 log.info("load request to thread.");
-                threadPoolExecutor.execute(httpWorker);
+                threadPoolExecutor.execute(createWorkerTask(inputStream, outputStream));
             } catch (IOException e) {
                 throw new RuntimeException(MessageFormat.format("I/O fail. Reason : `{0}`", e.getCause()));
             }
         }
+    }
+
+    private Runnable createWorkerTask(InputStream inputStream, OutputStream outputStream) {
+        return () -> {
+            log.info("start to create requestWorker");
+
+            try (HttpRequestReader httpRequestReader = new HttpRequestReader(inputStream);
+                 HttpResponse httpResponse = new HttpResponse(outputStream)) {
+
+                HttpRequest httpRequest = httpRequestReader.read();
+                ApplicationFilterChain applicationFilterChain = applicationFilterChainCreator.create(httpRequest.getHttpUri().getUrl());
+
+                applicationFilterChain.doChain(httpRequest, httpResponse);
+//                HttpWorker httpWorker = createHttpWorker(httpRequestReader, httpResponse, applicationFilterChainCreator);
+//                httpWorker.run();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        };
+    }
+
+    private static HttpWorker createHttpWorker(HttpRequestReader httpRequestReader, HttpResponse httpResponse, ApplicationFilterChainCreator applicationFilterChainCreator) {
+        log.info("start to create requestWorker");
+        HttpWorker httpWorker = new HttpWorker(httpRequestReader, httpResponse, applicationFilterChainCreator);
+        log.info("created requestWorker");
+        return httpWorker;
     }
 
     private static HttpWorker createHttpWorker(InputStream inputStream, OutputStream outputStream, ApplicationFilterChainCreator applicationFilterChainCreator) {

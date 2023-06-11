@@ -25,7 +25,7 @@ public class ApplicationFilterChainCreator {
             throw new RuntimeException("requestUrl is empty.");
         }
 
-        List<FilterWorker> filterWorkers = filters.findFilterWorkers(requestUrl);
-        return new ApplicationFilterChain(requestExecutor, filterWorkers.toArray(FilterWorker[]::new));
+        List<FilterWorker2> filterWorkers = filters.findFilterWorkers(requestUrl);
+        return new ApplicationFilterChain(requestExecutor, filterWorkers.toArray(FilterWorker2[]::new));
     }
 }

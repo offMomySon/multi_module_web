@@ -6,7 +6,6 @@ import com.main.filter.ApplicationWebFilterCreator;
 import container.ComponentContainerCreator;
 import container.Container;
 import converter.CompositeConverter;
-import filter.ApplicationFilterChainCreator;
 import filter.Filters;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -32,10 +31,8 @@ public class App {
         HttpPathMatcher httpPathMatcher = new ControllerHttpPathMatcherCreator(classes).create();
         CompositeConverter converter = new CompositeConverter();
         RequestExecutor requestExecutor = new RequestExecutor(methodExecutor, httpPathMatcher, converter);
-
-        ApplicationFilterChainCreator applicationFilterChainCreator = new ApplicationFilterChainCreator(requestExecutor, filters);
-
-        HttpService httpService = new HttpService(applicationFilterChainCreator);
+        
+        HttpService httpService = new HttpService(requestExecutor, filters);
         httpService.start();
     }
 }

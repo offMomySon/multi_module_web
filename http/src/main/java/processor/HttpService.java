@@ -1,14 +1,18 @@
 package processor;
 
 import config.Config;
-import filter.ApplicationFilterChain;
-import filter.ApplicationFilterChainCreator;
+import filter.FilterWorker2;
+import filter.Filters;
+import filter.chain.BaseFilterWorkerChain;
+import filter.chain.FilterWorkerChain;
+import filter.chain.HttpRequestExecutorChain;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.MessageFormat;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -26,10 +30,12 @@ import vo.HttpResponse;
 public class HttpService {
     private final ThreadPoolExecutor threadPoolExecutor;
     private final ServerSocket serverSocket;
-    private final ApplicationFilterChainCreator applicationFilterChainCreator;
+    private final HttpRequestExecutor httpRequestExecutor;
+    private final Filters filters;
 
-    public HttpService(ApplicationFilterChainCreator applicationFilterChainCreator) {
-        Objects.requireNonNull(applicationFilterChainCreator);
+    public HttpService(HttpRequestExecutor httpRequestExecutor, Filters filters) {
+        Objects.requireNonNull(httpRequestExecutor);
+        Objects.requireNonNull(filters);
 
         try {
             this.threadPoolExecutor = new ThreadPoolExecutor(Config.INSTANCE.getMaxConnection(),
@@ -38,7 +44,8 @@ public class HttpService {
                                                              TimeUnit.MILLISECONDS,
                                                              new LinkedBlockingQueue<>(Config.INSTANCE.getWaitConnection()));
             this.serverSocket = new ServerSocket(Config.INSTANCE.getPort());
-            this.applicationFilterChainCreator = applicationFilterChainCreator;
+            this.httpRequestExecutor = httpRequestExecutor;
+            this.filters = filters;
         } catch (IOException e) {
             throw new RuntimeException(MessageFormat.format("fail to active server. Reason : `{0}`", e.getCause()), e);
         }
@@ -53,10 +60,10 @@ public class HttpService {
                 InputStream inputStream = socket.getInputStream();
                 OutputStream outputStream = socket.getOutputStream();
 
-                HttpWorker httpWorker = createHttpWorker(inputStream, outputStream, applicationFilterChainCreator);
+                Runnable workerTask = createWorkerTask(inputStream, outputStream);
 
-                log.info("load request to thread.");
-                threadPoolExecutor.execute(createWorkerTask(inputStream, outputStream));
+                log.info("load task to thread.");
+                threadPoolExecutor.execute(workerTask);
             } catch (IOException e) {
                 throw new RuntimeException(MessageFormat.format("I/O fail. Reason : `{0}`", e.getCause()));
             }
@@ -64,38 +71,31 @@ public class HttpService {
     }
 
     private Runnable createWorkerTask(InputStream inputStream, OutputStream outputStream) {
+        log.info("create worker task.");
+
         return () -> {
-            log.info("start to create requestWorker");
+            log.info("start task");
 
             try (HttpRequestReader httpRequestReader = new HttpRequestReader(inputStream);
                  HttpResponse httpResponse = new HttpResponse(outputStream)) {
-
                 HttpRequest httpRequest = httpRequestReader.read();
-                ApplicationFilterChain applicationFilterChain = applicationFilterChainCreator.create(httpRequest.getHttpUri().getUrl());
 
-                applicationFilterChain.doChain(httpRequest, httpResponse);
-//                HttpWorker httpWorker = createHttpWorker(httpRequestReader, httpResponse, applicationFilterChainCreator);
-//                httpWorker.run();
+                List<FilterWorker2> filterWorkers = filters.findFilterWorkers(httpRequest.getHttpUri().getUrl());
+
+                log.info("create filter chain");
+                FilterWorkerChain lastFilterWorkerChain = new HttpRequestExecutorChain(httpRequestExecutor);
+                FilterWorkerChain filterWorkerChain = filterWorkers.stream()
+                    .reduce(
+                        lastFilterWorkerChain,
+                        BaseFilterWorkerChain::new,
+                        (pw, pw2) -> null);
+
+                log.info("execute filter chain");
+                filterWorkerChain.execute(httpRequest, httpResponse);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         };
-    }
-
-    private static HttpWorker createHttpWorker(HttpRequestReader httpRequestReader, HttpResponse httpResponse, ApplicationFilterChainCreator applicationFilterChainCreator) {
-        log.info("start to create requestWorker");
-        HttpWorker httpWorker = new HttpWorker(httpRequestReader, httpResponse, applicationFilterChainCreator);
-        log.info("created requestWorker");
-        return httpWorker;
-    }
-
-    private static HttpWorker createHttpWorker(InputStream inputStream, OutputStream outputStream, ApplicationFilterChainCreator applicationFilterChainCreator) {
-        log.info("start to create requestWorker");
-        HttpRequestReader httpRequestReader = new HttpRequestReader(inputStream);
-        HttpResponse httpResponse = new HttpResponse(outputStream);
-        HttpWorker httpWorker = new HttpWorker(httpRequestReader, httpResponse, applicationFilterChainCreator);
-        log.info("created requestWorker");
-        return httpWorker;
     }
 
     private Socket acceptSocket() throws IOException {

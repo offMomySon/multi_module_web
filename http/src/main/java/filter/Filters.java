@@ -46,7 +46,7 @@ public class Filters {
 
     // todo
     // 받은 입력이 null 이면 excpeiton 이 좋을까?, emtpy 가 좋을까?
-    public List<FilterWorker> findFilterWorkers(String requestUrl) {
+    public List<FilterWorker2> findFilterWorkers(String requestUrl) {
         if (Objects.isNull(requestUrl) || requestUrl.isBlank()) {
             return Collections.emptyList();
         }
@@ -68,29 +68,29 @@ public class Filters {
 
     private static class MatchedFilter {
         private final String filterName;
-        private final FilterWorker filterWorker;
+        private final FilterWorker2 filterWorker2;
 
-        public MatchedFilter(String filterName, FilterWorker filterWorker) {
+        public MatchedFilter(String filterName, FilterWorker2 filterWorker2) {
             if (Objects.isNull(filterName) || filterName.isBlank()) {
                 throw new RuntimeException("filterName is empty.");
             }
-            Objects.requireNonNull(filterWorker);
+            Objects.requireNonNull(filterWorker2);
 
             this.filterName = filterName;
-            this.filterWorker = filterWorker;
+            this.filterWorker2 = filterWorker2;
         }
 
         public static MatchedFilter from(Filter filter) {
             Objects.requireNonNull(filter);
 
             String filterName = filter.getName();
-            FilterWorker filterWorker = filter.getFilterWorker();
+            FilterWorker2 filterWorker2 = filter.getFilterWorker2();
 
-            return new MatchedFilter(filterName, filterWorker);
+            return new MatchedFilter(filterName, filterWorker2);
         }
 
-        public FilterWorker getFilterWorker() {
-            return filterWorker;
+        public FilterWorker2 getFilterWorker() {
+            return filterWorker2;
         }
 
         @Override

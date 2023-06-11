@@ -51,11 +51,11 @@ class FiltersTest {
         Filters allFilters = new Filters(combinedFilters);
 
         //when
-        List<FilterWorker> actuals = allFilters.findFilterWorkers(pattern);
+        List<FilterWorker2> actuals = allFilters.findFilterWorkers(pattern);
 
         //then
         Assertions.assertThat(actuals).hasSize(expectSize);
-        FilterWorker[] expectFilterWorkers = filters.stream().map(Filter::getFilterWorker).collect(Collectors.toUnmodifiableList()).toArray(FilterWorker[]::new);
+        FilterWorker2[] expectFilterWorkers = filters.stream().map(Filter::getFilterWorker2).collect(Collectors.toUnmodifiableList()).toArray(FilterWorker2[]::new);
         Assertions.assertThat(actuals).containsOnly(expectFilterWorkers);
     }
 
@@ -77,23 +77,35 @@ class FiltersTest {
         Filters allFilters = new Filters(combinedFilters);
 
         //when
-        List<FilterWorker> actuals = allFilters.findFilterWorkers(pattern);
+        List<FilterWorker2> actuals = allFilters.findFilterWorkers(pattern);
 
         //then
         Assertions.assertThat(actuals).hasSize(2);
-        FilterWorker[] expectFilterWorkers = new FilterWorker[]{baseFilterWorker, otherFilterWorker};
+        FilterWorker2[] expectFilterWorkers = new FilterWorker2[]{baseFilterWorker, otherFilterWorker};
         Assertions.assertThat(actuals).containsOnly(expectFilterWorkers);
     }
 
-    public static class TestFilterWorker implements FilterWorker {
+    public static class TestFilterWorker implements FilterWorker2 {
         @Override
-        public void doChain(HttpRequest request, HttpResponse response, FilterChain chain) {
+        public void prevExecute(HttpRequest httpRequest, HttpResponse httpResponse) {
+
+        }
+
+        @Override
+        public void postExecute(HttpRequest httpRequest, HttpResponse httpResponse) {
+
         }
     }
 
-    public static class TestFilterWorker2 implements FilterWorker {
+    public static class TestFilterWorker2 implements FilterWorker2 {
         @Override
-        public void doChain(HttpRequest request, HttpResponse response, FilterChain chain) {
+        public void prevExecute(HttpRequest httpRequest, HttpResponse httpResponse) {
+
+        }
+
+        @Override
+        public void postExecute(HttpRequest httpRequest, HttpResponse httpResponse) {
+
         }
     }
 }

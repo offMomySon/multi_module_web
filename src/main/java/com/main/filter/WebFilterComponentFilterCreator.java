@@ -2,7 +2,7 @@ package com.main.filter;
 
 import annotation.Component;
 import container.Container;
-import filter.FilterWorker;
+import filter.FilterWorker2;
 import filter.Filters;
 import filter.WebFilterAnnotatedFilterCreator;
 import filter.annotation.WebFilter;
@@ -30,7 +30,7 @@ public class WebFilterComponentFilterCreator {
 
         Class<?>[] memberClasses = AnnotationUtils.peekFieldsType(filterWorkerClazz, COMPONENT_CLASS).toArray(Class<?>[]::new);
         Object[] memberObjects = Arrays.stream(memberClasses).map(container::get).toArray(Object[]::new);
-        FilterWorker filterWorker = (FilterWorker) newObject(filterWorkerClazz, memberClasses, memberObjects);
+        FilterWorker2 filterWorker = (FilterWorker2) newObject(filterWorkerClazz, memberClasses, memberObjects);
 
         WebFilterAnnotatedFilterCreator filterCreator = new WebFilterAnnotatedFilterCreator(filterWorker);
         return filterCreator.create();

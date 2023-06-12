@@ -4,10 +4,10 @@ import annotation.PathVariable;
 import annotation.RequestBody;
 import annotation.RequestParam;
 import converter.CompositeParameterConverter;
-import converter.Converter;
 import converter.ParameterConverter;
 import converter.RequestBodyParameterConverter;
 import converter.RequestParameterConverter;
+import converter.base.Converter;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -24,7 +24,7 @@ import vo.HttpRequest;
 import vo.HttpResponse;
 import vo.HttpResponseWriter;
 import vo.QueryParameters;
-import vo.RequestValues;
+import vo.RequestParameters;
 import web.RequestMethod;
 import static method.BaseHttpPathMatcher.MatchedMethod;
 
@@ -48,26 +48,23 @@ public class RequestExecutor implements HttpRequestExecutor {
         Objects.requireNonNull(request);
         Objects.requireNonNull(response);
 
-        try {
-            RequestMethod method = RequestMethod.find(request.getHttpMethod().name());
-            String requestUrl = request.getHttpUri().getUrl();
-            QueryParameters queryParameters = request.getQueryParameters();
-            BodyContent bodyContent = BodyContent.from(request.getBodyInputStream());
+        RequestMethod method = RequestMethod.find(request.getHttpMethod().name());
+        String requestUrl = request.getHttpUri().getUrl();
+        QueryParameters queryParameters = request.getQueryParameters();
+        BodyContent bodyContent = BodyContent.from(request.getBodyInputStream());
 
-            Object o = doExecute(method, requestUrl, queryParameters, bodyContent);
+        Object o = doExecute(method, requestUrl, queryParameters, bodyContent);
 
-            InputStream inputStream = converter.convertToInputStream(o);
+        InputStream inputStream = converter.convertToInputStream(o);
 
-            response.setStartLine("HTTP/1.1 200 OK");
-            response.appendHeader(Map.of(
-                "Date", "MON, 27 Jul 2023 12:28:53 GMT",
-                "Host", "localhost:8080",
-                "Content-Type", "text/html; charset=UTF-8"));
-            HttpResponseWriter sender = response.getSender();
-            sender.send(inputStream);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        response.setStartLine("HTTP/1.1 200 OK");
+        response.appendHeader(Map.of(
+            "Date", "MON, 27 Jul 2023 12:28:53 GMT",
+            "Host", "localhost:8080",
+            "Content-Type", "text/html; charset=UTF-8"));
+        HttpResponseWriter sender = response.getSender();
+        sender.send(inputStream);
+
     }
 
     private Object doExecute(RequestMethod method, String requestUrl, QueryParameters queryParameters, BodyContent bodyContent) {
@@ -76,7 +73,7 @@ public class RequestExecutor implements HttpRequestExecutor {
 
         Method javaMethod = matchedMethod.getJavaMethod();
         PathVariableValue pathVariableValue = matchedMethod.getPathVariableValue();
-        RequestValues queryParamValues = new RequestValues(queryParameters.getParameterMap());
+        RequestParameters queryParamValues = new RequestParameters(queryParameters.getParameterMap());
 
         Map<Class<? extends Annotation>, ParameterConverter> classParameterConverterMap = Map.of(RequestParam.class, new RequestParameterConverter(RequestParam.class, queryParamValues),
                                                                                                  PathVariable.class, RequestParameterConverter.from(PathVariable.class, pathVariableValue),

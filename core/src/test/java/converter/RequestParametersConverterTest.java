@@ -7,8 +7,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -17,9 +19,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import util.AnnotationUtils;
-import vo.RequestValues;
+import vo.RequestParameters;
 
-class RequestParameterConverterTest {
+class RequestParametersConverterTest {
 
     @DisplayName("변환 가능한 어노테인션을 가진 parameter 은 올바르게 동작합니다.")
     @ParameterizedTest
@@ -28,7 +30,7 @@ class RequestParameterConverterTest {
         //given
         RequestParameterConverter converter = new RequestParameterConverter(
             annotationType,
-            new RequestValues(Map.of("arg0", "1", "arg1", "2", "rp", "1")));
+            new RequestParameters(Map.of("arg0", "1", "arg1", "2", "rp", "1")));
 
         //when
         Throwable actual = Assertions.catchThrowable(() -> converter.convertAsValue(parameter));
@@ -44,7 +46,7 @@ class RequestParameterConverterTest {
         Parameter requestBodyAnnotatedParameter = TestClass.getParameter(RequestParam.class);
         RequestParameterConverter converter = new RequestParameterConverter(
             PathVariable.class,
-            new RequestValues(new HashMap<>()));
+            new RequestParameters(new HashMap<>()));
 
         //when
         Optional<Object> actual = converter.convertAsValue(requestBodyAnnotatedParameter);
@@ -92,14 +94,14 @@ class RequestParameterConverterTest {
     void test5() throws Exception {
         //given
         Parameter parameter = TestClass.getParameter(PathVariable.class);
-        RequestValues existValueRequestValues = TestClass.getExistValueReuqestParameters();
+        RequestParameters existValueRequestParameters = TestClass.getExistValueReuqestParameters();
         RequestParameterConverter converter = new RequestParameterConverter(
             PathVariable.class,
-            existValueRequestValues
+            existValueRequestParameters
         );
 
         String parameterName = parameter.getName();
-        String expect = existValueRequestValues.get(parameterName);
+        String expect = existValueRequestParameters.get(parameterName);
 
         //when
         Optional<Object> actual = converter.convertAsValue(parameter);
@@ -108,6 +110,33 @@ class RequestParameterConverterTest {
         Assertions.assertThat(actual).isPresent();
         Object actualValue = actual.get();
         Assertions.assertThat(actualValue).isEqualTo(expect);
+    }
+
+    @DisplayName("모든 타입에 대한 값 변환이 가능합니다.")
+    @Test
+    void test() throws Exception {
+        //given
+        Parameter[] parameters = TestAllTypeParameterClass.getMethod().getParameters();
+        RequestParameters requestParameters = TestAllTypeParameterClass.getRequestParameters();
+        RequestParameterConverter converter = new RequestParameterConverter(RequestParam.class, requestParameters);
+
+        List<Class<?>> expectTypes = Arrays.stream(parameters)
+            .map(Parameter::getType)
+            .filter(type -> !type.isPrimitive())
+            .distinct()
+            .collect(Collectors.toUnmodifiableList());
+
+        //when
+        List<Class<?>> actualTypes = Arrays.stream(parameters)
+            .map(converter::convertAsValue)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .map(Object::getClass)
+            .distinct()
+            .collect(Collectors.toUnmodifiableList());
+
+        //then
+        Assertions.assertThat(actualTypes).containsExactlyInAnyOrderElementsOf(expectTypes);
     }
 
     public static Stream<Arguments> provideAbleConvertAnnotatedParameters() {
@@ -125,15 +154,15 @@ class RequestParameterConverterTest {
                                     @RequestBody String requestBody) {
         }
 
-        public static RequestValues getDoesNotExistValueRequestParameters() {
+        public static RequestParameters getDoesNotExistValueRequestParameters() {
             Map<String, String> doesNotExistValue = Map.of("doesNotExistKey", "value");
-            return new RequestValues(doesNotExistValue);
+            return new RequestParameters(doesNotExistValue);
         }
 
-        public static RequestValues getExistValueReuqestParameters() {
+        public static RequestParameters getExistValueReuqestParameters() {
             Map<String, String> existValue = Map.of("arg0", "arg0",
                                                     "rp", "requestParam");
-            return new RequestValues(existValue);
+            return new RequestParameters(existValue);
         }
 
         private static Method getAnnotatedMethod() {
@@ -154,14 +183,67 @@ class RequestParameterConverterTest {
         }
     }
 
+    private static class TestAllTypeParameterClass {
+        public void annotatedMethod(
+            @RequestParam(value = "boolean") boolean argboolean,
+            @RequestParam(value = "Boolean") Boolean argBoolean,
+            @RequestParam(value = "int") int argint,
+            @RequestParam(value = "Integer") Integer argInteger,
+            @RequestParam(value = "long") long arglong,
+            @RequestParam(value = "Long") Long argLong,
+            @RequestParam(value = "float") float argfloat,
+            @RequestParam(value = "Float") Float argFloat,
+            @RequestParam(value = "double") double argdouble,
+            @RequestParam(value = "Double") Double argDouble,
+            @RequestParam(value = "String") String argString
+        ) {
+        }
+
+
+        private static RequestParameters getRequestParam() {
+            return new RequestParameters(Map.of());
+        }
+
+        private static Method getMethod() {
+            try {
+                return TestAllTypeParameterClass.class.getDeclaredMethod("annotatedMethod",
+                                                                         boolean.class, Boolean.class,
+                                                                         int.class, Integer.class,
+                                                                         long.class, Long.class,
+                                                                         float.class, Float.class,
+                                                                         double.class, Double.class,
+                                                                         String.class);
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        private static RequestParameters getRequestParameters() {
+            Map<String, String> value = new HashMap<>();
+            value.put("boolean", "false");
+            value.put("Boolean", "false");
+            value.put("int", "33");
+            value.put("Integer", "333");
+            value.put("long", "44");
+            value.put("Long", "444");
+            value.put("float", "3.14");
+            value.put("Float", "3.14");
+            value.put("double", "3.111111");
+            value.put("Double", "3.141241");
+            value.put("String", "string");
+            return new RequestParameters(value);
+        }
+
+    }
+
     private static class TestClassDoesNotRequired {
         public void annotatedMethod(@RequestParam(value = "rp", required = false) String requestParam) {
 
         }
 
-        public static RequestValues getDoesNotExistValueRequestParameters() {
+        public static RequestParameters getDoesNotExistValueRequestParameters() {
             Map<String, String> doesNotExistValue = Map.of("doesNotExistKey", "value");
-            return new RequestValues(doesNotExistValue);
+            return new RequestParameters(doesNotExistValue);
         }
 
         private static Method getAnnotatedMethod() {

@@ -1,4 +1,4 @@
-package converter;
+package converter.base;
 
 import java.io.File;
 import java.io.InputStream;
@@ -35,7 +35,7 @@ public class CompositeConverter implements Converter {
     }
 
     @Override
-    public InputStream convertToInputStream(Object object) throws Exception {
+    public InputStream convertToInputStream(Object object) {
         Class<?> key = object.getClass();
 
         Converter converter = converters.getOrDefault(key, emptyConverter);

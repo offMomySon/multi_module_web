@@ -6,10 +6,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class RequestValues {
+public class RequestParameters {
     private final Map<String, String> values;
 
-    public RequestValues(Map<String, String> values) {
+    public RequestParameters(Map<String, String> values) {
         if (Objects.isNull(values)) {
             throw new RuntimeException("values is null.");
         }
@@ -43,25 +43,25 @@ public class RequestValues {
         }
         return valueOrNull;
     }
-
-    public RequestValues merge(RequestValues other) {
+    
+    public RequestParameters merge(RequestParameters other) {
         Map<String, String> newValues = new HashMap<>();
 
         values.forEach((key, value) -> newValues.merge(key, value, (prev, curr) -> prev));
         other.values.forEach((key, value) -> newValues.merge(key, value, (prev, curr) -> prev));
 
-        return new RequestValues(newValues);
+        return new RequestParameters(newValues);
     }
 
-    public static RequestValues empty() {
-        return new RequestValues(Collections.emptyMap());
+    public static RequestParameters empty() {
+        return new RequestParameters(Collections.emptyMap());
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        RequestValues that = (RequestValues) o;
+        RequestParameters that = (RequestParameters) o;
         return Objects.equals(values, that.values);
     }
 

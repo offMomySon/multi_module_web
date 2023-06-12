@@ -9,7 +9,7 @@ import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import vo.RequestValues;
+import vo.RequestParameters;
 
 class MethodExecutorTest {
 
@@ -22,7 +22,7 @@ class MethodExecutorTest {
         Method method = TestClass.getMethod();
 
         //when
-        Throwable actual = Assertions.catchThrowable(() -> methodExecutor.execute(method, new RequestParameterConverter(RequestParam.class, new RequestValues(Map.of("arg0", "failCase")))));
+        Throwable actual = Assertions.catchThrowable(() -> methodExecutor.execute(method, new RequestParameterConverter(RequestParam.class, new RequestParameters(Map.of("arg0", "failCase")))));
 
         //then
         Assertions.assertThat(actual).isNotNull();
@@ -35,11 +35,11 @@ class MethodExecutorTest {
         String mapValue = "length";
         Method method = TestClass.getMethod();
         Container container = new Container(Map.of(TestClass.class, new TestClass()));
-        RequestValues requestValues = new RequestValues(Map.of("arg0", mapValue));
+        RequestParameters requestParameters = new RequestParameters(Map.of("arg0", mapValue));
         MethodExecutor methodExecutor = new MethodExecutor(container);
 
         //when
-        Optional<Object> actual = methodExecutor.execute(method, new RequestParameterConverter(RequestParam.class, requestValues));
+        Optional<Object> actual = methodExecutor.execute(method, new RequestParameterConverter(RequestParam.class, requestParameters));
 
         //then
         Assertions.assertThat(actual).isPresent();

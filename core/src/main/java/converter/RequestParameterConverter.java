@@ -2,6 +2,7 @@ package converter;
 
 import annotation.PathVariable;
 import annotation.RequestParam;
+import converter.base.ObjectConverter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
 import java.util.Objects;
@@ -9,27 +10,28 @@ import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import method.segment.PathVariableValue;
 import util.AnnotationUtils;
-import vo.RequestValues;
+import vo.RequestParameters;
 
 @Slf4j
 public class RequestParameterConverter implements ParameterConverter {
+    private static final ObjectConverter objectConverter = new ObjectConverter();
 
     private final Class<?> targetAnnotationClazz;
-    private final RequestValues requestValues;
+    private final RequestParameters requestParameters;
 
-    public RequestParameterConverter(Class<?> targetAnnotationClazz, RequestValues requestValues) {
+    public RequestParameterConverter(Class<?> targetAnnotationClazz, RequestParameters requestParameters) {
         Objects.requireNonNull(targetAnnotationClazz);
-        Objects.requireNonNull(requestValues);
+        Objects.requireNonNull(requestParameters);
 
         this.targetAnnotationClazz = targetAnnotationClazz;
-        this.requestValues = requestValues;
+        this.requestParameters = requestParameters;
     }
 
     public static RequestParameterConverter from(Class<?> targetAnnotationClazz, PathVariableValue pathVariableValue) {
         Objects.requireNonNull(targetAnnotationClazz);
         Objects.requireNonNull(pathVariableValue);
 
-        return new RequestParameterConverter(targetAnnotationClazz, new RequestValues(pathVariableValue.getValues()));
+        return new RequestParameterConverter(targetAnnotationClazz, new RequestParameters(pathVariableValue.getValues()));
     }
 
     @Override
@@ -52,14 +54,24 @@ public class RequestParameterConverter implements ParameterConverter {
         }
 
         String defaultValue = annotationValue.getDefaultValue().orElse(null);
-        String foundValueOrNull = requestValues.getOrDefault(bindName, defaultValue);
+        String foundValueOrNull = requestParameters.getOrDefault(bindName, defaultValue);
 
         boolean doesNotPossibleConvert = Objects.isNull(foundValueOrNull) && annotationValue.isRequired();
         if (doesNotPossibleConvert) {
             throw new RuntimeException("does not possible convert.");
         }
 
-        return Optional.ofNullable(foundValueOrNull);
+        if (Objects.isNull(foundValueOrNull)) {
+            return Optional.empty();
+        }
+
+        boolean doesNotNecessaryTypeConvert = Objects.equals(foundValueOrNull.getClass(), parameter.getType());
+        if (doesNotNecessaryTypeConvert) {
+            return Optional.of(foundValueOrNull);
+        }
+
+        Object convertedValue = objectConverter.convert(foundValueOrNull, parameter.getType());
+        return Optional.of(convertedValue);
     }
 
 
@@ -106,5 +118,4 @@ public class RequestParameterConverter implements ParameterConverter {
             return required;
         }
     }
-
 }

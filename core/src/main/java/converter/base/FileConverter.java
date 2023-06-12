@@ -1,4 +1,4 @@
-package converter;
+package converter.base;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,12 +9,16 @@ import util.IoUtils;
 
 public class FileConverter implements Converter {
     @Override
-    public InputStream convertToInputStream(Object object) throws Exception {
+    public InputStream convertToInputStream(Object object) {
         Objects.requireNonNull(object);
         return convertToInputStream((File) object);
     }
 
-    public InputStream convertToInputStream(File fIle) throws FileNotFoundException {
-        return IoUtils.createBufferedInputStream(new FileInputStream(fIle));
+    public InputStream convertToInputStream(File fIle) {
+        try {
+            return IoUtils.createBufferedInputStream(new FileInputStream(fIle));
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

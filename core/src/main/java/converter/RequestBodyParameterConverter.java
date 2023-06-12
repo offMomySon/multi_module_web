@@ -6,9 +6,11 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import java.lang.reflect.Parameter;
 import java.util.Objects;
 import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 import util.AnnotationUtils;
 import vo.BodyContent;
 
+@Slf4j
 public class RequestBodyParameterConverter implements ParameterConverter {
     private static final Class<RequestBody> REQUEST_BODY_CLASS = RequestBody.class;
     private static final JsonMapper JSON_MAPPER = new JsonMapper();
@@ -43,14 +45,14 @@ public class RequestBodyParameterConverter implements ParameterConverter {
         }
 
         return Optional.ofNullable(bodyContent.getValue())
-            .map(bodyMessage -> createObject(parameter));
+            .map(bodyMessage -> createObject(parameter, bodyMessage));
     }
 
-    private Object createObject(Parameter parameter) {
+    private Object createObject(Parameter parameter, String bodyMessage) {
         try {
             Class<?> type = parameter.getType();
-            String bodyMessage = bodyContent.getValue();
-            System.out.println(type);
+            log.info("type : `{}`", type);
+            log.info("bodyMessage : `{}`", bodyMessage);
 
             return JSON_MAPPER.readValue(bodyMessage, type);
         } catch (JsonProcessingException e) {

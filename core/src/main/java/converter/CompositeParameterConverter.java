@@ -8,7 +8,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class CompositeParameterConverter implements ParameterConverter {
     private final Map<Class<? extends Annotation>, ParameterConverter> parameterConverters;
 
@@ -34,6 +36,7 @@ public class CompositeParameterConverter implements ParameterConverter {
         Objects.requireNonNull(parameter);
 
         ParameterConverter foundConverter = findParameterConverter(parameter);
+        log.info("foundConverter : {}", foundConverter);
 
         return foundConverter.convertAsValue(parameter);
     }
@@ -44,6 +47,7 @@ public class CompositeParameterConverter implements ParameterConverter {
             .collect(Collectors.toUnmodifiableList());
 
         return annotationTypes.stream()
+            .peek(annotationType -> log.info("annotationType : {}", annotationType))
             .filter(parameterConverters::containsKey)
             .map(parameterConverters::get)
             .findAny()

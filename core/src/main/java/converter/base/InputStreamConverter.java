@@ -1,18 +1,17 @@
-package converter;
+package converter.base;
 
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Objects;
 import util.IoUtils;
 
 public class InputStreamConverter implements Converter {
     @Override
-    public InputStream convertToInputStream(Object object) throws Exception {
+    public InputStream convertToInputStream(Object object) {
         Objects.requireNonNull(object);
         return convertToInputStream((InputStream) object);
     }
 
-    public InputStream convertToInputStream(InputStream inputStream) throws FileNotFoundException {
+    public InputStream convertToInputStream(InputStream inputStream) {
         return IoUtils.createBufferedInputStream(inputStream);
     }
 }

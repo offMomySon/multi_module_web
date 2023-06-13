@@ -1,5 +1,5 @@
 plugins {
-    id 'java'
+    id 'java-library'
 }
 
 group 'org.example'
@@ -10,8 +10,8 @@ repositories {
 }
 
 dependencies {
-    implementation project(':core')
-    implementation project(':http')
+    implementation project(':web')
+
 
     //logback
     implementation 'ch.qos.logback:logback-core:1.2.3'

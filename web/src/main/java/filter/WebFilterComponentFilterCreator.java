@@ -1,10 +1,7 @@
-package com.main.filter;
+package filter;
 
 import annotation.Component;
 import container.Container;
-import filter.FilterWorker2;
-import filter.Filters;
-import filter.WebFilterAnnotatedFilterCreator;
 import filter.annotation.WebFilter;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;

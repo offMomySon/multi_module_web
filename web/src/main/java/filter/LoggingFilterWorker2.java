@@ -1,6 +1,5 @@
-package com.main.filter;
+package filter;
 
-import filter.FilterWorker2;
 import filter.annotation.WebFilter;
 import lombok.extern.slf4j.Slf4j;
 import vo.HttpRequest;

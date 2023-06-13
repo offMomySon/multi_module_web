@@ -1,0 +1,14 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    // todo
+    //  관계를 숨기지 않아도 괜찮은가..? -> implement
+    api project(':http')
+    api project(':connection')
+    api project(':context')
+    
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}

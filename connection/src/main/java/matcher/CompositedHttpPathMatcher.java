@@ -8,6 +8,10 @@ import matcher.segment.PathUrl;
 import web.RequestMethod;
 import static matcher.BaseHttpPathMatcher.MatchedMethod;
 
+// http
+// link
+// context
+
 // n 개의 methodResolver 를 1개 처럼 다룬다.
 public class CompositedHttpPathMatcher implements HttpPathMatcher {
     private final List<BaseHttpPathMatcher> baseHttpPathMatchers;

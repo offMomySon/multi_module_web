@@ -12,8 +12,8 @@ import java.util.stream.Collectors;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
+import matcher.RequestMethod;
 import util.AnnotationUtils;
-import web.RequestMethod;
 
 public class RequestMappingValueExtractor {
     private static final Class<RequestMapping> REQUEST_MAPPING_CLASS = RequestMapping.class;

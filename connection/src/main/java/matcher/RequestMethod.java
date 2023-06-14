@@ -1,4 +1,4 @@
-package web;
+package matcher;
 
 import java.text.MessageFormat;
 import java.util.Arrays;

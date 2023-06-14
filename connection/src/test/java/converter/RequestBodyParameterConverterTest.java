@@ -13,7 +13,6 @@ import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import vo.BodyContent;
 
 class RequestBodyParameterConverterTest {
 

@@ -7,11 +7,11 @@ import java.util.stream.Collectors;
 import lombok.NonNull;
 import matcher.BaseHttpPathMatcher;
 import matcher.PathUrlMatcher;
+import matcher.RequestMethod;
 import matcher.creator.RequestMappingValueExtractor.RequestMappedMethod;
 import matcher.segment.PathUrl;
 import matcher.segment.SegmentChunkFactory;
 import util.AnnotationUtils;
-import web.RequestMethod;
 
 public class JavaMethodPathMatcherCreator {
     private final static Class<RequestMapping> REQUEST_MAPPING_CLASS = RequestMapping.class;

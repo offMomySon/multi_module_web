@@ -6,7 +6,7 @@ import annotation.RequestMapping;
 import annotation.RequestParam;
 import com.main.domain.SampleDomain1;
 import lombok.extern.slf4j.Slf4j;
-import web.RequestMethod;
+import matcher.RequestMethod;
 
 @Slf4j
 @Controller

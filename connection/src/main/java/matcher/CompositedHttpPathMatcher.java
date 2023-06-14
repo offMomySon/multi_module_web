@@ -5,7 +5,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import matcher.segment.PathUrl;
-import web.RequestMethod;
 import static matcher.BaseHttpPathMatcher.MatchedMethod;
 
 // http

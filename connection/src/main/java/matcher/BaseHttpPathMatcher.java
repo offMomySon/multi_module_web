@@ -6,7 +6,6 @@ import java.util.Optional;
 import lombok.Getter;
 import matcher.segment.PathUrl;
 import matcher.segment.PathVariableValue;
-import web.RequestMethod;
 
 public class BaseHttpPathMatcher implements HttpPathMatcher {
     private final RequestMethod requestMethod;

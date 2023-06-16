@@ -43,7 +43,6 @@ public class FileSystemUtil {
         try {
             Path rootPath = getRoot(bootClass);
             Path findPath = rootPath.resolve(findPackage.replace(".", "/"));
-            log.info("rootPath : {}", rootPath);
             log.info("findPath : {}", findPath);
 
             try (Stream<Path> pathStream = Files.walk(findPath)) {
@@ -65,19 +64,24 @@ public class FileSystemUtil {
     }
 
     private static Path getRoot(Class<?> bootClass) throws IOException, URISyntaxException {
-        URI rootUri = bootClass.getResource("").toURI();
+        URI classDirectoryUri = bootClass.getResource("").toURI();
+        log.info("classDirectoryUri : {}", classDirectoryUri);
 
-        if (isJarFileSystem(rootUri)) {
-            FileSystem jarFileSystem = FileSystems.newFileSystem(rootUri, Collections.emptyMap());
-            return jarFileSystem.getPath("/");
+        if (isJarFileSystem(classDirectoryUri)) {
+            FileSystem jarFileSystem = FileSystems.newFileSystem(classDirectoryUri, Collections.emptyMap());
+            Path rootPath = jarFileSystem.getPath("/");
+            log.info("rootPath : {}", rootPath);
+            return rootPath;
         }
 
-        rootUri = bootClass.getResource("/").toURI();
+        URI rootUri = bootClass.getResource("/").toURI();
+        log.info("rootUri : {}", rootUri);
         return Paths.get(rootUri);
     }
 
     private static boolean isJarFileSystem(URI uri) {
         String scheme = uri.getScheme();
+        log.info("scheme : {}", scheme);
 
         if ("jar".equalsIgnoreCase(scheme)) {
             return true;

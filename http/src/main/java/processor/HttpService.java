@@ -31,10 +31,12 @@ public class HttpService {
     private final ThreadPoolExecutor threadPoolExecutor;
     private final ServerSocket serverSocket;
     private final HttpRequestExecutor httpRequestExecutor;
+    private final HttpRequestExecutor httpStaticResourceExecutor;
     private final Filters filters;
 
-    public HttpService(HttpRequestExecutor httpRequestExecutor, Filters filters) {
+    public HttpService(HttpRequestExecutor httpRequestExecutor, HttpRequestExecutor httpStaticResourceExecutor, Filters filters) {
         Objects.requireNonNull(httpRequestExecutor);
+        Objects.requireNonNull(httpStaticResourceExecutor);
         Objects.requireNonNull(filters);
 
         try {
@@ -45,6 +47,7 @@ public class HttpService {
                                                              new LinkedBlockingQueue<>(Config.INSTANCE.getWaitConnection()));
             this.serverSocket = new ServerSocket(Config.INSTANCE.getPort());
             this.httpRequestExecutor = httpRequestExecutor;
+            this.httpStaticResourceExecutor = httpStaticResourceExecutor;
             this.filters = filters;
         } catch (IOException e) {
             throw new RuntimeException(MessageFormat.format("fail to active server. Reason : `{0}`", e.getCause()), e);
@@ -83,7 +86,7 @@ public class HttpService {
                 List<FilterWorker2> filterWorkers = filters.findFilterWorkers(httpRequest.getHttpUri().getUrl());
 
                 log.info("create filter chain");
-                FilterWorkerChain lastFilterWorkerChain = new HttpRequestExecutorChain(httpRequestExecutor);
+                FilterWorkerChain lastFilterWorkerChain = new HttpRequestExecutorChain(httpStaticResourceExecutor, httpRequestExecutor);
                 FilterWorkerChain filterWorkerChain = filterWorkers.stream()
                     .reduce(
                         lastFilterWorkerChain,

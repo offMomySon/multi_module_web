@@ -52,4 +52,13 @@ public class BaseHttpPathMatcher implements HttpPathMatcher {
             this.pathVariableValue = pathVariableValue;
         }
     }
+
+    @Override
+    public String toString() {
+        return "BaseHttpPathMatcher{" +
+            "requestMethod=" + requestMethod +
+            ", baseUrlPathMatcher=" + baseUrlPathMatcher +
+            ", javaMethod=" + javaMethod +
+            '}';
+    }
 }

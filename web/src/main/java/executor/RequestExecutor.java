@@ -44,7 +44,7 @@ public class RequestExecutor implements HttpRequestExecutor {
     }
 
     @Override
-    public void execute(HttpRequest request, HttpResponse response) {
+    public boolean execute(HttpRequest request, HttpResponse response) {
         Objects.requireNonNull(request);
         Objects.requireNonNull(response);
 
@@ -65,6 +65,7 @@ public class RequestExecutor implements HttpRequestExecutor {
         HttpResponseWriter sender = response.getSender();
         sender.send(inputStream);
 
+        return true;
     }
 
     private Object doExecute(RequestMethod method, String requestUrl, QueryParameters queryParameters, BodyContent bodyContent) {

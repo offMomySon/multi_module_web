@@ -10,8 +10,7 @@ repositories {
 }
 
 dependencies {
-    implementation project(':web')
-
+    implementation project(':engine')
 
     //logback
     implementation 'ch.qos.logback:logback-core:1.2.3'

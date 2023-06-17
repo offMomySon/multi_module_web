@@ -6,9 +6,10 @@ dependencies {
     // todo
     //  관계를 숨기지 않아도 괜찮은가?
     //  지금은 implement 가 아닌 api 를 사용하여 이용하는 모듈에 모두 접근가능하다.
-    //  그렇기 때문에 하위의 'web' 모듈을 사용하는 측에서 http, connection, context 를 모두 사용하고 있다.
+    //  하위의 'web' 모듈을 사용하는 측에서 http, connection, context 를 모두 사용이 필요하다.
+    //  그렇기 때문에 열어두어야한다.(그럼 언제 implemnt 로 닫아야하는가..)
     api project(':http')
-    api project(':connection')
+    api project(':datahandler')
     api project(':context')
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'

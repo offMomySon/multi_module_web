@@ -4,5 +4,4 @@ include 'http'
 include 'connection'
 include 'context'
 include 'web'
-include 'resource'
 

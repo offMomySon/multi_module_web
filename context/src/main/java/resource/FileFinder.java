@@ -1,4 +1,4 @@
-package read;
+package resource;
 
 import java.net.URI;
 import java.net.URISyntaxException;

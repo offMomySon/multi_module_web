@@ -4,23 +4,25 @@ import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import processor.HttpRequestExecutor;
 import resource.ResourceFinder;
+import resource.ResourceUrls;
 import vo.HttpRequest;
 import vo.HttpResponse;
 import vo.HttpResponseWriter;
 
 @Slf4j
 public class StaticResourceExecutor implements HttpRequestExecutor {
+    private final ResourceUrls resourceUrls;
     private final ResourceFinder resourceFinder;
 
     public StaticResourceExecutor(ResourceFinder resourceFinder) {
         Objects.requireNonNull(resourceFinder);
+        this.resourceUrls = resourceFinder.extractResourceUrls();
         this.resourceFinder = resourceFinder;
     }
 
@@ -28,32 +30,35 @@ public class StaticResourceExecutor implements HttpRequestExecutor {
         Objects.requireNonNull(request);
         Objects.requireNonNull(response);
 
-        String url = request.getHttpUri().getUrl();
-        log.info("url : {}", url);
-        Path requestUrl = Path.of(url);
-        log.info("requestUrl : {}", requestUrl);
+        String requestUrl = request.getHttpUri().getUrl();
+        Path newRequestUrl = Path.of(requestUrl);
+        log.info("newRequestUrl : {}", newRequestUrl);
 
-        List<String> resourceUrls = resourceFinder.findResourceUrls();
-        log.info("resourceUrls : {}", resourceUrls);
-
-        Optional<Path> optionalResource = resourceFinder.findResource(requestUrl);
-
-        if (optionalResource.isEmpty()) {
+        boolean doesNotExistMatchUrl = !resourceUrls.contain(newRequestUrl);
+        if (doesNotExistMatchUrl) {
+            log.info("does not exist MatchUrl.");
             return false;
         }
 
-        Path file = optionalResource.get();
-        log.info("file : {}", file);
+        Optional<Path> optionalResource = resourceFinder.findResource(newRequestUrl);
+        if (optionalResource.isEmpty()) {
+            log.info("does not exist resource.");
+            return false;
+        }
 
-        setHttpResponse(response, file);
+        Path resource = optionalResource.get();
+        log.info("resource : {}", resource);
 
+        setHttpResponse(response, resource);
+        sendHttpResponse(response, resource);
+        return true;
+    }
+
+    private static void sendHttpResponse(HttpResponse response, Path file) {
         HttpResponseWriter sender = response.getSender();
-
         try {
             BufferedInputStream fileInputStream = new BufferedInputStream(new FileInputStream(file.toString()));
             sender.send(fileInputStream);
-
-            return true;
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }

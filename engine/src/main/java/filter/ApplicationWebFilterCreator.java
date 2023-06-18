@@ -13,7 +13,7 @@ public class ApplicationWebFilterCreator extends AbstractFilterCreator {
     private final WebFilterComponentFilterCreator webFilterComponentFilterCreator;
     private final List<Class<?>> clazzes;
 
-    public ApplicationWebFilterCreator(WebFilterComponentFilterCreator webFilterComponentFilterCreator, List<Class<?>> clazzes) {
+    private ApplicationWebFilterCreator(WebFilterComponentFilterCreator webFilterComponentFilterCreator, List<Class<?>> clazzes) {
         Objects.requireNonNull(webFilterComponentFilterCreator, "container is null.");
         Objects.requireNonNull(clazzes, "container is null.");
 

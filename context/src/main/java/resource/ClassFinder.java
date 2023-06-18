@@ -28,8 +28,8 @@ public class ClassFinder {
         log.info("classPackage : {}", classPackage);
         log.info("classPackageDirectory : {}", classPackageDirectory);
 
-        this.classPackage = classPackage;
-        this.classPackageDirectory = classPackageDirectory;
+        this.classPackage = classPackage.normalize();
+        this.classPackageDirectory = classPackageDirectory.normalize();
     }
 
     public static ClassFinder from(Class<?> clazz, String classPackage) {
@@ -37,8 +37,8 @@ public class ClassFinder {
         if (Objects.isNull(classPackage) || classPackage.isBlank()) {
             throw new RuntimeException("classPackage is null.");
         }
+        
         Path clazzRootPath = FileSystemUtil.getClazzRootPath(clazz);
-
         Path newClassPackage = Path.of(classPackage.replace(PACKAGE_DELIMITER, DIRECTORY_DELIMITER));
         Path classPackageDirectory = clazzRootPath.resolve(newClassPackage);
 
@@ -62,9 +62,9 @@ public class ClassFinder {
         return fileName.getFileName().toString().endsWith(CLASS_FILE_EXTENSION);
     }
 
-    private static String createFullyQualifiedClassName(Path classPackageDirectory, Path findClassPackageDirectory, Path classFilePath) {
+    private static String createFullyQualifiedClassName(Path classPackage, Path findClassPackageDirectory, Path classFilePath) {
         Path fullClassFilePath = findClassPackageDirectory.relativize(classFilePath);
-        Path jvmFilePath = classPackageDirectory.resolve(fullClassFilePath);
+        Path jvmFilePath = classPackage.resolve(fullClassFilePath);
 
         return jvmFilePath.toString()
             .substring(0, jvmFilePath.toString().lastIndexOf(CLASS_FILE_EXTENSION))

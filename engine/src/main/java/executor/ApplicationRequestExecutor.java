@@ -29,12 +29,12 @@ import vo.QueryParameters;
 import static matcher.BaseHttpPathMatcher.MatchedMethod;
 
 @Slf4j
-public class RequestExecutor implements HttpRequestExecutor {
+public class ApplicationRequestExecutor implements HttpRequestExecutor {
     private final MethodExecutor methodExecutor;
     private final HttpPathMatcher httpPathMatcher;
     private final Converter converter;
 
-    public RequestExecutor(MethodExecutor methodExecutor, HttpPathMatcher httpPathMatcher, Converter converter) {
+    public ApplicationRequestExecutor(MethodExecutor methodExecutor, HttpPathMatcher httpPathMatcher, Converter converter) {
         Objects.requireNonNull(methodExecutor, "methodExecutor require not null.");
         Objects.requireNonNull(httpPathMatcher, "httpPathMatcher require not null.");
 

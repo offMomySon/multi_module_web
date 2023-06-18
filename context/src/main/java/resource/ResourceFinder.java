@@ -2,9 +2,9 @@ package resource;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
@@ -12,12 +12,14 @@ import util.FileSystemUtil;
 
 @Slf4j
 public class ResourceFinder {
+    private static final String DIRECTORY_DELIMITER = "/";
+
     private final Path resourceDirectory;
 
     public ResourceFinder(Path resourceDirectory) {
         Objects.requireNonNull(resourceDirectory);
         log.info("resourceDirectory : {}", resourceDirectory);
-        this.resourceDirectory = resourceDirectory;
+        this.resourceDirectory = resourceDirectory.normalize();
     }
 
     public static ResourceFinder from(Class<?> clazz, String resourcePackage) {
@@ -33,33 +35,40 @@ public class ResourceFinder {
         return new ResourceFinder(resourceDirectory);
     }
 
-    public List<String> findResourceUrls() {
+    public ResourceUrls extractResourceUrls() {
         try (Stream<Path> fileWalk = Files.walk(resourceDirectory)) {
-            return fileWalk
+            Set<Path> urls = fileWalk
                 .filter(path -> !Files.isDirectory(path))
-                .map(Path::toString)
-                .peek(url -> log.info("url : {}", url))
-                .collect(Collectors.toUnmodifiableList());
+                .map(resourcePath -> createResourceUrl(resourceDirectory, resourcePath))
+                .peek(resourceUrl -> log.info("resourceUrl : {}", resourceUrl))
+                .collect(Collectors.toUnmodifiableSet());
+            return new ResourceUrls(urls);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
+    private static Path createResourceUrl(Path resourceDirectory, Path resourcePath) {
+        Path packageResourcePath = resourceDirectory.relativize(resourcePath);
+        return Path.of(DIRECTORY_DELIMITER).resolve(packageResourcePath);
+    }
+
     public Optional<Path> findResource(Path resourceUrl) {
-        Objects.requireNonNull(resourceUrl);
+        if (Objects.isNull(resourceUrl)) {
+            return Optional.empty();
+        }
 
         resourceUrl = resourceUrl.normalize();
-        String resourceFile = resourceUrl.toString().substring(1);
+        if (resourceUrl.startsWith(DIRECTORY_DELIMITER)) {
+            resourceUrl = Path.of(resourceUrl.toString().substring(1));
+        }
 
-        Path fullPathResourceFile = resourceDirectory.resolve(resourceFile);
+        Path canonicalResourcePath = resourceDirectory.resolve(resourceUrl);
 
-        log.info("relativeResourceFile : {}", resourceFile);
-        log.info("fullPathResourceFile : {}", fullPathResourceFile);
-
-        if (Files.notExists(fullPathResourceFile)) {
+        if (Files.notExists(canonicalResourcePath)) {
             log.info("file does not exist");
             return Optional.empty();
         }
-        return Optional.of(fullPathResourceFile);
+        return Optional.of(canonicalResourcePath);
     }
 }

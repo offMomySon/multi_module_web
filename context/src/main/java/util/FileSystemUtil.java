@@ -3,6 +3,7 @@ package util;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -56,37 +57,47 @@ public class FileSystemUtil {
                     .map(FileSystemUtil::getClass)
                     .collect(Collectors.toUnmodifiableList());
             }
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(MessageFormat.format("uri syntax exception. {}", e.getMessage()));
         } catch (IOException e) {
             throw new RuntimeException(MessageFormat.format("io exception. {}", e.getMessage()));
         }
     }
 
-    private static Path getRoot(Class<?> bootClass) throws IOException, URISyntaxException {
-        URI classDirectoryUri = bootClass.getResource("").toURI();
-        log.info("classDirectoryUri : {}", classDirectoryUri);
+    public static Path getRoot(Class<?> bootClazz) {
+        try {
+            URL classDirectoryUrl = bootClazz.getResource("");
+            if (Objects.isNull(classDirectoryUrl)) {
+                throw new RuntimeException("classDirectoryUrl is null.");
+            }
+            URI classDirectoryUri = classDirectoryUrl.toURI();
+            log.info("classDirectoryUri : {}", classDirectoryUri);
 
-        if (isJarFileSystem(classDirectoryUri)) {
-            FileSystem jarFileSystem = FileSystems.newFileSystem(classDirectoryUri, Collections.emptyMap());
-            Path rootPath = jarFileSystem.getPath("/");
-            log.info("rootPath : {}", rootPath);
-            return rootPath;
+            if (isJarFileSystem(classDirectoryUri)) {
+                try (FileSystem jarFileSystem = FileSystems.newFileSystem(classDirectoryUri, Collections.emptyMap())) {
+                    Path rootPath = jarFileSystem.getPath("/");
+                    log.info("rootPath : {}", rootPath);
+                    return rootPath;
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            URL rootUrl = bootClazz.getResource("/");
+            if (Objects.isNull(rootUrl)) {
+                throw new RuntimeException("uri is null.");
+            }
+            URI rootUri = rootUrl.toURI();
+            log.info("rootUri : {}", rootUri);
+            return Paths.get(rootUri);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
         }
-
-        URI rootUri = bootClass.getResource("/").toURI();
-        log.info("rootUri : {}", rootUri);
-        return Paths.get(rootUri);
     }
 
     private static boolean isJarFileSystem(URI uri) {
         String scheme = uri.getScheme();
         log.info("scheme : {}", scheme);
 
-        if ("jar".equalsIgnoreCase(scheme)) {
-            return true;
-        }
-        return false;
+        return "jar".equalsIgnoreCase(scheme);
     }
 
     private static boolean hasClassExtension(Path fileName) {

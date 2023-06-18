@@ -4,23 +4,24 @@ import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import processor.HttpRequestExecutor;
-import resource.FileFinder;
+import resource.ResourceFinder;
 import vo.HttpRequest;
 import vo.HttpResponse;
 import vo.HttpResponseWriter;
 
 @Slf4j
-public class HttpStaticResourceExecutor implements HttpRequestExecutor {
-    private final FileFinder fileFinder;
+public class StaticResourceExecutor implements HttpRequestExecutor {
+    private final ResourceFinder resourceFinder;
 
-    public HttpStaticResourceExecutor(FileFinder fileFinder) {
-        Objects.requireNonNull(fileFinder);
-        this.fileFinder = fileFinder;
+    public StaticResourceExecutor(ResourceFinder resourceFinder) {
+        Objects.requireNonNull(resourceFinder);
+        this.resourceFinder = resourceFinder;
     }
 
     public boolean execute(HttpRequest request, HttpResponse response) {
@@ -32,7 +33,10 @@ public class HttpStaticResourceExecutor implements HttpRequestExecutor {
         Path requestUrl = Path.of(url);
         log.info("requestUrl : {}", requestUrl);
 
-        Optional<Path> optionalResource = fileFinder.findResource(requestUrl);
+        List<String> resourceUrls = resourceFinder.findResourceUrls();
+        log.info("resourceUrls : {}", resourceUrls);
+
+        Optional<Path> optionalResource = resourceFinder.findResource(requestUrl);
 
         if (optionalResource.isEmpty()) {
             return false;

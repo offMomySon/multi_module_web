@@ -7,26 +7,26 @@ import java.util.Optional;
 public class Filter {
     private final String name;
     private final PatternMatcher patternMatcher;
-    private final FilterWorker2 filterWorker2;
+    private final FilterWorker filterWorker;
 
-    public Filter(String name, PatternMatcher patternMatcher, FilterWorker2 filterWorker2) {
+    public Filter(String name, PatternMatcher patternMatcher, FilterWorker filterWorker) {
         if (Objects.isNull(name) || name.isBlank()) {
             throw new RuntimeException("name is empty.");
         }
         Objects.requireNonNull(patternMatcher);
-        Objects.requireNonNull(filterWorker2);
+        Objects.requireNonNull(filterWorker);
 
         this.name = name;
         this.patternMatcher = patternMatcher;
-        this.filterWorker2 = filterWorker2;
+        this.filterWorker = filterWorker;
     }
 
     public String getName() {
         return name;
     }
 
-    public FilterWorker2 getFilterWorker2() {
-        return filterWorker2;
+    public FilterWorker getFilterWorker2() {
+        return filterWorker;
     }
 
     public PatternMatcher getPatternMatcher() {
@@ -37,13 +37,13 @@ public class Filter {
         return matchUrl(requestUrl).isPresent();
     }
 
-    public Optional<FilterWorker2> matchUrl(String requestUrl) {
+    public Optional<FilterWorker> matchUrl(String requestUrl) {
         if (Objects.isNull(requestUrl) || requestUrl.isBlank()) {
             throw new RuntimeException("requestUrl is empty.");
         }
 
         if (patternMatcher.isMatch(requestUrl)) {
-            return Optional.of(filterWorker2);
+            return Optional.of(filterWorker);
         }
         return Optional.empty();
     }

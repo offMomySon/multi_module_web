@@ -4,6 +4,7 @@ import vo.HttpRequest;
 import vo.HttpResponse;
 
 public interface FilterWorker {
+    void prevExecute(HttpRequest httpRequest, HttpResponse httpResponse);
 
-    void doChain(HttpRequest request, HttpResponse response, FilterChain chain);
+    void postExecute(HttpRequest httpRequest, HttpResponse httpResponse);
 }

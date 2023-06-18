@@ -51,11 +51,11 @@ class FiltersTest {
         Filters allFilters = new Filters(combinedFilters);
 
         //when
-        List<FilterWorker2> actuals = allFilters.findFilterWorkers(pattern);
+        List<FilterWorker> actuals = allFilters.findFilterWorkers(pattern);
 
         //then
         Assertions.assertThat(actuals).hasSize(expectSize);
-        FilterWorker2[] expectFilterWorkers = filters.stream().map(Filter::getFilterWorker2).collect(Collectors.toUnmodifiableList()).toArray(FilterWorker2[]::new);
+        FilterWorker[] expectFilterWorkers = filters.stream().map(Filter::getFilterWorker2).collect(Collectors.toUnmodifiableList()).toArray(FilterWorker[]::new);
         Assertions.assertThat(actuals).containsOnly(expectFilterWorkers);
     }
 
@@ -70,34 +70,22 @@ class FiltersTest {
             .mapToObj(n -> new Filter("sameFilterName", basePatternMatcher, baseFilterWorker))
             .collect(Collectors.toUnmodifiableList());
 
-        TestFilterWorker2 otherFilterWorker = new TestFilterWorker2();
+        TestFilterWorker otherFilterWorker = new TestFilterWorker();
         Filter diffPathFilter = new Filter("diffFilterName", basePatternMatcher, otherFilterWorker);
 
         List<Filter> combinedFilters = Stream.of(filters, List.of(diffPathFilter)).flatMap(List::stream).collect(Collectors.toUnmodifiableList());
         Filters allFilters = new Filters(combinedFilters);
 
         //when
-        List<FilterWorker2> actuals = allFilters.findFilterWorkers(pattern);
+        List<FilterWorker> actuals = allFilters.findFilterWorkers(pattern);
 
         //then
         Assertions.assertThat(actuals).hasSize(2);
-        FilterWorker2[] expectFilterWorkers = new FilterWorker2[]{baseFilterWorker, otherFilterWorker};
+        FilterWorker[] expectFilterWorkers = new FilterWorker[]{baseFilterWorker, otherFilterWorker};
         Assertions.assertThat(actuals).containsOnly(expectFilterWorkers);
     }
 
-    public static class TestFilterWorker implements FilterWorker2 {
-        @Override
-        public void prevExecute(HttpRequest httpRequest, HttpResponse httpResponse) {
-
-        }
-
-        @Override
-        public void postExecute(HttpRequest httpRequest, HttpResponse httpResponse) {
-
-        }
-    }
-
-    public static class TestFilterWorker2 implements FilterWorker2 {
+    public static class TestFilterWorker implements FilterWorker {
         @Override
         public void prevExecute(HttpRequest httpRequest, HttpResponse httpResponse) {
 

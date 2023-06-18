@@ -7,7 +7,7 @@ import vo.HttpResponse;
 
 @Slf4j
 @WebFilter
-public class LoggingFilterWorker2 implements FilterWorker2 {
+public class LoggingFilterWorker implements FilterWorker {
 
     @Override
     public void prevExecute(HttpRequest httpRequest, HttpResponse httpResponse) {

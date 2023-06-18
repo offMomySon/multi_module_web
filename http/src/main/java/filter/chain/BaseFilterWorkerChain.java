@@ -1,15 +1,15 @@
 package filter.chain;
 
-import filter.FilterWorker2;
+import filter.FilterWorker;
 import java.util.Objects;
 import vo.HttpRequest;
 import vo.HttpResponse;
 
 public class BaseFilterWorkerChain implements FilterWorkerChain {
     private final FilterWorkerChain nextFilterWorkerChain;
-    private final FilterWorker2 filterWorker;
+    private final FilterWorker filterWorker;
 
-    public BaseFilterWorkerChain(FilterWorkerChain nextFilterWorkerChain, FilterWorker2 filterWorker) {
+    public BaseFilterWorkerChain(FilterWorkerChain nextFilterWorkerChain, FilterWorker filterWorker) {
         Objects.requireNonNull(nextFilterWorkerChain);
         Objects.requireNonNull(filterWorker);
         this.nextFilterWorkerChain = nextFilterWorkerChain;

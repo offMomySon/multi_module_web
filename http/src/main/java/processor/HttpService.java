@@ -1,7 +1,7 @@
 package processor;
 
 import config.Config;
-import filter.FilterWorker2;
+import filter.FilterWorker;
 import filter.Filters;
 import filter.chain.BaseFilterWorkerChain;
 import filter.chain.FilterWorkerChain;
@@ -83,7 +83,7 @@ public class HttpService {
                  HttpResponse httpResponse = new HttpResponse(outputStream)) {
                 HttpRequest httpRequest = httpRequestReader.read();
 
-                List<FilterWorker2> filterWorkers = filters.findFilterWorkers(httpRequest.getHttpUri().getUrl());
+                List<FilterWorker> filterWorkers = filters.findFilterWorkers(httpRequest.getHttpUri().getUrl());
 
                 log.info("create filter chain");
                 FilterWorkerChain lastFilterWorkerChain = new HttpRequestExecutorChain(httpStaticResourceExecutor, httpRequestExecutor);

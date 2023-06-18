@@ -20,11 +20,11 @@ class FilterTest {
         Filter filter = new Filter("filterName", patternMatcher, new TestFilterWorker());
 
         //when
-        Optional<FilterWorker2> optionalActual = filter.matchUrl(requestPath);
+        Optional<FilterWorker> optionalActual = filter.matchUrl(requestPath);
 
         //then
         Assertions.assertThat(optionalActual).isPresent();
-        FilterWorker2 actualWorker = optionalActual.get();
+        FilterWorker actualWorker = optionalActual.get();
         Assertions.assertThat(actualWorker).isInstanceOf(TestFilterWorker.class);
     }
 
@@ -37,14 +37,14 @@ class FilterTest {
         Filter filter = new Filter("filterName", patternMatcher, new TestFilterWorker());
 
         //when
-        Optional<FilterWorker2> optionalActual = filter.matchUrl(requestPath);
+        Optional<FilterWorker> optionalActual = filter.matchUrl(requestPath);
 
         //then
         Assertions.assertThat(optionalActual).isEmpty();
     }
 
 
-    public static class TestFilterWorker implements FilterWorker2 {
+    public static class TestFilterWorker implements FilterWorker {
         @Override
         public void prevExecute(HttpRequest httpRequest, HttpResponse httpResponse) {
 

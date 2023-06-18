@@ -37,9 +37,13 @@ class WebFilterAnnotatedFilterCreatorTest {
 
     @WebFilter(filterName = "testFilterWorker", patterns = {"/p1", "/p2/*", "*.txt"})
     public static class WebFilterAnnotatedFilterWorker implements FilterWorker {
+        @Override
+        public void prevExecute(HttpRequest httpRequest, HttpResponse httpResponse) {
+
+        }
 
         @Override
-        public void doChain(HttpRequest request, HttpResponse response, FilterChain chain) {
+        public void postExecute(HttpRequest httpRequest, HttpResponse httpResponse) {
 
         }
     }

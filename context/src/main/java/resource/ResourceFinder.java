@@ -16,23 +16,19 @@ public class ResourceFinder {
 
     public ResourceFinder(Path resourceDirectory) {
         Objects.requireNonNull(resourceDirectory);
+        log.info("resourceDirectory : {}", resourceDirectory);
         this.resourceDirectory = resourceDirectory;
     }
 
-    public static ResourceFinder create(Class<?> bootClazz, String resourcePackage) {
-        if (Objects.isNull(bootClazz)) {
-            throw new RuntimeException("parameter is null.");
-        }
+    public static ResourceFinder from(Class<?> clazz, String resourcePackage) {
+        Objects.requireNonNull(clazz);
         if (Objects.isNull(resourcePackage) || resourcePackage.isBlank()) {
             throw new RuntimeException("requestPackage is empty.");
         }
 
-        Path clazzRoot = FileSystemUtil.getRoot(bootClazz);
-        log.info("clazzRoot : {}", clazzRoot);
-        Path projectPackage = clazzRoot.getParent();
-        log.info("projectPackage : {}", projectPackage);
-        Path resourceDirectory = projectPackage.resolve(resourcePackage);
-        log.info("resourceDirectory : {}", resourceDirectory);
+        Path clazzPath = FileSystemUtil.getClazzRootPath(clazz);
+        Path projectPackageDirectory = clazzPath.getParent();
+        Path resourceDirectory = projectPackageDirectory.resolve(resourcePackage);
 
         return new ResourceFinder(resourceDirectory);
     }
@@ -49,15 +45,15 @@ public class ResourceFinder {
         }
     }
 
-    public Optional<Path> findResource(Path resourceFile) {
-        if (Objects.isNull(resourceFile)) {
-            throw new RuntimeException("resource is null.");
-        }
-        resourceFile = resourceFile.normalize();
-        String relativeResourceFile = resourceFile.toString().substring(1);
-        log.info("relativeResourceFile : {}", relativeResourceFile);
+    public Optional<Path> findResource(Path resourceUrl) {
+        Objects.requireNonNull(resourceUrl);
 
-        Path fullPathResourceFile = resourceDirectory.resolve(relativeResourceFile);
+        resourceUrl = resourceUrl.normalize();
+        String resourceFile = resourceUrl.toString().substring(1);
+
+        Path fullPathResourceFile = resourceDirectory.resolve(resourceFile);
+
+        log.info("relativeResourceFile : {}", resourceFile);
         log.info("fullPathResourceFile : {}", fullPathResourceFile);
 
         if (Files.notExists(fullPathResourceFile)) {

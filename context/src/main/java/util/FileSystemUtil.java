@@ -1,21 +1,14 @@
 package util;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.MessageFormat;
 import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -31,40 +24,11 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class FileSystemUtil {
-    /**
-     * 인자로 받아온 패키지 하위의 모든 클래스를 가져온다.
-     * bootClass 파일시스템의 루트를 지정하기 위해 사용된다.
-     * findPackage 는 class 검색의 시작점을 지정하기 위해 사용된다.
-     */
-    public static List<Class<?>> findClass(Class<?> bootClass, String findPackage) {
-        if (Objects.isNull(bootClass) || Objects.isNull(findPackage)) {
-            throw new RuntimeException("parameter is null.");
-        }
+    private static final String JAR_SCHEME = "jar";
 
+    public static Path getClazzRootPath(Class<?> clazz) {
         try {
-            Path rootPath = getRoot(bootClass);
-            Path findPath = rootPath.resolve(findPackage.replace(".", "/"));
-            log.info("findPath : {}", findPath);
-
-            try (Stream<Path> pathStream = Files.walk(findPath)) {
-                List<Path> classFilePaths = pathStream
-                    .filter(path -> Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS))
-                    .filter(FileSystemUtil::hasClassExtension)
-                    .collect(Collectors.toUnmodifiableList());
-
-                return classFilePaths.stream()
-                    .map(classFilePath -> generateFullyQualifiedClassName(rootPath, classFilePath))
-                    .map(FileSystemUtil::getClass)
-                    .collect(Collectors.toUnmodifiableList());
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(MessageFormat.format("io exception. {}", e.getMessage()));
-        }
-    }
-
-    public static Path getRoot(Class<?> bootClazz) {
-        try {
-            URL classDirectoryUrl = bootClazz.getResource("");
+            URL classDirectoryUrl = clazz.getResource("");
             if (Objects.isNull(classDirectoryUrl)) {
                 throw new RuntimeException("classDirectoryUrl is null.");
             }
@@ -81,7 +45,7 @@ public class FileSystemUtil {
                 }
             }
 
-            URL rootUrl = bootClazz.getResource("/");
+            URL rootUrl = clazz.getResource("/");
             if (Objects.isNull(rootUrl)) {
                 throw new RuntimeException("uri is null.");
             }
@@ -96,27 +60,6 @@ public class FileSystemUtil {
     private static boolean isJarFileSystem(URI uri) {
         String scheme = uri.getScheme();
         log.info("scheme : {}", scheme);
-
-        return "jar".equalsIgnoreCase(scheme);
-    }
-
-    private static boolean hasClassExtension(Path fileName) {
-        return fileName.getFileName().toString().endsWith(".class");
-    }
-
-    private static String generateFullyQualifiedClassName(Path rootPath, Path classFilePath) {
-        Path jvmPath = rootPath.relativize(classFilePath);
-
-        return jvmPath.toString()
-            .substring(0, jvmPath.toString().lastIndexOf(".class"))
-            .replace("/", ".");
-    }
-
-    private static Class<?> getClass(String n) {
-        try {
-            return Class.forName(n);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        return JAR_SCHEME.equalsIgnoreCase(scheme);
     }
 }

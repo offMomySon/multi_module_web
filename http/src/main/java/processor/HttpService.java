@@ -3,7 +3,7 @@ package processor;
 import config.Config;
 import filter.FilterWorker;
 import filter.Filters;
-import filter.chain.BaseFilterWorkerChain;
+import filter.chain.FilterChain;
 import filter.chain.FilterWorkerChain;
 import filter.chain.HttpRequestExecutorChain;
 import java.io.IOException;
@@ -30,13 +30,13 @@ import vo.HttpResponse;
 public class HttpService {
     private final ThreadPoolExecutor threadPoolExecutor;
     private final ServerSocket serverSocket;
-    private final HttpRequestExecutor httpRequestExecutor;
-    private final HttpRequestExecutor httpStaticResourceExecutor;
+    private final HttpRequestExecutor applicationExecutor;
+    private final HttpRequestExecutor staticResourceExecutor;
     private final Filters filters;
 
-    public HttpService(HttpRequestExecutor httpRequestExecutor, HttpRequestExecutor httpStaticResourceExecutor, Filters filters) {
-        Objects.requireNonNull(httpRequestExecutor);
-        Objects.requireNonNull(httpStaticResourceExecutor);
+    public HttpService(HttpRequestExecutor applicationExecutor, HttpRequestExecutor staticResourceExecutor, Filters filters) {
+        Objects.requireNonNull(applicationExecutor);
+        Objects.requireNonNull(staticResourceExecutor);
         Objects.requireNonNull(filters);
 
         try {
@@ -46,8 +46,9 @@ public class HttpService {
                                                              TimeUnit.MILLISECONDS,
                                                              new LinkedBlockingQueue<>(Config.INSTANCE.getWaitConnection()));
             this.serverSocket = new ServerSocket(Config.INSTANCE.getPort());
-            this.httpRequestExecutor = httpRequestExecutor;
-            this.httpStaticResourceExecutor = httpStaticResourceExecutor;
+
+            this.applicationExecutor = applicationExecutor;
+            this.staticResourceExecutor = staticResourceExecutor;
             this.filters = filters;
         } catch (IOException e) {
             throw new RuntimeException(MessageFormat.format("fail to active server. Reason : `{0}`", e.getCause()), e);
@@ -85,16 +86,18 @@ public class HttpService {
 
                 List<FilterWorker> filterWorkers = filters.findFilterWorkers(httpRequest.getHttpUri().getUrl());
 
+                // todo. - notion .
                 log.info("create filter chain");
-                FilterWorkerChain lastFilterWorkerChain = new HttpRequestExecutorChain(httpStaticResourceExecutor, httpRequestExecutor);
-                FilterWorkerChain filterWorkerChain = filterWorkers.stream()
+                FilterChain applicationExecutorChain = new HttpRequestExecutorChain(applicationExecutor, null);
+                FilterChain staticResourceExecutorChain = new HttpRequestExecutorChain(staticResourceExecutor, applicationExecutorChain);
+                FilterChain filterChain = filterWorkers.stream()
                     .reduce(
-                        lastFilterWorkerChain,
-                        BaseFilterWorkerChain::new,
+                        staticResourceExecutorChain,
+                        FilterWorkerChain::new,
                         (pw, pw2) -> null);
 
                 log.info("execute filter chain");
-                filterWorkerChain.execute(httpRequest, httpResponse);
+                filterChain.execute(httpRequest, httpResponse);
             } catch (Exception e) {
                 e.printStackTrace();
             }

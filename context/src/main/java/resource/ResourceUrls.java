@@ -14,7 +14,6 @@ public class ResourceUrls {
         Objects.requireNonNull(values);
         this.values = values.stream()
             .filter(Objects::nonNull)
-            .peek(path -> log.info("[jihun] path : {}", path))
             .collect(Collectors.toUnmodifiableSet());
     }
 
@@ -22,10 +21,6 @@ public class ResourceUrls {
         if (Objects.isNull(requestUrl)) {
             return false;
         }
-        log.info("[jihun] requestUrl : {}", requestUrl);
-        boolean contains = values.contains(requestUrl);
-        log.info("[jihun] contains : {}", contains);
-
-        return contains;
+        return values.contains(requestUrl);
     }
 }

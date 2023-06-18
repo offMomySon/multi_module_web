@@ -1,31 +1,37 @@
 package filter.chain;
 
 import java.util.Objects;
+import lombok.extern.slf4j.Slf4j;
 import processor.HttpRequestExecutor;
 import vo.HttpRequest;
 import vo.HttpResponse;
 
 
-public class HttpRequestExecutorChain implements FilterWorkerChain {
-    private final HttpRequestExecutor httpStaticResourceExecutor;
+@Slf4j
+public class HttpRequestExecutorChain implements FilterChain {
+    private final FilterChain nextFilterChain;
     private final HttpRequestExecutor httpRequestExecutor;
-//    private final HttpSta
 
-
-    public HttpRequestExecutorChain(HttpRequestExecutor httpStaticResourceExecutor, HttpRequestExecutor httpRequestExecutor) {
-        Objects.requireNonNull(httpStaticResourceExecutor);
+    public HttpRequestExecutorChain(HttpRequestExecutor httpRequestExecutor, FilterChain nextFilterChain) {
         Objects.requireNonNull(httpRequestExecutor);
-        this.httpStaticResourceExecutor = httpStaticResourceExecutor;
         this.httpRequestExecutor = httpRequestExecutor;
+        this.nextFilterChain = nextFilterChain;
     }
 
     @Override
     public void execute(HttpRequest request, HttpResponse response) {
-        boolean execute = httpStaticResourceExecutor.execute(request, response);
+        boolean execute = httpRequestExecutor.execute(request, response);
         if (execute) {
+            log.info("request executed.");
+            return;
+        }
+        log.info("does not request executed.");
+
+        if (Objects.isNull(nextFilterChain)) {
+            log.info("does not exist next filter chain.");
             return;
         }
 
-        httpRequestExecutor.execute(request, response);
+        nextFilterChain.execute(request, response);
     }
 }

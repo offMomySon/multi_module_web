@@ -5,16 +5,16 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import matcher.segment.PathUrl;
-import matcher.segment.PathVariableCollectChainV2;
+import matcher.segment.PathVariableCollectChain;
 import matcher.segment.PathVariableValue;
 import matcher.segment.SegmentChunk;
 import matcher.segment.SegmentChunkFactory;
-import static matcher.segment.PathVariableCollectChainV2.ConsumeResult;
+import static matcher.segment.PathVariableCollectChain.ConsumeResult;
 
 public class PathUrlMatcher {
-    private final PathVariableCollectChainV2 baseSegmentChunkChain;
+    private final PathVariableCollectChain baseSegmentChunkChain;
 
-    private PathUrlMatcher(PathVariableCollectChainV2 baseSegmentChunkChain) {
+    private PathUrlMatcher(PathVariableCollectChain baseSegmentChunkChain) {
         this.baseSegmentChunkChain = baseSegmentChunkChain;
     }
 
@@ -23,7 +23,7 @@ public class PathUrlMatcher {
 
         List<SegmentChunk> segmentChunks = segmentChunkFactory.create();
         Collections.reverse(segmentChunks);
-        PathVariableCollectChainV2 baseSegmentChunkChain = PathVariableCollectChainV2.empty();
+        PathVariableCollectChain baseSegmentChunkChain = PathVariableCollectChain.empty();
         for (SegmentChunk segmentChunk : segmentChunks) {
             baseSegmentChunkChain = baseSegmentChunkChain.chaining(segmentChunk);
         }

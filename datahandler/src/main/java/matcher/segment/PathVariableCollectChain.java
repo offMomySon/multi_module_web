@@ -6,23 +6,23 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-public class PathVariableCollectChainV2 {
-    private final PathVariableCollectChainV2 segmentChunkChain;
+public class PathVariableCollectChain {
+    private final PathVariableCollectChain segmentChunkChain;
     private final SegmentChunk segmentChunk;
 
-    public PathVariableCollectChainV2(PathVariableCollectChainV2 segmentChunkChain, SegmentChunk segmentChunk) {
+    public PathVariableCollectChain(PathVariableCollectChain segmentChunkChain, SegmentChunk segmentChunk) {
         Objects.requireNonNull(segmentChunk);
         this.segmentChunkChain = segmentChunkChain;
         this.segmentChunk = segmentChunk;
     }
 
-    public static PathVariableCollectChainV2 empty() {
-        return new PathVariableCollectChainV2(null, new EmptySegmentChunk());
+    public static PathVariableCollectChain empty() {
+        return new PathVariableCollectChain(null, new EmptySegmentChunk());
     }
 
-    public PathVariableCollectChainV2 chaining(SegmentChunk segmentChunk) {
+    public PathVariableCollectChain chaining(SegmentChunk segmentChunk) {
         Objects.requireNonNull(segmentChunk);
-        return new PathVariableCollectChainV2(this, segmentChunk);
+        return new PathVariableCollectChain(this, segmentChunk);
     }
 
     public ConsumeResult consume(PathUrl requestPathUrl) {

@@ -9,7 +9,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import util.AnnotationUtils;
 
-public class WebFilterAnnotatedFilterCreator extends AbstractFilterCreator {
+public class WebFilterAnnotatedFilterCreator implements AbstractFilterCreator {
     private static final Class<WebFilter> WEB_FILTER_CLASS = WebFilter.class;
 
     private final WebFilter webFilter;

@@ -1,7 +1,7 @@
 package filter;
 
 
-public abstract class AbstractFilterCreator {
+public interface AbstractFilterCreator {
 
-    public abstract Filters create();
+    Filters create();
 }

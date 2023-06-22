@@ -7,7 +7,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import util.AnnotationUtils;
 
-public class ApplicationWebFilterCreator extends AbstractFilterCreator {
+public class ApplicationWebFilterCreator implements AbstractFilterCreator {
     private static final Class<WebFilter> WEB_FILTER_CLASS = WebFilter.class;
 
     private final WebFilterComponentFilterCreator webFilterComponentFilterCreator;

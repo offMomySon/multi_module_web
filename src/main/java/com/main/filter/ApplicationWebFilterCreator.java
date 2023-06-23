@@ -1,5 +1,6 @@
 package com.main.filter;
 
+import com.main.util.AnnotationUtils;
 import container.Container;
 import filter.AbstractFilterCreator;
 import filter.Filters;
@@ -7,7 +8,6 @@ import filter.annotation.WebFilter;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import util.AnnotationUtils;
 
 public class ApplicationWebFilterCreator implements AbstractFilterCreator {
     private static final Class<WebFilter> WEB_FILTER_CLASS = WebFilter.class;

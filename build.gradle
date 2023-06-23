@@ -11,7 +11,6 @@ repositories {
 
 dependencies {
     api project(':http')
-    api project(':datahandler')
     api project(':context')
 
     //logback

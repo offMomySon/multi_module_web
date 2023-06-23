@@ -1,6 +1,7 @@
 package com.main.filter;
 
 import annotation.Component;
+import com.main.util.AnnotationUtils;
 import container.Container;
 import filter.FilterWorker;
 import filter.Filters;
@@ -9,7 +10,6 @@ import filter.annotation.WebFilter;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.Objects;
-import util.AnnotationUtils;
 
 public class WebFilterComponentFilterCreator {
     private static final Class<WebFilter> WEB_FILTER_CLASS = WebFilter.class;

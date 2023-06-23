@@ -1,4 +1,4 @@
-package resource;
+package com.main.container.resource;
 
 import java.nio.file.Path;
 import java.util.Objects;

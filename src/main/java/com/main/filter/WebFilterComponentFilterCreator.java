@@ -1,8 +1,8 @@
 package com.main.filter;
 
-import annotation.Component;
+import com.main.container.Container;
+import com.main.container.annotation.Component;
 import com.main.util.AnnotationUtils;
-import container.Container;
 import filter.FilterWorker;
 import filter.Filters;
 import filter.WebFilterAnnotatedFilterCreator;

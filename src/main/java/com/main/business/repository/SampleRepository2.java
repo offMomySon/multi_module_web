@@ -1,6 +1,6 @@
 package com.main.business.repository;
 
-import annotation.Repository;
+import com.main.container.annotation.Repository;
 
 @Repository
 public class SampleRepository2 {

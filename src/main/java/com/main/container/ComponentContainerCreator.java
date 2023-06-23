@@ -1,6 +1,6 @@
-package container;
+package com.main.container;
 
-import annotation.Component;
+import com.main.container.annotation.Component;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;

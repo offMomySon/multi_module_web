@@ -1,8 +1,8 @@
 package com.main.business.service;
 
-import annotation.Service;
 import com.main.business.repository.SampleRepository;
 import com.main.business.repository.SampleRepository2;
+import com.main.container.annotation.Service;
 
 @Service
 public class SampleService {

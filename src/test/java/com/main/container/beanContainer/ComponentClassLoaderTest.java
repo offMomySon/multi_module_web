@@ -1,10 +1,10 @@
-package beanContainer;
+package com.main.container.beanContainer;
 
-import annotation.Controller;
-import annotation.Repository;
-import annotation.Service;
-import container.ComponentClassLoader;
-import container.Container;
+import com.main.container.ComponentClassLoader;
+import com.main.container.Container;
+import com.main.container.annotation.Controller;
+import com.main.container.annotation.Repository;
+import com.main.container.annotation.Service;
 import java.util.Set;
 import java.util.stream.Stream;
 import org.assertj.core.api.Assertions;

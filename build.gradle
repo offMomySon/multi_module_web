@@ -10,7 +10,9 @@ repositories {
 }
 
 dependencies {
-    implementation project(':engine')
+    api project(':http')
+    api project(':datahandler')
+    api project(':context')
 
     //logback
     implementation 'ch.qos.logback:logback-core:1.2.3'

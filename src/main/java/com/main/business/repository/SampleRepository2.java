@@ -1,4 +1,4 @@
-package com.main.repository;
+package com.main.business.repository;
 
 import annotation.Repository;
 

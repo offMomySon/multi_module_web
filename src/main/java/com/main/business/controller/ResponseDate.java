@@ -1,4 +1,4 @@
-package com.main.controller;
+package com.main.business.controller;
 
 public class ResponseDate<T> {
     private final int code;

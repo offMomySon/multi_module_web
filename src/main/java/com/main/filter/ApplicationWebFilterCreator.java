@@ -1,6 +1,8 @@
-package filter;
+package com.main.filter;
 
 import container.Container;
+import filter.AbstractFilterCreator;
+import filter.Filters;
 import filter.annotation.WebFilter;
 import java.util.List;
 import java.util.Objects;

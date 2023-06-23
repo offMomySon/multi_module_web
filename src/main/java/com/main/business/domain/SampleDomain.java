@@ -1,7 +1,7 @@
-package com.main.domain;
+package com.main.business.domain;
 
 import annotation.Domain;
-import com.main.service.SampleService;
+import com.main.business.service.SampleService;
 
 @Domain
 public class SampleDomain {

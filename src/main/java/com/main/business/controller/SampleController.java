@@ -1,10 +1,10 @@
-package com.main.controller;
+package com.main.business.controller;
 
 import annotation.Controller;
 import annotation.PathVariable;
 import annotation.RequestMapping;
 import annotation.RequestParam;
-import com.main.domain.SampleDomain;
+import com.main.business.domain.SampleDomain;
 import lombok.extern.slf4j.Slf4j;
 import matcher.RequestMethod;
 

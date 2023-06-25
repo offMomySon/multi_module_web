@@ -31,12 +31,10 @@ public class HttpService {
     private final ThreadPoolExecutor threadPoolExecutor;
     private final ServerSocket serverSocket;
     private final HttpRequestExecutor applicationExecutor;
-    private final HttpRequestExecutor staticResourceExecutor;
     private final Filters filters;
 
-    public HttpService(HttpRequestExecutor applicationExecutor, HttpRequestExecutor staticResourceExecutor, Filters filters) {
+    public HttpService(HttpRequestExecutor applicationExecutor, Filters filters) {
         Objects.requireNonNull(applicationExecutor);
-        Objects.requireNonNull(staticResourceExecutor);
         Objects.requireNonNull(filters);
 
         try {
@@ -46,9 +44,7 @@ public class HttpService {
                                                              TimeUnit.MILLISECONDS,
                                                              new LinkedBlockingQueue<>(Config.INSTANCE.getWaitConnection()));
             this.serverSocket = new ServerSocket(Config.INSTANCE.getPort());
-
             this.applicationExecutor = applicationExecutor;
-            this.staticResourceExecutor = staticResourceExecutor;
             this.filters = filters;
         } catch (IOException e) {
             throw new RuntimeException(MessageFormat.format("fail to active server. Reason : `{0}`", e.getCause()), e);
@@ -87,12 +83,12 @@ public class HttpService {
                 List<FilterWorker> filterWorkers = filters.findFilterWorkers(httpRequest.getHttpUri().getUrl());
 
                 // todo. - notion .
+                // 이렇게 해도 괜찮은가?
                 log.info("create filter chain");
                 FilterChain applicationExecutorChain = new HttpRequestExecutorChain(applicationExecutor, null);
-                FilterChain staticResourceExecutorChain = new HttpRequestExecutorChain(staticResourceExecutor, applicationExecutorChain);
                 FilterChain filterChain = filterWorkers.stream()
                     .reduce(
-                        staticResourceExecutorChain,
+                        applicationExecutorChain,
                         FilterWorkerChain::new,
                         (pw, pw2) -> null);
 

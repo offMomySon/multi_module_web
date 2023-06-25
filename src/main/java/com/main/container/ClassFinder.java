@@ -1,4 +1,4 @@
-package com.main.container.resource;
+package com.main.container;
 
 import com.main.util.FileSystemUtil;
 import java.io.IOException;

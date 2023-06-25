@@ -1,13 +1,11 @@
 package com.main;
 
 
+import com.main.container.ClassFinder;
 import com.main.container.ComponentContainerCreator;
 import com.main.container.Container;
-import com.main.container.resource.ClassFinder;
-import com.main.container.resource.ResourceFinder;
 import com.main.executor.ApplicationRequestExecutor;
 import com.main.executor.MethodExecutor;
-import com.main.executor.StaticResourceExecutor;
 import com.main.filter.ApplicationWebFilterCreator;
 import com.main.matcher.ControllerHttpPathMatcherCreator;
 import com.main.matcher.HttpPathMatcher;
@@ -23,10 +21,7 @@ public class App {
         ClassFinder classFinder = ClassFinder.from(App.class, "com.main.business");
         List<Class<?>> clazzes = classFinder.findClazzes();
         Container container = new ComponentContainerCreator(clazzes).create();
-
-        ResourceFinder resourceFinder = ResourceFinder.from(App.class, "resources");
-        StaticResourceExecutor staticResourceExecutor = new StaticResourceExecutor(resourceFinder);
-
+        
         ApplicationWebFilterCreator applicationWebFilterCreator = ApplicationWebFilterCreator.from(container, clazzes);
         Filters filters = applicationWebFilterCreator.create();
 
@@ -35,7 +30,7 @@ public class App {
         CompositeConverter converter = new CompositeConverter();
         ApplicationRequestExecutor applicationRequestExecutor = new ApplicationRequestExecutor(methodExecutor, httpPathMatcher, converter);
 
-        HttpService httpService = new HttpService(applicationRequestExecutor, staticResourceExecutor, filters);
+        HttpService httpService = new HttpService(applicationRequestExecutor, filters);
         httpService.start();
     }
 }

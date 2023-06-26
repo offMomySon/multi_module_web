@@ -1,5 +1,4 @@
-package com.main.container.annotation;
-
+package container.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -9,5 +8,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Component
-public @interface Controller {
+public @interface Repository {
 }

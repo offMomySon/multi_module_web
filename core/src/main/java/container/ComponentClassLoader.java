@@ -1,14 +1,15 @@
-package com.main.container;
+package container;
 
-import com.main.container.annotation.Component;
-import com.main.util.AnnotationUtils;
+import container.annotation.Component;
+import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
+import util.AnnotationUtils;
+
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ComponentClassLoader {
@@ -35,8 +36,8 @@ public class ComponentClassLoader {
     private Object instantiate(Class<?> clazz, Container newContainer, Container prevContainer, Set<Class<?>> alreadyVisitedClasses) {
         if (alreadyVisitedClasses.contains(clazz)) {
             String alreadyVisitedClassesName = alreadyVisitedClasses.stream()
-                .map(Class::getSimpleName)
-                .collect(Collectors.joining(",", "[", "]"));
+                    .map(Class::getSimpleName)
+                    .collect(Collectors.joining(",", "[", "]"));
             log.info("already visited class. alreadyVisited class : `{}`, current class : `{}`", alreadyVisitedClassesName, clazz.getSimpleName());
             throw new RuntimeException("already visited class. alreadyVisited class : " + alreadyVisitedClassesName);
         }
@@ -63,8 +64,8 @@ public class ComponentClassLoader {
         Class<?>[] memberClasses = AnnotationUtils.peekFieldsType(clazz, COMPONENT_CLASS).toArray(Class<?>[]::new);
 
         Object[] memberObjects = Arrays.stream(memberClasses)
-            .map(memberClazz -> this.instantiate(memberClazz, newContainer, prevContainer, alreadyVisitedClasses))
-            .toArray();
+                .map(memberClazz -> this.instantiate(memberClazz, newContainer, prevContainer, alreadyVisitedClasses))
+                .toArray();
 
         return newObject(clazz, memberClasses, memberObjects);
     }

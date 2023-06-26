@@ -1,4 +1,5 @@
 rootProject.name = 'multi_module_web_server'
 
 include 'http'
+include 'core'
 

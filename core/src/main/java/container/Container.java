@@ -1,11 +1,6 @@
-package com.main.container;
+package container;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Container {
@@ -17,9 +12,9 @@ public class Container {
 
     public Container(Map<Class<?>, Object> values) {
         this.values = values.entrySet().stream()
-            .filter(entry -> !Objects.isNull(entry.getKey()))
-            .filter(entry -> !Objects.isNull(entry.getValue()))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
+                .filter(entry -> !Objects.isNull(entry.getKey()))
+                .filter(entry -> !Objects.isNull(entry.getValue()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
     }
 
     public static Container empty() {
@@ -32,7 +27,7 @@ public class Container {
         }
 
         otherContainer.values
-            .forEach((key, value) -> this.values.merge(key, value, (prev, curr) -> prev));
+                .forEach((key, value) -> this.values.merge(key, value, (prev, curr) -> prev));
 
         return this;
     }
@@ -62,9 +57,9 @@ public class Container {
 
         public ReadOnlyContainer(Map<Class<?>, Object> values) {
             this.values = values.entrySet().stream()
-                .filter(entry -> !Objects.isNull(entry.getKey()))
-                .filter(entry -> !Objects.isNull(entry.getValue()))
-                .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
+                    .filter(entry -> !Objects.isNull(entry.getKey()))
+                    .filter(entry -> !Objects.isNull(entry.getValue()))
+                    .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
         }
     }
 }

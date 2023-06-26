@@ -1,11 +1,12 @@
-package com.main.container;
+package container;
 
-import com.main.container.annotation.Component;
+import container.annotation.Component;
+import lombok.extern.slf4j.Slf4j;
+import util.AnnotationUtils;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import util.AnnotationUtils;
 
 @Slf4j
 public class ComponentContainerCreator {
@@ -17,15 +18,15 @@ public class ComponentContainerCreator {
         Objects.requireNonNull(classes, "classes is null.");
 
         this.componentClasses = classes.stream()
-            .filter(clazz -> !Objects.isNull(clazz))
-            .filter(clazz -> AnnotationUtils.exist(clazz, COMPONENT_CLASS))
-            .collect(Collectors.toUnmodifiableList());
+                .filter(clazz -> !Objects.isNull(clazz))
+                .filter(clazz -> AnnotationUtils.exist(clazz, COMPONENT_CLASS))
+                .collect(Collectors.toUnmodifiableList());
     }
 
     public Container create() {
         List<ComponentClassLoader> componentClassLoaders = componentClasses.stream()
-            .map(ComponentClassLoader::new)
-            .collect(Collectors.toUnmodifiableList());
+                .map(ComponentClassLoader::new)
+                .collect(Collectors.toUnmodifiableList());
 
         Container container = Container.empty();
         for (ComponentClassLoader classLoader : componentClassLoaders) {

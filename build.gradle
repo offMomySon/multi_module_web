@@ -11,6 +11,7 @@ repositories {
 
 dependencies {
     api project(':http')
+    api project(':core')
 
     //logback
     implementation 'ch.qos.logback:logback-core:1.2.3'

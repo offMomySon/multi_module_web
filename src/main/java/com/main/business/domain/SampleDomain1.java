@@ -2,7 +2,7 @@ package com.main.business.domain;
 
 import com.main.business.repository.SampleRepository;
 import com.main.business.service.SampleService2;
-import com.main.container.annotation.Domain;
+import container.annotation.Domain;
 
 @Domain
 public class SampleDomain1 {

@@ -1,10 +1,11 @@
 package com.main.filter;
 
-import com.main.container.Container;
 import com.main.util.AnnotationUtils;
+import container.Container;
 import filter.AbstractFilterCreator;
 import filter.Filters;
 import filter.annotation.WebFilter;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -20,9 +21,9 @@ public class ApplicationWebFilterCreator implements AbstractFilterCreator {
         Objects.requireNonNull(clazzes, "container is null.");
 
         this.clazzes = clazzes.stream()
-            .filter(clazz -> !Objects.isNull(clazz))
-            .filter(clazz -> AnnotationUtils.exist(clazz, WEB_FILTER_CLASS))
-            .collect(Collectors.toUnmodifiableList());
+                .filter(clazz -> !Objects.isNull(clazz))
+                .filter(clazz -> AnnotationUtils.exist(clazz, WEB_FILTER_CLASS))
+                .collect(Collectors.toUnmodifiableList());
         this.webFilterComponentFilterCreator = webFilterComponentFilterCreator;
     }
 
@@ -36,7 +37,7 @@ public class ApplicationWebFilterCreator implements AbstractFilterCreator {
 
     public Filters create() {
         return clazzes.stream()
-            .map(webFilterComponentFilterCreator::create)
-            .reduce(Filters.empty(), Filters::merge);
+                .map(webFilterComponentFilterCreator::create)
+                .reduce(Filters.empty(), Filters::merge);
     }
 }

@@ -1,7 +1,7 @@
 package com.main.executor;
 
-import com.main.matcher.ResourceFinder;
-import com.main.matcher.ResourceUrls;
+import matcher.ResourceFinder;
+import matcher.ResourceUrls;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

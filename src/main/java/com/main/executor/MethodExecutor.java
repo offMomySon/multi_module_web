@@ -17,7 +17,6 @@ public class MethodExecutor {
 
     public MethodExecutor(Container container) {
         Objects.requireNonNull(container);
-
         this.container = container;
     }
 

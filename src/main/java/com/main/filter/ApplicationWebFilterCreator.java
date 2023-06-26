@@ -1,7 +1,6 @@
 package com.main.filter;
 
 import com.main.util.AnnotationUtils;
-import container.Container;
 import filter.AbstractFilterCreator;
 import filter.Filters;
 import filter.annotation.WebFilter;
@@ -16,7 +15,7 @@ public class ApplicationWebFilterCreator implements AbstractFilterCreator {
     private final WebFilterComponentFilterCreator webFilterComponentFilterCreator;
     private final List<Class<?>> clazzes;
 
-    private ApplicationWebFilterCreator(WebFilterComponentFilterCreator webFilterComponentFilterCreator, List<Class<?>> clazzes) {
+    public ApplicationWebFilterCreator(WebFilterComponentFilterCreator webFilterComponentFilterCreator, List<Class<?>> clazzes) {
         Objects.requireNonNull(webFilterComponentFilterCreator, "container is null.");
         Objects.requireNonNull(clazzes, "container is null.");
 
@@ -25,14 +24,6 @@ public class ApplicationWebFilterCreator implements AbstractFilterCreator {
                 .filter(clazz -> AnnotationUtils.exist(clazz, WEB_FILTER_CLASS))
                 .collect(Collectors.toUnmodifiableList());
         this.webFilterComponentFilterCreator = webFilterComponentFilterCreator;
-    }
-
-    public static ApplicationWebFilterCreator from(Container container, List<Class<?>> clazzes) {
-        Objects.requireNonNull(container, "container is null.");
-        Objects.requireNonNull(clazzes, "clazzes is null.");
-
-        WebFilterComponentFilterCreator filterCreator = new WebFilterComponentFilterCreator(container);
-        return new ApplicationWebFilterCreator(filterCreator, clazzes);
     }
 
     public Filters create() {

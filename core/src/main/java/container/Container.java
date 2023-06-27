@@ -2,11 +2,12 @@ package container;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Container {
     private final Map<Class<?>, Object> values;
 
-    public Container() {
+    private Container() {
         this.values = new HashMap<>();
     }
 
@@ -26,10 +27,13 @@ public class Container {
             return this;
         }
 
-        otherContainer.values
-                .forEach((key, value) -> this.values.merge(key, value, (prev, curr) -> prev));
+        Stream<Map.Entry<Class<?>, Object>> baseValueStream = this.values.entrySet().stream();
+        Stream<Map.Entry<Class<?>, Object>> otherValueStream = otherContainer.values.entrySet().stream();
 
-        return this;
+        Map<Class<?>, Object> newValue = Stream.concat(baseValueStream, otherValueStream)
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
+
+        return new Container(newValue);
     }
 
     public Container lock() {
@@ -61,5 +65,12 @@ public class Container {
                     .filter(entry -> !Objects.isNull(entry.getValue()))
                     .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Container{" +
+            "values=" + values +
+            '}';
     }
 }

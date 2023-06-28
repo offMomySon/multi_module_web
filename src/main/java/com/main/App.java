@@ -11,7 +11,6 @@ import container.annotation.Controller;
 import filter.Filter;
 import filter.FilterWorker;
 import filter.Filters;
-import filter.WebFilterAnnotatedFilterCreator;
 import filter.annotation.WebFilter;
 import filter.pattern.PatternMatcher;
 import filter.pattern.PatternMatcherStrategy;
@@ -20,6 +19,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -57,21 +57,14 @@ public class App {
         List<Class<?>> clazzes = ClassFinder.from(App.class, "com.main.business").findClazzes();
 
         // 2. class 로 container 를 생성.
-        List<Class<?>> componentClazzes = clazzes.stream()
-            .filter(clazz -> !Objects.isNull(clazz))
-            .filter(clazz -> exist(clazz, COMPONENT_CLASS))
-            .peek(aClass -> log.info("aClass : {}", aClass))
-            .collect(Collectors.toUnmodifiableList());
+        List<Class<?>> componentClazzes = AnnotationUtils.filterByAnnotationClazz(clazzes, COMPONENT_CLASS);
         List<ComponentClassLoader> componentClassLoaders = componentClazzes.stream()
             .map(ComponentClassLoader::new)
             .collect(Collectors.toUnmodifiableList());
         Container container = createContainer(componentClassLoaders);
 
         // 3. class 로 httpPathMatcher 를 생성.
-        List<Class<?>> controllerClazzes = clazzes.stream()
-            .filter(clazz -> !Objects.isNull(clazz))
-            .filter(clazz -> exist(clazz, CONTROLLER_CLASS))
-            .collect(Collectors.toUnmodifiableList());
+        List<Class<?>> controllerClazzes = AnnotationUtils.filterByAnnotationClazz(clazzes, CONTROLLER_CLASS);
         List<BaseHttpPathMatcher> baseHttpPathMatchers = controllerClazzes.stream()
             .map(JavaMethodPathMatcherCreator::new)
             .map(JavaMethodPathMatcherCreator::create)
@@ -81,10 +74,7 @@ public class App {
         HttpPathMatcher httpPathMatcher = new CompositedHttpPathMatcher(baseHttpPathMatchers);
 
         // 4. class 로 webfilter 를 생성.
-        List<Class<?>> webFilterAnnotatedClazzes = clazzes.stream()
-            .filter(clazz -> !Objects.isNull(clazz))
-            .filter(clazz -> exist(clazz, WEB_FILTER_CLASS))
-            .collect(Collectors.toUnmodifiableList());
+        List<Class<?>> webFilterAnnotatedClazzes = AnnotationUtils.filterByAnnotationClazz(clazzes, WEB_FILTER_CLASS);
         List<Filter> filters = webFilterAnnotatedClazzes.stream()
             .map(webFilterAnnotatedClazz -> createFilters(container, webFilterAnnotatedClazz))
             .flatMap(Collection::stream)
@@ -117,9 +107,7 @@ public class App {
         Object[] memberObjects = Arrays.stream(memberClasses).map(container::get).toArray(Object[]::new);
         FilterWorker filterWorker = (FilterWorker) newObject(filterWorkerClazz, memberClasses, memberObjects);
 
-        Class<? extends FilterWorker> filterClazz = filterWorker.getClass();
-        WebFilter webFilter = AnnotationUtils.find(filterClazz, WEB_FILTER_CLASS).orElseThrow(() -> new RuntimeException("filter does not annotated WebFilter."));
-
+        WebFilter webFilter = AnnotationUtils.find(filterWorkerClazz, WEB_FILTER_CLASS).orElseThrow(() -> new RuntimeException("filter does not annotated WebFilter."));
         String filterName = webFilter.filterName().isEmpty() ? filterWorker.getClass().getSimpleName() : webFilter.filterName();
         List<String> basePaths = Arrays.stream(webFilter.patterns()).collect(Collectors.toUnmodifiableList());
 

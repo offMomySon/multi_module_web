@@ -36,9 +36,10 @@ public class JavaMethodPathMatcherCreator {
             .map(requestMappedMethod -> {
                 RequestMethod requestMethod = requestMappedMethod.getRequestMethod();
                 PathUrl baseUrl = PathUrl.from(requestMappedMethod.getUrl());
+                Method javaMethod = requestMappedMethod.getJavaMethod();
+
                 SegmentChunkFactory segmentChunkFactory = new SegmentChunkFactory(baseUrl);
                 PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(segmentChunkFactory);
-                Method javaMethod = requestMappedMethod.getJavaMethod();
 
                 return new BaseHttpPathMatcher(requestMethod, pathUrlMatcher, javaMethod);
             })

@@ -8,6 +8,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -19,6 +20,22 @@ public class AnnotationUtils {
 
     public static boolean doesNotExistAll(Class<?> clazz, Class<?>... _annotationClazzes) {
         return !existAll(clazz, _annotationClazzes);
+    }
+
+    public static List<Class<?>> filterByAnnotationClazz(List<Class<?>> clazzes, Class<?> annotationClazz) {
+        Objects.requireNonNull(clazzes);
+        Objects.requireNonNull(annotationClazz);
+
+        if (!annotationClazz.isAnnotation()) {
+            return Collections.emptyList();
+        }
+
+        clazzes = clazzes.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableList());
+
+        return clazzes.stream()
+            .filter(clazz -> !Objects.isNull(clazz))
+            .filter(clazz -> exist(clazz, annotationClazz))
+            .collect(Collectors.toUnmodifiableList());
     }
 
     public static boolean existAll(Class<?> clazz, Class<?>... _annotationClazzes) {

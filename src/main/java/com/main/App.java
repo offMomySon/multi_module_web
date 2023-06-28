@@ -1,7 +1,6 @@
 package com.main;
 
 
-import com.main.executor.ApplicationRequestExecutor2;
 import com.main.util.AnnotationUtils;
 import container.ClassFinder;
 import container.ComponentClassLoader;
@@ -48,7 +47,6 @@ import vo.HttpRequest;
 import vo.HttpResponse;
 import vo.HttpResponseWriter;
 import vo.QueryParameters;
-import static com.main.util.AnnotationUtils.exist;
 
 @Slf4j
 public class App {
@@ -58,6 +56,7 @@ public class App {
     private static final Objects EMPTY_VALUE = null;
 
     public static void main(String[] args) {
+        // [시스템 컴포넌트적 요소 존재.]
         // 1. class 를 모두 찾아옴.
         List<Class<?>> clazzes = ClassFinder.from(App.class, "com.main.business").findClazzes();
 
@@ -149,15 +148,27 @@ public class App {
             Objects.requireNonNull(request);
             Objects.requireNonNull(response);
 
-            RequestMethod method = RequestMethod.find(request.getHttpMethod().name());
-            PathUrl requestUrl = PathUrl.from(request.getHttpUri().getUrl());
-            QueryParameters queryParameters = request.getQueryParameters();
-            BodyContent bodyContent = BodyContent.from(request.getBodyInputStream());
+            // 5. http data 가져오기. (does not need compoenet)
+            String methodName = request.getHttpMethod().name();
+            String url = request.getHttpUri().getUrl();
 
-            MatchedMethod matchedMethod = httpPathMatcher.matchJavaMethod(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
+            // 6.match method 찾기
+            RequestMethod method = RequestMethod.find(methodName);
+            PathUrl pathUrl = PathUrl.from(url);
+            MatchedMethod matchedMethod = httpPathMatcher.matchJavaMethod(method, pathUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
+
+            // todo, 값 변환자 생성이 아닌 값 변환이 필요하다.
+            // [시스템 컴포넌트적 요소 존재.]
+            // 7.
+            // as is.
+            // (1) 값 변환자 생성.
+            // to be.
+            // (1) 값 변환.
             Method javaMethod = matchedMethod.getJavaMethod();
             RequestParameters pathVariableValue = new RequestParameters(matchedMethod.getPathVariableValue().getValues());
+            QueryParameters queryParameters = request.getQueryParameters();
             RequestParameters queryParamValues = new RequestParameters(queryParameters.getParameterMap());
+            BodyContent bodyContent = BodyContent.from(request.getBodyInputStream());
 
             Map<Class<? extends Annotation>, ParameterConverter> parameterConverters = Map.of(
                 PathVariable.class, new RequestParameterConverter(PathVariable.class, pathVariableValue),
@@ -166,12 +177,19 @@ public class App {
             );
             ParameterConverter parameterConverter = new CompositeParameterConverter(parameterConverters);
 
+            // [시스템 컴포넌트적 요소 존재.]
+            // 8.method 실행.
+            // (1) class, instance 가져오기.
             Class<?> declaringClass = javaMethod.getDeclaringClass();
             Object instance = container.get(declaringClass);
             log.info("declaringClass : {}", declaringClass);
             log.info("instance : {}", instance);
             log.info("javaMethod : {}", javaMethod);
 
+            // -> todo, parameter 에서 값 변환은 사전에 진행되었어야한다.
+            // 8.1.
+            // as is. (1) parameter -> value 변환.
+            // to be. (1) nothing.
             Object[] values = Arrays.stream(javaMethod.getParameters())
                 .peek(parameter -> log.info("parameter : `{}`, param class : `{}`", parameter, parameter.getClass()))
                 .map(parameterConverter::convertAsValue)
@@ -179,10 +197,17 @@ public class App {
                 .peek(value -> log.info("value : {}, {}", value, value.getClass()))
                 .toArray();
 
+            // 8.2. 실행.
             Object result = doExecute(instance, javaMethod, values);
 
+            // [시스템 컴포넌트적 요소 존재.]
+            // 9. 응답값 생성.
+            // as is.
+            // (1) result -> to input stream.
+            // (2) 임의의 header 셋팅
+            // to be.
+            // (1) 응닶 타입에 따라 content-type 설정.
             InputStream inputStream = converter.convertToInputStream(result);
-
             response.setStartLine("HTTP/1.1 200 OK");
             response.appendHeader(Map.of(
                 "Date", "MON, 27 Jul 2023 12:28:53 GMT",

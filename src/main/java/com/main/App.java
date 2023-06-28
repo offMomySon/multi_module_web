@@ -26,6 +26,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import matcher.BaseHttpPathMatcher;
+import matcher.BaseHttpPathMatcher.MatchedMethod;
 import matcher.CompositedHttpPathMatcher;
 import matcher.HttpPathMatcher;
 import matcher.RequestMethod;
@@ -48,8 +49,8 @@ import static com.main.util.AnnotationUtils.exist;
 @Slf4j
 public class App {
     private static final Class<Component> COMPONENT_CLASS = Component.class;
-    private static final Class<WebFilter> WEB_FILTER_CLASS = WebFilter.class;
     private static final Class<Controller> CONTROLLER_CLASS = Controller.class;
+    private static final Class<WebFilter> WEB_FILTER_CLASS = WebFilter.class;
     private static final Objects EMPTY_VALUE = null;
 
     public static void main(String[] args) {
@@ -139,34 +140,31 @@ public class App {
             this.httpPathMatcher = httpPathMatcher;
         }
 
-        public Object execute(RequestMethod method, String requestUrl, QueryParameters queryParameters, BodyContent bodyContent) {
-            PathUrl requestPathUrl = PathUrl.from(requestUrl);
-            BaseHttpPathMatcher.MatchedMethod matchedMethod = httpPathMatcher.matchJavaMethod(method, requestPathUrl)
-                .orElseThrow(() -> new RuntimeException("Does not exist match method."));
+        public Object execute(RequestMethod method, PathUrl requestUrl, QueryParameters queryParameters, BodyContent bodyContent) {
+            MatchedMethod matchedMethod = httpPathMatcher.matchJavaMethod(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
 
             Method javaMethod = matchedMethod.getJavaMethod();
-            PathVariableValue pathVariableValue = matchedMethod.getPathVariableValue();
+            RequestParameters pathVariableValue = new RequestParameters(matchedMethod.getPathVariableValue().getValues());
             RequestParameters queryParamValues = new RequestParameters(queryParameters.getParameterMap());
 
-            Map<Class<? extends Annotation>, ParameterConverter> classParameterConverterMap = Map.of(
-                PathVariable.class, RequestParameterConverter.from(PathVariable.class, pathVariableValue),
+            Map<Class<? extends Annotation>, ParameterConverter> parameterConverters = Map.of(
+                PathVariable.class, new RequestParameterConverter(PathVariable.class, pathVariableValue),
                 RequestParam.class, new RequestParameterConverter(RequestParam.class, queryParamValues),
                 RequestBody.class, new RequestBodyParameterConverter(bodyContent)
             );
-            CompositeParameterConverter parameterConverter = new CompositeParameterConverter(classParameterConverterMap);
+            ParameterConverter parameterConverter = new CompositeParameterConverter(parameterConverters);
 
             Class<?> declaringClass = javaMethod.getDeclaringClass();
-            log.info("declaringClass : {}", declaringClass);
-
             Object instance = container.get(declaringClass);
+            log.info("declaringClass : {}", declaringClass);
             log.info("instance : {}", instance);
             log.info("javaMethod : {}", javaMethod);
 
             Object[] values = Arrays.stream(javaMethod.getParameters())
                 .peek(parameter -> log.info("parameter : `{}`, param class : `{}`", parameter, parameter.getClass()))
                 .map(parameterConverter::convertAsValue)
-                .peek(op -> log.info("parameterConverter : {}, {}", op.get(), op.get().getClass()))
                 .map(optionalValue -> optionalValue.orElse(EMPTY_VALUE))
+                .peek(value -> log.info("value : {}, {}", value, value.getClass()))
                 .toArray();
 
             Object result = doExecute(instance, javaMethod, values);

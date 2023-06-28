@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import matcher.RequestMethod;
 import matcher.converter.*;
 import matcher.converter.base.CompositeConverter;
+import matcher.segment.PathUrl;
 import processor.HttpRequestExecutor;
 import vo.HttpRequest;
 import vo.HttpResponse;
@@ -30,7 +31,7 @@ public class ApplicationRequestExecutor2 implements HttpRequestExecutor {
         Objects.requireNonNull(response);
 
         RequestMethod method = RequestMethod.find(request.getHttpMethod().name());
-        String requestUrl = request.getHttpUri().getUrl();
+        PathUrl requestUrl = PathUrl.from(request.getHttpUri().getUrl());
         QueryParameters queryParameters = request.getQueryParameters();
         BodyContent bodyContent = BodyContent.from(request.getBodyInputStream());
 

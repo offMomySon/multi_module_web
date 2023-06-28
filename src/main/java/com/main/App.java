@@ -14,12 +14,12 @@ import filter.Filters;
 import filter.annotation.WebFilter;
 import filter.pattern.PatternMatcher;
 import filter.pattern.PatternMatcherStrategy;
+import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -39,10 +39,14 @@ import matcher.converter.ParameterConverter;
 import matcher.converter.RequestBodyParameterConverter;
 import matcher.converter.RequestParameterConverter;
 import matcher.converter.RequestParameters;
+import matcher.converter.base.CompositeConverter;
 import matcher.creator.JavaMethodPathMatcherCreator;
 import matcher.segment.PathUrl;
-import matcher.segment.PathVariableValue;
+import processor.HttpRequestExecutor;
 import processor.HttpService;
+import vo.HttpRequest;
+import vo.HttpResponse;
+import vo.HttpResponseWriter;
 import vo.QueryParameters;
 import static com.main.util.AnnotationUtils.exist;
 
@@ -82,10 +86,8 @@ public class App {
             .collect(Collectors.toUnmodifiableList());
         Filters newFilters = new Filters(filters);
 
-        RequestExecutor methodExecutor = new RequestExecutor(container, httpPathMatcher);
-        ApplicationRequestExecutor2 applicationRequestExecutor = new ApplicationRequestExecutor2(methodExecutor);
-
-        HttpService httpService = new HttpService(applicationRequestExecutor, newFilters);
+        BaseRequestExecutor baseRequestExecutor = new BaseRequestExecutor(container, httpPathMatcher);
+        HttpService httpService = new HttpService(baseRequestExecutor, newFilters);
         httpService.start();
     }
 
@@ -131,18 +133,28 @@ public class App {
         return new Filter(filterName, patternMatcher, filterWorker);
     }
 
-    public static class RequestExecutor {
+    public static class BaseRequestExecutor implements HttpRequestExecutor {
+        private static final CompositeConverter converter = new CompositeConverter();
+
         private final Container container;
         private final HttpPathMatcher httpPathMatcher;
 
-        public RequestExecutor(Container container, HttpPathMatcher httpPathMatcher) {
+        public BaseRequestExecutor(Container container, HttpPathMatcher httpPathMatcher) {
             this.container = container;
             this.httpPathMatcher = httpPathMatcher;
         }
 
-        public Object execute(RequestMethod method, PathUrl requestUrl, QueryParameters queryParameters, BodyContent bodyContent) {
-            MatchedMethod matchedMethod = httpPathMatcher.matchJavaMethod(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
+        @Override
+        public boolean execute(HttpRequest request, HttpResponse response) {
+            Objects.requireNonNull(request);
+            Objects.requireNonNull(response);
 
+            RequestMethod method = RequestMethod.find(request.getHttpMethod().name());
+            PathUrl requestUrl = PathUrl.from(request.getHttpUri().getUrl());
+            QueryParameters queryParameters = request.getQueryParameters();
+            BodyContent bodyContent = BodyContent.from(request.getBodyInputStream());
+
+            MatchedMethod matchedMethod = httpPathMatcher.matchJavaMethod(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
             Method javaMethod = matchedMethod.getJavaMethod();
             RequestParameters pathVariableValue = new RequestParameters(matchedMethod.getPathVariableValue().getValues());
             RequestParameters queryParamValues = new RequestParameters(queryParameters.getParameterMap());
@@ -168,7 +180,18 @@ public class App {
                 .toArray();
 
             Object result = doExecute(instance, javaMethod, values);
-            return Objects.isNull(result) ? "emtpy" : result;
+
+            InputStream inputStream = converter.convertToInputStream(result);
+
+            response.setStartLine("HTTP/1.1 200 OK");
+            response.appendHeader(Map.of(
+                "Date", "MON, 27 Jul 2023 12:28:53 GMT",
+                "Host", "localhost:8080",
+                "Content-Type", "text/html; charset=UTF-8"));
+            HttpResponseWriter sender = response.getSender();
+            sender.send(inputStream);
+
+            return true;
         }
 
         private static Object doExecute(Object object, Method javaMethod, Object[] paramsValues) {

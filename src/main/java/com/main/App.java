@@ -61,14 +61,14 @@ public class App {
         List<Class<?>> clazzes = ClassFinder.from(App.class, "com.main.business").findClazzes();
 
         // 2. class 로 container 를 생성.
-        List<Class<?>> componentClazzes = AnnotationUtils.filterByAnnotationClazz(clazzes, COMPONENT_CLASS);
+        List<Class<?>> componentClazzes = AnnotationUtils.filterByAnnotatedClazz(clazzes, COMPONENT_CLASS);
         List<ComponentClassLoader> componentClassLoaders = componentClazzes.stream()
             .map(ComponentClassLoader::new)
             .collect(Collectors.toUnmodifiableList());
         Container container = createContainer(componentClassLoaders);
 
         // 3. class 로 httpPathMatcher 를 생성.
-        List<Class<?>> controllerClazzes = AnnotationUtils.filterByAnnotationClazz(clazzes, CONTROLLER_CLASS);
+        List<Class<?>> controllerClazzes = AnnotationUtils.filterByAnnotatedClazz(clazzes, CONTROLLER_CLASS);
         List<BaseHttpPathMatcher> baseHttpPathMatchers = controllerClazzes.stream()
             .map(JavaMethodPathMatcherCreator::new)
             .map(JavaMethodPathMatcherCreator::create)
@@ -78,7 +78,7 @@ public class App {
         HttpPathMatcher httpPathMatcher = new CompositedHttpPathMatcher(baseHttpPathMatchers);
 
         // 4. class 로 webfilter 를 생성.
-        List<Class<?>> webFilterAnnotatedClazzes = AnnotationUtils.filterByAnnotationClazz(clazzes, WEB_FILTER_CLASS);
+        List<Class<?>> webFilterAnnotatedClazzes = AnnotationUtils.filterByAnnotatedClazz(clazzes, WEB_FILTER_CLASS);
         List<Filter> filters = webFilterAnnotatedClazzes.stream()
             .map(webFilterAnnotatedClazz -> createFilters(container, webFilterAnnotatedClazz))
             .flatMap(Collection::stream)

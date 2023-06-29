@@ -22,7 +22,7 @@ public class AnnotationUtils {
         return !existAll(clazz, _annotationClazzes);
     }
 
-    public static List<Class<?>> filterByAnnotationClazz(List<Class<?>> clazzes, Class<?> annotationClazz) {
+    public static List<Class<?>> filterByAnnotatedClazz(List<Class<?>> clazzes, Class<?> annotationClazz) {
         Objects.requireNonNull(clazzes);
         Objects.requireNonNull(annotationClazz);
 

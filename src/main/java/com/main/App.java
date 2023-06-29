@@ -1,6 +1,8 @@
 package com.main;
 
 
+import com.main.extractor.ParameterValueExtractor;
+import com.main.extractor.ValueExtractorStrategy;
 import com.main.util.AnnotationUtils;
 import container.ClassFinder;
 import container.ComponentClassLoader;
@@ -17,6 +19,7 @@ import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -47,6 +50,7 @@ import vo.HttpRequest;
 import vo.HttpResponse;
 import vo.HttpResponseWriter;
 import vo.QueryParameters;
+import static com.main.extractor.ParameterValueExtractor.*;
 
 @Slf4j
 public class App {
@@ -164,12 +168,13 @@ public class App {
             // (1) 값 변환자 생성.
             // to be.
             // (1) 값 변환.
-            Method javaMethod = matchedMethod.getJavaMethod();
             RequestParameters pathVariableValue = new RequestParameters(matchedMethod.getPathVariableValue().getValues());
-            QueryParameters queryParameters = request.getQueryParameters();
-            RequestParameters queryParamValues = new RequestParameters(queryParameters.getParameterMap());
+            RequestParameters queryParamValues = new RequestParameters(request.getQueryParameters().getParameterMap());
             BodyContent bodyContent = BodyContent.from(request.getBodyInputStream());
+            ValueExtractorStrategy valueExtractorStrategy = new ValueExtractorStrategy(pathVariableValue, queryParamValues, bodyContent);
 
+            Method javaMethod = matchedMethod.getJavaMethod();
+            
             Map<Class<? extends Annotation>, ParameterConverter> parameterConverters = Map.of(
                 PathVariable.class, new RequestParameterConverter(PathVariable.class, pathVariableValue),
                 RequestParam.class, new RequestParameterConverter(RequestParam.class, queryParamValues),

@@ -9,9 +9,9 @@ public interface ParameterValueExtractor {
 
     class ExtractValue {
         private final Class<?> parameterType;
-        private final Optional<Object> optionalValue;
+        private final Optional<String> optionalValue;
 
-        public ExtractValue(Class<?> parameterType, Optional<Object> optionalValue) {
+        public ExtractValue(Class<?> parameterType, Optional<String> optionalValue) {
             Objects.requireNonNull(parameterType);
             Objects.requireNonNull(optionalValue);
             this.parameterType = parameterType;
@@ -22,7 +22,7 @@ public interface ParameterValueExtractor {
             return parameterType;
         }
 
-        public Optional<Object> getOptionalValue() {
+        public Optional<String> getOptionalValue() {
             return optionalValue;
         }
     }

@@ -4,8 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import lombok.extern.slf4j.Slf4j;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+@Slf4j
 public class ObjectConverter implements Converter {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -20,7 +22,13 @@ public class ObjectConverter implements Converter {
     }
 
     public <T> T convert(String value, Class<T> targetClazz) {
+        if(String.class == targetClazz){
+            return (T) value;
+        }
+
         try {
+            log.info("value : {}", value);
+            log.info("targetClazz : {}", targetClazz);
             return objectMapper.readValue(value, targetClazz);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);

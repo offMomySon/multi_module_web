@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import matcher.BaseHttpPathMatcher;
@@ -42,6 +43,7 @@ import matcher.converter.RequestBodyParameterConverter;
 import matcher.converter.RequestParameterConverter;
 import matcher.converter.RequestParameters;
 import matcher.converter.base.CompositeConverter;
+import matcher.converter.base.ObjectConverter;
 import matcher.creator.JavaMethodPathMatcherCreator;
 import matcher.segment.PathUrl;
 import processor.HttpRequestExecutor;
@@ -58,6 +60,8 @@ public class App {
     private static final Class<Controller> CONTROLLER_CLASS = Controller.class;
     private static final Class<WebFilter> WEB_FILTER_CLASS = WebFilter.class;
     private static final Objects EMPTY_VALUE = null;
+
+    private static final ObjectConverter objectConverter = new ObjectConverter();
 
     public static void main(String[] args) {
         // [시스템 컴포넌트적 요소 존재.]
@@ -174,13 +178,6 @@ public class App {
             ValueExtractorStrategy valueExtractorStrategy = new ValueExtractorStrategy(pathVariableValue, queryParamValues, bodyContent);
 
             Method javaMethod = matchedMethod.getJavaMethod();
-            
-            Map<Class<? extends Annotation>, ParameterConverter> parameterConverters = Map.of(
-                PathVariable.class, new RequestParameterConverter(PathVariable.class, pathVariableValue),
-                RequestParam.class, new RequestParameterConverter(RequestParam.class, queryParamValues),
-                RequestBody.class, new RequestBodyParameterConverter(bodyContent)
-            );
-            ParameterConverter parameterConverter = new CompositeParameterConverter(parameterConverters);
 
             // [시스템 컴포넌트적 요소 존재.]
             // 8.method 실행.
@@ -196,9 +193,13 @@ public class App {
             // as is. (1) parameter -> value 변환.
             // to be. (1) nothing.
             Object[] values = Arrays.stream(javaMethod.getParameters())
-                .peek(parameter -> log.info("parameter : `{}`, param class : `{}`", parameter, parameter.getClass()))
-                .map(parameterConverter::convertAsValue)
-                .map(optionalValue -> optionalValue.orElse(EMPTY_VALUE))
+                .map(valueExtractorStrategy::create)
+                .map(ParameterValueExtractor::extract)
+                .map(extractValue -> {
+                    String value = extractValue.getOptionalValue().orElse("");
+                    Class<?> parameterType = extractValue.getParameterType();
+                    return objectConverter.convert(value, parameterType);
+                })
                 .peek(value -> log.info("value : {}, {}", value, value.getClass()))
                 .toArray();
 

@@ -9,12 +9,12 @@ import matcher.annotation.RequestParam;
 import matcher.converter.RequestParameters;
 import util.AnnotationUtils;
 
-public class BaseParameterValueExtractor implements ParameterValueExtractor {
+public class RequestParameterValueExtractor implements ParameterValueExtractor {
     private final Class<?> targetAnnotationClazz;
     private final RequestParameters requestParameters;
     private final Parameter parameter;
 
-    public BaseParameterValueExtractor(Class<?> targetAnnotationClazz, RequestParameters requestParameters, Parameter parameter) {
+    public RequestParameterValueExtractor(Class<?> targetAnnotationClazz, RequestParameters requestParameters, Parameter parameter) {
         Objects.requireNonNull(targetAnnotationClazz);
         Objects.requireNonNull(requestParameters);
         Objects.requireNonNull(parameter);

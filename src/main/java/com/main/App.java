@@ -2,7 +2,7 @@ package com.main;
 
 
 import com.main.extractor.ParameterValueExtractor;
-import com.main.extractor.ValueExtractorStrategy;
+import com.main.extractor.ParameterValueExtractorStrategy;
 import com.main.util.AnnotationUtils;
 import container.ClassFinder;
 import container.ComponentClassLoader;
@@ -16,16 +16,13 @@ import filter.annotation.WebFilter;
 import filter.pattern.PatternMatcher;
 import filter.pattern.PatternMatcherStrategy;
 import java.io.InputStream;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import matcher.BaseHttpPathMatcher;
@@ -33,14 +30,7 @@ import matcher.BaseHttpPathMatcher.MatchedMethod;
 import matcher.CompositedHttpPathMatcher;
 import matcher.HttpPathMatcher;
 import matcher.RequestMethod;
-import matcher.annotation.PathVariable;
-import matcher.annotation.RequestBody;
-import matcher.annotation.RequestParam;
 import matcher.converter.BodyContent;
-import matcher.converter.CompositeParameterConverter;
-import matcher.converter.ParameterConverter;
-import matcher.converter.RequestBodyParameterConverter;
-import matcher.converter.RequestParameterConverter;
 import matcher.converter.RequestParameters;
 import matcher.converter.base.CompositeConverter;
 import matcher.converter.base.ObjectConverter;
@@ -51,8 +41,6 @@ import processor.HttpService;
 import vo.HttpRequest;
 import vo.HttpResponse;
 import vo.HttpResponseWriter;
-import vo.QueryParameters;
-import static com.main.extractor.ParameterValueExtractor.*;
 
 @Slf4j
 public class App {
@@ -175,7 +163,7 @@ public class App {
             RequestParameters pathVariableValue = new RequestParameters(matchedMethod.getPathVariableValue().getValues());
             RequestParameters queryParamValues = new RequestParameters(request.getQueryParameters().getParameterMap());
             BodyContent bodyContent = BodyContent.from(request.getBodyInputStream());
-            ValueExtractorStrategy valueExtractorStrategy = new ValueExtractorStrategy(pathVariableValue, queryParamValues, bodyContent);
+            ParameterValueExtractorStrategy parameterValueExtractorStrategy = new ParameterValueExtractorStrategy(pathVariableValue, queryParamValues, bodyContent);
 
             Method javaMethod = matchedMethod.getJavaMethod();
 
@@ -193,7 +181,7 @@ public class App {
             // as is. (1) parameter -> value 변환.
             // to be. (1) nothing.
             Object[] values = Arrays.stream(javaMethod.getParameters())
-                .map(valueExtractorStrategy::create)
+                .map(parameterValueExtractorStrategy::create)
                 .map(ParameterValueExtractor::extract)
                 .map(extractValue -> {
                     String value = extractValue.getOptionalValue().orElse("");

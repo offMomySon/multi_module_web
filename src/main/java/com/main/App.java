@@ -3,39 +3,31 @@ package com.main;
 
 import com.main.extractor.ParameterValueExtractor;
 import com.main.extractor.ParameterValueExtractorStrategy;
+import com.main.filter.ApplicationWebFilterCreator;
+import com.main.filter.WebFilterComponentFilterCreator;
 import com.main.invoker.MethodInvoker;
-import com.main.util.AnnotationUtils;
 import container.ClassFinder;
-import container.ComponentClassLoader;
+import container.ComponentContainerCreator;
 import container.Container;
 import container.annotation.Component;
 import container.annotation.Controller;
-import filter.Filter;
-import filter.FilterWorker;
 import filter.Filters;
 import filter.annotation.WebFilter;
-import filter.pattern.PatternMatcher;
-import filter.pattern.PatternMatcherStrategy;
 import java.io.InputStream;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import matcher.BaseHttpPathMatcher;
 import matcher.BaseHttpPathMatcher.MatchedMethod;
-import matcher.CompositedHttpPathMatcher;
+import matcher.ControllerHttpPathMatcherCreator;
 import matcher.HttpPathMatcher;
 import matcher.RequestMethod;
 import matcher.converter.BodyContent;
 import matcher.converter.RequestParameters;
 import matcher.converter.base.CompositeConverter;
 import matcher.converter.base.ObjectConverter;
-import matcher.creator.JavaMethodPathMatcherCreator;
 import matcher.segment.PathUrl;
 import processor.HttpRequestExecutor;
 import processor.HttpService;
@@ -53,80 +45,26 @@ public class App {
     private static final ObjectConverter objectConverter = new ObjectConverter();
 
     public static void main(String[] args) {
-        // [시스템 컴포넌트적 요소 존재.]
         // 1. class 를 모두 찾아옴.
         List<Class<?>> clazzes = ClassFinder.from(App.class, "com.main.business").findClazzes();
 
         // 2. class 로 container 를 생성.
-        List<Class<?>> componentClazzes = AnnotationUtils.filterByAnnotatedClazz(clazzes, COMPONENT_CLASS);
-        List<ComponentClassLoader> componentClassLoaders = componentClazzes.stream()
-            .map(ComponentClassLoader::new)
-            .collect(Collectors.toUnmodifiableList());
-        Container container = createContainer(componentClassLoaders);
+        ComponentContainerCreator componentContainerCreator = new ComponentContainerCreator(clazzes);
+        Container container = componentContainerCreator.create();
 
         // 3. class 로 httpPathMatcher 를 생성.
-        List<Class<?>> controllerClazzes = AnnotationUtils.filterByAnnotatedClazz(clazzes, CONTROLLER_CLASS);
-        List<BaseHttpPathMatcher> baseHttpPathMatchers = controllerClazzes.stream()
-            .map(JavaMethodPathMatcherCreator::new)
-            .map(JavaMethodPathMatcherCreator::create)
-            .flatMap(Collection::stream)
-            .peek(httpPathMatcher -> log.info("httpPathMatcher : `{}`", httpPathMatcher))
-            .collect(Collectors.toUnmodifiableList());
-        HttpPathMatcher httpPathMatcher = new CompositedHttpPathMatcher(baseHttpPathMatchers);
+        ControllerHttpPathMatcherCreator controllerHttpPathMatcherCreator = new ControllerHttpPathMatcherCreator(clazzes);
+        HttpPathMatcher httpPathMatcher = controllerHttpPathMatcherCreator.create();
 
         // 4. class 로 webfilter 를 생성.
-        List<Class<?>> webFilterAnnotatedClazzes = AnnotationUtils.filterByAnnotatedClazz(clazzes, WEB_FILTER_CLASS);
-        List<Filter> filters = webFilterAnnotatedClazzes.stream()
-            .map(webFilterAnnotatedClazz -> createFilters(container, webFilterAnnotatedClazz))
-            .flatMap(Collection::stream)
-            .collect(Collectors.toUnmodifiableList());
-        Filters newFilters = new Filters(filters);
+        WebFilterComponentFilterCreator webFilterComponentFilterCreator = new WebFilterComponentFilterCreator(container);
+        ApplicationWebFilterCreator applicationWebFilterCreator = new ApplicationWebFilterCreator(webFilterComponentFilterCreator, clazzes);
+        Filters filters = applicationWebFilterCreator.create();
 
+        // 5. executor 를 생성.
         BaseRequestExecutor baseRequestExecutor = new BaseRequestExecutor(container, httpPathMatcher);
-        HttpService httpService = new HttpService(baseRequestExecutor, newFilters);
+        HttpService httpService = new HttpService(baseRequestExecutor, filters);
         httpService.start();
-    }
-
-    private static Container createContainer(List<ComponentClassLoader> componentClassLoaders) {
-        Container container = Container.empty();
-        for (ComponentClassLoader classLoader : componentClassLoaders) {
-            Container newContainer = classLoader.load(container);
-            container = container.merge(newContainer);
-        }
-        return container;
-    }
-
-    public static List<Filter> createFilters(Container container, Class<?> filterWorkerClazz) {
-        Objects.requireNonNull(filterWorkerClazz);
-        if (AnnotationUtils.doesNotExist(filterWorkerClazz, WEB_FILTER_CLASS)) {
-            throw new RuntimeException("does not exist component annotation");
-        }
-
-        Class<?>[] memberClasses = AnnotationUtils.peekFieldsType(filterWorkerClazz, COMPONENT_CLASS).toArray(Class<?>[]::new);
-        Object[] memberObjects = Arrays.stream(memberClasses).map(container::get).toArray(Object[]::new);
-        FilterWorker filterWorker = (FilterWorker) newObject(filterWorkerClazz, memberClasses, memberObjects);
-
-        WebFilter webFilter = AnnotationUtils.find(filterWorkerClazz, WEB_FILTER_CLASS).orElseThrow(() -> new RuntimeException("filter does not annotated WebFilter."));
-        String filterName = webFilter.filterName().isEmpty() ? filterWorker.getClass().getSimpleName() : webFilter.filterName();
-        List<String> basePaths = Arrays.stream(webFilter.patterns()).collect(Collectors.toUnmodifiableList());
-
-        return basePaths.stream()
-            .map(basePath -> createFilter(filterName, basePath, filterWorker))
-            .collect(Collectors.toUnmodifiableList());
-    }
-
-    private static Object newObject(Class<?> filterWorkerClazz, Class<?>[] memberClasses, Object[] memberObjects) {
-        try {
-            Constructor<?> constructor = filterWorkerClazz.getConstructor(memberClasses);
-            return constructor.newInstance(memberObjects);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static Filter createFilter(String filterName, String basePath, FilterWorker filterWorker) {
-        PatternMatcher patternMatcher = PatternMatcherStrategy.create(basePath);
-        return new Filter(filterName, patternMatcher, filterWorker);
     }
 
     public static class BaseRequestExecutor implements HttpRequestExecutor {

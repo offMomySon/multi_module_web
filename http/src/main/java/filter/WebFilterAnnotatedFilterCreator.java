@@ -20,7 +20,8 @@ public class WebFilterAnnotatedFilterCreator implements AbstractFilterCreator {
 
         Class<? extends FilterWorker> filterClazz = filterWorker.getClass();
 
-        this.webFilter = AnnotationUtils.find(filterClazz, WEB_FILTER_CLASS).orElseThrow(() -> new RuntimeException("filter does not annotated WebFilter."));
+        this.webFilter = AnnotationUtils.find(filterClazz, WEB_FILTER_CLASS)
+            .orElseThrow(() -> new RuntimeException("filter does not annotated WebFilter."));
         this.filterWorker = filterWorker;
     }
 

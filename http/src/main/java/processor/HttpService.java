@@ -22,10 +22,11 @@ import vo.HttpRequest;
 import vo.HttpRequestReader;
 import vo.HttpResponse;
 
-/***
- * 역할.
- * http request 를 지속적으로 수신하고 thread 에 worker 를 할당함으로써 서비스를 수행하는 역할.
- */
+// todo
+// processor vs service 가 어느때 사용되어야 적절한가?
+//
+// processor
+//
 @Slf4j
 public class HttpService {
     private final ThreadPoolExecutor threadPoolExecutor;

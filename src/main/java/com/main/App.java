@@ -3,6 +3,7 @@ package com.main;
 
 import com.main.extractor.ParameterValueExtractor;
 import com.main.extractor.ParameterValueExtractorStrategy;
+import com.main.invoker.MethodInvoker;
 import com.main.util.AnnotationUtils;
 import container.ClassFinder;
 import container.ComponentClassLoader;
@@ -144,32 +145,41 @@ public class App {
             Objects.requireNonNull(request);
             Objects.requireNonNull(response);
 
-            // 5. http data 가져오기. (does not need compoenet)
             String methodName = request.getHttpMethod().name();
             String url = request.getHttpUri().getUrl();
 
-            // 6.match method 찾기
             RequestMethod method = RequestMethod.find(methodName);
             PathUrl pathUrl = PathUrl.from(url);
             MatchedMethod matchedMethod = httpPathMatcher.matchJavaMethod(method, pathUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
 
-            // todo, 값 변환자 생성이 아닌 값 변환이 필요하다.
-            // [시스템 컴포넌트적 요소 존재.]
-            // 7.
-            // as is.
-            // (1) 값 변환자 생성.
-            // to be.
-            // (1) 값 변환.
             RequestParameters pathVariableValue = new RequestParameters(matchedMethod.getPathVariableValue().getValues());
             RequestParameters queryParamValues = new RequestParameters(request.getQueryParameters().getParameterMap());
             BodyContent bodyContent = BodyContent.from(request.getBodyInputStream());
             ParameterValueExtractorStrategy parameterValueExtractorStrategy = new ParameterValueExtractorStrategy(pathVariableValue, queryParamValues, bodyContent);
 
-            Method javaMethod = matchedMethod.getJavaMethod();
+            MethodInvoker methodInvoker = new MethodInvoker(container, parameterValueExtractorStrategy);
+            Object result = methodInvoker.invoke(matchedMethod.getJavaMethod());
 
             // [시스템 컴포넌트적 요소 존재.]
-            // 8.method 실행.
-            // (1) class, instance 가져오기.
+            // 9. 응답값 생성.
+            // as is.
+            // (1) result -> to input stream.
+            // (2) 임의의 header 셋팅
+            // to be.
+            // (1) 응닶 타입에 따라 content-type 설정.
+            InputStream inputStream = converter.convertToInputStream(result);
+            response.setStartLine("HTTP/1.1 200 OK");
+            response.appendHeader(Map.of(
+                "Date", "MON, 27 Jul 2023 12:28:53 GMT",
+                "Host", "localhost:8080",
+                "Content-Type", "text/html; charset=UTF-8"));
+            HttpResponseWriter sender = response.getSender();
+            sender.send(inputStream);
+
+            return true;
+        }
+
+        private Object invoke(Method javaMethod, ParameterValueExtractorStrategy parameterValueExtractorStrategy) {
             Class<?> declaringClass = javaMethod.getDeclaringClass();
             Object instance = container.get(declaringClass);
             log.info("declaringClass : {}", declaringClass);
@@ -192,25 +202,7 @@ public class App {
                 .toArray();
 
             // 8.2. 실행.
-            Object result = doExecute(instance, javaMethod, values);
-
-            // [시스템 컴포넌트적 요소 존재.]
-            // 9. 응답값 생성.
-            // as is.
-            // (1) result -> to input stream.
-            // (2) 임의의 header 셋팅
-            // to be.
-            // (1) 응닶 타입에 따라 content-type 설정.
-            InputStream inputStream = converter.convertToInputStream(result);
-            response.setStartLine("HTTP/1.1 200 OK");
-            response.appendHeader(Map.of(
-                "Date", "MON, 27 Jul 2023 12:28:53 GMT",
-                "Host", "localhost:8080",
-                "Content-Type", "text/html; charset=UTF-8"));
-            HttpResponseWriter sender = response.getSender();
-            sender.send(inputStream);
-
-            return true;
+            return doExecute(instance, javaMethod, values);
         }
 
         private static Object doExecute(Object object, Method javaMethod, Object[] paramsValues) {

@@ -23,17 +23,17 @@ public class ComponentContainerCreator {
                 .collect(Collectors.toUnmodifiableList());
     }
 
-    public Container create() {
+    public ObjectRepository create() {
         List<ComponentClassLoader> componentClassLoaders = componentClasses.stream()
                 .map(ComponentClassLoader::new)
                 .collect(Collectors.toUnmodifiableList());
 
-        Container container = Container.empty();
+        ObjectRepository objectRepository = ObjectRepository.empty();
         for (ComponentClassLoader classLoader : componentClassLoaders) {
-            Container newContainer = classLoader.load(container);
-            container.merge(newContainer);
+            ObjectRepository newObjectRepository = classLoader.load(objectRepository);
+            objectRepository.merge(newObjectRepository);
         }
 
-        return container;
+        return objectRepository;
     }
 }

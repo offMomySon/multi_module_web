@@ -3,7 +3,7 @@ package com.main.executor;
 import matcher.annotation.RequestParam;
 import matcher.converter.RequestParameterConverter;
 import matcher.converter.RequestParameters;
-import container.Container;
+import container.ObjectRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,8 +18,8 @@ class MethodExecutorTest {
     @Test
     void test() throws Exception {
         //given
-        Container container = Container.empty();
-        MethodExecutor methodExecutor = new MethodExecutor(container);
+        ObjectRepository objectRepository = ObjectRepository.empty();
+        MethodExecutor methodExecutor = new MethodExecutor(objectRepository);
         Method method = TestClass.getMethod();
 
         //when
@@ -35,9 +35,9 @@ class MethodExecutorTest {
         //given
         String mapValue = "length";
         Method method = TestClass.getMethod();
-        Container container = new Container(Map.of(TestClass.class, new TestClass()));
+        ObjectRepository objectRepository = new ObjectRepository(Map.of(TestClass.class, new TestClass()));
         RequestParameters requestParameters = new RequestParameters(Map.of("arg0", mapValue));
-        MethodExecutor methodExecutor = new MethodExecutor(container);
+        MethodExecutor methodExecutor = new MethodExecutor(objectRepository);
 
         //when
         Optional<Object> actual = methodExecutor.execute(method, new RequestParameterConverter(RequestParam.class, requestParameters));

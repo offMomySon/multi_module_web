@@ -1,11 +1,10 @@
 package com.main;
 
 
-import com.main.executor.ApplicationRequestExecutor2;
 import com.main.util.AnnotationUtils;
 import container.ClassFinder;
 import container.ComponentClassLoader;
-import container.Container;
+import container.ObjectRepository;
 import container.annotation.Component;
 import container.annotation.Controller;
 import filter.Filter;
@@ -65,7 +64,7 @@ public class App {
         List<ComponentClassLoader> componentClassLoaders = componentClazzes.stream()
             .map(ComponentClassLoader::new)
             .collect(Collectors.toUnmodifiableList());
-        Container container = createContainer(componentClassLoaders);
+        ObjectRepository objectRepository = createContainer(componentClassLoaders);
 
         // 3. class 로 httpPathMatcher 를 생성.
         List<Class<?>> controllerClazzes = AnnotationUtils.filterByAnnotatedClazz(clazzes, CONTROLLER_CLASS);
@@ -80,33 +79,33 @@ public class App {
         // 4. class 로 webfilter 를 생성.
         List<Class<?>> webFilterAnnotatedClazzes = AnnotationUtils.filterByAnnotatedClazz(clazzes, WEB_FILTER_CLASS);
         List<Filter> filters = webFilterAnnotatedClazzes.stream()
-            .map(webFilterAnnotatedClazz -> createFilters(container, webFilterAnnotatedClazz))
+            .map(webFilterAnnotatedClazz -> createFilters(objectRepository, webFilterAnnotatedClazz))
             .flatMap(Collection::stream)
             .collect(Collectors.toUnmodifiableList());
         Filters newFilters = new Filters(filters);
 
-        BaseRequestExecutor baseRequestExecutor = new BaseRequestExecutor(container, httpPathMatcher);
+        BaseRequestExecutor baseRequestExecutor = new BaseRequestExecutor(objectRepository, httpPathMatcher);
         HttpService httpService = new HttpService(baseRequestExecutor, newFilters);
         httpService.start();
     }
 
-    private static Container createContainer(List<ComponentClassLoader> componentClassLoaders) {
-        Container container = Container.empty();
+    private static ObjectRepository createContainer(List<ComponentClassLoader> componentClassLoaders) {
+        ObjectRepository objectRepository = ObjectRepository.empty();
         for (ComponentClassLoader classLoader : componentClassLoaders) {
-            Container newContainer = classLoader.load(container);
-            container = container.merge(newContainer);
+            ObjectRepository newObjectRepository = classLoader.load(objectRepository);
+            objectRepository = objectRepository.merge(newObjectRepository);
         }
-        return container;
+        return objectRepository;
     }
 
-    public static List<Filter> createFilters(Container container, Class<?> filterWorkerClazz) {
+    public static List<Filter> createFilters(ObjectRepository objectRepository, Class<?> filterWorkerClazz) {
         Objects.requireNonNull(filterWorkerClazz);
         if (util.AnnotationUtils.doesNotExist(filterWorkerClazz, WEB_FILTER_CLASS)) {
             throw new RuntimeException("does not exist component annotation");
         }
 
         Class<?>[] memberClasses = util.AnnotationUtils.peekFieldsType(filterWorkerClazz, COMPONENT_CLASS).toArray(Class<?>[]::new);
-        Object[] memberObjects = Arrays.stream(memberClasses).map(container::get).toArray(Object[]::new);
+        Object[] memberObjects = Arrays.stream(memberClasses).map(objectRepository::get).toArray(Object[]::new);
         FilterWorker filterWorker = (FilterWorker) newObject(filterWorkerClazz, memberClasses, memberObjects);
 
         WebFilter webFilter = AnnotationUtils.find(filterWorkerClazz, WEB_FILTER_CLASS).orElseThrow(() -> new RuntimeException("filter does not annotated WebFilter."));
@@ -135,11 +134,11 @@ public class App {
     public static class BaseRequestExecutor implements HttpRequestExecutor {
         private static final CompositeConverter converter = new CompositeConverter();
 
-        private final Container container;
+        private final ObjectRepository objectRepository;
         private final HttpPathMatcher httpPathMatcher;
 
-        public BaseRequestExecutor(Container container, HttpPathMatcher httpPathMatcher) {
-            this.container = container;
+        public BaseRequestExecutor(ObjectRepository objectRepository, HttpPathMatcher httpPathMatcher) {
+            this.objectRepository = objectRepository;
             this.httpPathMatcher = httpPathMatcher;
         }
 
@@ -166,7 +165,7 @@ public class App {
             ParameterConverter parameterConverter = new CompositeParameterConverter(parameterConverters);
 
             Class<?> declaringClass = javaMethod.getDeclaringClass();
-            Object instance = container.get(declaringClass);
+            Object instance = objectRepository.get(declaringClass);
             log.info("declaringClass : {}", declaringClass);
             log.info("instance : {}", instance);
             log.info("javaMethod : {}", javaMethod);

@@ -24,16 +24,16 @@ public class ComponentClassLoader {
         this.clazz = clazz;
     }
 
-    public Container load(Container prevContainer) {
-        Container newContainer = Container.empty();
+    public ObjectRepository load(ObjectRepository prevObjectRepository) {
+        ObjectRepository newObjectRepository = ObjectRepository.empty();
 
-        Object instantiate = instantiate(clazz, newContainer, prevContainer, new LinkedHashSet<>());
-        newContainer.put(clazz, instantiate);
+        Object instantiate = instantiate(clazz, newObjectRepository, prevObjectRepository, new LinkedHashSet<>());
+        newObjectRepository.put(clazz, instantiate);
 
-        return newContainer;
+        return newObjectRepository;
     }
 
-    private Object instantiate(Class<?> clazz, Container newContainer, Container prevContainer, Set<Class<?>> alreadyVisitedClasses) {
+    private Object instantiate(Class<?> clazz, ObjectRepository newObjectRepository, ObjectRepository prevObjectRepository, Set<Class<?>> alreadyVisitedClasses) {
         if (alreadyVisitedClasses.contains(clazz)) {
             String alreadyVisitedClassesName = alreadyVisitedClasses.stream()
                     .map(Class::getSimpleName)
@@ -43,14 +43,14 @@ public class ComponentClassLoader {
         }
         alreadyVisitedClasses.add(clazz);
 
-        if (newContainer.containsKey(clazz) || prevContainer.containsKey(clazz)) {
+        if (newObjectRepository.containsKey(clazz) || prevObjectRepository.containsKey(clazz)) {
             alreadyVisitedClasses.remove(clazz);
-            return newContainer.containsKey(clazz) ? newContainer.get(clazz) : prevContainer.get(clazz);
+            return newObjectRepository.containsKey(clazz) ? newObjectRepository.get(clazz) : prevObjectRepository.get(clazz);
         }
 
-        Object instance = doInstantiate(clazz, newContainer, prevContainer, alreadyVisitedClasses);
+        Object instance = doInstantiate(clazz, newObjectRepository, prevObjectRepository, alreadyVisitedClasses);
 
-        newContainer.put(clazz, instance);
+        newObjectRepository.put(clazz, instance);
 
         // need remove. ex) s1, s2 ref r1
         // s1, r1 already has instance.
@@ -60,11 +60,11 @@ public class ComponentClassLoader {
         return instance;
     }
 
-    private Object doInstantiate(Class<?> clazz, Container newContainer, Container prevContainer, Set<Class<?>> alreadyVisitedClasses) {
+    private Object doInstantiate(Class<?> clazz, ObjectRepository newObjectRepository, ObjectRepository prevObjectRepository, Set<Class<?>> alreadyVisitedClasses) {
         Class<?>[] memberClasses = AnnotationUtils.peekFieldsType(clazz, COMPONENT_CLASS).toArray(Class<?>[]::new);
 
         Object[] memberObjects = Arrays.stream(memberClasses)
-                .map(memberClazz -> this.instantiate(memberClazz, newContainer, prevContainer, alreadyVisitedClasses))
+                .map(memberClazz -> this.instantiate(memberClazz, newObjectRepository, prevObjectRepository, alreadyVisitedClasses))
                 .toArray();
 
         return newObject(clazz, memberClasses, memberObjects);

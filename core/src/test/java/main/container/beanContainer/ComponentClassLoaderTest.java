@@ -1,7 +1,7 @@
 package main.container.beanContainer;
 
 import container.ComponentClassLoader;
-import container.Container;
+import container.ObjectRepository;
 import container.annotation.Controller;
 import container.annotation.Repository;
 import container.annotation.Service;
@@ -29,7 +29,7 @@ class ComponentClassLoaderTest {
         ComponentClassLoader componentClassLoader = new ComponentClassLoader(Controller1.class);
 
         //when
-        Set<Class<?>> actual = componentClassLoader.load(Container.empty()).keySet();
+        Set<Class<?>> actual = componentClassLoader.load(ObjectRepository.empty()).keySet();
 
         //then
         Assertions.assertThat(actual).containsAll(expect);
@@ -43,7 +43,7 @@ class ComponentClassLoaderTest {
         ComponentClassLoader componentClassLoader = new ComponentClassLoader(clazz);
 
         //when
-        Throwable actual = Assertions.catchThrowable(() -> componentClassLoader.load(Container.empty()));
+        Throwable actual = Assertions.catchThrowable(() -> componentClassLoader.load(ObjectRepository.empty()));
 
         //then
         Assertions.assertThat(actual).isNotNull();

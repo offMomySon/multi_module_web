@@ -2,7 +2,7 @@ package com.main.invoker;
 
 import com.main.extractor.ParameterValueExtractor;
 import com.main.extractor.ParameterValueExtractorStrategy;
-import container.Container;
+import container.ObjectRepository;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Objects;
@@ -13,13 +13,13 @@ import matcher.converter.base.ObjectConverter;
 public class MethodInvoker {
     private static final ObjectConverter objectConverter = new ObjectConverter();
 
-    private final Container container;
+    private final ObjectRepository objectRepository;
     private final ParameterValueExtractorStrategy parameterValueExtractorStrategy;
 
-    public MethodInvoker(Container container, ParameterValueExtractorStrategy parameterValueExtractorStrategy) {
-        Objects.requireNonNull(container);
+    public MethodInvoker(ObjectRepository objectRepository, ParameterValueExtractorStrategy parameterValueExtractorStrategy) {
+        Objects.requireNonNull(objectRepository);
         Objects.requireNonNull(parameterValueExtractorStrategy);
-        this.container = container;
+        this.objectRepository = objectRepository;
         this.parameterValueExtractorStrategy = parameterValueExtractorStrategy;
     }
 
@@ -27,7 +27,7 @@ public class MethodInvoker {
         Objects.requireNonNull(javaMethod);
 
         Class<?> declaringClass = javaMethod.getDeclaringClass();
-        Object instance = container.get(declaringClass);
+        Object instance = objectRepository.get(declaringClass);
         log.info("declaringClass : {}", declaringClass);
         log.info("instance : {}", instance);
         log.info("javaMethod : {}", javaMethod);

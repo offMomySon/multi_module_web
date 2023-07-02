@@ -1,7 +1,7 @@
 package com.main.filter;
 
 import com.main.util.AnnotationUtils;
-import container.Container;
+import container.ObjectRepository;
 import container.annotation.Component;
 import filter.FilterWorker;
 import filter.Filters;
@@ -16,11 +16,11 @@ public class WebFilterComponentFilterCreator {
     private static final Class<WebFilter> WEB_FILTER_CLASS = WebFilter.class;
     private static final Class<Component> COMPONENT_CLASS = Component.class;
 
-    private final Container container;
+    private final ObjectRepository objectRepository;
 
-    public WebFilterComponentFilterCreator(Container container) {
-        Objects.requireNonNull(container);
-        this.container = container;
+    public WebFilterComponentFilterCreator(ObjectRepository objectRepository) {
+        Objects.requireNonNull(objectRepository);
+        this.objectRepository = objectRepository;
     }
 
     public Filters create(Class<?> filterWorkerClazz) {
@@ -30,7 +30,7 @@ public class WebFilterComponentFilterCreator {
         }
 
         Class<?>[] memberClasses = AnnotationUtils.peekFieldsType(filterWorkerClazz, COMPONENT_CLASS).toArray(Class<?>[]::new);
-        Object[] memberObjects = Arrays.stream(memberClasses).map(container::get).toArray(Object[]::new);
+        Object[] memberObjects = Arrays.stream(memberClasses).map(objectRepository::get).toArray(Object[]::new);
         FilterWorker filterWorker = (FilterWorker) newObject(filterWorkerClazz, memberClasses, memberObjects);
 
         WebFilterAnnotatedFilterCreator filterCreator = new WebFilterAnnotatedFilterCreator(filterWorker);

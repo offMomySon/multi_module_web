@@ -1,7 +1,7 @@
 package com.main.executor;
 
 import matcher.converter.ParameterConverter;
-import container.Container;
+import container.ObjectRepository;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Method;
@@ -13,11 +13,11 @@ import java.util.Optional;
 public class MethodExecutor {
     private static final Objects EMPTY_VALUE = null;
 
-    private final Container container;
+    private final ObjectRepository objectRepository;
 
-    public MethodExecutor(Container container) {
-        Objects.requireNonNull(container);
-        this.container = container;
+    public MethodExecutor(ObjectRepository objectRepository) {
+        Objects.requireNonNull(objectRepository);
+        this.objectRepository = objectRepository;
     }
 
     public Optional<Object> execute(Method javaMethod, ParameterConverter parameterConverter) {
@@ -26,7 +26,7 @@ public class MethodExecutor {
 
         Class<?> declaringClass = javaMethod.getDeclaringClass();
 
-        Object instance = container.get(declaringClass);
+        Object instance = objectRepository.get(declaringClass);
         log.info("instance : {}", instance);
         log.info("javaMethod : {}", javaMethod);
 

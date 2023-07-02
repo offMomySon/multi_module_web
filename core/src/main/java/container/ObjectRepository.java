@@ -4,40 +4,40 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class Container {
+public class ObjectRepository {
     private final Map<Class<?>, Object> values;
 
-    private Container() {
+    private ObjectRepository() {
         this.values = new HashMap<>();
     }
 
-    public Container(Map<Class<?>, Object> values) {
+    public ObjectRepository(Map<Class<?>, Object> values) {
         this.values = values.entrySet().stream()
                 .filter(entry -> !Objects.isNull(entry.getKey()))
                 .filter(entry -> !Objects.isNull(entry.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
     }
 
-    public static Container empty() {
-        return new Container(new HashMap<>());
+    public static ObjectRepository empty() {
+        return new ObjectRepository(new HashMap<>());
     }
 
-    public Container merge(Container otherContainer) {
-        if (Objects.isNull(otherContainer)) {
+    public ObjectRepository merge(ObjectRepository otherObjectRepository) {
+        if (Objects.isNull(otherObjectRepository)) {
             return this;
         }
 
         Stream<Map.Entry<Class<?>, Object>> baseValueStream = this.values.entrySet().stream();
-        Stream<Map.Entry<Class<?>, Object>> otherValueStream = otherContainer.values.entrySet().stream();
+        Stream<Map.Entry<Class<?>, Object>> otherValueStream = otherObjectRepository.values.entrySet().stream();
 
         Map<Class<?>, Object> newValue = Stream.concat(baseValueStream, otherValueStream)
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
 
-        return new Container(newValue);
+        return new ObjectRepository(newValue);
     }
 
-    public Container lock() {
-        return new Container(Collections.unmodifiableMap(this.values));
+    public ObjectRepository lock() {
+        return new ObjectRepository(Collections.unmodifiableMap(this.values));
     }
 
     public Set<Class<?>> keySet() {

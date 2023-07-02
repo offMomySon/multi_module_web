@@ -3,7 +3,7 @@ package com.main;
 
 import com.main.util.AnnotationUtils;
 import container.ClassFinder;
-import container.ComponentClassLoader;
+import container.ComponentClassInitializer;
 import container.ObjectRepository;
 import container.annotation.Component;
 import container.annotation.Controller;
@@ -61,10 +61,10 @@ public class App {
 
         // 2. class 로 container 를 생성.
         List<Class<?>> componentClazzes = AnnotationUtils.filterByAnnotatedClazz(clazzes, COMPONENT_CLASS);
-        List<ComponentClassLoader> componentClassLoaders = componentClazzes.stream()
-            .map(ComponentClassLoader::new)
+        List<ComponentClassInitializer> componentClassInitializers = componentClazzes.stream()
+            .map(ComponentClassInitializer::new)
             .collect(Collectors.toUnmodifiableList());
-        ObjectRepository objectRepository = createContainer(componentClassLoaders);
+        ObjectRepository objectRepository = createContainer(componentClassInitializers);
 
         // 3. class 로 httpPathMatcher 를 생성.
         List<Class<?>> controllerClazzes = AnnotationUtils.filterByAnnotatedClazz(clazzes, CONTROLLER_CLASS);
@@ -89,10 +89,10 @@ public class App {
         httpService.start();
     }
 
-    private static ObjectRepository createContainer(List<ComponentClassLoader> componentClassLoaders) {
+    private static ObjectRepository createContainer(List<ComponentClassInitializer> componentClassInitializers) {
         ObjectRepository objectRepository = ObjectRepository.empty();
-        for (ComponentClassLoader classLoader : componentClassLoaders) {
-            ObjectRepository newObjectRepository = classLoader.load(objectRepository);
+        for (ComponentClassInitializer componentClassInitializer : componentClassInitializers) {
+            ObjectRepository newObjectRepository = componentClassInitializer.load(objectRepository);
             objectRepository = objectRepository.merge(newObjectRepository);
         }
         return objectRepository;

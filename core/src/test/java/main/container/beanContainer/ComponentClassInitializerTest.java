@@ -1,6 +1,6 @@
 package main.container.beanContainer;
 
-import container.ComponentClassLoader;
+import container.ComponentClassInitializer;
 import container.ObjectRepository;
 import container.annotation.Controller;
 import container.annotation.Repository;
@@ -15,7 +15,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.Set;
 import java.util.stream.Stream;
 
-class ComponentClassLoaderTest {
+class ComponentClassInitializerTest {
     @DisplayName("@Component 어노테이션이 붙은 class 를 load 합니다.")
     @Test
     void test0() throws Exception {
@@ -26,10 +26,10 @@ class ComponentClassLoaderTest {
                 Repository1.class,
                 Repository2.class);
 
-        ComponentClassLoader componentClassLoader = new ComponentClassLoader(Controller1.class);
+        ComponentClassInitializer componentClassInitializer = new ComponentClassInitializer(Controller1.class);
 
         //when
-        Set<Class<?>> actual = componentClassLoader.load(ObjectRepository.empty()).keySet();
+        Set<Class<?>> actual = componentClassInitializer.load(ObjectRepository.empty()).keySet();
 
         //then
         Assertions.assertThat(actual).containsAll(expect);
@@ -40,10 +40,10 @@ class ComponentClassLoaderTest {
     @MethodSource("provideCircularRefClasses")
     void test1(Class<?> clazz) throws Exception {
         //given
-        ComponentClassLoader componentClassLoader = new ComponentClassLoader(clazz);
+        ComponentClassInitializer componentClassInitializer = new ComponentClassInitializer(clazz);
 
         //when
-        Throwable actual = Assertions.catchThrowable(() -> componentClassLoader.load(ObjectRepository.empty()));
+        Throwable actual = Assertions.catchThrowable(() -> componentClassInitializer.load(ObjectRepository.empty()));
 
         //then
         Assertions.assertThat(actual).isNotNull();
@@ -54,7 +54,7 @@ class ComponentClassLoaderTest {
     void test3() throws Exception {
         //given
         //when
-        Throwable actual = Assertions.catchThrowable(() -> new ComponentClassLoader(DoesNotHasComponentAnnotationClass.class));
+        Throwable actual = Assertions.catchThrowable(() -> new ComponentClassInitializer(DoesNotHasComponentAnnotationClass.class));
 
         //then
         Assertions.assertThat(actual).isNotNull();

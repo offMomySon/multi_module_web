@@ -12,12 +12,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class ComponentClassLoader {
+public class ComponentClassInitializer {
     private static final Class<Component> COMPONENT_CLASS = Component.class;
 
     private final Class<?> clazz;
 
-    public ComponentClassLoader(@NonNull Class<?> clazz) {
+    public ComponentClassInitializer(@NonNull Class<?> clazz) {
         if (AnnotationUtils.doesNotExist(clazz, COMPONENT_CLASS)) {
             throw new RuntimeException("does not exist component annotation");
         }

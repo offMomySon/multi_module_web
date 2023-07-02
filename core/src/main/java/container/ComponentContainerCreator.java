@@ -24,12 +24,12 @@ public class ComponentContainerCreator {
     }
 
     public ObjectRepository create() {
-        List<ComponentClassLoader> componentClassLoaders = componentClasses.stream()
-                .map(ComponentClassLoader::new)
+        List<ComponentClassInitializer> componentClassInitializers = componentClasses.stream()
+                .map(ComponentClassInitializer::new)
                 .collect(Collectors.toUnmodifiableList());
 
         ObjectRepository objectRepository = ObjectRepository.empty();
-        for (ComponentClassLoader classLoader : componentClassLoaders) {
+        for (ComponentClassInitializer classLoader : componentClassInitializers) {
             ObjectRepository newObjectRepository = classLoader.load(objectRepository);
             objectRepository.merge(newObjectRepository);
         }

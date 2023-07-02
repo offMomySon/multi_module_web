@@ -2,6 +2,7 @@ package com.main;
 
 
 import com.main.util.AnnotationUtils;
+import config.Config;
 import container.ClassFinder;
 import container.ComponentClassInitializer;
 import container.ObjectRepository;
@@ -11,9 +12,13 @@ import filter.Filter;
 import filter.FilterWorker;
 import filter.Filters;
 import filter.annotation.WebFilter;
+import filter.chain.FilterChain;
+import filter.chain.FilterWorkerChain;
+import filter.chain.HttpRequestExecutorChain;
 import filter.pattern.PatternMatcher;
 import filter.pattern.PatternMatcherStrategy;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -42,8 +47,9 @@ import matcher.converter.base.CompositeConverter;
 import matcher.creator.JavaMethodPathMatcherCreator;
 import matcher.segment.PathUrl;
 import processor.HttpRequestProcessor;
-import processor.HttpService;
+import processor.RequestProcessor;
 import vo.HttpRequest;
+import vo.HttpRequestReader;
 import vo.HttpResponse;
 import vo.HttpResponseWriter;
 import vo.QueryParameters;
@@ -57,7 +63,8 @@ public class App {
 
     public static void main(String[] args) {
         // 1. class 를 모두 찾아옴.
-        List<Class<?>> clazzes = ClassFinder.from(App.class, "com.main.business").findClazzes();
+        List<Class<?>> clazzes = ClassFinder.from(App.class, "com.main").findClazzes();
+        log.info("clazzes : {}", clazzes);
 
         // 2. class 로 container 를 생성.
         List<Class<?>> componentClazzes = AnnotationUtils.filterByAnnotatedClazz(clazzes, COMPONENT_CLASS);
@@ -78,15 +85,23 @@ public class App {
 
         // 4. class 로 webfilter 를 생성.
         List<Class<?>> webFilterAnnotatedClazzes = AnnotationUtils.filterByAnnotatedClazz(clazzes, WEB_FILTER_CLASS);
+        log.info("webFilterAnnotatedClazzes : {}", webFilterAnnotatedClazzes);
         List<Filter> filters = webFilterAnnotatedClazzes.stream()
             .map(webFilterAnnotatedClazz -> createFilters(objectRepository, webFilterAnnotatedClazz))
             .flatMap(Collection::stream)
             .collect(Collectors.toUnmodifiableList());
         Filters newFilters = new Filters(filters);
 
-        BaseRequestExecutor baseRequestExecutor = new BaseRequestExecutor(objectRepository, httpPathMatcher);
-        HttpService httpService = new HttpService(baseRequestExecutor, newFilters);
-        httpService.start();
+        log.info("newFilters : {}", newFilters);
+
+        BaseHttpRequestExecutor baseHttpRequestExecutor = new BaseHttpRequestExecutor(objectRepository, httpPathMatcher);
+        RequestRunner requestRunner = new RequestRunner(baseHttpRequestExecutor, newFilters);
+        RequestProcessor requestProcessor = RequestProcessor.create(Config.INSTANCE.getMaxConnection(),
+                                                                    Config.INSTANCE.getKeepAliveTime(),
+                                                                    Config.INSTANCE.getWaitConnection(),
+                                                                    Config.INSTANCE.getPort(),
+                                                                    requestRunner);
+        requestProcessor.process();
     }
 
     private static ObjectRepository createContainer(List<ComponentClassInitializer> componentClassInitializers) {
@@ -131,13 +146,13 @@ public class App {
         return new Filter(filterName, patternMatcher, filterWorker);
     }
 
-    public static class BaseRequestExecutor implements HttpRequestProcessor {
+    public static class BaseHttpRequestExecutor implements HttpRequestProcessor {
         private static final CompositeConverter converter = new CompositeConverter();
 
         private final ObjectRepository objectRepository;
         private final HttpPathMatcher httpPathMatcher;
 
-        public BaseRequestExecutor(ObjectRepository objectRepository, HttpPathMatcher httpPathMatcher) {
+        public BaseHttpRequestExecutor(ObjectRepository objectRepository, HttpPathMatcher httpPathMatcher) {
             this.objectRepository = objectRepository;
             this.httpPathMatcher = httpPathMatcher;
         }
@@ -200,5 +215,44 @@ public class App {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    public static class RequestRunner implements processor.RequestRunner {
+        private final HttpRequestProcessor httpRequestProcessor;
+        private final Filters filters;
+
+        public RequestRunner(HttpRequestProcessor httpRequestProcessor, Filters filters) {
+            Objects.requireNonNull(httpRequestProcessor);
+            Objects.requireNonNull(filters);
+            this.httpRequestProcessor = httpRequestProcessor;
+            this.filters = filters;
+        }
+
+        @Override
+        public void run(InputStream inputStream, OutputStream outputStream) {
+            try (HttpRequestReader httpRequestReader = new HttpRequestReader(inputStream);
+                 HttpResponse httpResponse = new HttpResponse(outputStream)) {
+                HttpRequest httpRequest = httpRequestReader.read();
+
+                log.info(httpRequest.getHttpUri().getUrl());
+
+                List<FilterWorker> filterWorkers = filters.findFilterWorkers(httpRequest.getHttpUri().getUrl());
+                log.info("filterWorkers : {}", filterWorkers);
+
+                log.info("create filter chain");
+                FilterChain applicationExecutorChain = new HttpRequestExecutorChain(httpRequestProcessor, null);
+                FilterChain filterChain = filterWorkers.stream()
+                    .reduce(
+                        applicationExecutorChain,
+                        FilterWorkerChain::new,
+                        (pw, pw2) -> null);
+
+                log.info("execute filter chain");
+                filterChain.execute(httpRequest, httpResponse);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 }

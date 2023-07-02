@@ -105,5 +105,20 @@ public class Filters {
         public int hashCode() {
             return Objects.hash(filterName);
         }
+
+        @Override
+        public String toString() {
+            return "MatchedFilter{" +
+                "filterName='" + filterName + '\'' +
+                ", filterWorker=" + filterWorker +
+                '}';
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "Filters{" +
+            "values=" + values +
+            '}';
     }
 }

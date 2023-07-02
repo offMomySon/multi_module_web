@@ -31,10 +31,10 @@ import vo.HttpResponse;
 public class HttpService {
     private final ThreadPoolExecutor threadPoolExecutor;
     private final ServerSocket serverSocket;
-    private final HttpRequestExecutor applicationExecutor;
+    private final HttpRequestProcessor applicationExecutor;
     private final Filters filters;
 
-    public HttpService(HttpRequestExecutor applicationExecutor, Filters filters) {
+    public HttpService(HttpRequestProcessor applicationExecutor, Filters filters) {
         Objects.requireNonNull(applicationExecutor);
         Objects.requireNonNull(filters);
 

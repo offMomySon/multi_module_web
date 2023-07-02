@@ -41,7 +41,7 @@ import matcher.converter.RequestParameters;
 import matcher.converter.base.CompositeConverter;
 import matcher.creator.JavaMethodPathMatcherCreator;
 import matcher.segment.PathUrl;
-import processor.HttpRequestExecutor;
+import processor.HttpRequestProcessor;
 import processor.HttpService;
 import vo.HttpRequest;
 import vo.HttpResponse;
@@ -131,7 +131,7 @@ public class App {
         return new Filter(filterName, patternMatcher, filterWorker);
     }
 
-    public static class BaseRequestExecutor implements HttpRequestExecutor {
+    public static class BaseRequestExecutor implements HttpRequestProcessor {
         private static final CompositeConverter converter = new CompositeConverter();
 
         private final ObjectRepository objectRepository;

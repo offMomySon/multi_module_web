@@ -2,7 +2,7 @@ package filter.chain;
 
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
-import processor.HttpRequestExecutor;
+import processor.HttpRequestProcessor;
 import vo.HttpRequest;
 import vo.HttpResponse;
 
@@ -10,9 +10,9 @@ import vo.HttpResponse;
 @Slf4j
 public class HttpRequestExecutorChain implements FilterChain {
     private final FilterChain nextFilterChain;
-    private final HttpRequestExecutor httpRequestExecutor;
+    private final HttpRequestProcessor httpRequestExecutor;
 
-    public HttpRequestExecutorChain(HttpRequestExecutor httpRequestExecutor, FilterChain nextFilterChain) {
+    public HttpRequestExecutorChain(HttpRequestProcessor httpRequestExecutor, FilterChain nextFilterChain) {
         Objects.requireNonNull(httpRequestExecutor);
         this.httpRequestExecutor = httpRequestExecutor;
         this.nextFilterChain = nextFilterChain;

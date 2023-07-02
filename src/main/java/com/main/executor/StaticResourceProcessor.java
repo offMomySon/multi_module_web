@@ -10,17 +10,17 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import processor.HttpRequestExecutor;
+import processor.HttpRequestProcessor;
 import vo.HttpRequest;
 import vo.HttpResponse;
 import vo.HttpResponseWriter;
 
 @Slf4j
-public class StaticResourceExecutor implements HttpRequestExecutor {
+public class StaticResourceProcessor implements HttpRequestProcessor {
     private final ResourceUrls resourceUrls;
     private final ResourceFinder resourceFinder;
 
-    public StaticResourceExecutor(ResourceFinder resourceFinder) {
+    public StaticResourceProcessor(ResourceFinder resourceFinder) {
         Objects.requireNonNull(resourceFinder);
         this.resourceUrls = resourceFinder.extractResourceUrls();
         this.resourceFinder = resourceFinder;

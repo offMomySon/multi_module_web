@@ -1,39 +1,53 @@
 package com.main;
 
 
-import com.main.extractor.ParameterValueExtractor;
-import com.main.extractor.ParameterValueExtractorStrategy;
-import com.main.filter.ApplicationWebFilterCreator;
-import com.main.filter.WebFilterComponentFilterCreator;
-import com.main.invoker.MethodInvoker;
+import com.main.executor.ApplicationRequestExecutor2;
+import com.main.util.AnnotationUtils;
 import container.ClassFinder;
-import container.ComponentContainerCreator;
+import container.ComponentClassLoader;
 import container.Container;
 import container.annotation.Component;
 import container.annotation.Controller;
+import filter.Filter;
+import filter.FilterWorker;
 import filter.Filters;
 import filter.annotation.WebFilter;
+import filter.pattern.PatternMatcher;
+import filter.pattern.PatternMatcherStrategy;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import matcher.BaseHttpPathMatcher;
 import matcher.BaseHttpPathMatcher.MatchedMethod;
-import matcher.ControllerHttpPathMatcherCreator;
+import matcher.CompositedHttpPathMatcher;
 import matcher.HttpPathMatcher;
 import matcher.RequestMethod;
+import matcher.annotation.PathVariable;
+import matcher.annotation.RequestBody;
+import matcher.annotation.RequestParam;
 import matcher.converter.BodyContent;
+import matcher.converter.CompositeParameterConverter;
+import matcher.converter.ParameterConverter;
+import matcher.converter.RequestBodyParameterConverter;
+import matcher.converter.RequestParameterConverter;
 import matcher.converter.RequestParameters;
 import matcher.converter.base.CompositeConverter;
-import matcher.converter.base.ObjectConverter;
+import matcher.creator.JavaMethodPathMatcherCreator;
 import matcher.segment.PathUrl;
 import processor.HttpRequestExecutor;
 import processor.HttpService;
 import vo.HttpRequest;
 import vo.HttpResponse;
 import vo.HttpResponseWriter;
+import vo.QueryParameters;
 
 @Slf4j
 public class App {
@@ -42,29 +56,80 @@ public class App {
     private static final Class<WebFilter> WEB_FILTER_CLASS = WebFilter.class;
     private static final Objects EMPTY_VALUE = null;
 
-    private static final ObjectConverter objectConverter = new ObjectConverter();
-
     public static void main(String[] args) {
         // 1. class 를 모두 찾아옴.
         List<Class<?>> clazzes = ClassFinder.from(App.class, "com.main.business").findClazzes();
 
         // 2. class 로 container 를 생성.
-        ComponentContainerCreator componentContainerCreator = new ComponentContainerCreator(clazzes);
-        Container container = componentContainerCreator.create();
+        List<Class<?>> componentClazzes = AnnotationUtils.filterByAnnotatedClazz(clazzes, COMPONENT_CLASS);
+        List<ComponentClassLoader> componentClassLoaders = componentClazzes.stream()
+            .map(ComponentClassLoader::new)
+            .collect(Collectors.toUnmodifiableList());
+        Container container = createContainer(componentClassLoaders);
 
         // 3. class 로 httpPathMatcher 를 생성.
-        ControllerHttpPathMatcherCreator controllerHttpPathMatcherCreator = new ControllerHttpPathMatcherCreator(clazzes);
-        HttpPathMatcher httpPathMatcher = controllerHttpPathMatcherCreator.create();
+        List<Class<?>> controllerClazzes = AnnotationUtils.filterByAnnotatedClazz(clazzes, CONTROLLER_CLASS);
+        List<BaseHttpPathMatcher> baseHttpPathMatchers = controllerClazzes.stream()
+            .map(JavaMethodPathMatcherCreator::new)
+            .map(JavaMethodPathMatcherCreator::create)
+            .flatMap(Collection::stream)
+            .peek(httpPathMatcher -> log.info("httpPathMatcher : `{}`", httpPathMatcher))
+            .collect(Collectors.toUnmodifiableList());
+        HttpPathMatcher httpPathMatcher = new CompositedHttpPathMatcher(baseHttpPathMatchers);
 
         // 4. class 로 webfilter 를 생성.
-        WebFilterComponentFilterCreator webFilterComponentFilterCreator = new WebFilterComponentFilterCreator(container);
-        ApplicationWebFilterCreator applicationWebFilterCreator = new ApplicationWebFilterCreator(webFilterComponentFilterCreator, clazzes);
-        Filters filters = applicationWebFilterCreator.create();
+        List<Class<?>> webFilterAnnotatedClazzes = AnnotationUtils.filterByAnnotatedClazz(clazzes, WEB_FILTER_CLASS);
+        List<Filter> filters = webFilterAnnotatedClazzes.stream()
+            .map(webFilterAnnotatedClazz -> createFilters(container, webFilterAnnotatedClazz))
+            .flatMap(Collection::stream)
+            .collect(Collectors.toUnmodifiableList());
+        Filters newFilters = new Filters(filters);
 
-        // 5. executor 를 생성.
         BaseRequestExecutor baseRequestExecutor = new BaseRequestExecutor(container, httpPathMatcher);
-        HttpService httpService = new HttpService(baseRequestExecutor, filters);
+        HttpService httpService = new HttpService(baseRequestExecutor, newFilters);
         httpService.start();
+    }
+
+    private static Container createContainer(List<ComponentClassLoader> componentClassLoaders) {
+        Container container = Container.empty();
+        for (ComponentClassLoader classLoader : componentClassLoaders) {
+            Container newContainer = classLoader.load(container);
+            container = container.merge(newContainer);
+        }
+        return container;
+    }
+
+    public static List<Filter> createFilters(Container container, Class<?> filterWorkerClazz) {
+        Objects.requireNonNull(filterWorkerClazz);
+        if (util.AnnotationUtils.doesNotExist(filterWorkerClazz, WEB_FILTER_CLASS)) {
+            throw new RuntimeException("does not exist component annotation");
+        }
+
+        Class<?>[] memberClasses = util.AnnotationUtils.peekFieldsType(filterWorkerClazz, COMPONENT_CLASS).toArray(Class<?>[]::new);
+        Object[] memberObjects = Arrays.stream(memberClasses).map(container::get).toArray(Object[]::new);
+        FilterWorker filterWorker = (FilterWorker) newObject(filterWorkerClazz, memberClasses, memberObjects);
+
+        WebFilter webFilter = AnnotationUtils.find(filterWorkerClazz, WEB_FILTER_CLASS).orElseThrow(() -> new RuntimeException("filter does not annotated WebFilter."));
+        String filterName = webFilter.filterName().isEmpty() ? filterWorker.getClass().getSimpleName() : webFilter.filterName();
+        List<String> basePaths = Arrays.stream(webFilter.patterns()).collect(Collectors.toUnmodifiableList());
+
+        return basePaths.stream()
+            .map(basePath -> createFilter(filterName, basePath, filterWorker))
+            .collect(Collectors.toUnmodifiableList());
+    }
+
+    private static Object newObject(Class<?> filterWorkerClazz, Class<?>[] memberClasses, Object[] memberObjects) {
+        try {
+            Constructor<?> constructor = filterWorkerClazz.getConstructor(memberClasses);
+            return constructor.newInstance(memberObjects);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static Filter createFilter(String filterName, String basePath, FilterWorker filterWorker) {
+        PatternMatcher patternMatcher = PatternMatcherStrategy.create(basePath);
+        return new Filter(filterName, patternMatcher, filterWorker);
     }
 
     public static class BaseRequestExecutor implements HttpRequestExecutor {
@@ -83,29 +148,40 @@ public class App {
             Objects.requireNonNull(request);
             Objects.requireNonNull(response);
 
-            String methodName = request.getHttpMethod().name();
-            String url = request.getHttpUri().getUrl();
-
-            RequestMethod method = RequestMethod.find(methodName);
-            PathUrl pathUrl = PathUrl.from(url);
-            MatchedMethod matchedMethod = httpPathMatcher.matchJavaMethod(method, pathUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
-
-            RequestParameters pathVariableValue = new RequestParameters(matchedMethod.getPathVariableValue().getValues());
-            RequestParameters queryParamValues = new RequestParameters(request.getQueryParameters().getParameterMap());
+            RequestMethod method = RequestMethod.find(request.getHttpMethod().name());
+            PathUrl requestUrl = PathUrl.from(request.getHttpUri().getUrl());
+            QueryParameters queryParameters = request.getQueryParameters();
             BodyContent bodyContent = BodyContent.from(request.getBodyInputStream());
-            ParameterValueExtractorStrategy parameterValueExtractorStrategy = new ParameterValueExtractorStrategy(pathVariableValue, queryParamValues, bodyContent);
 
-            MethodInvoker methodInvoker = new MethodInvoker(container, parameterValueExtractorStrategy);
-            Object result = methodInvoker.invoke(matchedMethod.getJavaMethod());
+            MatchedMethod matchedMethod = httpPathMatcher.matchJavaMethod(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
+            Method javaMethod = matchedMethod.getJavaMethod();
+            RequestParameters pathVariableValue = new RequestParameters(matchedMethod.getPathVariableValue().getValues());
+            RequestParameters queryParamValues = new RequestParameters(queryParameters.getParameterMap());
 
-            // [시스템 컴포넌트적 요소 존재.]
-            // 9. 응답값 생성.
-            // as is.
-            // (1) result -> to input stream.
-            // (2) 임의의 header 셋팅
-            // to be.
-            // (1) 응닶 타입에 따라 content-type 설정.
+            Map<Class<? extends Annotation>, ParameterConverter> parameterConverters = Map.of(
+                PathVariable.class, new RequestParameterConverter(PathVariable.class, pathVariableValue),
+                RequestParam.class, new RequestParameterConverter(RequestParam.class, queryParamValues),
+                RequestBody.class, new RequestBodyParameterConverter(bodyContent)
+            );
+            ParameterConverter parameterConverter = new CompositeParameterConverter(parameterConverters);
+
+            Class<?> declaringClass = javaMethod.getDeclaringClass();
+            Object instance = container.get(declaringClass);
+            log.info("declaringClass : {}", declaringClass);
+            log.info("instance : {}", instance);
+            log.info("javaMethod : {}", javaMethod);
+
+            Object[] values = Arrays.stream(javaMethod.getParameters())
+                .peek(parameter -> log.info("parameter : `{}`, param class : `{}`", parameter, parameter.getClass()))
+                .map(parameterConverter::convertAsValue)
+                .map(optionalValue -> optionalValue.orElse(EMPTY_VALUE))
+                .peek(value -> log.info("value : {}, {}", value, value.getClass()))
+                .toArray();
+
+            Object result = doExecute(instance, javaMethod, values);
+
             InputStream inputStream = converter.convertToInputStream(result);
+
             response.setStartLine("HTTP/1.1 200 OK");
             response.appendHeader(Map.of(
                 "Date", "MON, 27 Jul 2023 12:28:53 GMT",
@@ -115,32 +191,6 @@ public class App {
             sender.send(inputStream);
 
             return true;
-        }
-
-        private Object invoke(Method javaMethod, ParameterValueExtractorStrategy parameterValueExtractorStrategy) {
-            Class<?> declaringClass = javaMethod.getDeclaringClass();
-            Object instance = container.get(declaringClass);
-            log.info("declaringClass : {}", declaringClass);
-            log.info("instance : {}", instance);
-            log.info("javaMethod : {}", javaMethod);
-
-            // -> todo, parameter 에서 값 변환은 사전에 진행되었어야한다.
-            // 8.1.
-            // as is. (1) parameter -> value 변환.
-            // to be. (1) nothing.
-            Object[] values = Arrays.stream(javaMethod.getParameters())
-                .map(parameterValueExtractorStrategy::create)
-                .map(ParameterValueExtractor::extract)
-                .map(extractValue -> {
-                    String value = extractValue.getOptionalValue().orElse("");
-                    Class<?> parameterType = extractValue.getParameterType();
-                    return objectConverter.convert(value, parameterType);
-                })
-                .peek(value -> log.info("value : {}, {}", value, value.getClass()))
-                .toArray();
-
-            // 8.2. 실행.
-            return doExecute(instance, javaMethod, values);
         }
 
         private static Object doExecute(Object object, Method javaMethod, Object[] paramsValues) {

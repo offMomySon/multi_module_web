@@ -230,29 +230,25 @@ public class App {
 
         @Override
         public void run(InputStream inputStream, OutputStream outputStream) {
-            try (HttpRequestReader httpRequestReader = new HttpRequestReader(inputStream);
-                 HttpResponse httpResponse = new HttpResponse(outputStream)) {
-                HttpRequest httpRequest = httpRequestReader.read();
+            HttpRequestReader httpRequestReader = new HttpRequestReader(inputStream);
+            HttpRequest httpRequest = httpRequestReader.read();
+            HttpResponse httpResponse = new HttpResponse(outputStream);
 
-                log.info(httpRequest.getHttpUri().getUrl());
+            log.info(httpRequest.getHttpUri().getUrl());
 
-                List<FilterWorker> filterWorkers = filters.findFilterWorkers(httpRequest.getHttpUri().getUrl());
-                log.info("filterWorkers : {}", filterWorkers);
+            List<FilterWorker> filterWorkers = filters.findFilterWorkers(httpRequest.getHttpUri().getUrl());
+            log.info("filterWorkers : {}", filterWorkers);
 
-                log.info("create filter chain");
-                FilterChain applicationExecutorChain = new HttpRequestExecutorChain(httpRequestProcessor, null);
-                FilterChain filterChain = filterWorkers.stream()
-                    .reduce(
-                        applicationExecutorChain,
-                        FilterWorkerChain::new,
-                        (pw, pw2) -> null);
+            log.info("create filter chain");
+            FilterChain applicationExecutorChain = new HttpRequestExecutorChain(httpRequestProcessor, null);
+            FilterChain filterChain = filterWorkers.stream()
+                .reduce(
+                    applicationExecutorChain,
+                    FilterWorkerChain::new,
+                    (pw, pw2) -> null);
 
-                log.info("execute filter chain");
-                filterChain.execute(httpRequest, httpResponse);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            log.info("execute filter chain");
+            filterChain.execute(httpRequest, httpResponse);
         }
-
     }
 }

@@ -52,10 +52,15 @@ public class SocketProcessor {
         while (true) {
             try {
                 Socket socket = acceptSocket();
-                InputStream inputStream = socket.getInputStream();
-                OutputStream outputStream = socket.getOutputStream();
 
-                Runnable task = () -> requestRunner.run(inputStream, outputStream);
+                Runnable task = () -> {
+                    try (InputStream inputStream = socket.getInputStream();
+                         OutputStream outputStream = socket.getOutputStream()) {
+                        requestRunner.run(inputStream, outputStream);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                };
 
                 log.info("load task to thread.");
                 threadPoolExecutor.execute(task);

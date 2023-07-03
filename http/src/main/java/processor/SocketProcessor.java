@@ -11,7 +11,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
 import lombok.extern.slf4j.Slf4j;
 
 // todo
@@ -20,12 +19,12 @@ import lombok.extern.slf4j.Slf4j;
 // processor
 //
 @Slf4j
-public class RequestProcessor {
+public class SocketProcessor {
     private final ThreadPoolExecutor threadPoolExecutor;
     private final ServerSocket serverSocket;
     private final RequestRunner requestRunner;
 
-    public RequestProcessor(ThreadPoolExecutor threadPoolExecutor, ServerSocket serverSocket, RequestRunner requestRunner) {
+    public SocketProcessor(ThreadPoolExecutor threadPoolExecutor, ServerSocket serverSocket, RequestRunner requestRunner) {
         Objects.requireNonNull(threadPoolExecutor);
         Objects.requireNonNull(serverSocket);
         Objects.requireNonNull(requestRunner);
@@ -34,13 +33,14 @@ public class RequestProcessor {
         this.requestRunner = requestRunner;
     }
 
-    public static RequestProcessor create(int poolSize, long keepAliceTime, int waitCapacity, int port, RequestRunner requestRunner) {
+    public static SocketProcessor create(int poolSize, long keepAliceTime, int waitCapacity, int port, RequestRunner requestRunner) {
+        Objects.requireNonNull(requestRunner);
         try {
             BlockingQueue<Runnable> blockingQueue = new LinkedBlockingQueue<>(waitCapacity);
             ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(poolSize, poolSize, keepAliceTime, TimeUnit.MILLISECONDS, blockingQueue);
             ServerSocket socket = new ServerSocket(port);
 
-            return new RequestProcessor(threadPoolExecutor, socket, requestRunner);
+            return new SocketProcessor(threadPoolExecutor, socket, requestRunner);
         } catch (IOException e) {
             throw new RuntimeException(MessageFormat.format("fail to active server. Reason : `{0}`", e.getCause()), e);
         }

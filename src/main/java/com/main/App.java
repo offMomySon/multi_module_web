@@ -47,6 +47,7 @@ import matcher.converter.base.CompositeConverter;
 import matcher.creator.JavaMethodPathMatcherCreator;
 import matcher.segment.PathUrl;
 import processor.HttpRequestProcessor;
+import processor.HttpService;
 import processor.SocketProcessor;
 import vo.HttpRequest;
 import vo.HttpRequestReader;
@@ -95,13 +96,8 @@ public class App {
         log.info("newFilters : {}", newFilters);
 
         BaseHttpRequestExecutor baseHttpRequestExecutor = new BaseHttpRequestExecutor(objectRepository, httpPathMatcher);
-        RequestRunner requestRunner = new RequestRunner(baseHttpRequestExecutor, newFilters);
-        SocketProcessor socketProcessor = SocketProcessor.create(Config.INSTANCE.getMaxConnection(),
-                                                                 Config.INSTANCE.getKeepAliveTime(),
-                                                                 Config.INSTANCE.getWaitConnection(),
-                                                                 Config.INSTANCE.getPort(),
-                                                                 requestRunner);
-        socketProcessor.process();
+        HttpService httpService = new HttpService(baseHttpRequestExecutor, newFilters);
+        httpService.start();
     }
 
     private static ObjectRepository createContainer(List<ComponentClassInitializer> componentClassInitializers) {

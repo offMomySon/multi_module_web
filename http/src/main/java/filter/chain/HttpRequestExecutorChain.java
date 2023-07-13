@@ -19,19 +19,19 @@ public class HttpRequestExecutorChain implements FilterChain {
     }
 
     @Override
-    public void execute(HttpRequest request, HttpResponse response) {
+    public boolean execute(HttpRequest request, HttpResponse response) {
         boolean execute = httpRequestExecutor.execute(request, response);
         if (execute) {
             log.info("request executed.");
-            return;
+            return true;
         }
         log.info("does not request executed.");
 
         if (Objects.isNull(nextFilterChain)) {
             log.info("does not exist next filter chain.");
-            return;
+            return true;
         }
 
-        nextFilterChain.execute(request, response);
+        return nextFilterChain.execute(request, response);
     }
 }

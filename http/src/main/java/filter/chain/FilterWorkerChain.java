@@ -17,11 +17,21 @@ public class FilterWorkerChain implements FilterChain {
     }
 
     @Override
-    public void execute(HttpRequest request, HttpResponse response) {
-        filterWorker.prevExecute(request, response);
+    public boolean execute(HttpRequest request, HttpResponse response) {
+        boolean next = filterWorker.prevExecute(request, response);
+        if (!next) {
+            return false;
+        }
 
-        nextFilterChain.execute(request, response);
+        next = nextFilterChain.execute(request, response);
+        if (!next) {
+            return false;
+        }
 
-        filterWorker.postExecute(request, response);
+        next = filterWorker.postExecute(request, response);
+        if (!next) {
+            return false;
+        }
+        return true;
     }
 }

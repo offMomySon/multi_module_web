@@ -46,13 +46,13 @@ class FilterTest {
 
     public static class TestFilterWorker implements FilterWorker {
         @Override
-        public void prevExecute(HttpRequest httpRequest, HttpResponse httpResponse) {
-
+        public boolean prevExecute(HttpRequest httpRequest, HttpResponse httpResponse) {
+            return true;
         }
 
         @Override
-        public void postExecute(HttpRequest httpRequest, HttpResponse httpResponse) {
-
+        public boolean postExecute(HttpRequest httpRequest, HttpResponse httpResponse) {
+            return true;
         }
     }
 }

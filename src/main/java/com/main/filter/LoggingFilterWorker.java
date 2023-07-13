@@ -11,16 +11,18 @@ import vo.HttpResponse;
 public class LoggingFilterWorker implements FilterWorker {
 
     @Override
-    public void prevExecute(HttpRequest httpRequest, HttpResponse httpResponse) {
+    public boolean prevExecute(HttpRequest httpRequest, HttpResponse httpResponse) {
         log.info("request method : {}", httpRequest.getHttpMethod());
         log.info("request uri : {}", httpRequest.getHttpUri());
         log.info("request header : {}", httpRequest.getHttpHeader());
         log.info("request body : {}", httpRequest.getBodyString());
+        return true;
     }
 
     @Override
-    public void postExecute(HttpRequest httpRequest, HttpResponse httpResponse) {
+    public boolean postExecute(HttpRequest httpRequest, HttpResponse httpResponse) {
         log.info("response startLine : {}", httpResponse.getStartLine());
         log.info("response headerMap : {}", httpResponse.getHeader());
+        return true;
     }
 }

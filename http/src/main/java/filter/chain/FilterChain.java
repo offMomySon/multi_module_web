@@ -5,5 +5,5 @@ import vo.HttpResponse;
 
 public interface FilterChain {
 
-    void execute(HttpRequest request, HttpResponse response);
+    boolean execute(HttpRequest request, HttpResponse response);
 }

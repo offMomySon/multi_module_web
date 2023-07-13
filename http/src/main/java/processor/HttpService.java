@@ -5,7 +5,7 @@ import filter.FilterWorker;
 import filter.Filters;
 import filter.chain.FilterChain;
 import filter.chain.FilterWorkerChain;
-import filter.chain.HttpRequestExecutorChain;
+import filter.chain.HttpRequestProcessorChain;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.text.MessageFormat;
@@ -15,7 +15,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.protocol.HttpRequestExecutor;
 
 // todo
 // processor vs service 가 어느때 사용되어야 적절한가?
@@ -60,7 +59,7 @@ public class HttpService {
             List<FilterWorker> filterWorkers = filters.findFilterWorkers(httpRequest.getHttpUri().getUrl());
 
             log.info("create filter chain");
-            FilterChain applicationExecutorChain = new HttpRequestExecutorChain(httpRequestProcessor, null);
+            FilterChain applicationExecutorChain = new HttpRequestProcessorChain(httpRequestProcessor, null);
             FilterChain filterChain = filterWorkers.stream()
                 .reduce(
                     applicationExecutorChain,

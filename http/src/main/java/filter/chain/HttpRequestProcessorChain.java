@@ -8,11 +8,11 @@ import vo.HttpResponse;
 
 
 @Slf4j
-public class HttpRequestExecutorChain implements FilterChain {
+public class HttpRequestProcessorChain implements FilterChain {
     private final FilterChain nextFilterChain;
     private final HttpRequestProcessor httpRequestExecutor;
 
-    public HttpRequestExecutorChain(HttpRequestProcessor httpRequestExecutor, FilterChain nextFilterChain) {
+    public HttpRequestProcessorChain(HttpRequestProcessor httpRequestExecutor, FilterChain nextFilterChain) {
         Objects.requireNonNull(httpRequestExecutor);
         this.httpRequestExecutor = httpRequestExecutor;
         this.nextFilterChain = nextFilterChain;

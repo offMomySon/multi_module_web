@@ -14,7 +14,7 @@ import filter.Filters;
 import filter.annotation.WebFilter;
 import filter.chain.FilterChain;
 import filter.chain.FilterWorkerChain;
-import filter.chain.HttpRequestExecutorChain;
+import filter.chain.HttpRequestProcessorChain;
 import filter.pattern.PatternMatcher;
 import filter.pattern.PatternMatcherStrategy;
 import java.io.InputStream;
@@ -240,7 +240,7 @@ public class App {
             log.info("filterWorkers : {}", filterWorkers);
 
             log.info("create filter chain");
-            FilterChain applicationExecutorChain = new HttpRequestExecutorChain(httpRequestProcessor, null);
+            FilterChain applicationExecutorChain = new HttpRequestProcessorChain(httpRequestProcessor, null);
             FilterChain filterChain = filterWorkers.stream()
                 .reduce(
                     applicationExecutorChain,

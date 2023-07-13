@@ -49,8 +49,9 @@ public class HttpService {
 //    httpRequest, httpResponse 를 받는다.
 //    httpRequest 로 부터 url 을 가져온다.
 //    url 에 매칭되는 filterWorker 를 가져온다.
-//    applicationExecutor 를
-
+//    httpRequestProcessor 를 filterChain 에 등록한다.
+//    filterWorker 들을 filterChain 에 차례대로 등록한다.
+//    filterChain 을 실행시킨다.
     public void start() {
         log.info("start server.");
 
@@ -69,12 +70,5 @@ public class HttpService {
             log.info("execute filter chain");
             filterChain.execute(httpRequest, httpResponse);
         }));
-        // inputstream 으로 부터 httpRequestReader 를 생성한다.
-        // httpRequestReader 를 읽어 httpRequest 를 생성한다.
-        // outputStream 으로 부터 httpResponse 를 생성한다.
-        // filters 에서 http url 을 기준으로 filterWorker 들을 뽑아온다.
-        // filterWorker 와 http 실행자를 filter chain 으로 엮는다.
-        // 엮은 filter chain 을 실행한다.
-
     }
 }

@@ -59,16 +59,26 @@ public class HttpService {
         socketHttpTaskExecutor.execute(((httpRequest, httpResponse) -> {
             List<FilterWorker> filterWorkers = filters.findFilterWorkers(httpRequest.getHttpUri().getUrl());
 
-            log.info("create filter chain");
-            FilterChain applicationExecutorChain = new HttpRequestProcessorChain(httpRequestProcessor, null);
-            FilterChain filterChain = filterWorkers.stream()
-                .reduce(
-                    applicationExecutorChain,
-                    FilterWorkerChain::new,
-                    (pw, pw2) -> null);
+//            log.info("create filter chain");
+//            FilterChain applicationExecutorChain = new HttpRequestProcessorChain(httpRequestProcessor, null);
+//            FilterChain filterChain = filterWorkers.stream()
+//                .reduce(
+//                    applicationExecutorChain,
+//                    FilterWorkerChain::new,
+//                    (pw, pw2) -> null);
+//
+//            log.info("execute filter chain");
+//            filterChain.execute(httpRequest, httpResponse);
 
-            log.info("execute filter chain");
-            filterChain.execute(httpRequest, httpResponse);
+            for(FilterWorker filterWorker : filterWorkers){
+                filterWorker.prevExecute(httpRequest, httpResponse);
+            }
+
+            httpRequestProcessor.execute(httpRequest, httpResponse);
+
+            for(FilterWorker filterWorker : filterWorkers){
+                filterWorker.postExecute(httpRequest, httpResponse);
+            }
         }));
     }
 }

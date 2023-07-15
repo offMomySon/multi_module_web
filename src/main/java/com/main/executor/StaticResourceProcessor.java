@@ -1,7 +1,5 @@
 package com.main.executor;
 
-import matcher.ResourceFinder;
-import matcher.ResourceUrls;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -10,6 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
+import matcher.ResourceFinder;
 import processor.HttpRequestProcessor;
 import vo.HttpRequest;
 import vo.HttpResponse;
@@ -17,12 +16,10 @@ import vo.HttpResponseWriter;
 
 @Slf4j
 public class StaticResourceProcessor implements HttpRequestProcessor {
-    private final ResourceUrls resourceUrls;
     private final ResourceFinder resourceFinder;
 
     public StaticResourceProcessor(ResourceFinder resourceFinder) {
         Objects.requireNonNull(resourceFinder);
-        this.resourceUrls = resourceFinder.extractResourceUrls();
         this.resourceFinder = resourceFinder;
     }
 
@@ -33,12 +30,6 @@ public class StaticResourceProcessor implements HttpRequestProcessor {
         String requestUrl = request.getHttpUri().getUrl();
         Path newRequestUrl = Path.of(requestUrl);
         log.info("newRequestUrl : {}", newRequestUrl);
-
-        boolean doesNotExistMatchUrl = !resourceUrls.contain(newRequestUrl);
-        if (doesNotExistMatchUrl) {
-            log.info("does not exist MatchUrl.");
-            return false;
-        }
 
         Optional<Path> optionalResource = resourceFinder.findResource(newRequestUrl);
         if (optionalResource.isEmpty()) {

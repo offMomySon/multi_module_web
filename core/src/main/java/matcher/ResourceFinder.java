@@ -15,11 +15,15 @@ public class ResourceFinder {
     private static final String DIRECTORY_DELIMITER = "/";
 
     private final Path resourceDirectory;
+    private final ResourceUrls resourceUrls;
 
-    public ResourceFinder(Path resourceDirectory) {
+    public ResourceFinder(Path resourceDirectory, ResourceUrls resourceUrls) {
         Objects.requireNonNull(resourceDirectory);
+        Objects.requireNonNull(resourceUrls);
         log.info("resourceDirectory : {}", resourceDirectory);
+        log.info("resourceUrls : {}", resourceUrls);
         this.resourceDirectory = resourceDirectory.normalize();
+        this.resourceUrls = resourceUrls;
     }
 
     public static ResourceFinder from(Class<?> clazz, String resourcePackage) {
@@ -31,11 +35,14 @@ public class ResourceFinder {
         Path clazzPath = FileSystemUtil.getClazzRootPath(clazz);
         Path projectPackageDirectory = clazzPath.getParent();
         Path resourceDirectory = projectPackageDirectory.resolve(resourcePackage);
+        resourceDirectory = resourceDirectory.normalize();
 
-        return new ResourceFinder(resourceDirectory);
+        ResourceUrls resourceUrls = extractResourceUrls(resourceDirectory);
+
+        return new ResourceFinder(resourceDirectory, resourceUrls);
     }
 
-    public ResourceUrls extractResourceUrls() {
+    private static ResourceUrls extractResourceUrls(Path resourceDirectory) {
         try (Stream<Path> fileWalk = Files.walk(resourceDirectory)) {
             Set<Path> urls = fileWalk
                 .filter(path -> !Files.isDirectory(path))
@@ -53,17 +60,23 @@ public class ResourceFinder {
         return Path.of(DIRECTORY_DELIMITER).resolve(packageResourcePath);
     }
 
-    public Optional<Path> findResource(Path resourceUrl) {
-        if (Objects.isNull(resourceUrl)) {
+    public Optional<Path> findResource(Path requestUrl) {
+        if (Objects.isNull(requestUrl)) {
+            return Optional.empty();
+        }
+        requestUrl = requestUrl.normalize();
+
+        boolean doesNotExistMatchUrl = !resourceUrls.contain(requestUrl);
+        if (doesNotExistMatchUrl) {
+            log.info("does not exist MatchUrl.");
             return Optional.empty();
         }
 
-        resourceUrl = resourceUrl.normalize();
-        if (resourceUrl.startsWith(DIRECTORY_DELIMITER)) {
-            resourceUrl = Path.of(resourceUrl.toString().substring(1));
+        if (requestUrl.startsWith(DIRECTORY_DELIMITER)) {
+            requestUrl = Path.of(requestUrl.toString().substring(1));
         }
 
-        Path canonicalResourcePath = resourceDirectory.resolve(resourceUrl);
+        Path canonicalResourcePath = resourceDirectory.resolve(requestUrl);
 
         if (Files.notExists(canonicalResourcePath)) {
             log.info("file does not exist");

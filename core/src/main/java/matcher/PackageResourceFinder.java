@@ -11,22 +11,20 @@ import lombok.extern.slf4j.Slf4j;
 import util.FileSystemUtil;
 
 @Slf4j
-public class ResourceFinder {
+public class PackageResourceFinder {
     private static final String DIRECTORY_DELIMITER = "/";
 
     private final Path resourceDirectory;
     private final ResourceUrls resourceUrls;
 
-    public ResourceFinder(Path resourceDirectory, ResourceUrls resourceUrls) {
+    private PackageResourceFinder(Path resourceDirectory) {
         Objects.requireNonNull(resourceDirectory);
-        Objects.requireNonNull(resourceUrls);
         log.info("resourceDirectory : {}", resourceDirectory);
-        log.info("resourceUrls : {}", resourceUrls);
         this.resourceDirectory = resourceDirectory.normalize();
-        this.resourceUrls = resourceUrls;
+        this.resourceUrls = extractResourceUrls(this.resourceDirectory);
     }
 
-    public static ResourceFinder from(Class<?> clazz, String resourcePackage) {
+    public static PackageResourceFinder from(Class<?> clazz, String resourcePackage) {
         Objects.requireNonNull(clazz);
         if (Objects.isNull(resourcePackage) || resourcePackage.isBlank()) {
             throw new RuntimeException("requestPackage is empty.");
@@ -37,9 +35,7 @@ public class ResourceFinder {
         Path resourceDirectory = projectPackageDirectory.resolve(resourcePackage);
         resourceDirectory = resourceDirectory.normalize();
 
-        ResourceUrls resourceUrls = extractResourceUrls(resourceDirectory);
-
-        return new ResourceFinder(resourceDirectory, resourceUrls);
+        return new PackageResourceFinder(resourceDirectory);
     }
 
     private static ResourceUrls extractResourceUrls(Path resourceDirectory) {
@@ -60,23 +56,29 @@ public class ResourceFinder {
         return Path.of(DIRECTORY_DELIMITER).resolve(packageResourcePath);
     }
 
-    public Optional<Path> findResource(Path requestUrl) {
-        if (Objects.isNull(requestUrl)) {
+//    request url 을 받아온다.
+//    request url 을 일반화 한다.
+//    등록된 resourceUrls 중에서 request url 와 동일한 url 이 존재하는지 확인한다.
+//    requestUrl 에서 / 를 제거한다.
+//    resource directory 와 request url 을 합쳐 resource 위치를 가리키는 resource Path 를 생성한다.
+//    resource Path 를 반환한다.
+    public Optional<Path> find(Path findUrl) {
+        if (Objects.isNull(findUrl)) {
             return Optional.empty();
         }
-        requestUrl = requestUrl.normalize();
+        findUrl = findUrl.normalize();
 
-        boolean doesNotExistMatchUrl = !resourceUrls.contain(requestUrl);
+        boolean doesNotExistMatchUrl = !resourceUrls.contain(findUrl);
         if (doesNotExistMatchUrl) {
             log.info("does not exist MatchUrl.");
             return Optional.empty();
         }
 
-        if (requestUrl.startsWith(DIRECTORY_DELIMITER)) {
-            requestUrl = Path.of(requestUrl.toString().substring(1));
+        if (findUrl.startsWith(DIRECTORY_DELIMITER)) {
+            findUrl = Path.of(findUrl.toString().substring(1));
         }
 
-        Path canonicalResourcePath = resourceDirectory.resolve(requestUrl);
+        Path canonicalResourcePath = resourceDirectory.resolve(findUrl);
 
         if (Files.notExists(canonicalResourcePath)) {
             log.info("file does not exist");

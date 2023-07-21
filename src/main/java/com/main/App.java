@@ -2,7 +2,6 @@ package com.main;
 
 
 import com.main.util.AnnotationUtils;
-import config.Config;
 import container.ClassFinder;
 import container.ComponentClassInitializer;
 import container.ObjectRepository;
@@ -48,7 +47,6 @@ import matcher.creator.JavaMethodPathMatcherCreator;
 import matcher.segment.PathUrl;
 import processor.HttpRequestProcessor;
 import processor.HttpService;
-import processor.SocketProcessor;
 import vo.HttpRequest;
 import vo.HttpRequestReader;
 import vo.HttpResponse;
@@ -162,7 +160,7 @@ public class App {
             Objects.requireNonNull(response);
 
             RequestMethod method = RequestMethod.find(request.getHttpMethod().name());
-            PathUrl requestUrl = PathUrl.from(request.getHttpUri().getUrl());
+            PathUrl requestUrl = PathUrl.from(request.getHttpRequestPath().getValue().toString());
             QueryParameters queryParameters = request.getQueryParameters();
             BodyContent bodyContent = BodyContent.from(request.getBodyInputStream());
 
@@ -233,9 +231,9 @@ public class App {
             HttpRequest httpRequest = httpRequestReader.read();
             HttpResponse httpResponse = new HttpResponse(outputStream);
 
-            log.info(httpRequest.getHttpUri().getUrl());
+            log.info(httpRequest.getHttpRequestPath().toString());
 
-            List<FilterWorker> filterWorkers = filters.findFilterWorkers(httpRequest.getHttpUri().getUrl());
+            List<FilterWorker> filterWorkers = filters.findFilterWorkers(httpRequest.getHttpRequestPath().toString());
             log.info("filterWorkers : {}", filterWorkers);
 
             log.info("create filter chain");

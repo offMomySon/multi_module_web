@@ -32,12 +32,12 @@ public class HttpRequestReader implements Closeable {
             String[] uriElements = startLineElements[1].split(QUERY_PARAM_STARTER, 2);
 
             HttpMethod httpMethod = HttpMethod.find(startLineElements[0]);
-            HttpUri httpUri = HttpUri.from(uriElements[0]);
+            HttpRequestPath httpRequestPath = HttpRequestPath.from(uriElements[0]);
             QueryParameters queryParameters = getQueryParameters(uriElements);
             HttpHeader httpHeader = createHttpHeader(reader);
             InputStream newRequestStream = combineRequestStream(reader, requestStream);
 
-            return new HttpRequest(httpMethod, httpUri, queryParameters, httpHeader, newRequestStream);
+            return new HttpRequest(httpMethod, httpRequestPath, queryParameters, httpHeader, newRequestStream);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

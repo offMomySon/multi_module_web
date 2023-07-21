@@ -3,9 +3,6 @@ package processor;
 import config.Config;
 import filter.FilterWorker;
 import filter.Filters;
-import filter.chain.FilterChain;
-import filter.chain.FilterWorkerChain;
-import filter.chain.HttpRequestProcessorChain;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.text.MessageFormat;
@@ -57,7 +54,7 @@ public class HttpService {
 
         SocketHttpTaskExecutor socketHttpTaskExecutor = SocketHttpTaskExecutor.create(5, 8080);
         socketHttpTaskExecutor.execute(((httpRequest, httpResponse) -> {
-            List<FilterWorker> filterWorkers = filters.findFilterWorkers(httpRequest.getHttpUri().getUrl());
+            List<FilterWorker> filterWorkers = filters.findFilterWorkers(httpRequest.getHttpRequestPath().getValue().toString());
 
 //            log.info("create filter chain");
 //            FilterChain applicationExecutorChain = new HttpRequestProcessorChain(httpRequestProcessor, null);

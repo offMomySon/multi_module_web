@@ -13,7 +13,7 @@ public class LoggingFilterWorker implements FilterWorker {
     @Override
     public boolean prevExecute(HttpRequest httpRequest, HttpResponse httpResponse) {
         log.info("request method : {}", httpRequest.getHttpMethod());
-        log.info("request uri : {}", httpRequest.getHttpUri());
+        log.info("request uri : {}", httpRequest.getHttpRequestPath());
         log.info("request header : {}", httpRequest.getHttpHeader());
         log.info("request body : {}", httpRequest.getBodyString());
         return true;

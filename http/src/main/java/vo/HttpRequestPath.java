@@ -6,13 +6,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.Objects;
-import lombok.ToString;
 
-@ToString
-public class HttpUri {
+public class HttpRequestPath {
     private final Path value;
 
-    private HttpUri(Path value) {
+    private HttpRequestPath(Path value) {
         Objects.requireNonNull(value);
 
         value = value.normalize();
@@ -20,11 +18,11 @@ public class HttpUri {
         this.value = value;
     }
 
-    public String getUrl() {
-        return value.toString();
+    public Path getValue() {
+        return Path.of(value.toString());
     }
 
-    public static HttpUri from(String requestUri) {
+    public static HttpRequestPath from(String requestUri) {
         Objects.requireNonNull(requestUri);
 
         try {
@@ -36,15 +34,15 @@ public class HttpUri {
 
         Path path = Paths.get(requestUri);
 
-        return new HttpUri(path);
+        return new HttpRequestPath(path);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        HttpUri httpUri = (HttpUri) o;
-        return value.equals(httpUri.value);
+        HttpRequestPath httpRequestPath = (HttpRequestPath) o;
+        return value.equals(httpRequestPath.value);
     }
 
     @Override

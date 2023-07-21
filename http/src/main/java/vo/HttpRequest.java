@@ -7,20 +7,20 @@ import static util.IoUtils.createBufferedInputStream;
 
 public class HttpRequest {
     private final HttpMethod httpMethod;
-    private final HttpUri httpUri;
+    private final HttpRequestPath httpRequestPath;
     private final QueryParameters queryParameters;
     private final HttpHeader httpHeader;
     private final InputStream requestStream;
 
-    public HttpRequest(HttpMethod httpMethod, HttpUri httpUri, QueryParameters queryParameters, HttpHeader httpHeader, InputStream requestStream) {
+    public HttpRequest(HttpMethod httpMethod, HttpRequestPath httpRequestPath, QueryParameters queryParameters, HttpHeader httpHeader, InputStream requestStream) {
         Objects.requireNonNull(httpMethod);
-        Objects.requireNonNull(httpUri);
+        Objects.requireNonNull(httpRequestPath);
         Objects.requireNonNull(queryParameters);
         Objects.requireNonNull(httpHeader);
         Objects.requireNonNull(requestStream);
 
         this.httpMethod = httpMethod;
-        this.httpUri = httpUri;
+        this.httpRequestPath = httpRequestPath;
         this.queryParameters = queryParameters;
         this.httpHeader = httpHeader;
         this.requestStream = requestStream;
@@ -30,8 +30,8 @@ public class HttpRequest {
         return httpMethod;
     }
 
-    public HttpUri getHttpUri() {
-        return httpUri;
+    public HttpRequestPath getHttpRequestPath() {
+        return httpRequestPath;
     }
 
     public HttpHeader getHttpHeader() {
@@ -71,7 +71,7 @@ public class HttpRequest {
     public String toString() {
         return "HttpRequest{" +
             "httpMethod=" + httpMethod +
-            ", httpUri=" + httpUri +
+            ", httpUri=" + httpRequestPath +
             ", queryParameters=" + queryParameters +
             ", httpHeader=" + httpHeader +
             ", requestStream=" + requestStream +

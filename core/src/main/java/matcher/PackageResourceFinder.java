@@ -62,7 +62,7 @@ public class PackageResourceFinder {
 //    requestUrl 에서 / 를 제거한다.
 //    resource directory 와 request url 을 합쳐 resource 위치를 가리키는 resource Path 를 생성한다.
 //    resource Path 를 반환한다.
-    public Optional<Path> find(Path findUrl) {
+    public Optional<Path> findCanonicalPath(Path findUrl) {
         if (Objects.isNull(findUrl)) {
             return Optional.empty();
         }

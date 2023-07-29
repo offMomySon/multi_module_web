@@ -12,10 +12,10 @@ import java.util.Optional;
 import static matcher.segment.PathVariableCollectChain.ConsumeResult;
 
 public class PathUrlMatcher {
-    private final PathVariableCollectChain baseSegmentChunkChain;
+    private final PathVariableCollectChain segmentChunkChain;
 
-    private PathUrlMatcher(PathVariableCollectChain baseSegmentChunkChain) {
-        this.baseSegmentChunkChain = baseSegmentChunkChain;
+    private PathUrlMatcher(PathVariableCollectChain segmentChunkChain) {
+        this.segmentChunkChain = segmentChunkChain;
     }
 
     public static PathUrlMatcher from(SegmentChunkFactory segmentChunkFactory) {
@@ -33,7 +33,7 @@ public class PathUrlMatcher {
     public Optional<PathVariableValue> match(PathUrl requestUrl) {
         Objects.requireNonNull(requestUrl);
 
-        ConsumeResult consumeResult = baseSegmentChunkChain.consume(requestUrl);
+        ConsumeResult consumeResult = segmentChunkChain.consume(requestUrl);
         if (consumeResult.doesNotAllConsumed()) {
             return Optional.empty();
         }

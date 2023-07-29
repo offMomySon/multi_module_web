@@ -43,15 +43,6 @@ public class RequestParameters {
         }
         return valueOrNull;
     }
-    
-    public RequestParameters merge(RequestParameters other) {
-        Map<String, String> newValues = new HashMap<>();
-
-        values.forEach((key, value) -> newValues.merge(key, value, (prev, curr) -> prev));
-        other.values.forEach((key, value) -> newValues.merge(key, value, (prev, curr) -> prev));
-
-        return new RequestParameters(newValues);
-    }
 
     public static RequestParameters empty() {
         return new RequestParameters(Collections.emptyMap());

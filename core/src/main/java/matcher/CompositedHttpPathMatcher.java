@@ -31,6 +31,7 @@ public class CompositedHttpPathMatcher implements HttpPathMatcher {
         this.baseHttpPathMatchers = newJavaMethodResolver;
     }
 
+//    1. method, request url 이 매칭되는 pathMatcher 가 존재하면 method, pathVariable value 를 반환합니다.
     public Optional<MatchedMethod> matchJavaMethod(RequestMethod requestMethod, PathUrl requestUrl) {
         return baseHttpPathMatchers.stream()
             .map(methodResolver -> methodResolver.matchJavaMethod(requestMethod, requestUrl))

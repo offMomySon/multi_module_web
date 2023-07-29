@@ -1,4 +1,4 @@
-package com.main.executor;
+package com.main.task;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
@@ -24,6 +24,23 @@ public class StaticResourceProcessor implements HttpRequestProcessor {
         this.packageResourceFinder = packageResourceFinder;
     }
 
+    // 시나리오분석.
+//    1. request, response 를 받는다.
+//    2. request 로부터 request Path 를 가져온다.
+//    3. request path 를 이용하여 resource 의 path 를 찾아온다.
+//      1. resource 를 찾기 위한 path 를 받는다.
+//      2. findUrl 을 일반화한다.
+//      3. 등록된 url 에 findUrl 이 존재하는 지 확인한다.
+//      4. resource directory path, find url path 를 조합하여 resource path 를 생성한다.
+//    4. resource 의 확장자를 추출한다.
+//    5. resource 확장자를 이용하여 response header 값을 셋팅한다.
+//    6. resource 를 전송하기 위해 inputStream 으로 변환한다.
+//    7. httpResponse 로 부터 httpResponseWriter 를 가져온다.
+//    8. response header, resource inputStream 을 전송한다.
+
+//    1. request path 로 부터 resource 를 가져온다.
+//    2. resource extension 에 따라 http resposne header 값을 셋팅한다.
+//    3. http header, body 를 받은 http response 을 전송한다.
     public boolean execute(HttpRequest request, HttpResponse response) {
         Objects.requireNonNull(request);
         Objects.requireNonNull(response);
@@ -31,7 +48,7 @@ public class StaticResourceProcessor implements HttpRequestProcessor {
         Path requestUrl = request.getHttpRequestPath().getValue();
         log.info("requestUrl : {}", requestUrl);
 
-        Optional<Path> optionalResourcePath = packageResourceFinder.findCanonicalPath(requestUrl);
+        Optional<Path> optionalResourcePath = packageResourceFinder.findResource(requestUrl);
         if (optionalResourcePath.isEmpty()) {
             log.info("does not exist resource.");
             return false;

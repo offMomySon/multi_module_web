@@ -7,17 +7,22 @@ import java.util.Objects;
 import java.util.Optional;
 import lombok.Getter;
 
+// 생성자
+// 1. requestMethod 를 받는다.
+// 2. pathUrlMatcher 를 받는다.
+// 3. java method 를 받는다.
+// 4. 객체를 생성한다.
 public class BaseHttpPathMatcher implements HttpPathMatcher {
     private final RequestMethod requestMethod;
-    private final PathUrlMatcher baseUrlPathMatcher;
+    private final PathUrlMatcher pathUrlMatcher;
     private final Method javaMethod;
 
-    public BaseHttpPathMatcher(RequestMethod requestMethod, PathUrlMatcher baseUrlPathMatcher, Method javaMethod) {
+    public BaseHttpPathMatcher(RequestMethod requestMethod, PathUrlMatcher pathUrlMatcher, Method javaMethod) {
         Objects.requireNonNull(requestMethod);
-        Objects.requireNonNull(baseUrlPathMatcher);
+        Objects.requireNonNull(pathUrlMatcher);
         Objects.requireNonNull(javaMethod);
         this.requestMethod = requestMethod;
-        this.baseUrlPathMatcher = baseUrlPathMatcher;
+        this.pathUrlMatcher = pathUrlMatcher;
         this.javaMethod = javaMethod;
     }
 
@@ -30,7 +35,7 @@ public class BaseHttpPathMatcher implements HttpPathMatcher {
             return Optional.empty();
         }
 
-        Optional<PathVariableValue> optionalPathVariableValue = baseUrlPathMatcher.match(requestUrl);
+        Optional<PathVariableValue> optionalPathVariableValue = pathUrlMatcher.match(requestUrl);
         boolean doesNotMatch = optionalPathVariableValue.isEmpty();
         if (doesNotMatch) {
             return Optional.empty();
@@ -57,7 +62,7 @@ public class BaseHttpPathMatcher implements HttpPathMatcher {
     public String toString() {
         return "BaseHttpPathMatcher{" +
             "requestMethod=" + requestMethod +
-            ", baseUrlPathMatcher=" + baseUrlPathMatcher +
+            ", baseUrlPathMatcher=" + pathUrlMatcher +
             ", javaMethod=" + javaMethod +
             '}';
     }

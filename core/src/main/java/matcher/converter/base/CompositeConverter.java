@@ -37,9 +37,7 @@ public class CompositeConverter implements Converter {
     @Override
     public InputStream convertToInputStream(Object object) {
         Class<?> key = object.getClass();
-
         Converter converter = converters.getOrDefault(key, emptyConverter);
-
         return converter.convertToInputStream(object);
     }
 }

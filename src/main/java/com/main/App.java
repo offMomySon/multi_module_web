@@ -151,8 +151,6 @@ public class App {
             this.httpPathMatcher = httpPathMatcher;
         }
 
-//        http reuqest, response 를 받는다.
-//
 
         @Override
         public boolean execute(HttpRequest request, HttpResponse response) {

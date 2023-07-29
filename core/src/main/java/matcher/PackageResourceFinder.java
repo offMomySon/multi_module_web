@@ -56,13 +56,11 @@ public class PackageResourceFinder {
         return Path.of(DIRECTORY_DELIMITER).resolve(packageResourcePath);
     }
 
-//    request url 을 받아온다.
-//    request url 을 일반화 한다.
-//    등록된 resourceUrls 중에서 request url 와 동일한 url 이 존재하는지 확인한다.
-//    requestUrl 에서 / 를 제거한다.
-//    resource directory 와 request url 을 합쳐 resource 위치를 가리키는 resource Path 를 생성한다.
-//    resource Path 를 반환한다.
-    public Optional<Path> findCanonicalPath(Path findUrl) {
+//    1. resource 를 찾기 위한 path 를 받는다.
+//    2. findUrl 을 일반화한다.
+//    3. 등록된 url 에 findUrl 이 존재하는 지 확인한다.
+//    4. resource directory path, find url path 를 조합하여 resource path 를 생성한다.
+    public Optional<Path> findResource(Path findUrl) {
         if (Objects.isNull(findUrl)) {
             return Optional.empty();
         }

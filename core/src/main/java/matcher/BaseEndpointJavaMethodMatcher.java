@@ -12,12 +12,12 @@ import lombok.Getter;
 // 2. pathUrlMatcher 를 받는다.
 // 3. java method 를 받는다.
 // 4. 객체를 생성한다.
-public class BaseHttpPathMatcher implements HttpPathMatcher {
+public class BaseEndpointJavaMethodMatcher implements EndpointJavaMethodMatcher {
     private final RequestMethod requestMethod;
     private final PathUrlMatcher pathUrlMatcher;
     private final Method javaMethod;
 
-    public BaseHttpPathMatcher(RequestMethod requestMethod, PathUrlMatcher pathUrlMatcher, Method javaMethod) {
+    public BaseEndpointJavaMethodMatcher(RequestMethod requestMethod, PathUrlMatcher pathUrlMatcher, Method javaMethod) {
         Objects.requireNonNull(requestMethod);
         Objects.requireNonNull(pathUrlMatcher);
         Objects.requireNonNull(javaMethod);
@@ -27,7 +27,7 @@ public class BaseHttpPathMatcher implements HttpPathMatcher {
     }
 
     @Override
-    public Optional<MatchedMethod> matchJavaMethod(RequestMethod requestMethod, PathUrl requestUrl) {
+    public Optional<MatchedMethod> match(RequestMethod requestMethod, PathUrl requestUrl) {
         if (Objects.isNull(requestUrl)) {
             return Optional.empty();
         }

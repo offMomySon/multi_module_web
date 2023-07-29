@@ -5,22 +5,22 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import static matcher.BaseHttpPathMatcher.MatchedMethod;
+import static matcher.BaseEndpointJavaMethodMatcher.MatchedMethod;
 
 // http
 // link
 // context
 
 // n 개의 methodResolver 를 1개 처럼 다룬다.
-public class CompositedHttpPathMatcher implements HttpPathMatcher {
-    private final List<BaseHttpPathMatcher> baseHttpPathMatchers;
+public class CompositedEndpointJavaMethodMatcher implements EndpointJavaMethodMatcher {
+    private final List<BaseEndpointJavaMethodMatcher> baseHttpPathMatchers;
 
-    public CompositedHttpPathMatcher(List<BaseHttpPathMatcher> baseHttpPathMatchers) {
+    public CompositedEndpointJavaMethodMatcher(List<BaseEndpointJavaMethodMatcher> baseHttpPathMatchers) {
         if (Objects.isNull(baseHttpPathMatchers)) {
             throw new RuntimeException("methodResolvers is null.");
         }
 
-        List<BaseHttpPathMatcher> newJavaMethodResolver = baseHttpPathMatchers.stream()
+        List<BaseEndpointJavaMethodMatcher> newJavaMethodResolver = baseHttpPathMatchers.stream()
             .filter(o -> !Objects.isNull(o))
             .collect(Collectors.toUnmodifiableList());
 
@@ -32,9 +32,9 @@ public class CompositedHttpPathMatcher implements HttpPathMatcher {
     }
 
 //    1. method, request url 이 매칭되는 pathMatcher 가 존재하면 method, pathVariable value 를 반환합니다.
-    public Optional<MatchedMethod> matchJavaMethod(RequestMethod requestMethod, PathUrl requestUrl) {
+    public Optional<MatchedMethod> match(RequestMethod requestMethod, PathUrl requestUrl) {
         return baseHttpPathMatchers.stream()
-            .map(methodResolver -> methodResolver.matchJavaMethod(requestMethod, requestUrl))
+            .map(methodResolver -> methodResolver.match(requestMethod, requestUrl))
             .filter(Optional::isPresent)
             .map(Optional::get)
             .findAny();

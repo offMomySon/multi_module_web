@@ -1,6 +1,6 @@
 package main.matcher.segment;
 
-import matcher.BaseHttpPathMatcher;
+import matcher.BaseEndpointJavaMethodMatcher;
 import matcher.PathUrlMatcher;
 import matcher.RequestMethod;
 import matcher.segment.PathUrl;
@@ -15,7 +15,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class BaseHttpPathMatcherTest {
+class BaseEndpointJavaMethodMatcherTest {
 
     @DisplayName("http path 와 일치하면 resolve 데이터를 가져옵니다.")
     @PathMatchTestSuite.PathMatchTest
@@ -24,10 +24,10 @@ class BaseHttpPathMatcherTest {
         PathUrl basePathUrl = PathUrl.from(baseUrl);
         SegmentChunkFactory segmentChunkFactory = new SegmentChunkFactory(basePathUrl);
         PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(segmentChunkFactory);
-        BaseHttpPathMatcher baseHttpPathMatcher = new BaseHttpPathMatcher(RequestMethod.GET, pathUrlMatcher, TestClass.class.getDeclaredMethod("method"));
+        BaseEndpointJavaMethodMatcher baseHttpPathMatcher = new BaseEndpointJavaMethodMatcher(RequestMethod.GET, pathUrlMatcher, TestClass.class.getDeclaredMethod("method"));
 
         //when
-        boolean actual = baseHttpPathMatcher.matchJavaMethod(RequestMethod.GET, PathUrl.from(requestPath)).isPresent();
+        boolean actual = baseHttpPathMatcher.match(RequestMethod.GET, PathUrl.from(requestPath)).isPresent();
 
         //then
         Assertions.assertThat(actual).isEqualTo(expect);
@@ -43,10 +43,10 @@ class BaseHttpPathMatcherTest {
         PathUrl basePathUrl = PathUrl.from(baseUrl);
         SegmentChunkFactory segmentChunkFactory = new SegmentChunkFactory(basePathUrl);
         PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(segmentChunkFactory);
-        BaseHttpPathMatcher baseHttpPathMatcher = new BaseHttpPathMatcher(RequestMethod.GET, pathUrlMatcher, TestClass.class.getDeclaredMethod("method"));
+        BaseEndpointJavaMethodMatcher baseHttpPathMatcher = new BaseEndpointJavaMethodMatcher(RequestMethod.GET, pathUrlMatcher, TestClass.class.getDeclaredMethod("method"));
 
         //when
-        Optional<BaseHttpPathMatcher.MatchedMethod> optionalResolvedMethod = baseHttpPathMatcher.matchJavaMethod(RequestMethod.GET, PathUrl.from(requestPath));
+        Optional<BaseEndpointJavaMethodMatcher.MatchedMethod> optionalResolvedMethod = baseHttpPathMatcher.match(RequestMethod.GET, PathUrl.from(requestPath));
 
         //then
         Assertions.assertThat(optionalResolvedMethod).isPresent();

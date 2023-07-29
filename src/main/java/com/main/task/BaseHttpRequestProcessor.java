@@ -8,8 +8,8 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
-import matcher.BaseHttpPathMatcher;
-import matcher.HttpPathMatcher;
+import matcher.BaseEndpointJavaMethodMatcher;
+import matcher.EndpointJavaMethodMatcher;
 import matcher.RequestMethod;
 import matcher.annotation.PathVariable;
 import matcher.annotation.RequestBody;
@@ -34,11 +34,11 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
     private static final Objects EMPTY_VALUE = null;
 
     private final ObjectRepository objectRepository;
-    private final HttpPathMatcher httpPathMatcher;
+    private final EndpointJavaMethodMatcher endpointJavaMethodMatcher;
 
-    public BaseHttpRequestProcessor(ObjectRepository objectRepository, HttpPathMatcher httpPathMatcher) {
+    public BaseHttpRequestProcessor(ObjectRepository objectRepository, EndpointJavaMethodMatcher endpointJavaMethodMatcher) {
         this.objectRepository = objectRepository;
-        this.httpPathMatcher = httpPathMatcher;
+        this.endpointJavaMethodMatcher = endpointJavaMethodMatcher;
     }
 
 //    1. http request, response 를 받는다.
@@ -142,7 +142,7 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
         QueryParameters queryParameters = request.getQueryParameters();
         BodyContent bodyContent = BodyContent.from(request.getBodyInputStream());
 
-        BaseHttpPathMatcher.MatchedMethod matchedMethod = httpPathMatcher.matchJavaMethod(method, requestUrl)
+        BaseEndpointJavaMethodMatcher.MatchedMethod matchedMethod = endpointJavaMethodMatcher.match(method, requestUrl)
             .orElseThrow(() -> new RuntimeException("Does not exist match method."));
         Method javaMethod = matchedMethod.getJavaMethod();
         RequestParameters pathVariableValue = new RequestParameters(matchedMethod.getPathVariableValue().getValues());

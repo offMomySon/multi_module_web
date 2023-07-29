@@ -1,6 +1,6 @@
 package matcher.creator;
 
-import matcher.BaseHttpPathMatcher;
+import matcher.BaseEndpointJavaMethodMatcher;
 import matcher.PathUrlMatcher;
 import matcher.RequestMethod;
 import matcher.annotation.RequestMapping;
@@ -23,7 +23,7 @@ public class JavaMethodPathMatcherCreator {
         this.valueExtractor = new RequestMappingValueExtractor(clazz);
     }
 
-    public List<BaseHttpPathMatcher> create() {
+    public List<BaseEndpointJavaMethodMatcher> create() {
         List<Method> peekMethods = AnnotationUtils.peekMethods(this.clazz, REQUEST_MAPPING_CLASS).stream()
             .collect(Collectors.toUnmodifiableList());
 
@@ -41,7 +41,7 @@ public class JavaMethodPathMatcherCreator {
                 SegmentChunkFactory segmentChunkFactory = new SegmentChunkFactory(baseUrl);
                 PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(segmentChunkFactory);
 
-                return new BaseHttpPathMatcher(requestMethod, pathUrlMatcher, javaMethod);
+                return new BaseEndpointJavaMethodMatcher(requestMethod, pathUrlMatcher, javaMethod);
             })
             .collect(Collectors.toUnmodifiableList());
     }

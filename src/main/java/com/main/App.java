@@ -28,10 +28,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import matcher.BaseHttpPathMatcher;
-import matcher.BaseHttpPathMatcher.MatchedMethod;
-import matcher.CompositedHttpPathMatcher;
-import matcher.HttpPathMatcher;
+import matcher.BaseEndpointJavaMethodMatcher;
+import matcher.BaseEndpointJavaMethodMatcher.MatchedMethod;
+import matcher.CompositedEndpointJavaMethodMatcher;
+import matcher.EndpointJavaMethodMatcher;
 import matcher.RequestMethod;
 import matcher.annotation.PathVariable;
 import matcher.annotation.RequestBody;
@@ -74,13 +74,13 @@ public class App {
 
         // 3. class 로 httpPathMatcher 를 생성.
         List<Class<?>> controllerClazzes = AnnotationUtils.filterByAnnotatedClazz(clazzes, CONTROLLER_CLASS);
-        List<BaseHttpPathMatcher> baseHttpPathMatchers = controllerClazzes.stream()
+        List<BaseEndpointJavaMethodMatcher> baseHttpPathMatchers = controllerClazzes.stream()
             .map(JavaMethodPathMatcherCreator::new)
             .map(JavaMethodPathMatcherCreator::create)
             .flatMap(Collection::stream)
             .peek(httpPathMatcher -> log.info("httpPathMatcher : `{}`", httpPathMatcher))
             .collect(Collectors.toUnmodifiableList());
-        HttpPathMatcher httpPathMatcher = new CompositedHttpPathMatcher(baseHttpPathMatchers);
+        EndpointJavaMethodMatcher endpointJavaMethodMatcher = new CompositedEndpointJavaMethodMatcher(baseHttpPathMatchers);
 
         // 4. class 로 webfilter 를 생성.
         List<Class<?>> webFilterAnnotatedClazzes = AnnotationUtils.filterByAnnotatedClazz(clazzes, WEB_FILTER_CLASS);
@@ -93,7 +93,7 @@ public class App {
 
         log.info("newFilters : {}", newFilters);
 
-        BaseHttpRequestExecutor baseHttpRequestExecutor = new BaseHttpRequestExecutor(objectRepository, httpPathMatcher);
+        BaseHttpRequestExecutor baseHttpRequestExecutor = new BaseHttpRequestExecutor(objectRepository, endpointJavaMethodMatcher);
         HttpService httpService = new HttpService(baseHttpRequestExecutor, newFilters);
         httpService.start();
     }
@@ -144,11 +144,11 @@ public class App {
         private static final CompositeConverter converter = new CompositeConverter();
 
         private final ObjectRepository objectRepository;
-        private final HttpPathMatcher httpPathMatcher;
+        private final EndpointJavaMethodMatcher endpointJavaMethodMatcher;
 
-        public BaseHttpRequestExecutor(ObjectRepository objectRepository, HttpPathMatcher httpPathMatcher) {
+        public BaseHttpRequestExecutor(ObjectRepository objectRepository, EndpointJavaMethodMatcher endpointJavaMethodMatcher) {
             this.objectRepository = objectRepository;
-            this.httpPathMatcher = httpPathMatcher;
+            this.endpointJavaMethodMatcher = endpointJavaMethodMatcher;
         }
 
 
@@ -162,7 +162,7 @@ public class App {
             QueryParameters queryParameters = request.getQueryParameters();
             BodyContent bodyContent = BodyContent.from(request.getBodyInputStream());
 
-            MatchedMethod matchedMethod = httpPathMatcher.matchJavaMethod(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
+            MatchedMethod matchedMethod = endpointJavaMethodMatcher.match(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
             Method javaMethod = matchedMethod.getJavaMethod();
             RequestParameters pathVariableValue = new RequestParameters(matchedMethod.getPathVariableValue().getValues());
             RequestParameters queryParamValues = new RequestParameters(queryParameters.getParameterMap());

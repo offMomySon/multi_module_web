@@ -151,7 +151,6 @@ public class App {
             this.endpointJavaMethodMatcher = endpointJavaMethodMatcher;
         }
 
-
         @Override
         public boolean execute(HttpRequest request, HttpResponse response) {
             Objects.requireNonNull(request);

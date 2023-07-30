@@ -8,20 +8,20 @@ import matcher.annotation.RequestBody;
 import util.AnnotationUtils;
 
 @Slf4j
-public class RequestBodyAnnotatedParameterValuePolicy implements ParameterValuePolicy {
+public class RequestBodyAnnotationParameterValuePolicy implements ParameterValuePolicy {
     private static final Class<RequestBody> REQUEST_BODY_CLASS = RequestBody.class;
 
     private final RequestBody requestBody;
     private final String body;
 
-    private RequestBodyAnnotatedParameterValuePolicy(RequestBody requestBody, String body) {
+    private RequestBodyAnnotationParameterValuePolicy(RequestBody requestBody, String body) {
         Objects.requireNonNull(requestBody);
         Objects.requireNonNull(body);
         this.requestBody = requestBody;
         this.body = body;
     }
 
-    public static RequestBodyAnnotatedParameterValuePolicy from(Parameter parameter, String body) {
+    public static RequestBodyAnnotationParameterValuePolicy from(Parameter parameter, String body) {
         Optional<RequestBody> optionalRequestBody = AnnotationUtils.find(parameter, REQUEST_BODY_CLASS);
         if (optionalRequestBody.isEmpty()) {
             throw new RuntimeException("requestBody 만 받을 수 있습니다.");
@@ -29,7 +29,7 @@ public class RequestBodyAnnotatedParameterValuePolicy implements ParameterValueP
         Objects.requireNonNull(body);
 
         RequestBody requestBody = optionalRequestBody.get();
-        return new RequestBodyAnnotatedParameterValuePolicy(requestBody, body);
+        return new RequestBodyAnnotationParameterValuePolicy(requestBody, body);
     }
 
     public Optional<Object> getValue() {

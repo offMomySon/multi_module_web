@@ -6,20 +6,28 @@ import java.lang.reflect.Parameter;
 import java.text.MessageFormat;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import matcher.annotation.PathVariable;
 import matcher.annotation.RequestParam;
 import matcher.converter.RequestParameters;
 
-public class ParameterAnnotationAnnotatedParameterValueMatcher<T> implements MethodParameterValueMatcher {
+public class BaseParameterAnnotationAnnotatedParameterValueMatcher<T> implements MethodParameterValueMatcher {
     private static final String EMPTY_VALUE = null;
+    private static final Set<Class<?>> BASE_PARAMETER_ANNOTATION_CLASS = Set.of(RequestParam.class, PathVariable.class);
 
     private final Class<T> paramAnnotationClazz;
     private final RequestParameters requestParameters;
 
-    public ParameterAnnotationAnnotatedParameterValueMatcher(Class<T> parameterAnnotationClazz, RequestParameters requestParameters) {
+    public BaseParameterAnnotationAnnotatedParameterValueMatcher(Class<T> parameterAnnotationClazz, RequestParameters requestParameters) {
         Objects.requireNonNull(parameterAnnotationClazz);
         Objects.requireNonNull(requestParameters);
-        paramAnnotationClazz = parameterAnnotationClazz;
+
+        boolean doesNotBaseParameterAnnotation = !BASE_PARAMETER_ANNOTATION_CLASS.contains(parameterAnnotationClazz);
+        if (doesNotBaseParameterAnnotation) {
+            throw new RuntimeException(MessageFormat.format("does not base annotation. parameterAnnotationClazz : `{}`", parameterAnnotationClazz));
+        }
+
+        this.paramAnnotationClazz = parameterAnnotationClazz;
         this.requestParameters = requestParameters;
     }
 
@@ -27,14 +35,15 @@ public class ParameterAnnotationAnnotatedParameterValueMatcher<T> implements Met
     public Optional<Object> match(Parameter parameter) {
         Objects.requireNonNull(parameter);
 
-        Optional<T> optionalPathVariable = AnnotationUtils.find(parameter, paramAnnotationClazz);
-        if (optionalPathVariable.isEmpty()) {
-            throw new RuntimeException("does not exist PathVariable annotation.");
+        Optional<T> optionalParameterAnnotation = AnnotationUtils.find(parameter, paramAnnotationClazz);
+        if (optionalParameterAnnotation.isEmpty()) {
+            throw new RuntimeException(
+                MessageFormat.format("does not exist annotation. parameter : `{}`, paramAnnotationClazz : `{}`", parameter, paramAnnotationClazz)
+            );
         }
 
-        Annotation annotation = (Annotation) optionalPathVariable.get();
+        Annotation annotation = (Annotation) optionalParameterAnnotation.get();
         ParameterNameAttribute parameterNameAttribute = ParameterNameAttribute.from(annotation);
-
         String bindName = !parameterNameAttribute.isBlank() ?
             parameterNameAttribute.getValue() :
             parameter.getName();
@@ -43,7 +52,7 @@ public class ParameterAnnotationAnnotatedParameterValueMatcher<T> implements Met
         return Optional.ofNullable(matchValue);
     }
 
-    public static class ParameterNameAttribute {
+    private static class ParameterNameAttribute {
         private final String value;
 
         public ParameterNameAttribute(String value) {

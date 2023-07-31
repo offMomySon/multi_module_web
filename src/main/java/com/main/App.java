@@ -159,7 +159,7 @@ public class App {
             RequestMethod method = RequestMethod.find(request.getHttpMethod().name());
             PathUrl requestUrl = PathUrl.from(request.getHttpRequestPath().getValue().toString());
             QueryParameters queryParameters = request.getQueryParameters();
-            BodyContent bodyContent = BodyContent.from(request.getBodyInputStream());
+            BodyContent bodyContent = new BodyContent(request.getBodyString());
 
             MatchedMethod matchedMethod = endpointJavaMethodMatcher.match(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
             Method javaMethod = matchedMethod.getJavaMethod();

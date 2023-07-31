@@ -8,27 +8,32 @@ import matcher.annotation.PathVariable;
 import matcher.annotation.RequestParam;
 import util.AnnotationUtils;
 
-public class DefaultAnnotationParameterValuePolicy implements ParameterValuePolicy {
+public class BaseAnnotatedParameterValuePolicy implements ParameterValuePolicy {
     private static final String DEFAULT_VALUE = null;
 
     private final AnnotationValue annotationValue;
     private final Optional<String> parameterValue;
 
-    private DefaultAnnotationParameterValuePolicy(AnnotationValue annotationValue, String parameterValue) {
+    private BaseAnnotatedParameterValuePolicy(AnnotationValue annotationValue, String parameterValue) {
         Objects.requireNonNull(annotationValue);
         this.annotationValue = annotationValue;
         this.parameterValue = Optional.of(parameterValue);
     }
 
-    public static DefaultAnnotationParameterValuePolicy from(Parameter parameter, Class<?> targetAnnotationClazz, String parameterValue) {
+    public static BaseAnnotatedParameterValuePolicy from(Parameter parameter, Class<?> targetAnnotationClazz, Object parameterValue) {
         Optional<?> optionalTargetAnnotation = AnnotationUtils.find(parameter, targetAnnotationClazz);
         boolean doesNotTargetAnnotation = optionalTargetAnnotation.isEmpty();
         if (doesNotTargetAnnotation) {
             throw new RuntimeException("does not match target annotation.");
         }
 
+        boolean doesNotStringClass = parameterValue.getClass() != String.class;
+        if (doesNotStringClass) {
+            throw new RuntimeException("does not match class.");
+        }
+
         AnnotationValue annotationValue = AnnotationValue.from((Annotation) optionalTargetAnnotation.get());
-        return new DefaultAnnotationParameterValuePolicy(annotationValue, parameterValue);
+        return new BaseAnnotatedParameterValuePolicy(annotationValue, (String) parameterValue);
     }
 
     public Optional<Object> getValue() {

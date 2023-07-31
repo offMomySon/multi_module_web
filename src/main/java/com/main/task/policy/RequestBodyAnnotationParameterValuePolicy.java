@@ -1,5 +1,7 @@
 package com.main.task.policy;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Parameter;
 import java.util.Objects;
 import java.util.Optional;
@@ -12,29 +14,32 @@ public class RequestBodyAnnotationParameterValuePolicy implements ParameterValue
     private static final Class<RequestBody> REQUEST_BODY_CLASS = RequestBody.class;
 
     private final RequestBody requestBody;
-    private final String body;
+    private final InputStream bodyInputStream;
 
-    private RequestBodyAnnotationParameterValuePolicy(RequestBody requestBody, String body) {
+    private RequestBodyAnnotationParameterValuePolicy(RequestBody requestBody, InputStream bodyInputStream) {
         Objects.requireNonNull(requestBody);
-        Objects.requireNonNull(body);
+        Objects.requireNonNull(bodyInputStream);
         this.requestBody = requestBody;
-        this.body = body;
+        this.bodyInputStream = bodyInputStream;
     }
 
-    public static RequestBodyAnnotationParameterValuePolicy from(Parameter parameter, String body) {
+    public static RequestBodyAnnotationParameterValuePolicy from(Parameter parameter, Object bodyInputStream) {
         Optional<RequestBody> optionalRequestBody = AnnotationUtils.find(parameter, REQUEST_BODY_CLASS);
         if (optionalRequestBody.isEmpty()) {
             throw new RuntimeException("requestBody 만 받을 수 있습니다.");
         }
-        Objects.requireNonNull(body);
+        Objects.requireNonNull(bodyInputStream);
+        if (!(bodyInputStream instanceof InputStream)) {
+            throw new RuntimeException("does not inputStream instance.");
+        }
 
         RequestBody requestBody = optionalRequestBody.get();
-        return new RequestBodyAnnotationParameterValuePolicy(requestBody, body);
+        return new RequestBodyAnnotationParameterValuePolicy(requestBody, (InputStream) bodyInputStream);
     }
 
     public Optional<Object> getValue() {
         boolean required = requestBody.required();
-        boolean isBodyEmpty = body.isEmpty();
+        boolean isBodyEmpty = isBodyEmpty(bodyInputStream);
 
         boolean doesNotPossibleCreate = required && isBodyEmpty;
         if (doesNotPossibleCreate) {
@@ -45,6 +50,14 @@ public class RequestBodyAnnotationParameterValuePolicy implements ParameterValue
         if (isPossibleEmptyBody) {
             return Optional.empty();
         }
-        return Optional.of(body);
+        return Optional.of(bodyInputStream);
+    }
+
+    private static boolean isBodyEmpty(InputStream bodyInputStream) {
+        try {
+            return bodyInputStream.available() == 0;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

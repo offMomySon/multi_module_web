@@ -46,12 +46,15 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
 //    3. http request path 를 PathUrl 로 변환한다.
 //    4. http request query param 을 queryParameters 로 변환한다.
 //    5. http body inputstream 을 body content 로 변환한다.
+
 //    6. requestMethod, PathUrl 와 매칭되는 method 를 가져온다. - 복잡도가 높다.
 //      1. requestMethod, PathUrl 을 받는다.
 //      2. request PathUrl 이 null 이면 empty 값을 반환합니다.
 //      3. requestMethod 가 instance variable requestMethod 와 일치하지 않으면 빈값을 반환한다.
 //      4. request PathUrl 이 pathUrlMatcher 와 일치하는지 체크한다, 일치하면 PathVariableValue 를 가져온다.
 //      5. java method, pathVariableValue 를 반환한다.
+
+
 //    7. pathVariableValue 를 requestParameter 로 변환한다.
 //    8. queryParameters 를 requestParameter 로 변환한다.
 //    9. parameter 가 PathVariable 어노테이션이면 값으로 변환하는 converter 를 생성한다. - 복잡도가 높다.
@@ -91,14 +94,6 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
 //    22. http response 로 부터 http response writer 를 가져온다.
 //    23. http response writer 로 http header, body 를 전송한다.
 
-//    키워드
-//    * requestParam
-//      역할 - requestParam 으로 부터 parameter signature(class type, annotation) 에 따라 parameter signature value 생성자를 생성한다.
-//    * parameter signature value
-//      역할 - signature 별 parameter 에 할당할 값을 선택한다.
-//    * parameter value type
-//      역할 - parameter type 별로 value type 을 변환한다.
-
 //    키워드 정리.
 //    1. endpoint(=http method, url).
 //       역할 - http method, url 에 매칭되는 method 를 찾아온다.
@@ -119,9 +114,9 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
 //      개념 - method, url 에 매칭되는 method 를 찾아온다.
 //    2. MethodParameterValueMatcher
 //      개념 - http request value 로 부터 method parameter 마다의 value 들을 매칭한다.
-//    3. MethodParameterValueAssigneeFactory
+//    3. MethodParameterValuePolicyFactory
 //      개념 - parameter signature(class type, annotation) 에 따라 requestParameters 로 부터 값 할당자를 생성한다.
-//    4. MethodParameterValueAssignee
+//    4. MethodParameterValuePolicy
 //      개념 - parameter signature 특성에 따라 parameter 에 할당할 값을 선택한다.
 //    5. ParameterValueConverter
 //      개념 - parameter type 별로 value type 을 변환한다.
@@ -142,11 +137,13 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
         QueryParameters queryParameters = request.getQueryParameters();
         BodyContent bodyContent = BodyContent.from(request.getBodyInputStream());
 
-        BaseEndpointJavaMethodMatcher.MatchedMethod matchedMethod = endpointJavaMethodMatcher.match(method, requestUrl)
-            .orElseThrow(() -> new RuntimeException("Does not exist match method."));
+        BaseEndpointJavaMethodMatcher.MatchedMethod matchedMethod = endpointJavaMethodMatcher.match(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
         Method javaMethod = matchedMethod.getJavaMethod();
         RequestParameters pathVariableValue = new RequestParameters(matchedMethod.getPathVariableValue().getValues());
         RequestParameters queryParamValues = new RequestParameters(queryParameters.getParameterMap());
+
+
+
 
         Map<Class<? extends Annotation>, ParameterConverter> parameterConverters = Map.of(
             PathVariable.class, new RequestParameterConverter(PathVariable.class, pathVariableValue),

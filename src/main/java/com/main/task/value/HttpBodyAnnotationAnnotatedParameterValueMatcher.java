@@ -7,12 +7,12 @@ import java.util.Objects;
 import java.util.Optional;
 import matcher.annotation.RequestBody;
 
-public class RequestBodyAnnotationAnnotatedParameterValueMatcher implements MethodParameterValueMatcher {
+public class HttpBodyAnnotationAnnotatedParameterValueMatcher implements MethodParameterValueMatcher {
     private static final Class<RequestBody> REQUEST_BODY_CLASS = RequestBody.class;
 
     private final InputStream inputStream;
 
-    public RequestBodyAnnotationAnnotatedParameterValueMatcher(InputStream inputStream) {
+    public HttpBodyAnnotationAnnotatedParameterValueMatcher(InputStream inputStream) {
         this.inputStream = inputStream;
     }
 

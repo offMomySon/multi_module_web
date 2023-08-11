@@ -11,14 +11,14 @@ import matcher.annotation.PathVariable;
 import matcher.annotation.RequestParam;
 import matcher.converter.RequestParameters;
 
-public class BaseParameterAnnotationAnnotatedParameterValueMatcher<T> implements MethodParameterValueMatcher {
+public class HttpUrlAnnotationAnnotatedParameterValueMatcher<T> implements MethodParameterValueMatcher {
     private static final String EMPTY_VALUE = null;
     private static final Set<Class<?>> BASE_PARAMETER_ANNOTATION_CLASS = Set.of(RequestParam.class, PathVariable.class);
 
     private final Class<T> paramAnnotationClazz;
     private final RequestParameters requestParameters;
 
-    public BaseParameterAnnotationAnnotatedParameterValueMatcher(Class<T> parameterAnnotationClazz, RequestParameters requestParameters) {
+    public HttpUrlAnnotationAnnotatedParameterValueMatcher(Class<T> parameterAnnotationClazz, RequestParameters requestParameters) {
         Objects.requireNonNull(parameterAnnotationClazz);
         Objects.requireNonNull(requestParameters);
 

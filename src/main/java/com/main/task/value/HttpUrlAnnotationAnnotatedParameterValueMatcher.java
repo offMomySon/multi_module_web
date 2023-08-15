@@ -11,9 +11,16 @@ import matcher.annotation.PathVariable;
 import matcher.annotation.RequestParam;
 import matcher.converter.RequestParameters;
 
+/*
+ *  todo
+ *   HttpUrlAnnotationAnnotatedParameterValueMatcher 네이밍의 판단 근거.
+ *   requestParam, pathVariable 각각의 개념이 존재하지만,
+ *   근본적으로 http url 로 부터 parameter 에 값을 할당한다.
+ *   그렇기 때문에 requestParam, pathVairalbe 을 아우르기 위해서 http url annotation 이란 키워드를 바탕으로 네이밍을 하였다.
+ */
 public class HttpUrlAnnotationAnnotatedParameterValueMatcher<T> implements MethodParameterValueMatcher {
     private static final String EMPTY_VALUE = null;
-    private static final Set<Class<?>> BASE_PARAMETER_ANNOTATION_CLASS = Set.of(RequestParam.class, PathVariable.class);
+    private static final Set<Class<?>> HTTP_URL_ANNOTATION_CLASSES = Set.of(RequestParam.class, PathVariable.class);
 
     private final Class<T> paramAnnotationClazz;
     private final RequestParameters requestParameters;
@@ -22,7 +29,7 @@ public class HttpUrlAnnotationAnnotatedParameterValueMatcher<T> implements Metho
         Objects.requireNonNull(parameterAnnotationClazz);
         Objects.requireNonNull(requestParameters);
 
-        boolean doesNotBaseParameterAnnotation = !BASE_PARAMETER_ANNOTATION_CLASS.contains(parameterAnnotationClazz);
+        boolean doesNotBaseParameterAnnotation = !HTTP_URL_ANNOTATION_CLASSES.contains(parameterAnnotationClazz);
         if (doesNotBaseParameterAnnotation) {
             throw new RuntimeException(MessageFormat.format("does not base annotation. parameterAnnotationClazz : `{}`", parameterAnnotationClazz));
         }
@@ -37,53 +44,84 @@ public class HttpUrlAnnotationAnnotatedParameterValueMatcher<T> implements Metho
 
         Optional<T> optionalParameterAnnotation = AnnotationUtils.find(parameter, paramAnnotationClazz);
         if (optionalParameterAnnotation.isEmpty()) {
-            throw new RuntimeException(
-                MessageFormat.format("does not exist annotation. parameter : `{}`, paramAnnotationClazz : `{}`", parameter, paramAnnotationClazz)
-            );
+            throw new RuntimeException(MessageFormat.format("does not exist annotation. parameter : `{}`, paramAnnotationClazz : `{}`", parameter, paramAnnotationClazz));
         }
 
         Annotation annotation = (Annotation) optionalParameterAnnotation.get();
-        ParameterNameAttribute parameterNameAttribute = ParameterNameAttribute.from(annotation);
-        String bindName = !parameterNameAttribute.isBlank() ?
-            parameterNameAttribute.getValue() :
+        HttpUrlAnnotation httpUrlAnnotation = HttpUrlAnnotation.from(annotation);
+        String bindName = !httpUrlAnnotation.isParameterNameBlank() ?
+            httpUrlAnnotation.getParameterName() :
             parameter.getName();
 
-        String matchValue = requestParameters.getOrDefault(bindName, EMPTY_VALUE);
-        return Optional.ofNullable(matchValue);
-    }
-
-    private static class ParameterNameAttribute {
-        private final String value;
-
-        public ParameterNameAttribute(String value) {
-            Objects.requireNonNull(value);
-            this.value = value;
+        Optional<String> optionalMatchValue = Optional.ofNullable(requestParameters.getOrDefault(bindName, EMPTY_VALUE));
+        boolean doesNotPossibleMatchValue = optionalMatchValue.isEmpty() && httpUrlAnnotation.isRequired();
+        if (doesNotPossibleMatchValue) {
+            throw new RuntimeException("Does not Possible match value, value must be exist.");
         }
 
-        public static ParameterNameAttribute from(Annotation annotation) {
+        boolean doesNotExistMatchValue = optionalMatchValue.isEmpty();
+        if (doesNotExistMatchValue) {
+            Optional<String> optionalDefaultValue = httpUrlAnnotation.getDefaultValue();
+            if(optionalDefaultValue.isPresent()){
+                return Optional.ofNullable(optionalDefaultValue.get());
+            }
+            return Optional.empty();
+        }
+
+        String matchValue = optionalMatchValue.get();
+        return Optional.of(matchValue);
+    }
+
+    public static class HttpUrlAnnotation {
+        private static final String EMPTY_VALUE = null;
+
+        private final String parameterName;
+        private final Optional<String> defaultValue;
+        private final boolean required;
+
+        public HttpUrlAnnotation(String parameterName, String defaultValue, boolean required) {
+            Objects.requireNonNull(parameterName);
+            this.parameterName = parameterName;
+            this.defaultValue = Optional.ofNullable(defaultValue);
+            this.required = required;
+        }
+
+        public static HttpUrlAnnotation from(Annotation annotation) {
             Objects.requireNonNull(annotation);
 
             if (annotation instanceof RequestParam) {
                 RequestParam requestParam = (RequestParam) annotation;
-                String value = requestParam.value();
-                return new ParameterNameAttribute(value);
+                String parameterName = requestParam.value();
+                String defaultValue = requestParam.defaultValue().isBlank() ? EMPTY_VALUE : requestParam.defaultValue();
+                boolean required = requestParam.required();
+
+                return new HttpUrlAnnotation(parameterName, defaultValue, required);
             }
 
             if (annotation instanceof PathVariable) {
                 PathVariable pathVariable = (PathVariable) annotation;
-                String value = pathVariable.value();
-                return new ParameterNameAttribute(value);
+                String parameterName = pathVariable.value();
+                boolean required = pathVariable.required();
+                return new HttpUrlAnnotation(parameterName, EMPTY_VALUE, required);
             }
 
             throw new RuntimeException(MessageFormat.format("does not possible create ParameterName whit this Annotation. Annotation : `{}`", annotation));
         }
 
-        public boolean isBlank() {
-            return value.isBlank();
+        public boolean isParameterNameBlank() {
+            return parameterName.isBlank();
         }
 
-        public String getValue() {
-            return value;
+        public String getParameterName() {
+            return parameterName;
+        }
+
+        public Optional<String> getDefaultValue() {
+            return defaultValue;
+        }
+
+        public boolean isRequired() {
+            return required;
         }
     }
 }

@@ -14,18 +14,17 @@ import matcher.converter.RequestParameters;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import static com.main.task.value.HttpUrlAnnotationAnnotatedParameterValueMatcher.HttpUrlAnnotation;
 
-class HttpUrlAnnotationAnnotatedParameterValueMatcherTest {
+class HttpUrlAnnotationAnnotatedParameterValueMatcher2Test {
 
     @DisplayName("parameter 로 부터 target annotation 을 찾지 못하면 exception 이 발생합니다.")
     @Test
-    void test() throws Exception {
+    void test() {
         //given
         Parameter doesNotAnnotatedParameter = ParamAnnotatedClass.getDoesNotAnnotatedParameter(RequestParam.class);
         RequestParameters allParamHasRequestParameters = ParamAnnotatedClass.getAllParamHasRequestParameters();
 
-        HttpUrlAnnotationAnnotatedParameterValueMatcher parameterValueMatcher = new HttpUrlAnnotationAnnotatedParameterValueMatcher(RequestParam.class, allParamHasRequestParameters);
+        HttpUrlAnnotationAnnotatedParameterValueMatcher2 parameterValueMatcher = new HttpUrlAnnotationAnnotatedParameterValueMatcher2(RequestParam.class, allParamHasRequestParameters);
         //when
         Throwable actual = Assertions.catchThrowable(() -> parameterValueMatcher.match(doesNotAnnotatedParameter));
 
@@ -35,13 +34,13 @@ class HttpUrlAnnotationAnnotatedParameterValueMatcherTest {
 
     @DisplayName("parameter 이름에 해당하는 값이 RequestParameters 에 존재하면 값을 찾아 옵니다.")
     @Test
-    void ttest() throws Exception {
+    void ttest() {
         //given
         Class<RequestParam> annotationClazz = RequestParam.class;
         Parameter annotatedParameter = ParamAnnotatedClass.getAnnotatedParameter(annotationClazz, true);
         RequestParameters allParamHasRequestParameters = ParamAnnotatedClass.getAllParamHasRequestParameters();
 
-        HttpUrlAnnotationAnnotatedParameterValueMatcher parameterValueMatcher = new HttpUrlAnnotationAnnotatedParameterValueMatcher(annotationClazz, allParamHasRequestParameters);
+        HttpUrlAnnotationAnnotatedParameterValueMatcher2 parameterValueMatcher = new HttpUrlAnnotationAnnotatedParameterValueMatcher2(annotationClazz, allParamHasRequestParameters);
 
         //when
         Optional<Object> optionalActual = parameterValueMatcher.match(annotatedParameter);
@@ -50,31 +49,15 @@ class HttpUrlAnnotationAnnotatedParameterValueMatcherTest {
         Assertions.assertThat(optionalActual).isPresent();
     }
 
-    @DisplayName("parameter 에 반드시 값을 할당해야하고 requestParameters 로 부터 값을 가져오지 못하면 exception 이 발생합니다.")
+    @DisplayName("parameter 이름에 해당하는 값이, requestParameters 로 부터 값을 가져오지 못하면 빈값을 반환합니다.")
     @Test
-    void tttest() throws Exception {
-        //given
-        Class<RequestParam> annotationClazz = RequestParam.class;
-        Parameter mustMatchParameter = ParamAnnotatedClass.getAnnotatedParameter(annotationClazz, true);
-        RequestParameters emptyRequestParameters = ParamAnnotatedClass.getEmptyRequestParameters();
-
-        HttpUrlAnnotationAnnotatedParameterValueMatcher parameterValueMatcher = new HttpUrlAnnotationAnnotatedParameterValueMatcher(annotationClazz, emptyRequestParameters);
-        //when
-        Throwable actual = Assertions.catchThrowable(() -> parameterValueMatcher.match(mustMatchParameter));
-
-        //then
-        Assertions.assertThat(actual).isNotNull();
-    }
-
-    @DisplayName("parameter 에 반드시 값을 할당할 필요없고, requestParameters 로 부터 값을 가져오지 못하면 빈값을 반환합니다.")
-    @Test
-    void ttttest() throws Exception {
+    void ttttest() {
         //given
         Class<RequestParam> annotationClazz = RequestParam.class;
         Parameter doesNotMustMatchParameter = ParamAnnotatedClass.getAnnotatedParameter(annotationClazz, false);
         RequestParameters emptyRequestParameters = ParamAnnotatedClass.getEmptyRequestParameters();
 
-        HttpUrlAnnotationAnnotatedParameterValueMatcher parameterValueMatcher = new HttpUrlAnnotationAnnotatedParameterValueMatcher(annotationClazz, emptyRequestParameters);
+        HttpUrlAnnotationAnnotatedParameterValueMatcher2 parameterValueMatcher = new HttpUrlAnnotationAnnotatedParameterValueMatcher2(annotationClazz, emptyRequestParameters);
 
         //when
         Optional optionalMatchValue = parameterValueMatcher.match(doesNotMustMatchParameter);
@@ -90,7 +73,7 @@ class HttpUrlAnnotationAnnotatedParameterValueMatcherTest {
                                                 "param1", "1",
                                                 "param2", "2",
                                                 "param3", "3"
-                                                ));
+            ));
         }
 
         public static RequestParameters getEmptyRequestParameters() {
@@ -125,7 +108,7 @@ class HttpUrlAnnotationAnnotatedParameterValueMatcherTest {
                 }
 
                 Annotation annotation = (Annotation) optionalAnnotation.get();
-                HttpUrlAnnotation httpUrlAnnotation = HttpUrlAnnotation.from(annotation);
+                HttpUrlAnnotationAnnotatedParameterValueMatcher.HttpUrlAnnotation httpUrlAnnotation = HttpUrlAnnotationAnnotatedParameterValueMatcher.HttpUrlAnnotation.from(annotation);
 
                 if (httpUrlAnnotation.isRequired() != required) {
                     continue;

@@ -27,6 +27,6 @@ public class HttpBodyAnnotationAnnotatedParameterValueMatcher implements MethodP
             throw new RuntimeException(MessageFormat.format("Does not RequestBody annotated. parameter : `{}`", parameter));
         }
 
-        return ParameterValue.from(parameter);
+        return ParameterValue.from(inputStream);
     }
 }

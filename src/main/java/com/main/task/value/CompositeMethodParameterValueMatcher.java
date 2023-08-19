@@ -23,7 +23,7 @@ public class CompositeMethodParameterValueMatcher implements MethodParameterValu
     }
 
     @Override
-    public Optional<Object> match(Parameter parameter) {
+    public ParameterValue<?> match(Parameter parameter) {
         Objects.requireNonNull(parameter);
 
         Optional<Class<?>> optionalMatchedAnnotationType = findAnnotatedClassForParameter(matchers.keySet(), parameter);
@@ -35,14 +35,14 @@ public class CompositeMethodParameterValueMatcher implements MethodParameterValu
         }
 
         Optional<Class<?>> optionalFoundParameterType = findMatchingParameterType(matchers.keySet(), parameter.getType());
-        boolean existFoundParameterType = optionalFoundParameterType.isPresent();
-        if (existFoundParameterType) {
+        boolean foundParameterType = optionalFoundParameterType.isPresent();
+        if (foundParameterType) {
             Class<?> matchedParameterType = optionalFoundParameterType.get();
             MethodParameterValueMatcher methodParameterValueMatcher = matchers.get(matchedParameterType);
             return methodParameterValueMatcher.match(parameter);
         }
 
-        return Optional.empty();
+        return ParameterValue.empty();
     }
 
     private static Optional<Class<?>> findAnnotatedClassForParameter(Set<Class<?>> matcherKeys, Parameter parameter) {

@@ -26,7 +26,7 @@ public class HttpParameterValueMatcher<T> implements MethodParameterValueMatcher
     }
 
     @Override
-    public Optional<Object> match(Parameter parameter) {
+    public ParameterValue<?> match(Parameter parameter) {
         Objects.requireNonNull(parameter);
 
         Class<?> httpObjectClass = httpObject.getClass();
@@ -35,6 +35,6 @@ public class HttpParameterValueMatcher<T> implements MethodParameterValueMatcher
             throw new RuntimeException("does not match parameter type.");
         }
 
-        return Optional.of(httpObject);
+        return ParameterValue.from(httpObject);
     }
 }

@@ -39,7 +39,7 @@ public class HttpUrlAnnotationAnnotatedParameterValueMatcher<T> implements Metho
     }
 
     @Override
-    public Optional<Object> match(Parameter parameter) {
+    public ParameterValue<?> match(Parameter parameter) {
         Objects.requireNonNull(parameter);
 
         Optional<T> optionalParameterAnnotation = AnnotationUtils.find(parameter, paramAnnotationClazz);
@@ -53,23 +53,20 @@ public class HttpUrlAnnotationAnnotatedParameterValueMatcher<T> implements Metho
             httpUrlAnnotation.getParameterName() :
             parameter.getName();
 
-        Optional<String> optionalMatchValue = Optional.ofNullable(requestParameters.getOrDefault(bindName, EMPTY_VALUE));
-        boolean doesNotPossibleMatchValue = optionalMatchValue.isEmpty() && httpUrlAnnotation.isRequired();
+        String matchValue = requestParameters.getOrDefault(bindName, EMPTY_VALUE);
+        boolean doesNotPossibleMatchValue = Objects.isNull(matchValue) && httpUrlAnnotation.isRequired();
         if (doesNotPossibleMatchValue) {
             throw new RuntimeException("Does not Possible match value, value must be exist.");
         }
 
-        boolean doesNotExistMatchValue = optionalMatchValue.isEmpty();
+        boolean doesNotExistMatchValue = Objects.isNull(matchValue);
         if (doesNotExistMatchValue) {
             Optional<String> optionalDefaultValue = httpUrlAnnotation.getDefaultValue();
-            if(optionalDefaultValue.isPresent()){
-                return Optional.ofNullable(optionalDefaultValue.get());
-            }
-            return Optional.empty();
+            ParameterValue<String> parameterValue = new ParameterValue<>(optionalDefaultValue);
+            return parameterValue;
         }
 
-        String matchValue = optionalMatchValue.get();
-        return Optional.of(matchValue);
+        return ParameterValue.from(matchValue);
     }
 
     public static class HttpUrlAnnotation {

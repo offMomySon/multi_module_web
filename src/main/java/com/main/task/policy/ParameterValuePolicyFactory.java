@@ -9,24 +9,24 @@ import matcher.annotation.RequestBody;
 import matcher.annotation.RequestParam;
 
 public class ParameterValuePolicyFactory {
-    public static ParameterValuePolicy create(Parameter parameter, Optional<Object> value) {
+    public static ParameterRequireChecker create(Parameter parameter, Optional<Object> value) {
         Objects.requireNonNull(parameter);
         Objects.requireNonNull(value);
 
         boolean existRequestParameter = AnnotationUtils.exist(parameter, RequestParam.class);
         if (existRequestParameter) {
-            return BaseAnnotatedParameterValuePolicy.from(parameter, RequestParam.class, value.get());
+//            return HttpUrlRequireChecker.from(parameter, RequestParam.class, value.get());
         }
 
         boolean existPathVariableParameter = AnnotationUtils.exist(parameter, PathVariable.class);
         if (existPathVariableParameter) {
-            return BaseAnnotatedParameterValuePolicy.from(parameter, PathVariable.class, value.get());
+//            return HttpUrlRequireChecker.from(parameter, PathVariable.class, value.get());
         }
 
         boolean existRequestBody = AnnotationUtils.exist(parameter, RequestBody.class);
         if (existRequestBody) {
-            return RequestBodyAnnotationParameterValuePolicy.from(parameter, value.get());
+//            return HttpBodyAnnotationAnnotatedParameterRequireChecker.from(parameter, value.get());
         }
-        return new NoneAnnotatedParameterValuePolicy(parameter, value.get());
+        return new NoneAnnotatedParameterRequireChecker(parameter, value.get());
     }
 }

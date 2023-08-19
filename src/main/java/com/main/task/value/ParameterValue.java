@@ -28,4 +28,16 @@ public class ParameterValue<T> {
     public Optional<T> getValue() {
         return value;
     }
+
+    public boolean isAssignableFrom(Class<?> clazz){
+        if(isEmpty()){
+            return false;
+        }
+
+        T t = value.get();
+        if(clazz.isAssignableFrom(t.getClass())){
+            return true;
+        }
+        return false;
+    }
 }

@@ -1,8 +1,9 @@
 package com.main.task.converter;
 
+import com.main.task.value.ParameterValue;
 import java.lang.reflect.Parameter;
 import java.util.Optional;
 
 public interface ParameterValueConverter {
-    Optional<Object> convert(Optional<Object> value);
+    ParameterValue<?> convert(ParameterValue<?> parameterValue);
 }

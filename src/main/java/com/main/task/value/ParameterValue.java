@@ -29,15 +29,21 @@ public class ParameterValue<T> {
         return value;
     }
 
-    public boolean isAssignableFrom(Class<?> clazz){
-        if(isEmpty()){
+    public boolean isAssignableFrom(Class<?> clazz) {
+        if (isEmpty()) {
             return false;
         }
 
         T t = value.get();
-        if(clazz.isAssignableFrom(t.getClass())){
-            return true;
+        return clazz.isAssignableFrom(t.getClass());
+    }
+
+    public Class<?> getClazz() {
+        if (isEmpty()) {
+            throw new RuntimeException("value is empty.");
         }
-        return false;
+
+        T t = value.get();
+        return t.getClass();
     }
 }

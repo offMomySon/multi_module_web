@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import matcher.annotation.RequestBody;
+import matcher.converter.BodyContent;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,8 @@ class HttpBodyAnnotationAnnotatedParameterValueMatcherTest {
     void test() throws Exception {
         //given
         InputStream inputStream = new ByteArrayInputStream(new byte[1]);
-        HttpBodyAnnotationAnnotatedParameterValueMatcher valueMatcher = new HttpBodyAnnotationAnnotatedParameterValueMatcher(inputStream);
+        BodyContent bodyContent = BodyContent.from(inputStream);
+        HttpBodyAnnotationAnnotatedParameterValueMatcher valueMatcher = HttpBodyAnnotationAnnotatedParameterValueMatcher.from(bodyContent);
 
         Parameter doesNotRequestBodyAnnotatedParameter = TestClass.getDoesNotRequestBodyAnnotatedParameter();
 
@@ -27,22 +29,23 @@ class HttpBodyAnnotationAnnotatedParameterValueMatcherTest {
         Assertions.assertThat(actual).isNotNull();
     }
 
-    @DisplayName("match value 로 inputStream 을 반환합니다.")
+    @DisplayName("match value 로 String 을 반환합니다.")
     @Test
     void ttest() throws Exception {
         //given
         InputStream inputStream = new ByteArrayInputStream(new byte[1]);
-        HttpBodyAnnotationAnnotatedParameterValueMatcher valueMatcher = new HttpBodyAnnotationAnnotatedParameterValueMatcher(inputStream);
+        BodyContent bodyContent = BodyContent.from(inputStream);
+        HttpBodyAnnotationAnnotatedParameterValueMatcher valueMatcher =  HttpBodyAnnotationAnnotatedParameterValueMatcher.from(bodyContent);
 
         Parameter requestBodyAnnotatedParameter = TestClass.getRequestBodyAnnotatedParameter();
 
         //when
-        ParameterValue parameterValue = valueMatcher.match(requestBodyAnnotatedParameter);
+        ParameterValue<?> parameterValue = valueMatcher.match(requestBodyAnnotatedParameter);
 
         //then
         Assertions.assertThat(parameterValue.isPresent()).isTrue();
-        boolean assignableFrom = parameterValue.isAssignableFrom(InputStream.class);
-        Assertions.assertThat(assignableFrom).isTrue();
+        boolean isStringClass = parameterValue.getClazz() == String.class;
+        Assertions.assertThat(isStringClass).isTrue();
     }
 
     private static class TestClass {

@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import util.IoUtils;
+import static util.IoUtils.*;
 
 @Slf4j
 public class BodyContent {
@@ -19,29 +20,25 @@ public class BodyContent {
         this.value = value;
     }
 
-    public static BodyContent from(InputStream inputStream) {
-        Objects.requireNonNull(inputStream);
+    public static BodyContent from(InputStream bodyInputStream) {
+        Objects.requireNonNull(bodyInputStream);
+        BufferedInputStream newBodyInputStream = createBufferedInputStream(bodyInputStream);
+
+        String body = readBody(newBodyInputStream);
+        return new BodyContent(body);
+    }
+
+    private static String readBody(BufferedInputStream bufferedInputStream) {
+        byte[] readAllBytes = readAllBytes(bufferedInputStream);
+        return new String(readAllBytes);
+    }
+
+    private static byte[] readAllBytes(BufferedInputStream bufferedInputStream){
         try {
-            BufferedInputStream newInputStream = IoUtils.createBufferedInputStream(inputStream);
-
-            String bodyContent = readBodyContent(newInputStream);
-
-            return new BodyContent(bodyContent);
+            return bufferedInputStream.readAllBytes();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private static String readBodyContent(BufferedInputStream newInputStream) throws IOException {
-        byte[] BUFFER = new byte[8192];
-        StringBuilder contentBuilder = new StringBuilder();
-        while (newInputStream.available() != 0) {
-            int read = newInputStream.read(BUFFER);
-            String partOfContent = new String(BUFFER, 0, read);
-
-            contentBuilder.append(partOfContent);
-        }
-        return contentBuilder.toString();
     }
 
     public static BodyContent empty() {

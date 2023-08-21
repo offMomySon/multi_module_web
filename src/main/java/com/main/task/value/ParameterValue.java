@@ -13,7 +13,7 @@ public class ParameterValue<T> {
         return new ParameterValue(Optional.ofNullable(value));
     }
 
-    public static <T> ParameterValue empty() {
+    public static ParameterValue empty() {
         return new ParameterValue(Optional.empty());
     }
 

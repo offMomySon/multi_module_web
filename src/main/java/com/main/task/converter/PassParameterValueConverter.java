@@ -17,7 +17,7 @@ public class PassParameterValueConverter implements ParameterValueConverter {
         }
 
         Class<?> parameterValueClazz = parameterValue.getClazz();
-        boolean doesNotMatchClazz = parameterValueClazz != targetClazz;
+        boolean doesNotMatchClazz = !targetClazz.isAssignableFrom(parameterValueClazz);
         if (doesNotMatchClazz) {
             throw new RuntimeException(MessageFormat.format("Does not match clazz. parameterValueClazz : `{}`, targetClazz : `{}`", parameterValue, targetClazz));
         }

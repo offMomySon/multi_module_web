@@ -1,9 +1,11 @@
 package com.main.task;
 
+import com.main.task.value.HttpBodyAnnotationAnnotatedParameterValueMatcher;
 import container.ObjectRepository;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
@@ -114,17 +116,13 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
 //      개념 - method, url 에 매칭되는 method 를 찾아온다.
 //    2. MethodParameterValueMatcher
 //      개념 - http request value 로 부터 method parameter 마다의 value 들을 매칭한다.
-//    3. MethodParameterValuePolicyFactory
-//      개념 - parameter signature(class type, annotation) 에 따라 requestParameters 로 부터 값 할당자를 생성한다.
-//    4. MethodParameterValuePolicy
-//      개념 - parameter signature 특성에 따라 parameter 에 할당할 값을 선택한다.
-//    5. ParameterValueConverter
+//    3. ParameterValueConverter
 //      개념 - parameter type 별로 value type 을 변환한다.
-//    6. MethodInvoker
+//    4. MethodInvoker
 //      개념 - method 를 가진 instance 를 불러와 실행시킨다.
-//    7. HttpResponseHeaderValueCreator
+//    5. HttpResponseHeaderValueCreator
 //      개념 - Object 에 따라 response header value 를 생성한다.
-//    8. HttpResponseSender
+//    6. HttpResponseSender
 //      개념 - http response 응답을 전송한다.
 
     @Override
@@ -135,20 +133,17 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
         RequestMethod method = RequestMethod.find(request.getHttpMethod().name());
         PathUrl requestUrl = PathUrl.from(request.getHttpRequestPath().getValue().toString());
         QueryParameters queryParameters = request.getQueryParameters();
-        BodyContent bodyContent = BodyContent.from(request.getBodyInputStream());
 
         BaseEndpointJavaMethodMatcher.MatchedMethod matchedMethod = endpointJavaMethodMatcher.match(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
         Method javaMethod = matchedMethod.getJavaMethod();
         RequestParameters pathVariableValue = new RequestParameters(matchedMethod.getPathVariableValue().getValues());
         RequestParameters queryParamValues = new RequestParameters(queryParameters.getParameterMap());
 
-
-
+        HttpBodyAnnotationAnnotatedParameterValueMatcher bodyAnnotationAnnotatedParameterValueMatcher = new HttpBodyAnnotationAnnotatedParameterValueMatcher(request.getBodyInputStream());
 
         Map<Class<? extends Annotation>, ParameterConverter> parameterConverters = Map.of(
             PathVariable.class, new RequestParameterConverter(PathVariable.class, pathVariableValue),
-            RequestParam.class, new RequestParameterConverter(RequestParam.class, queryParamValues),
-            RequestBody.class, new RequestBodyParameterConverter(bodyContent)
+            RequestParam.class, new RequestParameterConverter(RequestParam.class, queryParamValues)
         );
         ParameterConverter parameterConverter = new CompositeParameterConverter(parameterConverters);
 

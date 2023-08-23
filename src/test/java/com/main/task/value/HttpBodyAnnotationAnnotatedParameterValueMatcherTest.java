@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import matcher.annotation.RequestBody;
-import matcher.converter.BodyContent;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,8 +16,7 @@ class HttpBodyAnnotationAnnotatedParameterValueMatcherTest {
     void test() throws Exception {
         //given
         InputStream inputStream = new ByteArrayInputStream(new byte[1]);
-        BodyContent bodyContent = BodyContent.from(inputStream);
-        HttpBodyAnnotationAnnotatedParameterValueMatcher valueMatcher = HttpBodyAnnotationAnnotatedParameterValueMatcher.from(bodyContent);
+        HttpBodyAnnotationAnnotatedParameterValueMatcher valueMatcher = new HttpBodyAnnotationAnnotatedParameterValueMatcher(inputStream);
 
         Parameter doesNotRequestBodyAnnotatedParameter = TestClass.getDoesNotRequestBodyAnnotatedParameter();
 
@@ -34,8 +32,7 @@ class HttpBodyAnnotationAnnotatedParameterValueMatcherTest {
     void ttest() throws Exception {
         //given
         InputStream inputStream = new ByteArrayInputStream(new byte[1]);
-        BodyContent bodyContent = BodyContent.from(inputStream);
-        HttpBodyAnnotationAnnotatedParameterValueMatcher valueMatcher =  HttpBodyAnnotationAnnotatedParameterValueMatcher.from(bodyContent);
+        HttpBodyAnnotationAnnotatedParameterValueMatcher valueMatcher = new HttpBodyAnnotationAnnotatedParameterValueMatcher(inputStream);
 
         Parameter requestBodyAnnotatedParameter = TestClass.getRequestBodyAnnotatedParameter();
 

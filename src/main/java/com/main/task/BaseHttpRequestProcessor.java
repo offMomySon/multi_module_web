@@ -1,14 +1,24 @@
 package com.main.task;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.main.task.converter.ParameterValueConverter;
+import com.main.task.converter.ParameterValueConverterFactory;
+import com.main.task.value.BaseParameterValueMatcher;
+import com.main.task.value.CompositeMethodParameterValueMatcher;
 import com.main.task.value.HttpBodyAnnotationAnnotatedParameterValueMatcher;
+import com.main.task.value.HttpUrlAnnotationAnnotatedParameterValueMatcher;
+import com.main.task.value.MethodParameterValueMatcher;
+import com.main.task.value.ParameterValue;
 import container.ObjectRepository;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import matcher.BaseEndpointJavaMethodMatcher;
 import matcher.EndpointJavaMethodMatcher;
@@ -16,10 +26,8 @@ import matcher.RequestMethod;
 import matcher.annotation.PathVariable;
 import matcher.annotation.RequestBody;
 import matcher.annotation.RequestParam;
-import matcher.converter.BodyContent;
 import matcher.converter.CompositeParameterConverter;
 import matcher.converter.ParameterConverter;
-import matcher.converter.RequestBodyParameterConverter;
 import matcher.converter.RequestParameterConverter;
 import matcher.converter.RequestParameters;
 import matcher.converter.base.CompositeConverter;
@@ -139,7 +147,22 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
         RequestParameters pathVariableValue = new RequestParameters(matchedMethod.getPathVariableValue().getValues());
         RequestParameters queryParamValues = new RequestParameters(queryParameters.getParameterMap());
 
-        HttpBodyAnnotationAnnotatedParameterValueMatcher bodyAnnotationAnnotatedParameterValueMatcher = new HttpBodyAnnotationAnnotatedParameterValueMatcher(request.getBodyInputStream());
+        CompositeMethodParameterValueMatcher methodParameterValueMatcher = new CompositeMethodParameterValueMatcher(
+            Map.of(
+                InputStream.class, new BaseParameterValueMatcher(request.getBodyInputStream()),
+                RequestBody.class, new HttpBodyAnnotationAnnotatedParameterValueMatcher(request.getBodyInputStream()),
+                PathVariable.class, new HttpUrlAnnotationAnnotatedParameterValueMatcher(PathVariable.class, pathVariableValue),
+                RequestParam.class, new HttpUrlAnnotationAnnotatedParameterValueMatcher(RequestParam.class, queryParamValues))
+        );
+
+        ParameterValueGetter parameterValueGetter = new ParameterValueGetter(
+            methodParameterValueMatcher,
+            new ParameterValueConverterFactory(new ObjectMapper())
+        );
+
+        List<? extends ParameterValue<?>> parameterValues = Arrays.stream(javaMethod.getParameters())
+            .map(parameterValueGetter::get)
+            .collect(Collectors.toUnmodifiableList());
 
         Map<Class<? extends Annotation>, ParameterConverter> parameterConverters = Map.of(
             PathVariable.class, new RequestParameterConverter(PathVariable.class, pathVariableValue),
@@ -173,6 +196,27 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
         sender.send(inputStream);
 
         return true;
+    }
+
+    private static class ParameterValueGetter {
+        private final MethodParameterValueMatcher valueMatcher;
+        private final ParameterValueConverterFactory valueConverterFactory;
+
+        public ParameterValueGetter(MethodParameterValueMatcher valueMatcher, ParameterValueConverterFactory valueConverterFactory) {
+            Objects.requireNonNull(valueMatcher);
+            Objects.requireNonNull(valueConverterFactory);
+            this.valueMatcher = valueMatcher;
+            this.valueConverterFactory = valueConverterFactory;
+        }
+
+        public ParameterValue<?> get(Parameter parameter) {
+            Objects.requireNonNull(parameter);
+
+            ParameterValue<?> matchedValue = valueMatcher.match(parameter);
+
+            ParameterValueConverter valueConverter = valueConverterFactory.create(parameter);
+            return valueConverter.convert(matchedValue);
+        }
     }
 
     private static Object doExecute(Object object, Method javaMethod, Object[] paramsValues) {

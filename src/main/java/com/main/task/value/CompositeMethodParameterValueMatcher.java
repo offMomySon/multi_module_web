@@ -26,7 +26,7 @@ public class CompositeMethodParameterValueMatcher implements MethodParameterValu
     public ParameterValue<?> match(Parameter parameter) {
         Objects.requireNonNull(parameter);
 
-        Optional<Class<?>> optionalMatchedAnnotationType = findAnnotatedClassForParameter(matchers.keySet(), parameter);
+        Optional<Class<?>> optionalMatchedAnnotationType = findAnnotatedClassForParameter(parameter, matchers.keySet());
         boolean existMatchedAnnotationType = optionalMatchedAnnotationType.isPresent();
         if (existMatchedAnnotationType) {
             Class<?> annotationType = optionalMatchedAnnotationType.get();
@@ -34,7 +34,7 @@ public class CompositeMethodParameterValueMatcher implements MethodParameterValu
             return methodParameterValueMatcher.match(parameter);
         }
 
-        Optional<Class<?>> optionalFoundParameterType = findMatchingParameterType(matchers.keySet(), parameter.getType());
+        Optional<Class<?>> optionalFoundParameterType = findMatchParameterType(parameter.getType(), matchers.keySet());
         boolean foundParameterType = optionalFoundParameterType.isPresent();
         if (foundParameterType) {
             Class<?> matchedParameterType = optionalFoundParameterType.get();
@@ -45,14 +45,14 @@ public class CompositeMethodParameterValueMatcher implements MethodParameterValu
         return ParameterValue.empty();
     }
 
-    private static Optional<Class<?>> findAnnotatedClassForParameter(Set<Class<?>> matcherKeys, Parameter parameter) {
-        return matcherKeys.stream()
+    private static Optional<Class<?>> findAnnotatedClassForParameter(Parameter parameter, Set<Class<?>> findAnnotationClasses) {
+        return findAnnotationClasses.stream()
             .filter(type -> AnnotationUtils.exist(parameter, type))
             .findFirst();
     }
 
-    private static Optional<Class<?>> findMatchingParameterType(Set<Class<?>> matchers, Class<?> parameterType) {
-        return matchers.stream()
+    private static Optional<Class<?>> findMatchParameterType(Class<?> parameterType, Set<Class<?>> findParameterTypes) {
+        return findParameterTypes.stream()
             .filter(type -> type == parameterType)
             .findFirst();
     }

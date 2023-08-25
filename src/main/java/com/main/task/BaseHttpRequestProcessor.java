@@ -11,7 +11,6 @@ import com.main.task.value.MethodParameterValueMatcher;
 import com.main.task.value.ParameterValue;
 import container.ObjectRepository;
 import java.io.InputStream;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
@@ -26,9 +25,6 @@ import matcher.RequestMethod;
 import matcher.annotation.PathVariable;
 import matcher.annotation.RequestBody;
 import matcher.annotation.RequestParam;
-import matcher.converter.CompositeParameterConverter;
-import matcher.converter.ParameterConverter;
-import matcher.converter.RequestParameterConverter;
 import matcher.converter.RequestParameters;
 import matcher.converter.base.CompositeConverter;
 import matcher.segment.PathUrl;
@@ -164,26 +160,8 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
             .map(parameterValueGetter::get)
             .collect(Collectors.toUnmodifiableList());
 
-        Map<Class<? extends Annotation>, ParameterConverter> parameterConverters = Map.of(
-            PathVariable.class, new RequestParameterConverter(PathVariable.class, pathVariableValue),
-            RequestParam.class, new RequestParameterConverter(RequestParam.class, queryParamValues)
-        );
-        ParameterConverter parameterConverter = new CompositeParameterConverter(parameterConverters);
-
-        Class<?> declaringClass = javaMethod.getDeclaringClass();
-        Object instance = objectRepository.get(declaringClass);
-        log.info("declaringClass : {}", declaringClass);
-        log.info("instance : {}", instance);
-        log.info("javaMethod : {}", javaMethod);
-
-        Object[] values = Arrays.stream(javaMethod.getParameters())
-            .peek(parameter -> log.info("parameter : `{}`, param class : `{}`", parameter, parameter.getClass()))
-            .map(parameterConverter::convertAsValue)
-            .map(optionalValue -> optionalValue.orElse(EMPTY_VALUE))
-            .peek(value -> log.info("value : {}, {}", value, value.getClass()))
-            .toArray();
-
-        Object result = doExecute(instance, javaMethod, values);
+        MethodInvoker methodInvoker = new MethodInvoker(objectRepository);
+        Object result = methodInvoker.invoke(javaMethod, parameterValues);
 
         InputStream inputStream = converter.convertToInputStream(result);
 
@@ -212,9 +190,12 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
         public ParameterValue<?> get(Parameter parameter) {
             Objects.requireNonNull(parameter);
 
+            log.info("parameter : `{}`, param class : `{}`", parameter, parameter.getClass());
             ParameterValue<?> matchedValue = valueMatcher.match(parameter);
 
             ParameterValueConverter valueConverter = valueConverterFactory.create(parameter);
+            ParameterValue<?> value = valueConverter.convert(matchedValue);
+            log.info("ParameterValue. value : {}, class : {}", value.getValue(), value.getClass());
             return valueConverter.convert(matchedValue);
         }
     }

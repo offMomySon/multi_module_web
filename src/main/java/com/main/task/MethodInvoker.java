@@ -5,6 +5,7 @@ import container.ObjectRepository;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -16,7 +17,7 @@ public class MethodInvoker {
         this.objectRepository = objectRepository;
     }
 
-    public Object invoke(Method javaMethod, List<? extends ParameterValue<?>> parameterValues) {
+    public Optional<Object> invoke(Method javaMethod, List<? extends ParameterValue<?>> parameterValues) {
         Objects.requireNonNull(javaMethod);
         Objects.requireNonNull(parameterValues);
         boolean hasNullParameterValue = parameterValues.stream().anyMatch(Objects::isNull);
@@ -31,7 +32,8 @@ public class MethodInvoker {
             log.info("value : {}, {}", value, value.getClass());
         }
 
-        return doExecute(instance, javaMethod, values);
+        Object result = doExecute(instance, javaMethod, values);
+        return Optional.ofNullable(result);
     }
 
     private static Object doExecute(Object object, Method javaMethod, Object[] paramsValues) {

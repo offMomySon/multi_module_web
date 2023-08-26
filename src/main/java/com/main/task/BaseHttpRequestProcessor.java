@@ -1,22 +1,25 @@
 package com.main.task;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.main.task.converter.ParameterValueConverter;
 import com.main.task.converter.ParameterValueConverterFactory;
 import com.main.task.value.BaseParameterValueMatcher;
 import com.main.task.value.CompositeMethodParameterValueMatcher;
 import com.main.task.value.HttpBodyAnnotationAnnotatedParameterValueMatcher;
 import com.main.task.value.HttpUrlAnnotationAnnotatedParameterValueMatcher;
-import com.main.task.value.MethodParameterValueMatcher;
 import com.main.task.value.ParameterValue;
 import container.ObjectRepository;
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
+import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import matcher.BaseEndpointJavaMethodMatcher;
@@ -161,9 +164,10 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
             .collect(Collectors.toUnmodifiableList());
 
         MethodInvoker methodInvoker = new MethodInvoker(objectRepository);
-        Object result = methodInvoker.invoke(javaMethod, parameterValues);
-
-        InputStream inputStream = converter.convertToInputStream(result);
+        Optional<Object> methodResult = methodInvoker.invoke(javaMethod, parameterValues);
+        if (methodResult.isEmpty()) {
+            return false;
+        }
 
         response.setStartLine("HTTP/1.1 200 OK");
         response.appendHeader(Map.of(
@@ -171,40 +175,90 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
             "Host", "localhost:8080",
             "Content-Type", "text/html; charset=UTF-8"));
         HttpResponseWriter sender = response.getSender();
-        sender.send(inputStream);
 
+        InputStream inputStream = converter.convertToInputStream(methodResult.get());
+        sender.send(inputStream);
         return true;
     }
 
-    private static class ParameterValueGetter {
-        private final MethodParameterValueMatcher valueMatcher;
-        private final ParameterValueConverterFactory valueConverterFactory;
+    public interface HttpResponseCreator {
+        HttpResponseView create();
 
-        public ParameterValueGetter(MethodParameterValueMatcher valueMatcher, ParameterValueConverterFactory valueConverterFactory) {
-            Objects.requireNonNull(valueMatcher);
-            Objects.requireNonNull(valueConverterFactory);
-            this.valueMatcher = valueMatcher;
-            this.valueConverterFactory = valueConverterFactory;
-        }
+        class HttpResponseView {
+            private final String startLine;
+            private final Map<String, String> header;
 
-        public ParameterValue<?> get(Parameter parameter) {
-            Objects.requireNonNull(parameter);
+            public HttpResponseView(String startLine, Map<String, String> header) {
+                Objects.requireNonNull(startLine);
+                Objects.requireNonNull(header);
+                if (startLine.isBlank()) {
+                    throw new RuntimeException("startLine is empty.");
+                }
 
-            log.info("parameter : `{}`, param class : `{}`", parameter, parameter.getClass());
-            ParameterValue<?> matchedValue = valueMatcher.match(parameter);
+                header.entrySet().stream()
+                    .filter(e -> Objects.nonNull(e.getKey()))
+                    .filter(e -> Objects.nonNull(e.getValue()))
+                    .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
 
-            ParameterValueConverter valueConverter = valueConverterFactory.create(parameter);
-            ParameterValue<?> value = valueConverter.convert(matchedValue);
-            log.info("ParameterValue. value : {}, class : {}", value.getValue(), value.getClass());
-            return valueConverter.convert(matchedValue);
+                if (header.isEmpty()) {
+                    throw new RuntimeException("header is empty.");
+                }
+
+                this.startLine = startLine;
+                this.header = header;
+            }
+
+            public String getStartLine() {
+                return startLine;
+            }
+
+            public Map<String, String> getHeader() {
+                return new HashMap<>(header);
+            }
         }
     }
 
-    private static Object doExecute(Object object, Method javaMethod, Object[] paramsValues) {
+    private static String getFileExtension(Path filePath) {
+        String fileName = filePath.getFileName().toString();
+        log.info("fileName : {}", fileName);
+
+        int dotIndex = fileName.lastIndexOf(".");
+        if (dotIndex == -1 || dotIndex == fileName.length() - 1) {
+            return "";
+        }
+        return fileName.substring(dotIndex + 1);
+    }
+
+
+    private static HttpResponse setHttpResponseHeader(HttpResponse response, String fileExtension) {
+        log.info("fileExtension : {}", fileExtension);
+        switch (fileExtension) {
+            case "jpg":
+                log.info("jpg : {}", fileExtension);
+                response.setStartLine("HTTP/1.1 200 OK");
+                response.appendHeader(Map.of(
+                    "Date", "MON, 27 Jul 2023 12:28:53 GMT",
+                    "Host", "localhost:8080",
+                    "Connection", "close",
+                    "Content-Type", "image/jpeg"));
+                return response;
+            case "txt":
+                log.info("txt : {}", fileExtension);
+                response.setStartLine("HTTP/1.1 200 OK");
+                response.appendHeader(Map.of(
+                    "Date", "MON, 27 Jul 2023 12:28:53 GMT",
+                    "Host", "localhost:8080",
+                    "Connection", "close",
+                    "Content-Type", "text/html; charset=UTF-8"));
+                return response;
+        }
+        throw new RuntimeException("does exist match fileExtension");
+    }
+
+    private static InputStream getResourceInputStream(Path resource) {
         try {
-            log.info("object : {}, javaMethod : {}, paramsValues : {}", object.getClass(), javaMethod, paramsValues);
-            return javaMethod.invoke(object, paramsValues);
-        } catch (Exception e) {
+            return new BufferedInputStream(new FileInputStream(resource.toString()));
+        } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
     }

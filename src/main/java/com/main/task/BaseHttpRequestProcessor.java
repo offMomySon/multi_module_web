@@ -2,6 +2,9 @@ package com.main.task;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.main.task.converter.ParameterValueConverterFactory;
+import com.main.task.response.ContentTypeCreator;
+import com.main.task.response.HttpResponseHeader;
+import com.main.task.response.HttpResponseHeaderCreator;
 import com.main.task.value.BaseParameterValueMatcher;
 import com.main.task.value.CompositeMethodParameterValueMatcher;
 import com.main.task.value.HttpBodyAnnotationAnnotatedParameterValueMatcher;
@@ -13,7 +16,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.file.Path;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -169,6 +175,12 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
             return false;
         }
 
+        SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
+        String hostAddress = getHostAddress();
+        String contentType = ContentTypeCreator.from(javaMethod, methodResult).create();
+        HttpResponseHeaderCreator headerCreator = new HttpResponseHeaderCreator(dateFormat, hostAddress, contentType);
+        HttpResponseHeader httpResponseHeader = headerCreator.create();
+
         response.setStartLine("HTTP/1.1 200 OK");
         response.appendHeader(Map.of(
             "Date", "MON, 27 Jul 2023 12:28:53 GMT",
@@ -181,84 +193,11 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
         return true;
     }
 
-    public interface HttpResponseCreator {
-        HttpResponseView create();
-
-        class HttpResponseView {
-            private final String startLine;
-            private final Map<String, String> header;
-
-            public HttpResponseView(String startLine, Map<String, String> header) {
-                Objects.requireNonNull(startLine);
-                Objects.requireNonNull(header);
-                if (startLine.isBlank()) {
-                    throw new RuntimeException("startLine is empty.");
-                }
-
-                header.entrySet().stream()
-                    .filter(e -> Objects.nonNull(e.getKey()))
-                    .filter(e -> Objects.nonNull(e.getValue()))
-                    .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
-
-                if (header.isEmpty()) {
-                    throw new RuntimeException("header is empty.");
-                }
-
-                this.startLine = startLine;
-                this.header = header;
-            }
-
-            public String getStartLine() {
-                return startLine;
-            }
-
-            public Map<String, String> getHeader() {
-                return new HashMap<>(header);
-            }
-        }
-    }
-
-    private static String getFileExtension(Path filePath) {
-        String fileName = filePath.getFileName().toString();
-        log.info("fileName : {}", fileName);
-
-        int dotIndex = fileName.lastIndexOf(".");
-        if (dotIndex == -1 || dotIndex == fileName.length() - 1) {
-            return "";
-        }
-        return fileName.substring(dotIndex + 1);
-    }
-
-
-    private static HttpResponse setHttpResponseHeader(HttpResponse response, String fileExtension) {
-        log.info("fileExtension : {}", fileExtension);
-        switch (fileExtension) {
-            case "jpg":
-                log.info("jpg : {}", fileExtension);
-                response.setStartLine("HTTP/1.1 200 OK");
-                response.appendHeader(Map.of(
-                    "Date", "MON, 27 Jul 2023 12:28:53 GMT",
-                    "Host", "localhost:8080",
-                    "Connection", "close",
-                    "Content-Type", "image/jpeg"));
-                return response;
-            case "txt":
-                log.info("txt : {}", fileExtension);
-                response.setStartLine("HTTP/1.1 200 OK");
-                response.appendHeader(Map.of(
-                    "Date", "MON, 27 Jul 2023 12:28:53 GMT",
-                    "Host", "localhost:8080",
-                    "Connection", "close",
-                    "Content-Type", "text/html; charset=UTF-8"));
-                return response;
-        }
-        throw new RuntimeException("does exist match fileExtension");
-    }
-
-    private static InputStream getResourceInputStream(Path resource) {
+    private static String getHostAddress() {
         try {
-            return new BufferedInputStream(new FileInputStream(resource.toString()));
-        } catch (FileNotFoundException e) {
+            InetAddress localHost = InetAddress.getLocalHost();
+            return localHost.getHostAddress();
+        } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }
     }

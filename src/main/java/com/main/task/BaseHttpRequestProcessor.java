@@ -40,19 +40,17 @@ import vo.QueryParameters;
 
 @Slf4j
 public class BaseHttpRequestProcessor implements HttpRequestProcessor {
-    private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
-    private static final String HOST_ADDRESS;
-    static {
-        SIMPLE_DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
-        HOST_ADDRESS = getHostAddress();
-    }
 
     private final ObjectRepository objectRepository;
     private final EndpointJavaMethodMatcher endpointJavaMethodMatcher;
+    private final SimpleDateFormat simpleDateFormat;
+    private final String hostAddress;
 
-    public BaseHttpRequestProcessor(ObjectRepository objectRepository, EndpointJavaMethodMatcher endpointJavaMethodMatcher) {
+    public BaseHttpRequestProcessor(ObjectRepository objectRepository, EndpointJavaMethodMatcher endpointJavaMethodMatcher, SimpleDateFormat simpleDateFormat, String hostAddress) {
         this.objectRepository = objectRepository;
         this.endpointJavaMethodMatcher = endpointJavaMethodMatcher;
+        this.simpleDateFormat = simpleDateFormat;
+        this.hostAddress = hostAddress;
     }
 
     @Override
@@ -94,21 +92,12 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
         }
 
         String contentType = ContentTypeCreator.from(javaMethod, methodResult.get()).create();
-        HttpResponseHeaderCreator headerCreator = new HttpResponseHeaderCreator(SIMPLE_DATE_FORMAT, HOST_ADDRESS, contentType);
+        HttpResponseHeaderCreator headerCreator = new HttpResponseHeaderCreator(simpleDateFormat, hostAddress, contentType);
         HttpResponseHeader httpResponseHeader = headerCreator.create();
 
         HttpResponseSender httpResponseSender = new HttpResponseSender(response);
         httpResponseSender.send(httpResponseHeader, methodResult.get());
         return true;
-    }
-
-    private static String getHostAddress() {
-        try {
-            InetAddress localHost = InetAddress.getLocalHost();
-            return localHost.getHostAddress();
-        } catch (UnknownHostException e) {
-            throw new RuntimeException(e);
-        }
     }
 }
 

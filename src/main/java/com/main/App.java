@@ -22,11 +22,15 @@ import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import matcher.BaseEndpointJavaMethodMatcher;
@@ -56,6 +60,13 @@ import vo.QueryParameters;
 
 @Slf4j
 public class App {
+    private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
+    private static final String HOST_ADDRESS;
+    static {
+        SIMPLE_DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
+        HOST_ADDRESS = getHostAddress();
+    }
+
     private static final Class<Component> COMPONENT_CLASS = Component.class;
     private static final Class<Controller> CONTROLLER_CLASS = Controller.class;
     private static final Class<WebFilter> WEB_FILTER_CLASS = WebFilter.class;
@@ -94,7 +105,7 @@ public class App {
 
         log.info("newFilters : {}", newFilters);
 
-        BaseHttpRequestProcessor baseHttpRequestProcessor = new BaseHttpRequestProcessor(objectRepository, endpointJavaMethodMatcher);
+        BaseHttpRequestProcessor baseHttpRequestProcessor = new BaseHttpRequestProcessor(objectRepository, endpointJavaMethodMatcher, SIMPLE_DATE_FORMAT, HOST_ADDRESS);
         HttpService httpService = new HttpService(baseHttpRequestProcessor, newFilters);
         httpService.start();
     }
@@ -139,5 +150,14 @@ public class App {
     private static Filter createFilter(String filterName, String basePath, FilterWorker filterWorker) {
         PatternMatcher patternMatcher = PatternMatcherStrategy.create(basePath);
         return new Filter(filterName, patternMatcher, filterWorker);
+    }
+
+    private static String getHostAddress() {
+        try {
+            InetAddress localHost = InetAddress.getLocalHost();
+            return localHost.getHostAddress();
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

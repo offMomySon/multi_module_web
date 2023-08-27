@@ -1,6 +1,5 @@
 package com.main.task.response;
 
-import java.net.InetAddress;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
@@ -12,43 +11,42 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 class FileHttpResponseHeaderCreatorTest {
 
-
-    @DisplayName("")
+    @DisplayName("파일의 확장자가 존재하지 않으면 Http response header 를 생성하지 못합니다.")
     @Test
     void test() throws Exception {
         //given
-        // Get the local host IP address
-        InetAddress localhost = InetAddress.getLocalHost();
-        System.out.println("Local Host IP Address: " + localhost.getHostAddress());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 
-        // Get the IP address of a specific host by hostname
-        String hostname = "www.example.com"; // Replace with the hostname you want to look up
-        InetAddress address = InetAddress.getByName(hostname);
-        System.out.println("IP Address of " + hostname + ": " + address.getHostAddress());
-
+        Path path = Path.of("nonFileExtensionFile");
+        FileHttpResponseHeaderCreator headerCreator = new FileHttpResponseHeaderCreator(dateFormat, "192.168..0.49", path);
 
         //when
+        Throwable actual = Assertions.catchThrowable(headerCreator::create);
 
         //then
-
+        Assertions.assertThat(actual).isNotNull();
     }
 
 
-    @DisplayName("변환가능한 자료형이면 Response 데이터를 생성합니다.")
+    @DisplayName("파일의 포멧에 맞는 Http response header 를 생성합니다.")
     @ParameterizedTest
     @CsvSource({
         "test.txt",
         "/base/test.txt",
+        "test.gif",
+        "/test.gif",
+        "/base/test.gif",
         "test.jpg",
         "/base/test.jpg",
         "/base1/base2/test.jpg"})
     void ttest(String path) throws Exception {
         //given
-        SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
-        SIMPLE_DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
+        SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 
         Path newPath = Path.of(path);
-        FileHttpResponseHeaderCreator httpResponseCreator = new FileHttpResponseHeaderCreator(SIMPLE_DATE_FORMAT, "192.168.0.49", newPath);
+        FileHttpResponseHeaderCreator httpResponseCreator = new FileHttpResponseHeaderCreator(dateFormat, "192.168.0.49", newPath);
 
         //when
         Throwable actual = Assertions.catchThrowable(httpResponseCreator::create);

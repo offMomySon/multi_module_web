@@ -94,8 +94,6 @@ public class App {
 
         log.info("newFilters : {}", newFilters);
 
-//        BaseHttpRequestExecutor baseHttpRequestExecutor = new BaseHttpRequestExecutor(objectRepository, endpointJavaMethodMatcher);
-
         BaseHttpRequestProcessor baseHttpRequestProcessor = new BaseHttpRequestProcessor(objectRepository, endpointJavaMethodMatcher);
         HttpService httpService = new HttpService(baseHttpRequestProcessor, newFilters);
         httpService.start();
@@ -141,111 +139,5 @@ public class App {
     private static Filter createFilter(String filterName, String basePath, FilterWorker filterWorker) {
         PatternMatcher patternMatcher = PatternMatcherStrategy.create(basePath);
         return new Filter(filterName, patternMatcher, filterWorker);
-    }
-
-    public static class BaseHttpRequestExecutor implements HttpRequestProcessor {
-        private static final CompositeConverter converter = new CompositeConverter();
-
-        private final ObjectRepository objectRepository;
-        private final EndpointJavaMethodMatcher endpointJavaMethodMatcher;
-
-        public BaseHttpRequestExecutor(ObjectRepository objectRepository, EndpointJavaMethodMatcher endpointJavaMethodMatcher) {
-            this.objectRepository = objectRepository;
-            this.endpointJavaMethodMatcher = endpointJavaMethodMatcher;
-        }
-
-        @Override
-        public boolean execute(HttpRequest request, HttpResponse response) {
-            Objects.requireNonNull(request);
-            Objects.requireNonNull(response);
-
-            RequestMethod method = RequestMethod.find(request.getHttpMethod().name());
-            PathUrl requestUrl = PathUrl.from(request.getHttpRequestPath().getValue().toString());
-            QueryParameters queryParameters = request.getQueryParameters();
-            BodyContent bodyContent = new BodyContent(request.getBodyString());
-
-            MatchedMethod matchedMethod = endpointJavaMethodMatcher.match(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
-            Method javaMethod = matchedMethod.getJavaMethod();
-            RequestParameters pathVariableValue = new RequestParameters(matchedMethod.getPathVariableValue().getValues());
-            RequestParameters queryParamValues = new RequestParameters(queryParameters.getParameterMap());
-
-            Map<Class<? extends Annotation>, ParameterConverter> parameterConverters = Map.of(
-                PathVariable.class, new RequestParameterConverter(PathVariable.class, pathVariableValue),
-                RequestParam.class, new RequestParameterConverter(RequestParam.class, queryParamValues),
-                RequestBody.class, new RequestBodyParameterConverter(bodyContent)
-            );
-            ParameterConverter parameterConverter = new CompositeParameterConverter(parameterConverters);
-
-            Class<?> declaringClass = javaMethod.getDeclaringClass();
-            Object instance = objectRepository.get(declaringClass);
-            log.info("declaringClass : {}", declaringClass);
-            log.info("instance : {}", instance);
-            log.info("javaMethod : {}", javaMethod);
-
-            Object[] values = Arrays.stream(javaMethod.getParameters())
-                .peek(parameter -> log.info("parameter : `{}`, param class : `{}`", parameter, parameter.getClass()))
-                .map(parameterConverter::convertAsValue)
-                .map(optionalValue -> optionalValue.orElse(EMPTY_VALUE))
-                .peek(value -> log.info("value : {}, {}", value, value.getClass()))
-                .toArray();
-
-            Object result = doExecute(instance, javaMethod, values);
-
-            InputStream inputStream = converter.convertToInputStream(result);
-
-            response.setStartLine("HTTP/1.1 200 OK");
-            response.appendHeader(Map.of(
-                "Date", "MON, 27 Jul 2023 12:28:53 GMT",
-                "Host", "localhost:8080",
-                "Content-Type", "text/html; charset=UTF-8"));
-            HttpResponseWriter sender = response.getSender();
-            sender.send(inputStream);
-
-            return true;
-        }
-
-        private static Object doExecute(Object object, Method javaMethod, Object[] paramsValues) {
-            try {
-                log.info("object : {}, javaMethod : {}, paramsValues : {}", object.getClass(), javaMethod, paramsValues);
-                return javaMethod.invoke(object, paramsValues);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    public static class RequestRunner implements processor.RequestRunner {
-        private final HttpRequestProcessor httpRequestProcessor;
-        private final Filters filters;
-
-        public RequestRunner(HttpRequestProcessor httpRequestProcessor, Filters filters) {
-            Objects.requireNonNull(httpRequestProcessor);
-            Objects.requireNonNull(filters);
-            this.httpRequestProcessor = httpRequestProcessor;
-            this.filters = filters;
-        }
-
-        @Override
-        public void run(InputStream inputStream, OutputStream outputStream) {
-            HttpRequestReader httpRequestReader = new HttpRequestReader(inputStream);
-            HttpRequest httpRequest = httpRequestReader.read();
-            HttpResponse httpResponse = new HttpResponse(outputStream);
-
-            log.info(httpRequest.getHttpRequestPath().toString());
-
-            List<FilterWorker> filterWorkers = filters.findFilterWorkers(httpRequest.getHttpRequestPath().toString());
-            log.info("filterWorkers : {}", filterWorkers);
-
-            log.info("create filter chain");
-            FilterChain applicationExecutorChain = new HttpRequestProcessorChain(httpRequestProcessor, null);
-            FilterChain filterChain = filterWorkers.stream()
-                .reduce(
-                    applicationExecutorChain,
-                    FilterWorkerChain::new,
-                    (pw, pw2) -> null);
-
-            log.info("execute filter chain");
-            filterChain.execute(httpRequest, httpResponse);
-        }
     }
 }

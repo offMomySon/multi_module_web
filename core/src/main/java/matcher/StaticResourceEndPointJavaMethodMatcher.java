@@ -10,13 +10,10 @@ public class StaticResourceEndPointJavaMethodMatcher implements EndpointJavaMeth
     private static final RequestMethod REQUEST_METHOD = RequestMethod.GET;
 
     private final PathUrl pathUrl;
-    private final Method javaMethod;
 
-    public StaticResourceEndPointJavaMethodMatcher(PathUrl pathUrl, Method javaMethod) {
+    public StaticResourceEndPointJavaMethodMatcher(PathUrl pathUrl) {
         Objects.requireNonNull(pathUrl);
-        Objects.requireNonNull(javaMethod);
         this.pathUrl = pathUrl;
-        this.javaMethod = javaMethod;
     }
 
     @Override
@@ -30,6 +27,16 @@ public class StaticResourceEndPointJavaMethodMatcher implements EndpointJavaMeth
         if(doesNotEqualRequestUrl){
             Optional.empty();
         }
-        return Optional.of(new MatchedMethod(javaMethod, PathVariableValue.empty()));
+
+        return Optional.of(new MatchedMethod(getStaticResourceFindMethod(), PathVariableValue.empty()));
+    }
+
+    private Method getStaticResourceFindMethod(){
+        try {
+            return StaticResourceFinder.class.getMethod("find");
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 }

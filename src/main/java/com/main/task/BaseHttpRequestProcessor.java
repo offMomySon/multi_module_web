@@ -5,23 +5,19 @@ import com.main.task.converter.ParameterValueConverterFactory;
 import com.main.task.response.ContentTypeCreator;
 import com.main.task.response.HttpResponseHeader;
 import com.main.task.response.HttpResponseHeaderCreator;
+import com.main.task.response.HttpResponseSender;
 import com.main.task.value.BaseParameterValueMatcher;
 import com.main.task.value.CompositeMethodParameterValueMatcher;
 import com.main.task.value.HttpBodyAnnotationAnnotatedParameterValueMatcher;
 import com.main.task.value.HttpUrlAnnotationAnnotatedParameterValueMatcher;
 import com.main.task.value.ParameterValue;
 import container.ObjectRepository;
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -35,19 +31,14 @@ import matcher.annotation.PathVariable;
 import matcher.annotation.RequestBody;
 import matcher.annotation.RequestParam;
 import matcher.converter.RequestParameters;
-import matcher.converter.base.CompositeConverter;
 import matcher.segment.PathUrl;
 import processor.HttpRequestProcessor;
 import vo.HttpRequest;
 import vo.HttpResponse;
-import vo.HttpResponseWriter;
 import vo.QueryParameters;
 
 @Slf4j
 public class BaseHttpRequestProcessor implements HttpRequestProcessor {
-    private static final CompositeConverter converter = new CompositeConverter();
-    private static final Objects EMPTY_VALUE = null;
-
     private final ObjectRepository objectRepository;
     private final EndpointJavaMethodMatcher endpointJavaMethodMatcher;
 
@@ -154,10 +145,10 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
 
         CompositeMethodParameterValueMatcher methodParameterValueMatcher = new CompositeMethodParameterValueMatcher(
             Map.of(
-                InputStream.class, new BaseParameterValueMatcher(request.getBodyInputStream()),
+                InputStream.class, new BaseParameterValueMatcher<>(request.getBodyInputStream()),
                 RequestBody.class, new HttpBodyAnnotationAnnotatedParameterValueMatcher(request.getBodyInputStream()),
-                PathVariable.class, new HttpUrlAnnotationAnnotatedParameterValueMatcher(PathVariable.class, pathVariableValue),
-                RequestParam.class, new HttpUrlAnnotationAnnotatedParameterValueMatcher(RequestParam.class, queryParamValues))
+                PathVariable.class, new HttpUrlAnnotationAnnotatedParameterValueMatcher<>(PathVariable.class, pathVariableValue),
+                RequestParam.class, new HttpUrlAnnotationAnnotatedParameterValueMatcher<>(RequestParam.class, queryParamValues))
         );
 
         ParameterValueGetter parameterValueGetter = new ParameterValueGetter(
@@ -172,24 +163,17 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
         MethodInvoker methodInvoker = new MethodInvoker(objectRepository);
         Optional<Object> methodResult = methodInvoker.invoke(javaMethod, parameterValues);
         if (methodResult.isEmpty()) {
-            return false;
+            throw new RuntimeException("does not exist methodResult.");
         }
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
         String hostAddress = getHostAddress();
-        String contentType = ContentTypeCreator.from(javaMethod, methodResult).create();
+        String contentType = ContentTypeCreator.from(javaMethod, methodResult.get()).create();
         HttpResponseHeaderCreator headerCreator = new HttpResponseHeaderCreator(dateFormat, hostAddress, contentType);
         HttpResponseHeader httpResponseHeader = headerCreator.create();
 
-        response.setStartLine("HTTP/1.1 200 OK");
-        response.appendHeader(Map.of(
-            "Date", "MON, 27 Jul 2023 12:28:53 GMT",
-            "Host", "localhost:8080",
-            "Content-Type", "text/html; charset=UTF-8"));
-        HttpResponseWriter sender = response.getSender();
-
-        InputStream inputStream = converter.convertToInputStream(methodResult.get());
-        sender.send(inputStream);
+        HttpResponseSender httpResponseSender = new HttpResponseSender(response);
+        httpResponseSender.send(httpResponseHeader, methodResult.get());
         return true;
     }
 

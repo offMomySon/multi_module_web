@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import matcher.BaseEndpointJavaMethodMatcher;
@@ -39,6 +40,13 @@ import vo.QueryParameters;
 
 @Slf4j
 public class BaseHttpRequestProcessor implements HttpRequestProcessor {
+    private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
+    private static final String HOST_ADDRESS;
+    static {
+        SIMPLE_DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
+        HOST_ADDRESS = getHostAddress();
+    }
+
     private final ObjectRepository objectRepository;
     private final EndpointJavaMethodMatcher endpointJavaMethodMatcher;
 
@@ -142,6 +150,7 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
         Method javaMethod = matchedMethod.getJavaMethod();
         RequestParameters pathVariableValue = new RequestParameters(matchedMethod.getPathVariableValue().getValues());
         RequestParameters queryParamValues = new RequestParameters(queryParameters.getParameterMap());
+        log.info("javaMethod : `{}`", javaMethod);
 
         CompositeMethodParameterValueMatcher methodParameterValueMatcher = new CompositeMethodParameterValueMatcher(
             Map.of(
@@ -166,10 +175,8 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
             throw new RuntimeException("does not exist methodResult.");
         }
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
-        String hostAddress = getHostAddress();
         String contentType = ContentTypeCreator.from(javaMethod, methodResult.get()).create();
-        HttpResponseHeaderCreator headerCreator = new HttpResponseHeaderCreator(dateFormat, hostAddress, contentType);
+        HttpResponseHeaderCreator headerCreator = new HttpResponseHeaderCreator(SIMPLE_DATE_FORMAT, HOST_ADDRESS, contentType);
         HttpResponseHeader httpResponseHeader = headerCreator.create();
 
         HttpResponseSender httpResponseSender = new HttpResponseSender(response);

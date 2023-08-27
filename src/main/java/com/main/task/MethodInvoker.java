@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class MethodInvoker {
+    private static final Object EMPTY_VALUE = null;
     private final ObjectRepository objectRepository;
 
     public MethodInvoker(ObjectRepository objectRepository) {
@@ -27,10 +28,11 @@ public class MethodInvoker {
 
         Class<?> declaringClass = javaMethod.getDeclaringClass();
         Object instance = objectRepository.get(declaringClass);
-        Object[] values = parameterValues.toArray();
-        for (Object value : values) {
-            log.info("value : {}, {}", value, value.getClass());
-        }
+        Object[] values = parameterValues.stream()
+            .map(ParameterValue::getValue)
+            .map(v -> v.isPresent()?v.get():EMPTY_VALUE)
+            .peek(v -> log.info("clazz : {}, value : {}", Objects.isNull(v) ? "empty": v.getClass(), Objects.isNull(v) ? "null" : v))
+            .toArray();
 
         Object result = doExecute(instance, javaMethod, values);
         return Optional.ofNullable(result);

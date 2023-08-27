@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Controller
-@RequestMapping(value = "/basic2/{payMethod}")
+@RequestMapping(value = "/basic2")
 public class SampleController2 {
     public final SampleDomain1 sampleDomain1;
 

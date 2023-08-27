@@ -23,12 +23,12 @@ public class ParameterValueGetter {
     public ParameterValue<?> get(Parameter parameter) {
         Objects.requireNonNull(parameter);
 
-        log.info("parameter : `{}`, param class : `{}`", parameter, parameter.getClass());
+        log.info("parameter : `{}`, param class : `{}`", parameter, parameter.getType());
         ParameterValue<?> matchedValue = valueMatcher.match(parameter);
 
         ParameterValueConverter valueConverter = valueConverterFactory.create(parameter);
         ParameterValue<?> value = valueConverter.convert(matchedValue);
-        log.info("ParameterValue. value : {}, class : {}", value.getValue(), value.getClass());
+        log.info("ParameterValue. value : {}, class : {}", value.getValue(), value.getClazz());
         return valueConverter.convert(matchedValue);
     }
 }

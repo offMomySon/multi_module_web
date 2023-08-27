@@ -1,6 +1,7 @@
 package com.main;
 
 
+import com.main.task.BaseHttpRequestProcessor;
 import com.main.util.AnnotationUtils;
 import container.ClassFinder;
 import container.ComponentClassInitializer;
@@ -93,8 +94,10 @@ public class App {
 
         log.info("newFilters : {}", newFilters);
 
-        BaseHttpRequestExecutor baseHttpRequestExecutor = new BaseHttpRequestExecutor(objectRepository, endpointJavaMethodMatcher);
-        HttpService httpService = new HttpService(baseHttpRequestExecutor, newFilters);
+//        BaseHttpRequestExecutor baseHttpRequestExecutor = new BaseHttpRequestExecutor(objectRepository, endpointJavaMethodMatcher);
+
+        BaseHttpRequestProcessor baseHttpRequestProcessor = new BaseHttpRequestProcessor(objectRepository, endpointJavaMethodMatcher);
+        HttpService httpService = new HttpService(baseHttpRequestProcessor, newFilters);
         httpService.start();
     }
 

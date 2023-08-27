@@ -52,20 +52,9 @@ public class HttpService {
     public void start() {
         log.info("start server.");
 
-        SocketHttpTaskExecutor socketHttpTaskExecutor = SocketHttpTaskExecutor.create(5, 8080);
+        SocketHttpTaskExecutor socketHttpTaskExecutor = SocketHttpTaskExecutor.create(5, 8081);
         socketHttpTaskExecutor.execute(((httpRequest, httpResponse) -> {
             List<FilterWorker> filterWorkers = filters.findFilterWorkers(httpRequest.getHttpRequestPath().getValue().toString());
-
-//            log.info("create filter chain");
-//            FilterChain applicationExecutorChain = new HttpRequestProcessorChain(httpRequestProcessor, null);
-//            FilterChain filterChain = filterWorkers.stream()
-//                .reduce(
-//                    applicationExecutorChain,
-//                    FilterWorkerChain::new,
-//                    (pw, pw2) -> null);
-//
-//            log.info("execute filter chain");
-//            filterChain.execute(httpRequest, httpResponse);
 
             for(FilterWorker filterWorker : filterWorkers){
                 filterWorker.prevExecute(httpRequest, httpResponse);

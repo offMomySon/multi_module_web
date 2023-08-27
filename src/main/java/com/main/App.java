@@ -24,10 +24,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import matcher.BaseEndpointJavaMethodMatcher;
 import matcher.CompositedEndpointJavaMethodMatcher;
 import matcher.EndpointJavaMethodMatcher;
+import matcher.StaticResourceEndPointCreator;
+import matcher.StaticResourceEndPointJavaMethodMatcher;
 import matcher.creator.JavaMethodPathMatcherCreator;
 import processor.HttpService;
 
@@ -60,13 +63,18 @@ public class App {
 
         // 3. class 로 httpPathMatcher 를 생성.
         List<Class<?>> controllerClazzes = AnnotationUtils.filterByAnnotatedClazz(clazzes, CONTROLLER_CLASS);
-        List<BaseEndpointJavaMethodMatcher> baseHttpPathMatchers = controllerClazzes.stream()
+        List<EndpointJavaMethodMatcher> baseHttpPathMatchers = controllerClazzes.stream()
             .map(JavaMethodPathMatcherCreator::new)
             .map(JavaMethodPathMatcherCreator::create)
             .flatMap(Collection::stream)
             .peek(httpPathMatcher -> log.info("httpPathMatcher : `{}`", httpPathMatcher))
             .collect(Collectors.toUnmodifiableList());
-        EndpointJavaMethodMatcher endpointJavaMethodMatcher = new CompositedEndpointJavaMethodMatcher(baseHttpPathMatchers);
+        StaticResourceEndPointCreator staticResourceEndPointCreator = StaticResourceEndPointCreator.from(App.class, "../../resources");
+        List<StaticResourceEndPointJavaMethodMatcher> staticResourceEndPointJavaMethodMatchers = staticResourceEndPointCreator.create();
+
+        List<EndpointJavaMethodMatcher> endpointJavaMethodMatchers = Stream.concat(baseHttpPathMatchers.stream(), staticResourceEndPointJavaMethodMatchers.stream())
+            .collect(Collectors.toUnmodifiableList());
+        EndpointJavaMethodMatcher endpointJavaMethodMatcher = new CompositedEndpointJavaMethodMatcher(endpointJavaMethodMatchers);
 
         // 4. class 로 webfilter 를 생성.
         List<Class<?>> webFilterAnnotatedClazzes = AnnotationUtils.filterByAnnotatedClazz(clazzes, WEB_FILTER_CLASS);

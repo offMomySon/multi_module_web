@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.nio.file.Path;
 import java.util.Set;
 
-class ResourceUrlsTest {
+class ResourcePathUrlsTest {
 
     @DisplayName("")
     @Test

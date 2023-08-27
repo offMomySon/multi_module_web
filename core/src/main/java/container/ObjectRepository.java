@@ -48,6 +48,15 @@ public class ObjectRepository {
         return values.get(key);
     }
 
+    public Optional<Object> getOptional(Class<?> key) {
+        if(!values.containsKey(key)){
+            return Optional.empty();
+        }
+
+        Object object = values.get(key);
+        return Optional.of(object);
+    }
+
     public void put(Class<?> key, Object value) {
         values.put(key, value);
     }

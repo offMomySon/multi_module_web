@@ -19,6 +19,10 @@ public class PathUrl {
         this.beginIndex = beginIndex;
     }
 
+    public static PathUrl from(Path path){
+        return from(path.toString());
+    }
+
     public static PathUrl from(String path) {
         if (Objects.isNull(path)) {
             throw new RuntimeException("path is empty.");

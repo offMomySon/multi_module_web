@@ -1,6 +1,7 @@
 package main.matcher.segment;
 
 import matcher.BaseEndpointJavaMethodMatcher;
+import matcher.MatchedMethod;
 import matcher.PathUrlMatcher;
 import matcher.RequestMethod;
 import matcher.segment.PathUrl;
@@ -46,7 +47,7 @@ class BaseEndpointJavaMethodMatcherTest {
         BaseEndpointJavaMethodMatcher baseHttpPathMatcher = new BaseEndpointJavaMethodMatcher(RequestMethod.GET, pathUrlMatcher, TestClass.class.getDeclaredMethod("method"));
 
         //when
-        Optional<BaseEndpointJavaMethodMatcher.MatchedMethod> optionalResolvedMethod = baseHttpPathMatcher.match(RequestMethod.GET, PathUrl.from(requestPath));
+        Optional<MatchedMethod> optionalResolvedMethod = baseHttpPathMatcher.match(RequestMethod.GET, PathUrl.from(requestPath));
 
         //then
         Assertions.assertThat(optionalResolvedMethod).isPresent();

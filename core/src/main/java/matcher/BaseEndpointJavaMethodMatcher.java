@@ -5,7 +5,6 @@ import matcher.segment.PathVariableValue;
 import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.Optional;
-import lombok.Getter;
 
 // 생성자
 // 1. requestMethod 를 받는다.
@@ -43,19 +42,6 @@ public class BaseEndpointJavaMethodMatcher implements EndpointJavaMethodMatcher 
 
         PathVariableValue pathVariableValue = optionalPathVariableValue.get();
         return Optional.of(new MatchedMethod(javaMethod, pathVariableValue));
-    }
-
-    @Getter
-    public static class MatchedMethod {
-        private final Method javaMethod;
-        private final PathVariableValue pathVariableValue;
-
-        public MatchedMethod(Method javaMethod, PathVariableValue pathVariableValue) {
-            Objects.requireNonNull(javaMethod);
-            Objects.requireNonNull(pathVariableValue);
-            this.javaMethod = javaMethod;
-            this.pathVariableValue = pathVariableValue;
-        }
     }
 
     @Override

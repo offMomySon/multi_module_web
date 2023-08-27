@@ -1,11 +1,10 @@
 package matcher;
 
-import matcher.segment.PathUrl;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import static matcher.BaseEndpointJavaMethodMatcher.MatchedMethod;
+import matcher.segment.PathUrl;
 
 // http
 // link
@@ -31,7 +30,7 @@ public class CompositedEndpointJavaMethodMatcher implements EndpointJavaMethodMa
         this.baseHttpPathMatchers = newJavaMethodResolver;
     }
 
-//    1. method, request url 이 매칭되는 pathMatcher 가 존재하면 method, pathVariable value 를 반환합니다.
+    //    1. method, request url 이 매칭되는 pathMatcher 가 존재하면 method, pathVariable value 를 반환합니다.
     public Optional<MatchedMethod> match(RequestMethod requestMethod, PathUrl requestUrl) {
         return baseHttpPathMatchers.stream()
             .map(methodResolver -> methodResolver.match(requestMethod, requestUrl))

@@ -5,11 +5,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class HttpResponse {
+public class HttpResponseHeader {
     private final String startLine;
     private final Map<String, String> header;
 
-    public HttpResponse(String startLine, Map<String, String> header) {
+    public HttpResponseHeader(String startLine, Map<String, String> header) {
         Objects.requireNonNull(startLine);
         Objects.requireNonNull(header);
         if (startLine.isBlank()) {

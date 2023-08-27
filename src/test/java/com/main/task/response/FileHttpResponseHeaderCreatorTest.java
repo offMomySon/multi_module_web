@@ -2,13 +2,15 @@ package com.main.task.response;
 
 import java.net.InetAddress;
 import java.nio.file.Path;
+import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-class ResourceHttpResponseCreatorTest {
+class FileHttpResponseHeaderCreatorTest {
 
 
     @DisplayName("")
@@ -42,8 +44,11 @@ class ResourceHttpResponseCreatorTest {
         "/base1/base2/test.jpg"})
     void ttest(String path) throws Exception {
         //given
+        SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
+        SIMPLE_DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
+
         Path newPath = Path.of(path);
-        ResourceHttpResponseCreator httpResponseCreator = new ResourceHttpResponseCreator(newPath);
+        FileHttpResponseHeaderCreator httpResponseCreator = new FileHttpResponseHeaderCreator(SIMPLE_DATE_FORMAT, "192.168.0.49", newPath);
 
         //when
         Throwable actual = Assertions.catchThrowable(httpResponseCreator::create);

@@ -55,6 +55,63 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
         this.endpointJavaMethodMatcher = endpointJavaMethodMatcher;
     }
 
+    @Override
+    public boolean execute(HttpRequest request, HttpResponse response) {
+        Objects.requireNonNull(request);
+        Objects.requireNonNull(response);
+
+        RequestMethod method = RequestMethod.find(request.getHttpMethod().name());
+        PathUrl requestUrl = PathUrl.from(request.getHttpRequestPath().getValue().toString());
+        QueryParameters queryParameters = request.getQueryParameters();
+
+        BaseEndpointJavaMethodMatcher.MatchedMethod matchedMethod = endpointJavaMethodMatcher.match(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
+        Method javaMethod = matchedMethod.getJavaMethod();
+        RequestParameters pathVariableValue = new RequestParameters(matchedMethod.getPathVariableValue().getValues());
+        RequestParameters queryParamValues = new RequestParameters(queryParameters.getParameterMap());
+        log.info("javaMethod : `{}`", javaMethod);
+
+        CompositeMethodParameterValueMatcher methodParameterValueMatcher = new CompositeMethodParameterValueMatcher(
+            Map.of(
+                InputStream.class, new BaseParameterValueMatcher<>(request.getBodyInputStream()),
+                RequestBody.class, new HttpBodyAnnotationAnnotatedParameterValueMatcher(request.getBodyInputStream()),
+                PathVariable.class, new HttpUrlAnnotationAnnotatedParameterValueMatcher<>(PathVariable.class, pathVariableValue),
+                RequestParam.class, new HttpUrlAnnotationAnnotatedParameterValueMatcher<>(RequestParam.class, queryParamValues))
+        );
+
+        ParameterValueGetter parameterValueGetter = new ParameterValueGetter(
+            methodParameterValueMatcher,
+            new ParameterValueConverterFactory(new ObjectMapper())
+        );
+
+        List<? extends ParameterValue<?>> parameterValues = Arrays.stream(javaMethod.getParameters())
+            .map(parameterValueGetter::get)
+            .collect(Collectors.toUnmodifiableList());
+
+        MethodInvoker methodInvoker = new MethodInvoker(objectRepository);
+        Optional<Object> methodResult = methodInvoker.invoke(javaMethod, parameterValues);
+        if (methodResult.isEmpty()) {
+            throw new RuntimeException("does not exist methodResult.");
+        }
+
+        String contentType = ContentTypeCreator.from(javaMethod, methodResult.get()).create();
+        HttpResponseHeaderCreator headerCreator = new HttpResponseHeaderCreator(SIMPLE_DATE_FORMAT, HOST_ADDRESS, contentType);
+        HttpResponseHeader httpResponseHeader = headerCreator.create();
+
+        HttpResponseSender httpResponseSender = new HttpResponseSender(response);
+        httpResponseSender.send(httpResponseHeader, methodResult.get());
+        return true;
+    }
+
+    private static String getHostAddress() {
+        try {
+            InetAddress localHost = InetAddress.getLocalHost();
+            return localHost.getHostAddress();
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}
+
 //    1. http request, response 를 받는다.
 //    2. http request method 를 RequestMethod 로 변환한다.
 //    3. http request path 를 PathUrl 로 변환한다.
@@ -136,60 +193,3 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
 //      개념 - Object 에 따라 response header value 를 생성한다.
 //    6. HttpResponseSender
 //      개념 - http response 응답을 전송한다.
-
-    @Override
-    public boolean execute(HttpRequest request, HttpResponse response) {
-        Objects.requireNonNull(request);
-        Objects.requireNonNull(response);
-
-        RequestMethod method = RequestMethod.find(request.getHttpMethod().name());
-        PathUrl requestUrl = PathUrl.from(request.getHttpRequestPath().getValue().toString());
-        QueryParameters queryParameters = request.getQueryParameters();
-
-        BaseEndpointJavaMethodMatcher.MatchedMethod matchedMethod = endpointJavaMethodMatcher.match(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
-        Method javaMethod = matchedMethod.getJavaMethod();
-        RequestParameters pathVariableValue = new RequestParameters(matchedMethod.getPathVariableValue().getValues());
-        RequestParameters queryParamValues = new RequestParameters(queryParameters.getParameterMap());
-        log.info("javaMethod : `{}`", javaMethod);
-
-        CompositeMethodParameterValueMatcher methodParameterValueMatcher = new CompositeMethodParameterValueMatcher(
-            Map.of(
-                InputStream.class, new BaseParameterValueMatcher<>(request.getBodyInputStream()),
-                RequestBody.class, new HttpBodyAnnotationAnnotatedParameterValueMatcher(request.getBodyInputStream()),
-                PathVariable.class, new HttpUrlAnnotationAnnotatedParameterValueMatcher<>(PathVariable.class, pathVariableValue),
-                RequestParam.class, new HttpUrlAnnotationAnnotatedParameterValueMatcher<>(RequestParam.class, queryParamValues))
-        );
-
-        ParameterValueGetter parameterValueGetter = new ParameterValueGetter(
-            methodParameterValueMatcher,
-            new ParameterValueConverterFactory(new ObjectMapper())
-        );
-
-        List<? extends ParameterValue<?>> parameterValues = Arrays.stream(javaMethod.getParameters())
-            .map(parameterValueGetter::get)
-            .collect(Collectors.toUnmodifiableList());
-
-        MethodInvoker methodInvoker = new MethodInvoker(objectRepository);
-        Optional<Object> methodResult = methodInvoker.invoke(javaMethod, parameterValues);
-        if (methodResult.isEmpty()) {
-            throw new RuntimeException("does not exist methodResult.");
-        }
-
-        String contentType = ContentTypeCreator.from(javaMethod, methodResult.get()).create();
-        HttpResponseHeaderCreator headerCreator = new HttpResponseHeaderCreator(SIMPLE_DATE_FORMAT, HOST_ADDRESS, contentType);
-        HttpResponseHeader httpResponseHeader = headerCreator.create();
-
-        HttpResponseSender httpResponseSender = new HttpResponseSender(response);
-        httpResponseSender.send(httpResponseHeader, methodResult.get());
-        return true;
-    }
-
-    private static String getHostAddress() {
-        try {
-            InetAddress localHost = InetAddress.getLocalHost();
-            return localHost.getHostAddress();
-        } catch (UnknownHostException e) {
-            throw new RuntimeException(e);
-        }
-    }
-}

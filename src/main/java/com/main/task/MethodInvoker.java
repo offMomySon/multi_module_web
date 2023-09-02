@@ -27,22 +27,21 @@ public class MethodInvoker {
         }
 
         Class<?> declaringClass = javaMethod.getDeclaringClass();
-        Optional<Object> objectOptional = objectRepository.getOptional(declaringClass);
+        Object instance = objectRepository.get(declaringClass);
         Object[] values = parameterValues.stream()
             .map(ParameterValue::getValue)
             .map(v -> v.isPresent() ? v.get() : EMPTY_VALUE)
             .peek(v -> log.info("clazz : {}, value : {}", Objects.isNull(v) ? "empty" : v.getClass(), Objects.isNull(v) ? "null" : v))
             .toArray();
 
-        Object result = doExecute(objectOptional, javaMethod, values);
+        Object result = doExecute(instance, javaMethod, values);
         return Optional.ofNullable(result);
     }
 
-    private static Object doExecute(Optional<Object> objectOptional, Method javaMethod, Object[] paramsValues) {
+    private static Object doExecute(Object instance, Method javaMethod, Object[] paramsValues) {
         try {
-            Object object = objectOptional.isEmpty() ? null : objectOptional.get();
-            log.info("object : {}, javaMethod : {}, paramsValues : {}", object, javaMethod, paramsValues);
-            return javaMethod.invoke(object, paramsValues);
+            log.info("object : {}, javaMethod : {}, paramsValues : {}", instance, javaMethod, paramsValues);
+            return javaMethod.invoke(instance, paramsValues);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

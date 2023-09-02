@@ -1,23 +1,22 @@
 package matcher;
 
-import java.lang.reflect.Method;
 import java.util.Objects;
 import matcher.segment.PathVariableValue;
 import task.HttpTask;
 
 public class MatchedHttpTask {
-    private final HttpTask javaMethodTask;
+    private final HttpTask httpTask;
     private final PathVariableValue pathVariableValue;
 
-    public MatchedHttpTask(HttpTask javaMethodTask, PathVariableValue pathVariableValue) {
-        Objects.requireNonNull(javaMethodTask);
+    public MatchedHttpTask(HttpTask httpTask, PathVariableValue pathVariableValue) {
+        Objects.requireNonNull(httpTask);
         Objects.requireNonNull(pathVariableValue);
-        this.javaMethodTask = javaMethodTask;
+        this.httpTask = httpTask;
         this.pathVariableValue = pathVariableValue;
     }
 
-    public HttpTask getJavaMethodTask() {
-        return javaMethodTask;
+    public HttpTask getHttpTask() {
+        return httpTask;
     }
 
     public PathVariableValue getPathVariableValue() {

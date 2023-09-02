@@ -10,20 +10,16 @@ import com.main.task.value.BaseParameterValueMatcher;
 import com.main.task.value.CompositeMethodParameterValueMatcher;
 import com.main.task.value.HttpBodyAnnotationAnnotatedParameterValueMatcher;
 import com.main.task.value.HttpUrlAnnotationAnnotatedParameterValueMatcher;
-import com.main.task.value.ParameterValue;
 import container.ObjectRepository;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import matcher.EndpointMatcher;
-import matcher.MatchedMethod;
+import matcher.MatchedHttpTask;
 import matcher.RequestMethod;
 import matcher.annotation.PathVariable;
 import matcher.annotation.RequestBody;
@@ -31,6 +27,7 @@ import matcher.annotation.RequestParam;
 import matcher.converter.RequestParameters;
 import matcher.segment.PathUrl;
 import processor.HttpRequestProcessor;
+import task.HttpTask;
 import vo.HttpRequest;
 import vo.HttpResponse;
 import vo.QueryParameters;
@@ -59,11 +56,10 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
         PathUrl requestUrl = PathUrl.from(request.getHttpRequestPath().getValue().toString());
         QueryParameters queryParameters = request.getQueryParameters();
 
-        MatchedMethod matchedMethod = endpointMatcher.match(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
-        Method javaMethod = matchedMethod.getJavaMethod();
-        RequestParameters pathVariableValue = new RequestParameters(matchedMethod.getPathVariableValue().getValues());
+        MatchedHttpTask matchedHttpTask = endpointMatcher.match(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
+        HttpTask httpTask = matchedHttpTask.getHttpTask();
+        RequestParameters pathVariableValue = new RequestParameters(matchedHttpTask.getPathVariableValue().getValues());
         RequestParameters queryParamValues = new RequestParameters(queryParameters.getParameterMap());
-        log.info("javaMethod : `{}`", javaMethod);
 
         CompositeMethodParameterValueMatcher methodParameterValueMatcher = new CompositeMethodParameterValueMatcher(
             Map.of(
@@ -74,24 +70,24 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
         );
 
         ParameterValueGetter parameterValueGetter = new ParameterValueGetter(methodParameterValueMatcher, new ParameterValueConverterFactory(new ObjectMapper()));
-        List<? extends ParameterValue<?>> parameterValues = Arrays.stream(javaMethod.getParameters())
+        Object[] parameterValues = Arrays.stream(httpTask.getExecuteParameters())
             .map(parameterValueGetter::get)
-            .collect(Collectors.toUnmodifiableList());
+            .map(p -> p.getValue().isPresent() ? p.getValue().get() : null)
+            .toArray();
 
-        MethodInvoker methodInvoker = new MethodInvoker(objectRepository);
-        Optional<Object> methodResult = methodInvoker.invoke(javaMethod, parameterValues);
-        if (methodResult.isEmpty()) {
+        Optional<Object> result = httpTask.execute(parameterValues);
+        if (result.isEmpty()) {
             throw new RuntimeException("does not exist methodResult.");
         }
 
-        log.info("methodResult : `{}`, clazz : `{}`", methodResult.get(), methodResult.get().getClass());
+        log.info("methodResult : `{}`, clazz : `{}`", result.get(), result.get().getClass());
 
-        String contentType = ContentTypeCreator.from(javaMethod, methodResult.get()).create();
+        String contentType = ContentTypeCreator.from(httpTask, result.get()).create();
         HttpResponseHeaderCreator headerCreator = new HttpResponseHeaderCreator(simpleDateFormat, hostAddress, contentType);
         HttpResponseHeader httpResponseHeader = headerCreator.create();
 
         HttpResponseSender httpResponseSender = new HttpResponseSender(response);
-        httpResponseSender.send(httpResponseHeader, methodResult.get());
+        httpResponseSender.send(httpResponseHeader, result.get());
         return true;
     }
 }

@@ -8,6 +8,7 @@ import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import matcher.segment.PathUrl;
 import matcher.segment.PathVariableValue;
+import task.ResourceTask;
 
 @Slf4j
 public class StaticResourceEndPointMatcher implements EndpointMatcher {
@@ -30,7 +31,7 @@ public class StaticResourceEndPointMatcher implements EndpointMatcher {
     }
 
     @Override
-    public Optional<MatchedMethod> match(RequestMethod requestMethod, PathUrl requestUrl) {
+    public Optional<MatchedHttpTask> match(RequestMethod requestMethod, PathUrl requestUrl) {
         boolean doesNotResourceMethod = !requestMethod.equals(REQUEST_METHOD);
         if (doesNotResourceMethod) {
             return Optional.empty();
@@ -42,8 +43,7 @@ public class StaticResourceEndPointMatcher implements EndpointMatcher {
         }
 
         log.info("found match. pathUrl : `{}`, requestUrl : `{}`", pathUrl, requestUrl);
-        log.info("resourcePath : `{}`", resourcePath);
-        PathVariableValue pathVariableValue = new PathVariableValue(Map.of(pathVariableKey, resourcePath.toString()));
-        return Optional.of(new MatchedMethod(method, pathVariableValue));
+        ResourceTask resourceTask = new ResourceTask(resourcePath.toString());
+        return Optional.of(new MatchedHttpTask(resourceTask, PathVariableValue.empty()));
     }
 }

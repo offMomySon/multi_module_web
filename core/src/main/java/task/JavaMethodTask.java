@@ -22,6 +22,10 @@ public class JavaMethodTask implements HttpTask {
         this.parameters = javaMethod.getParameters();
     }
 
+    public Method getJavaMethod() {
+        return javaMethod;
+    }
+
     @Override
     public Parameter[] getExecuteParameters() {
         return Arrays.copyOf(parameters, parameters.length);

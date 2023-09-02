@@ -7,6 +7,8 @@ import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
+import task.HttpTask;
+import task.JavaMethodTask;
 
 @Slf4j
 public class ContentTypeCreator {
@@ -19,15 +21,20 @@ public class ContentTypeCreator {
         this.methodResult = methodResult;
     }
 
-    public static ContentTypeCreator from(Method javaMethod, Object methodResult) {
-        Objects.requireNonNull(javaMethod);
+    public static ContentTypeCreator from(HttpTask httpTask, Object methodResult) {
+        Objects.requireNonNull(httpTask);
         Objects.requireNonNull(methodResult);
 
-        Class<?> declaringClass = javaMethod.getDeclaringClass();
-        boolean isResponseBodyMethod = AnnotationUtils.exist(javaMethod, ResponseBody.class) ||
-            AnnotationUtils.exist(declaringClass, RestController.class);
+        if (httpTask instanceof JavaMethodTask) {
+            JavaMethodTask javaMethodTask = (JavaMethodTask) httpTask;
+            Method javaMethod = javaMethodTask.getJavaMethod();
+            Class<?> declaringClass = javaMethod.getDeclaringClass();
+            boolean isResponseBodyMethod = AnnotationUtils.exist(javaMethod, ResponseBody.class) ||
+                AnnotationUtils.exist(declaringClass, RestController.class);
+            return new ContentTypeCreator(isResponseBodyMethod, methodResult);
+        }
 
-        return new ContentTypeCreator(isResponseBodyMethod, methodResult);
+        return new ContentTypeCreator(false, methodResult);
     }
 
     public String create() {

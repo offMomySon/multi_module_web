@@ -73,11 +73,7 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
                 RequestParam.class, new HttpUrlAnnotationAnnotatedParameterValueMatcher<>(RequestParam.class, queryParamValues))
         );
 
-        ParameterValueGetter parameterValueGetter = new ParameterValueGetter(
-            methodParameterValueMatcher,
-            new ParameterValueConverterFactory(new ObjectMapper())
-        );
-
+        ParameterValueGetter parameterValueGetter = new ParameterValueGetter(methodParameterValueMatcher, new ParameterValueConverterFactory(new ObjectMapper()));
         List<? extends ParameterValue<?>> parameterValues = Arrays.stream(javaMethod.getParameters())
             .map(parameterValueGetter::get)
             .collect(Collectors.toUnmodifiableList());
@@ -87,6 +83,8 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
         if (methodResult.isEmpty()) {
             throw new RuntimeException("does not exist methodResult.");
         }
+
+        log.info("methodResult : `{}`, clazz : `{}`", methodResult.get(), methodResult.get().getClass());
 
         String contentType = ContentTypeCreator.from(javaMethod, methodResult.get()).create();
         HttpResponseHeaderCreator headerCreator = new HttpResponseHeaderCreator(simpleDateFormat, hostAddress, contentType);

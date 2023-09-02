@@ -14,7 +14,6 @@ import util.FileSystemUtil;
 
 @Slf4j
 public class StaticResourceEndPointCreator {
-    private static final String DIRECTORY_DELIMITER = "/";
     private static final String PATH_VARIABLE_KEY = "pathUrl";
 
     private final Path resourceDirectory;
@@ -91,16 +90,6 @@ public class StaticResourceEndPointCreator {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private static Path resolvePathUrl(Path resourceDirectory, Path resourcePath) {
-        Path packageResourcePath = resourceDirectory.relativize(resourcePath);
-        Path resourceUrl = Path.of(DIRECTORY_DELIMITER).resolve(packageResourcePath);
-
-        log.info("resourceDirectory : `{}`", resourceDirectory);
-        log.info("resourcePath : `{}`", resourcePath);
-        log.info("resourceUrl : `{}`", resourceUrl);
-        return resourceUrl;
     }
 
     private Method getStaticResourceFindMethod() {

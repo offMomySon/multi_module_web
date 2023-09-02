@@ -2,6 +2,6 @@ package matcher.converter.base;
 
 import java.io.InputStream;
 
-public interface Converter {
-    InputStream convertToInputStream(Object object);
+public interface Converter<T> {
+    InputStream convertToInputStream(T object);
 }

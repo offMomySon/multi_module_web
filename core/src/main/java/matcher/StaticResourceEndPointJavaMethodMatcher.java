@@ -42,6 +42,7 @@ public class StaticResourceEndPointJavaMethodMatcher implements EndpointJavaMeth
         }
 
         log.info("found match. pathUrl : `{}`, requestUrl : `{}`", pathUrl, requestUrl);
+        log.info("resourcePath : `{}`", resourcePath);
         PathVariableValue pathVariableValue = new PathVariableValue(Map.of(pathVariableKey, resourcePath.toString()));
         return Optional.of(new MatchedMethod(method, pathVariableValue));
     }

@@ -2,17 +2,22 @@ package matcher.converter.base;
 
 import java.io.File;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
-public class CompositeConverter implements Converter {
-    private static final Map<Class<?>, Converter> converters = new HashMap<>();
+public class CompositeConverter implements Converter<Object> {
+    private static final Map<Class<?>, Converter<?>> _converters;
 
     private static final EmptyConverter emptyConverter = new EmptyConverter();
 
     static {
         ObjectConverter objectConverter = new ObjectConverter();
 
+        Map<Class<?>, Converter<?>> converters = new HashMap<>();
+
+        converters.put(Path.class, new PathConverter());
         converters.put(InputStream.class, new InputStreamConverter());
         converters.put(File.class, new FileConverter());
         converters.put(boolean.class, objectConverter);
@@ -32,12 +37,30 @@ public class CompositeConverter implements Converter {
         converters.put(double.class, objectConverter);
         converters.put(Double.class, objectConverter);
         converters.put(String.class, objectConverter);
+
+        _converters = Map.copyOf(converters);
     }
 
     @Override
     public InputStream convertToInputStream(Object object) {
         Class<?> key = object.getClass();
-        Converter converter = converters.getOrDefault(key, emptyConverter);
+
+        Optional<Class<?>> foundkey = _converters.keySet().stream()
+            .filter(e -> e.isAssignableFrom(key))
+            .findFirst();
+
+        if(foundkey.isEmpty()){
+            return emptyConverter.convertToInputStream(object);
+        }
+
+        Class<?> targetClazz = foundkey.get();
+        Converter<Object> converter = (Converter<Object>) _converters.get(targetClazz);
         return converter.convertToInputStream(object);
+
+//        Converter<Object> converter = (Converter<Object>) first;
+//            .map(_converters::get)
+//            .orElse(emptyConverter);
+
+//        return converter.convertToInputStream(object);
     }
 }

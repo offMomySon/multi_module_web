@@ -49,4 +49,11 @@ public class HttpRequestPath {
     public int hashCode() {
         return Objects.hash(value);
     }
+
+    @Override
+    public String toString() {
+        return "HttpRequestPath{" +
+            "value=" + value +
+            '}';
+    }
 }

@@ -22,7 +22,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import matcher.EndpointJavaMethodMatcher;
+import matcher.EndpointMatcher;
 import matcher.MatchedMethod;
 import matcher.RequestMethod;
 import matcher.annotation.PathVariable;
@@ -39,13 +39,13 @@ import vo.QueryParameters;
 public class BaseHttpRequestProcessor implements HttpRequestProcessor {
 
     private final ObjectRepository objectRepository;
-    private final EndpointJavaMethodMatcher endpointJavaMethodMatcher;
+    private final EndpointMatcher endpointMatcher;
     private final SimpleDateFormat simpleDateFormat;
     private final String hostAddress;
 
-    public BaseHttpRequestProcessor(ObjectRepository objectRepository, EndpointJavaMethodMatcher endpointJavaMethodMatcher, SimpleDateFormat simpleDateFormat, String hostAddress) {
+    public BaseHttpRequestProcessor(ObjectRepository objectRepository, EndpointMatcher endpointMatcher, SimpleDateFormat simpleDateFormat, String hostAddress) {
         this.objectRepository = objectRepository;
-        this.endpointJavaMethodMatcher = endpointJavaMethodMatcher;
+        this.endpointMatcher = endpointMatcher;
         this.simpleDateFormat = simpleDateFormat;
         this.hostAddress = hostAddress;
     }
@@ -59,7 +59,7 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
         PathUrl requestUrl = PathUrl.from(request.getHttpRequestPath().getValue().toString());
         QueryParameters queryParameters = request.getQueryParameters();
 
-        MatchedMethod matchedMethod = endpointJavaMethodMatcher.match(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
+        MatchedMethod matchedMethod = endpointMatcher.match(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
         Method javaMethod = matchedMethod.getJavaMethod();
         RequestParameters pathVariableValue = new RequestParameters(matchedMethod.getPathVariableValue().getValues());
         RequestParameters queryParamValues = new RequestParameters(queryParameters.getParameterMap());

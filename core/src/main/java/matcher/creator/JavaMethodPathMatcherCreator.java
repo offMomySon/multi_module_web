@@ -1,6 +1,7 @@
 package matcher.creator;
 
-import matcher.BaseEndpointJavaMethodMatcher;
+import container.ObjectRepository;
+import matcher.BaseEndpointMatcher;
 import matcher.PathUrlMatcher;
 import matcher.RequestMethod;
 import matcher.annotation.RequestMapping;
@@ -17,13 +18,15 @@ public class JavaMethodPathMatcherCreator {
 
     private final Class<?> clazz;
     private final RequestMappingValueExtractor valueExtractor;
+    private final ObjectRepository objectRepository;
 
-    public JavaMethodPathMatcherCreator(@NonNull Class<?> clazz) {
+    public JavaMethodPathMatcherCreator(@NonNull Class<?> clazz, @NonNull ObjectRepository objectRepository) {
         this.clazz = clazz;
         this.valueExtractor = new RequestMappingValueExtractor(clazz);
+        this.objectRepository = objectRepository;
     }
 
-    public List<BaseEndpointJavaMethodMatcher> create() {
+    public List<BaseEndpointMatcher> create() {
         List<Method> peekMethods = AnnotationUtils.peekMethods(this.clazz, REQUEST_MAPPING_CLASS).stream()
             .collect(Collectors.toUnmodifiableList());
 
@@ -41,7 +44,10 @@ public class JavaMethodPathMatcherCreator {
                 SegmentChunkFactory segmentChunkFactory = new SegmentChunkFactory(baseUrl);
                 PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(segmentChunkFactory);
 
-                return new BaseEndpointJavaMethodMatcher(requestMethod, pathUrlMatcher, javaMethod);
+                Class<?> declaringClass = javaMethod.getDeclaringClass();
+                Object declaringInstance = objectRepository.get(declaringClass);
+
+                return new BaseEndpointMatcher(requestMethod, pathUrlMatcher, declaringInstance, javaMethod);
             })
             .collect(Collectors.toUnmodifiableList());
     }

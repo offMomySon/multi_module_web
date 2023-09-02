@@ -39,7 +39,7 @@ public class StaticResourceEndPointCreator {
     }
 
 
-    public List<StaticResourceEndPointJavaMethodMatcher> create() {
+    public List<StaticResourceEndPointMatcher> create() {
         Method staticResourceFindMethod = getStaticResourceFindMethod();
 
         List<Path> foundFiles = findFilePath(resourceDirectory);
@@ -49,7 +49,7 @@ public class StaticResourceEndPointCreator {
             .collect(Collectors.toUnmodifiableList());
 
         return resourcePaths.stream()
-            .map(resourcePath -> new StaticResourceEndPointJavaMethodMatcher(staticResourceFindMethod, resourcePath.getResourceUrl(), resourcePath.getResourcePath(), PATH_VARIABLE_KEY))
+            .map(resourcePath -> new StaticResourceEndPointMatcher(staticResourceFindMethod, resourcePath.getResourceUrl(), resourcePath.getResourcePath(), PATH_VARIABLE_KEY))
             .collect(Collectors.toUnmodifiableList());
     }
 

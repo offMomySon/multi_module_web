@@ -5,28 +5,33 @@ import matcher.segment.PathVariableValue;
 import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.Optional;
+import task.HttpTask;
+import task.JavaMethodTask;
 
 // 생성자
 // 1. requestMethod 를 받는다.
 // 2. pathUrlMatcher 를 받는다.
 // 3. java method 를 받는다.
 // 4. 객체를 생성한다.
-public class BaseEndpointJavaMethodMatcher implements EndpointJavaMethodMatcher {
+public class BaseEndpointMatcher implements EndpointMatcher {
     private final RequestMethod requestMethod;
     private final PathUrlMatcher pathUrlMatcher;
+    private final Object declaringInstance;
     private final Method javaMethod;
 
-    public BaseEndpointJavaMethodMatcher(RequestMethod requestMethod, PathUrlMatcher pathUrlMatcher, Method javaMethod) {
+    public BaseEndpointMatcher(RequestMethod requestMethod, PathUrlMatcher pathUrlMatcher, Object declaringInstance, Method javaMethod) {
         Objects.requireNonNull(requestMethod);
         Objects.requireNonNull(pathUrlMatcher);
+        Objects.requireNonNull(declaringInstance);
         Objects.requireNonNull(javaMethod);
         this.requestMethod = requestMethod;
         this.pathUrlMatcher = pathUrlMatcher;
+        this.declaringInstance = declaringInstance;
         this.javaMethod = javaMethod;
     }
 
     @Override
-    public Optional<MatchedMethod> match(RequestMethod requestMethod, PathUrl requestUrl) {
+    public Optional<MatchedHttpTask> match(RequestMethod requestMethod, PathUrl requestUrl) {
         if (Objects.isNull(requestUrl)) {
             return Optional.empty();
         }
@@ -40,8 +45,10 @@ public class BaseEndpointJavaMethodMatcher implements EndpointJavaMethodMatcher 
             return Optional.empty();
         }
 
+        HttpTask httpTask = new JavaMethodTask(declaringInstance, javaMethod);
         PathVariableValue pathVariableValue = optionalPathVariableValue.get();
-        return Optional.of(new MatchedMethod(javaMethod, pathVariableValue));
+        MatchedHttpTask matchedHttpTask = new MatchedHttpTask(httpTask, pathVariableValue);
+        return Optional.of(matchedHttpTask);
     }
 
     @Override

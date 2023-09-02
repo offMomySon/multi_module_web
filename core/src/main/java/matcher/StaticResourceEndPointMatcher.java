@@ -10,7 +10,7 @@ import matcher.segment.PathUrl;
 import matcher.segment.PathVariableValue;
 
 @Slf4j
-public class StaticResourceEndPointJavaMethodMatcher implements EndpointJavaMethodMatcher {
+public class StaticResourceEndPointMatcher implements EndpointMatcher {
     private static final RequestMethod REQUEST_METHOD = RequestMethod.GET;
 
     private final Method method;
@@ -18,7 +18,7 @@ public class StaticResourceEndPointJavaMethodMatcher implements EndpointJavaMeth
     private final Path resourcePath;
     private final String pathVariableKey;
 
-    public StaticResourceEndPointJavaMethodMatcher(Method method, PathUrl pathUrl, Path resourcePath, String pathVariableKey) {
+    public StaticResourceEndPointMatcher(Method method, PathUrl pathUrl, Path resourcePath, String pathVariableKey) {
         Objects.requireNonNull(method);
         Objects.requireNonNull(pathUrl);
         Objects.requireNonNull(resourcePath);

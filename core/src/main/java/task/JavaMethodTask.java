@@ -14,7 +14,7 @@ public class JavaMethodTask implements HttpTask {
     private final Method javaMethod;
     private final Parameter[] parameters;
 
-    private JavaMethodTask(Object declaringClazzObject, Method javaMethod) {
+    public JavaMethodTask(Object declaringClazzObject, Method javaMethod) {
         Objects.requireNonNull(declaringClazzObject);
         Objects.requireNonNull(javaMethod);
         this.declaringClazzObject = declaringClazzObject;

@@ -13,13 +13,13 @@ import task.JavaMethodTask;
 // 2. pathUrlMatcher 를 받는다.
 // 3. java method 를 받는다.
 // 4. 객체를 생성한다.
-public class BaseEndpointMatcher implements EndpointMatcher {
+public class JavaMethodEndpointMatcher implements EndpointMatcher {
     private final RequestMethod requestMethod;
     private final PathUrlMatcher pathUrlMatcher;
     private final Object declaringInstance;
     private final Method javaMethod;
 
-    public BaseEndpointMatcher(RequestMethod requestMethod, PathUrlMatcher pathUrlMatcher, Object declaringInstance, Method javaMethod) {
+    public JavaMethodEndpointMatcher(RequestMethod requestMethod, PathUrlMatcher pathUrlMatcher, Object declaringInstance, Method javaMethod) {
         Objects.requireNonNull(requestMethod);
         Objects.requireNonNull(pathUrlMatcher);
         Objects.requireNonNull(declaringInstance);

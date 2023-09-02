@@ -1,6 +1,6 @@
 package main.matcher.segment;
 
-import matcher.BaseEndpointMatcher;
+import matcher.JavaMethodEndpointMatcher;
 import matcher.MatchedMethod;
 import matcher.PathUrlMatcher;
 import matcher.RequestMethod;
@@ -16,7 +16,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class BaseEndpointMatcherTest {
+class JavaMethodEndpointMatcherTest {
 
     @DisplayName("http path 와 일치하면 resolve 데이터를 가져옵니다.")
     @PathMatchTestSuite.PathMatchTest
@@ -25,7 +25,7 @@ class BaseEndpointMatcherTest {
         PathUrl basePathUrl = PathUrl.from(baseUrl);
         SegmentChunkFactory segmentChunkFactory = new SegmentChunkFactory(basePathUrl);
         PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(segmentChunkFactory);
-        BaseEndpointMatcher baseHttpPathMatcher = new BaseEndpointMatcher(RequestMethod.GET, pathUrlMatcher, new Object(), TestClass.class.getDeclaredMethod("method"));
+        JavaMethodEndpointMatcher baseHttpPathMatcher = new JavaMethodEndpointMatcher(RequestMethod.GET, pathUrlMatcher, new Object(), TestClass.class.getDeclaredMethod("method"));
 
         //when
         boolean actual = baseHttpPathMatcher.match(RequestMethod.GET, PathUrl.from(requestPath)).isPresent();
@@ -44,7 +44,7 @@ class BaseEndpointMatcherTest {
         PathUrl basePathUrl = PathUrl.from(baseUrl);
         SegmentChunkFactory segmentChunkFactory = new SegmentChunkFactory(basePathUrl);
         PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(segmentChunkFactory);
-        BaseEndpointMatcher baseHttpPathMatcher = new BaseEndpointMatcher(RequestMethod.GET, pathUrlMatcher, new Object(), TestClass.class.getDeclaredMethod("method"));
+        JavaMethodEndpointMatcher baseHttpPathMatcher = new JavaMethodEndpointMatcher(RequestMethod.GET, pathUrlMatcher, new Object(), TestClass.class.getDeclaredMethod("method"));
 
         //when
         Optional<MatchedMethod> optionalResolvedMethod = baseHttpPathMatcher.match(RequestMethod.GET, PathUrl.from(requestPath));

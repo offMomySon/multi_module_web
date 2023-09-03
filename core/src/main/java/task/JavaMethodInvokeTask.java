@@ -9,7 +9,7 @@ import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class JavaMethodInvokeTask implements HttpTask {
+public class JavaMethodInvokeTask implements Task {
     private final Object declaringClazzObject;
     private final Method javaMethod;
     private final Parameter[] parameters;

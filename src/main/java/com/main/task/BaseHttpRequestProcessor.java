@@ -27,7 +27,7 @@ import matcher.annotation.RequestParam;
 import matcher.converter.RequestParameters;
 import matcher.segment.PathUrl;
 import processor.HttpRequestProcessor;
-import task.HttpTask;
+import task.Task;
 import vo.HttpRequest;
 import vo.HttpResponse;
 import vo.QueryParameters;
@@ -57,7 +57,7 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
         QueryParameters queryParameters = request.getQueryParameters();
 
         MatchedEndPoint matchedEndPoint = endpointMatcher.match(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
-        HttpTask httpTask = matchedEndPoint.getHttpTask();
+        Task task = matchedEndPoint.getTask();
         RequestParameters pathVariableValue = new RequestParameters(matchedEndPoint.getPathVariableValue().getValues());
         RequestParameters queryParamValues = new RequestParameters(queryParameters.getParameterMap());
 
@@ -70,19 +70,19 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
         );
 
         ParameterValueGetter parameterValueGetter = new ParameterValueGetter(methodParameterValueMatcher, new ParameterValueConverterFactory(new ObjectMapper()));
-        Object[] parameterValues = Arrays.stream(httpTask.getExecuteParameters())
+        Object[] parameterValues = Arrays.stream(task.getExecuteParameters())
             .map(parameterValueGetter::get)
             .map(p -> p.getValue().isPresent() ? p.getValue().get() : null)
             .toArray();
 
-        Optional<Object> result = httpTask.execute(parameterValues);
+        Optional<Object> result = task.execute(parameterValues);
         if (result.isEmpty()) {
             throw new RuntimeException("does not exist methodResult.");
         }
 
         log.info("methodResult : `{}`, clazz : `{}`", result.get(), result.get().getClass());
 
-        String contentType = ContentTypeCreator.from(httpTask, result.get()).create();
+        String contentType = ContentTypeCreator.from(task, result.get()).create();
         HttpResponseHeaderCreator headerCreator = new HttpResponseHeaderCreator(simpleDateFormat, hostAddress, contentType);
         HttpResponseHeader httpResponseHeader = headerCreator.create();
 

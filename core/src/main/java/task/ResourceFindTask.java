@@ -9,7 +9,7 @@ import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ResourceFindTask implements HttpTask {
+public class ResourceFindTask implements Task {
     private final Path resourcePath;
 
     public ResourceFindTask(Path resourcePath) {

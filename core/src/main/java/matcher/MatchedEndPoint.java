@@ -2,21 +2,21 @@ package matcher;
 
 import java.util.Objects;
 import matcher.segment.PathVariableValue;
-import task.HttpTask;
+import task.Task;
 
 public class MatchedEndPoint {
-    private final HttpTask httpTask;
+    private final Task task;
     private final PathVariableValue pathVariableValue;
 
-    public MatchedEndPoint(HttpTask httpTask, PathVariableValue pathVariableValue) {
-        Objects.requireNonNull(httpTask);
+    public MatchedEndPoint(Task task, PathVariableValue pathVariableValue) {
+        Objects.requireNonNull(task);
         Objects.requireNonNull(pathVariableValue);
-        this.httpTask = httpTask;
+        this.task = task;
         this.pathVariableValue = pathVariableValue;
     }
 
-    public HttpTask getHttpTask() {
-        return httpTask;
+    public Task getTask() {
+        return task;
     }
 
     public PathVariableValue getPathVariableValue() {

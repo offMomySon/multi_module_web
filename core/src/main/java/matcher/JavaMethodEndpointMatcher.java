@@ -5,7 +5,7 @@ import matcher.segment.PathVariableValue;
 import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.Optional;
-import task.HttpTask;
+import task.Task;
 import task.JavaMethodInvokeTask;
 
 // 생성자
@@ -45,9 +45,9 @@ public class JavaMethodEndpointMatcher implements EndpointMatcher {
             return Optional.empty();
         }
 
-        HttpTask httpTask = new JavaMethodInvokeTask(declaringInstance, javaMethod);
+        Task task = new JavaMethodInvokeTask(declaringInstance, javaMethod);
         PathVariableValue pathVariableValue = optionalPathVariableValue.get();
-        MatchedEndPoint matchedEndPoint = new MatchedEndPoint(httpTask, pathVariableValue);
+        MatchedEndPoint matchedEndPoint = new MatchedEndPoint(task, pathVariableValue);
         return Optional.of(matchedEndPoint);
     }
 

@@ -18,7 +18,7 @@ public class StaticResourceEndPointCreator {
 
     private final Path resourceDirectory;
 
-    public StaticResourceEndPointCreator(Path resourceDirectory) {
+    private StaticResourceEndPointCreator(Path resourceDirectory) {
         Objects.requireNonNull(resourceDirectory);
         log.info("resourceDirectory : {}", resourceDirectory);
         this.resourceDirectory = resourceDirectory.normalize();
@@ -31,9 +31,13 @@ public class StaticResourceEndPointCreator {
         }
 
         Path clazzPath = FileSystemUtil.getClazzRootPath(clazz);
+        log.info("classPath : `{}`", clazzPath);
         Path projectPackageDirectory = clazzPath.getParent();
+        log.info("projectPackageDirectory : `{}`", projectPackageDirectory);
         Path resourceDirectory = projectPackageDirectory.resolve(resourcePackage);
+        log.info("resourceDirectory1 : `{}`", resourceDirectory);
         resourceDirectory = resourceDirectory.normalize();
+        log.info("resourceDirectory2 : `{}`", resourceDirectory);
 
         return new StaticResourceEndPointCreator(resourceDirectory);
     }

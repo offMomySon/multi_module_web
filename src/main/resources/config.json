@@ -1,0 +1,7 @@
+{
+  "maxConnection": 5,
+  "waitConnection": 5,
+  "keepAliveTime" : 6000,
+  "port" : 8080
+}
+

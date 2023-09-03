@@ -1,6 +1,7 @@
 package com.main;
 
 
+import com.main.config.HttpConfig;
 import com.main.task.BaseHttpRequestProcessor;
 import com.main.util.AnnotationUtils;
 import container.ClassFinder;
@@ -87,7 +88,11 @@ public class App {
         log.info("newFilters : {}", newFilters);
 
         BaseHttpRequestProcessor baseHttpRequestProcessor = new BaseHttpRequestProcessor(objectRepository, endpointMatcher, SIMPLE_DATE_FORMAT, HOST_ADDRESS);
-        HttpService httpService = new HttpService(baseHttpRequestProcessor, newFilters);
+        HttpService httpService = HttpService.from(baseHttpRequestProcessor, newFilters,
+                                                   HttpConfig.INSTANCE.getPort(),
+                                                   HttpConfig.INSTANCE.getMaxConnection(),
+                                                   HttpConfig.INSTANCE.getWaitConnection(),
+                                                   HttpConfig.INSTANCE.getKeepAliveTime());
         httpService.start();
     }
 

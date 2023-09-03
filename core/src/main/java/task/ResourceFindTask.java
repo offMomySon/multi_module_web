@@ -3,17 +3,18 @@ package task;
 import java.lang.reflect.Parameter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.MessageFormat;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ResourceTask implements HttpTask {
-    private final String resourceUrl;
+public class ResourceFindTask implements HttpTask {
+    private final Path resourcePath;
 
-    public ResourceTask(String resourceUrl) {
-        Objects.requireNonNull(resourceUrl);
-        this.resourceUrl = resourceUrl;
+    public ResourceFindTask(Path resourcePath) {
+        Objects.requireNonNull(resourcePath);
+        this.resourcePath = resourcePath;
     }
 
     @Override
@@ -23,12 +24,11 @@ public class ResourceTask implements HttpTask {
 
     @Override
     public Optional<Object> execute(Object[] params) {
-        Path resourcePath = Path.of(resourceUrl);
         log.info("resourcePath : `{}`", resourcePath);
 
         if (Files.notExists(resourcePath)) {
-            log.info("file does not exist");
-            throw new RuntimeException("path does not exist");
+            log.info("does not exist resource. ResourcePath : `{}`", resourcePath);
+            throw new RuntimeException(MessageFormat.format("does not exist resource. ResourcePath : `{}`", resourcePath));
         }
 
         return Optional.of(resourcePath);

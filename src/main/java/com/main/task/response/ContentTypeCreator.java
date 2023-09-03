@@ -8,7 +8,7 @@ import java.nio.file.Path;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import task.HttpTask;
-import task.JavaMethodTask;
+import task.JavaMethodInvokeTask;
 
 @Slf4j
 public class ContentTypeCreator {
@@ -25,9 +25,9 @@ public class ContentTypeCreator {
         Objects.requireNonNull(httpTask);
         Objects.requireNonNull(methodResult);
 
-        if (httpTask instanceof JavaMethodTask) {
-            JavaMethodTask javaMethodTask = (JavaMethodTask) httpTask;
-            Method javaMethod = javaMethodTask.getJavaMethod();
+        if (httpTask instanceof JavaMethodInvokeTask) {
+            JavaMethodInvokeTask javaMethodInvokeTask = (JavaMethodInvokeTask) httpTask;
+            Method javaMethod = javaMethodInvokeTask.getJavaMethod();
             Class<?> declaringClass = javaMethod.getDeclaringClass();
             boolean isResponseBodyMethod = AnnotationUtils.exist(javaMethod, ResponseBody.class) ||
                 AnnotationUtils.exist(declaringClass, RestController.class);

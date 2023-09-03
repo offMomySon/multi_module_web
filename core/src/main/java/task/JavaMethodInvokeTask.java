@@ -9,12 +9,12 @@ import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class JavaMethodTask implements HttpTask {
+public class JavaMethodInvokeTask implements HttpTask {
     private final Object declaringClazzObject;
     private final Method javaMethod;
     private final Parameter[] parameters;
 
-    public JavaMethodTask(Object declaringClazzObject, Method javaMethod) {
+    public JavaMethodInvokeTask(Object declaringClazzObject, Method javaMethod) {
         Objects.requireNonNull(declaringClazzObject);
         Objects.requireNonNull(javaMethod);
         this.declaringClazzObject = declaringClazzObject;

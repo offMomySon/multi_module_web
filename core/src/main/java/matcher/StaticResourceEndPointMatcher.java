@@ -1,49 +1,42 @@
 package matcher;
 
-import java.lang.reflect.Method;
 import java.nio.file.Path;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import matcher.segment.PathUrl;
 import matcher.segment.PathVariableValue;
-import task.ResourceTask;
+import task.ResourceFindTask;
 
 @Slf4j
 public class StaticResourceEndPointMatcher implements EndpointMatcher {
     private static final RequestMethod REQUEST_METHOD = RequestMethod.GET;
 
-    private final Method method;
-    private final PathUrl pathUrl;
+    private final PathUrl endPointUrl;
     private final Path resourcePath;
-    private final String pathVariableKey;
 
-    public StaticResourceEndPointMatcher(Method method, PathUrl pathUrl, Path resourcePath, String pathVariableKey) {
-        Objects.requireNonNull(method);
-        Objects.requireNonNull(pathUrl);
+    public StaticResourceEndPointMatcher(PathUrl endPointUrl, Path resourcePath) {
+        Objects.requireNonNull(endPointUrl);
         Objects.requireNonNull(resourcePath);
-        Objects.requireNonNull(pathVariableKey);
-        this.method = method;
-        this.pathUrl = pathUrl;
+        this.endPointUrl = endPointUrl;
         this.resourcePath = resourcePath;
-        this.pathVariableKey = pathVariableKey;
     }
 
     @Override
-    public Optional<MatchedHttpTask> match(RequestMethod requestMethod, PathUrl requestUrl) {
+    public Optional<MatchedEndPoint> match(RequestMethod requestMethod, PathUrl requestUrl) {
         boolean doesNotResourceMethod = !requestMethod.equals(REQUEST_METHOD);
         if (doesNotResourceMethod) {
             return Optional.empty();
         }
 
-        boolean doesNotEqualRequestUrl = !pathUrl.equals(requestUrl);
-        if(doesNotEqualRequestUrl){
+        boolean doesNotMatchEndPointUrl = !endPointUrl.equals(requestUrl);
+        if (doesNotMatchEndPointUrl) {
             return Optional.empty();
         }
 
-        log.info("found match. pathUrl : `{}`, requestUrl : `{}`", pathUrl, requestUrl);
-        ResourceTask resourceTask = new ResourceTask(resourcePath.toString());
-        return Optional.of(new MatchedHttpTask(resourceTask, PathVariableValue.empty()));
+        log.info("Matched. requestUrl : `{}`, endPointUrl : `{}`, resourcePath : `{}`", requestUrl, endPointUrl, resourcePath);
+        ResourceFindTask resourceFindTask = new ResourceFindTask(resourcePath);
+        MatchedEndPoint matchedEndPoint = new MatchedEndPoint(resourceFindTask, PathVariableValue.empty());
+        return Optional.of(matchedEndPoint);
     }
 }

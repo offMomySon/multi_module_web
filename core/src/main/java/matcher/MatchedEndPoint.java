@@ -4,11 +4,11 @@ import java.util.Objects;
 import matcher.segment.PathVariableValue;
 import task.HttpTask;
 
-public class MatchedHttpTask {
+public class MatchedEndPoint {
     private final HttpTask httpTask;
     private final PathVariableValue pathVariableValue;
 
-    public MatchedHttpTask(HttpTask httpTask, PathVariableValue pathVariableValue) {
+    public MatchedEndPoint(HttpTask httpTask, PathVariableValue pathVariableValue) {
         Objects.requireNonNull(httpTask);
         Objects.requireNonNull(pathVariableValue);
         this.httpTask = httpTask;

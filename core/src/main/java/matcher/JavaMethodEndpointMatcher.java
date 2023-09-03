@@ -6,7 +6,7 @@ import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.Optional;
 import task.HttpTask;
-import task.JavaMethodTask;
+import task.JavaMethodInvokeTask;
 
 // 생성자
 // 1. requestMethod 를 받는다.
@@ -31,7 +31,7 @@ public class JavaMethodEndpointMatcher implements EndpointMatcher {
     }
 
     @Override
-    public Optional<MatchedHttpTask> match(RequestMethod requestMethod, PathUrl requestUrl) {
+    public Optional<MatchedEndPoint> match(RequestMethod requestMethod, PathUrl requestUrl) {
         if (Objects.isNull(requestUrl)) {
             return Optional.empty();
         }
@@ -45,10 +45,10 @@ public class JavaMethodEndpointMatcher implements EndpointMatcher {
             return Optional.empty();
         }
 
-        HttpTask httpTask = new JavaMethodTask(declaringInstance, javaMethod);
+        HttpTask httpTask = new JavaMethodInvokeTask(declaringInstance, javaMethod);
         PathVariableValue pathVariableValue = optionalPathVariableValue.get();
-        MatchedHttpTask matchedHttpTask = new MatchedHttpTask(httpTask, pathVariableValue);
-        return Optional.of(matchedHttpTask);
+        MatchedEndPoint matchedEndPoint = new MatchedEndPoint(httpTask, pathVariableValue);
+        return Optional.of(matchedEndPoint);
     }
 
     @Override

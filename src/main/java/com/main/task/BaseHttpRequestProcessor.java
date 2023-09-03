@@ -19,7 +19,7 @@ import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import matcher.EndpointMatcher;
-import matcher.MatchedHttpTask;
+import matcher.MatchedEndPoint;
 import matcher.RequestMethod;
 import matcher.annotation.PathVariable;
 import matcher.annotation.RequestBody;
@@ -56,9 +56,9 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
         PathUrl requestUrl = PathUrl.from(request.getHttpRequestPath().getValue().toString());
         QueryParameters queryParameters = request.getQueryParameters();
 
-        MatchedHttpTask matchedHttpTask = endpointMatcher.match(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
-        HttpTask httpTask = matchedHttpTask.getHttpTask();
-        RequestParameters pathVariableValue = new RequestParameters(matchedHttpTask.getPathVariableValue().getValues());
+        MatchedEndPoint matchedEndPoint = endpointMatcher.match(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
+        HttpTask httpTask = matchedEndPoint.getHttpTask();
+        RequestParameters pathVariableValue = new RequestParameters(matchedEndPoint.getPathVariableValue().getValues());
         RequestParameters queryParamValues = new RequestParameters(queryParameters.getParameterMap());
 
         CompositeMethodParameterValueMatcher methodParameterValueMatcher = new CompositeMethodParameterValueMatcher(

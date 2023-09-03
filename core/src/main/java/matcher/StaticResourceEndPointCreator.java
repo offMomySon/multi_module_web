@@ -1,6 +1,5 @@
 package matcher;
 
-import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -8,81 +7,47 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
-import matcher.annotation.PathVariable;
 import matcher.segment.PathUrl;
 import util.FileSystemUtil;
 
 @Slf4j
 public class StaticResourceEndPointCreator {
-    private static final String PATH_VARIABLE_KEY = "pathUrl";
 
     private final Path resourceDirectory;
+    private final String urlPrefix;
 
-    private StaticResourceEndPointCreator(Path resourceDirectory) {
+    private StaticResourceEndPointCreator(Path resourceDirectory, String urlPrefix) {
         Objects.requireNonNull(resourceDirectory);
+        Objects.requireNonNull(urlPrefix);
         log.info("resourceDirectory : {}", resourceDirectory);
+        log.info("urlPrefix : {}", urlPrefix);
         this.resourceDirectory = resourceDirectory.normalize();
+        this.urlPrefix = urlPrefix;
     }
 
-    public static StaticResourceEndPointCreator from(Class<?> clazz, String resourcePackage) {
+    public static StaticResourceEndPointCreator from(Class<?> clazz, String resourcePackage, String urlPrefix) {
         Objects.requireNonNull(clazz);
+        Objects.requireNonNull(urlPrefix);
         if (Objects.isNull(resourcePackage) || resourcePackage.isBlank()) {
             throw new RuntimeException("requestPackage is empty.");
         }
 
         Path clazzPath = FileSystemUtil.getClazzRootPath(clazz);
-        log.info("classPath : `{}`", clazzPath);
         Path projectPackageDirectory = clazzPath.getParent();
-        log.info("projectPackageDirectory : `{}`", projectPackageDirectory);
         Path resourceDirectory = projectPackageDirectory.resolve(resourcePackage);
-        log.info("resourceDirectory1 : `{}`", resourceDirectory);
         resourceDirectory = resourceDirectory.normalize();
-        log.info("resourceDirectory2 : `{}`", resourceDirectory);
-
-        return new StaticResourceEndPointCreator(resourceDirectory);
+        return new StaticResourceEndPointCreator(resourceDirectory, urlPrefix);
     }
-
 
     public List<StaticResourceEndPointMatcher> create() {
-        Method staticResourceFindMethod = getStaticResourceFindMethod();
-
-        List<Path> foundFiles = findFilePath(resourceDirectory);
-
-        List<ResourcePath> resourcePaths = foundFiles.stream()
-            .map(filePath -> ResourcePath.from(resourceDirectory, filePath))
+        List<Path> foundResources = findFilePath(resourceDirectory);
+        List<ResourceUrl> resourceUrls = foundResources.stream()
+            .map(foundResource -> ResourceUrl.from(resourceDirectory, foundResource, urlPrefix))
             .collect(Collectors.toUnmodifiableList());
 
-        return resourcePaths.stream()
-            .map(resourcePath -> new StaticResourceEndPointMatcher(staticResourceFindMethod, resourcePath.getResourceUrl(), resourcePath.getResourcePath(), PATH_VARIABLE_KEY))
+        return resourceUrls.stream()
+            .map(StaticResourceEndPointCreator::createStaticResourceEndPointMatcher)
             .collect(Collectors.toUnmodifiableList());
-    }
-
-    private static class ResourcePath {
-        private static final String DIRECTORY_DELIMITER = "/";
-
-        private final Path resourcePath;
-        private final PathUrl resourceUrl;
-
-        public ResourcePath(Path resourcePath, PathUrl resourceUrl) {
-            Objects.requireNonNull(resourcePath);
-            Objects.requireNonNull(resourceUrl);
-            this.resourcePath = resourcePath;
-            this.resourceUrl = resourceUrl;
-        }
-
-        public static ResourcePath from(Path resourceDirectory, Path resourcePath) {
-            Path packageResourcePath = resourceDirectory.relativize(resourcePath);
-            Path resourceUrl = Path.of(DIRECTORY_DELIMITER).resolve(packageResourcePath);
-            return new ResourcePath(resourcePath, PathUrl.from(resourceUrl));
-        }
-
-        public Path getResourcePath() {
-            return resourcePath;
-        }
-
-        public PathUrl getResourceUrl() {
-            return resourceUrl;
-        }
     }
 
     private static List<Path> findFilePath(Path resourceDirectory) {
@@ -96,24 +61,42 @@ public class StaticResourceEndPointCreator {
         }
     }
 
-    private Method getStaticResourceFindMethod() {
-        try {
-            return StaticResourceFinder.class.getMethod("find", String.class);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+    private static StaticResourceEndPointMatcher createStaticResourceEndPointMatcher(ResourceUrl resourceAndUrl) {
+        PathUrl resourceUrl = resourceAndUrl.getUrl();
+        Path resource = resourceAndUrl.getResource();
+        return new StaticResourceEndPointMatcher(resourceUrl, resource);
     }
 
-    public static class StaticResourceFinder {
-        public static Path find(@PathVariable(PATH_VARIABLE_KEY) String resourceUrl) {
-            Path resourcePath = Path.of(resourceUrl);
-            log.info("resourcePath : `{}`", resourcePath);
+    private static class ResourceUrl {
+        private static final String DELIMITER = "/";
 
-            if (Files.notExists(resourcePath)) {
-                log.info("file does not exist");
-                throw new RuntimeException("path does not exist");
-            }
-            return resourcePath;
+        private final Path resource;
+        private final PathUrl url;
+
+        public ResourceUrl(Path resource, PathUrl url) {
+            Objects.requireNonNull(resource);
+            Objects.requireNonNull(url);
+            this.resource = resource;
+            this.url = url;
+        }
+
+        public static ResourceUrl from(Path resourceDirectory, Path resource, String urlPrefix){
+            Objects.requireNonNull(resourceDirectory);
+            Objects.requireNonNull(resource);
+            Objects.requireNonNull(urlPrefix);
+
+            Path relativeResourcePath = resourceDirectory.relativize(resource);
+            Path resourcePath = Path.of(DELIMITER).resolve(urlPrefix).resolve(DELIMITER).resolve(relativeResourcePath);
+            PathUrl resourceUrl = PathUrl.from(resourcePath);
+            return new ResourceUrl(resource, resourceUrl);
+        }
+
+        public Path getResource() {
+            return resource;
+        }
+
+        public PathUrl getUrl() {
+            return url;
         }
     }
 }

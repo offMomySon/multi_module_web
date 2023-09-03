@@ -31,7 +31,7 @@ public class CompositedEndpointMatcher implements EndpointMatcher {
     }
 
 //    1. method, request url 이 매칭되는 pathMatcher 가 존재하면 method, pathVariable value 를 반환합니다.
-    public Optional<MatchedHttpTask> match(RequestMethod requestMethod, PathUrl requestUrl) {
+    public Optional<MatchedEndPoint> match(RequestMethod requestMethod, PathUrl requestUrl) {
         return baseHttpPathMatchers.stream()
             .map(methodResolver -> methodResolver.match(requestMethod, requestUrl))
             .filter(Optional::isPresent)

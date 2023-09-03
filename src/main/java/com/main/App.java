@@ -69,7 +69,7 @@ public class App {
             .flatMap(Collection::stream)
             .peek(httpPathMatcher -> log.info("httpPathMatcher : `{}`", httpPathMatcher))
             .collect(Collectors.toUnmodifiableList());
-        StaticResourceEndPointCreator staticResourceEndPointCreator = StaticResourceEndPointCreator.from(App.class, "../../resources");
+        StaticResourceEndPointCreator staticResourceEndPointCreator = StaticResourceEndPointCreator.from(App.class, "../../resources", "static");
         List<StaticResourceEndPointMatcher> staticResourceEndPointJavaMethodMatchers = staticResourceEndPointCreator.create();
 
         List<EndpointMatcher> endpointMatchers = Stream.concat(baseHttpPathMatchers.stream(), staticResourceEndPointJavaMethodMatchers.stream())

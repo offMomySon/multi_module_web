@@ -1,7 +1,7 @@
 package com.main.task.converter;
 
-import com.main.task.value.ParameterValue;
 import java.text.MessageFormat;
+import java.util.Optional;
 
 public class PassParameterValueConverter implements ParameterValueConverter {
     private final Class<?> targetClazz;
@@ -11,12 +11,12 @@ public class PassParameterValueConverter implements ParameterValueConverter {
     }
 
     @Override
-    public ParameterValue<?> convert(ParameterValue<?> parameterValue) {
+    public Optional<?> convert(Optional<?> parameterValue) {
         if (parameterValue.isEmpty()) {
             return parameterValue;
         }
 
-        Class<?> parameterValueClazz = parameterValue.getClazz();
+        Class<?> parameterValueClazz = parameterValue.get().getClass();
         boolean doesNotMatchClazz = !targetClazz.isAssignableFrom(parameterValueClazz);
         if (doesNotMatchClazz) {
             throw new RuntimeException(MessageFormat.format("Does not match clazz. parameterValueClazz : `{}`, targetClazz : `{}`", parameterValue, targetClazz));

@@ -23,7 +23,7 @@ public class HttpBodyAnnotationAnnotatedParameterValueMatcher implements MethodP
     }
 
     @Override
-    public ParameterValue<?> match(Parameter parameter) {
+    public Optional<?> match(Parameter parameter) {
         Objects.requireNonNull(parameter);
 
         Optional<RequestBody> optionalRequestBody = AnnotationUtils.find(parameter, REQUEST_BODY_CLASS);
@@ -31,11 +31,11 @@ public class HttpBodyAnnotationAnnotatedParameterValueMatcher implements MethodP
             throw new RuntimeException(MessageFormat.format("Does not RequestBody annotated. parameter : `{}`", parameter));
         }
 
-        if(Objects.isNull(this.body)){
+        if (Objects.isNull(this.body)) {
             this.body = readBody(this.bodyInputStream);
         }
 
-        return ParameterValue.from(this.body);
+        return Optional.of(this.body);
     }
 
     private static String readBody(InputStream bodyInputStream) {

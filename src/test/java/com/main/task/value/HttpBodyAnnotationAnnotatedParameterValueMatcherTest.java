@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.Optional;
 import matcher.annotation.RequestBody;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -37,11 +38,12 @@ class HttpBodyAnnotationAnnotatedParameterValueMatcherTest {
         Parameter requestBodyAnnotatedParameter = TestClass.getRequestBodyAnnotatedParameter();
 
         //when
-        ParameterValue<?> parameterValue = valueMatcher.match(requestBodyAnnotatedParameter);
+        Optional<?> optionalActual = valueMatcher.match(requestBodyAnnotatedParameter);
 
         //then
-        Assertions.assertThat(parameterValue.isPresent()).isTrue();
-        boolean isStringClass = parameterValue.getClazz() == String.class;
+        Assertions.assertThat(optionalActual).isPresent();
+        Object actual = optionalActual.get();
+        boolean isStringClass = actual.getClass() == String.class;
         Assertions.assertThat(isStringClass).isTrue();
     }
 

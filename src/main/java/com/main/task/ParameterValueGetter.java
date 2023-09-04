@@ -6,6 +6,7 @@ import com.main.task.value.MethodParameterValueMatcher;
 import com.main.task.value.ParameterValue;
 import java.lang.reflect.Parameter;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -20,15 +21,15 @@ public class ParameterValueGetter {
         this.valueConverterFactory = valueConverterFactory;
     }
 
-    public ParameterValue<?> get(Parameter parameter) {
+    public Optional<?> get(Parameter parameter) {
         Objects.requireNonNull(parameter);
 
         log.info("parameter : `{}`, param class : `{}`", parameter, parameter.getType());
-        ParameterValue<?> matchedValue = valueMatcher.match(parameter);
+        Optional matchedValue = valueMatcher.match(parameter);
 
         ParameterValueConverter valueConverter = valueConverterFactory.create(parameter);
-        ParameterValue<?> value = valueConverter.convert(matchedValue);
-        log.info("ParameterValue. value : {}, class : {}", value.getValue(), value.getClazz());
-        return valueConverter.convert(matchedValue);
+        Optional<?> value = valueConverter.convert(matchedValue);
+        log.info("ParameterValue. value : {}, class : {}", value.orElse(null), value.map(Object::getClass).orElse(null));
+        return value;
     }
 }

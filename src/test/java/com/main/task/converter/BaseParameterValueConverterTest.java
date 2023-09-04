@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.main.task.value.ParameterValue;
 import java.io.ByteArrayInputStream;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -19,11 +20,11 @@ class BaseParameterValueConverterTest {
     @Test
     void test() throws Exception {
         //given
-        ParameterValue parameterValue = ParameterValue.from(new ByteArrayInputStream(new byte[3]));
+        Optional<ByteArrayInputStream> byteArrayInputStream = Optional.of(new ByteArrayInputStream(new byte[3]));
         BaseParameterValueConverter converter = new BaseParameterValueConverter(new ObjectMapper(), int.class);
 
         //when
-        Throwable actual = Assertions.catchThrowable(() -> converter.convert(parameterValue));
+        Throwable actual = Assertions.catchThrowable(() -> converter.convert(byteArrayInputStream));
 
         //then
         Assertions.assertThat(actual).isNotNull();
@@ -33,14 +34,14 @@ class BaseParameterValueConverterTest {
     @Test
     void ttest() throws Exception {
         //given
-        ParameterValue parameterValue = ParameterValue.empty();
+        Optional<Object> empty = Optional.empty();
         BaseParameterValueConverter converter = new BaseParameterValueConverter(new ObjectMapper(), int.class);
 
         //when
-        ParameterValue<?> actual = converter.convert(parameterValue);
+        Optional<?> optionalActual = converter.convert(empty);
 
         //then
-        Assertions.assertThat(actual.isEmpty()).isTrue();
+        Assertions.assertThat(optionalActual).isEmpty();
     }
 
     @DisplayName("parameterValue 를 class 로 변환합니다.")
@@ -48,15 +49,16 @@ class BaseParameterValueConverterTest {
     @MethodSource("provideConvertClassAndValue")
     void tttest(Class<?> clazz, String value) throws Exception {
         //given
-        ParameterValue parameterValue = ParameterValue.from(value);
+        Optional<String> parameterValue = Optional.of(value);
         BaseParameterValueConverter converter = new BaseParameterValueConverter(new ObjectMapper(), clazz);
 
         //when
-        ParameterValue<?> actual = converter.convert(parameterValue);
+        Optional<?> optionalActual = converter.convert(parameterValue);
 
         //then
-        Assertions.assertThat(actual.isPresent()).isTrue();
-        Assertions.assertThat(actual.getClazz()).isEqualTo(clazz);
+        Assertions.assertThat(optionalActual).isPresent();
+        Class<?> actualClazz = optionalActual.get().getClass();
+        Assertions.assertThat(actualClazz).isEqualTo(clazz);
     }
 
     private static Stream<Arguments> provideConvertClassAndValue() {

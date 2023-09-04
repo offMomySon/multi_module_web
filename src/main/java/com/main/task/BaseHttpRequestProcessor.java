@@ -72,7 +72,7 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
         ParameterValueGetter parameterValueGetter = new ParameterValueGetter(methodParameterValueMatcher, new ParameterValueConverterFactory(new ObjectMapper()));
         Object[] parameterValues = Arrays.stream(task.getExecuteParameters())
             .map(parameterValueGetter::get)
-            .map(p -> p.getValue().isPresent() ? p.getValue().get() : null)
+            .map(v -> v.orElse(null))
             .toArray();
 
         Optional<Object> result = task.execute(parameterValues);

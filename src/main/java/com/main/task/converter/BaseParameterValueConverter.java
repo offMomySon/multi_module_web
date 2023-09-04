@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.main.task.value.ParameterValue;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -19,21 +20,21 @@ public class BaseParameterValueConverter implements ParameterValueConverter {
     }
 
     @Override
-    public ParameterValue<?> convert(ParameterValue<?> parameterValue) {
+    public Optional<?> convert(Optional<?> parameterValue) {
         if (parameterValue.isEmpty()) {
             return parameterValue;
         }
 
-        String value = (String) parameterValue.getValue().get();
+        String value = (String) parameterValue.get();
         log.info("value : `{}`", value);
 
         if (targetClazz == String.class) {
-            return ParameterValue.from(value);
+            return Optional.of(value);
         }
 
         Object convertValue = readValue(targetClazz, value);
         log.info("convertValue : `{}`", convertValue);
-        return ParameterValue.from(convertValue);
+        return Optional.of(convertValue);
     }
 
     private Object readValue(Class<?> targetClazz, String value) {

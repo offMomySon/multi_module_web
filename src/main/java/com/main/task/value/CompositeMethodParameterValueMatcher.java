@@ -23,7 +23,7 @@ public class CompositeMethodParameterValueMatcher implements MethodParameterValu
     }
 
     @Override
-    public ParameterValue<?> match(Parameter parameter) {
+    public Optional<?> match(Parameter parameter) {
         Objects.requireNonNull(parameter);
 
         Optional<Class<?>> optionalMatchedAnnotationType = findAnnotatedClassForParameter(parameter, matchers.keySet());
@@ -42,7 +42,7 @@ public class CompositeMethodParameterValueMatcher implements MethodParameterValu
             return methodParameterValueMatcher.match(parameter);
         }
 
-        return ParameterValue.empty();
+        return Optional.empty();
     }
 
     private static Optional<Class<?>> findAnnotatedClassForParameter(Parameter parameter, Set<Class<?>> findAnnotationClasses) {

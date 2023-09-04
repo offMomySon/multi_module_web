@@ -39,7 +39,7 @@ public class HttpUrlAnnotationAnnotatedParameterValueMatcher<T> implements Metho
     }
 
     @Override
-    public ParameterValue<?> match(Parameter parameter) {
+    public Optional<?> match(Parameter parameter) {
         Objects.requireNonNull(parameter);
 
         Optional<T> optionalParameterAnnotation = AnnotationUtils.find(parameter, paramAnnotationClazz);
@@ -61,12 +61,10 @@ public class HttpUrlAnnotationAnnotatedParameterValueMatcher<T> implements Metho
 
         boolean doesNotExistMatchValue = Objects.isNull(matchValue);
         if (doesNotExistMatchValue) {
-            Optional<String> optionalDefaultValue = httpUrlAnnotation.getDefaultValue();
-            ParameterValue<String> parameterValue = new ParameterValue<>(optionalDefaultValue);
-            return parameterValue;
+            return httpUrlAnnotation.getDefaultValue();
         }
 
-        return ParameterValue.from(matchValue);
+        return Optional.of(matchValue);
     }
 
     public static class HttpUrlAnnotation {

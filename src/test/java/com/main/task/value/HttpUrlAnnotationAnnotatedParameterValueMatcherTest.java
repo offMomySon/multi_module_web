@@ -44,10 +44,10 @@ class HttpUrlAnnotationAnnotatedParameterValueMatcherTest {
         HttpUrlAnnotationAnnotatedParameterValueMatcher parameterValueMatcher = new HttpUrlAnnotationAnnotatedParameterValueMatcher(annotationClazz, allParamHasRequestParameters);
 
         //when
-        ParameterValue actual = parameterValueMatcher.match(annotatedParameter);
+        Optional actual = parameterValueMatcher.match(annotatedParameter);
 
         //then
-        Assertions.assertThat(actual.isPresent()).isTrue();
+        Assertions.assertThat(actual).isPresent();
     }
 
     @DisplayName("parameter 에 반드시 값을 할당해야하고 requestParameters 로 부터 값을 가져오지 못하면 exception 이 발생합니다.")
@@ -77,13 +77,10 @@ class HttpUrlAnnotationAnnotatedParameterValueMatcherTest {
         HttpUrlAnnotationAnnotatedParameterValueMatcher parameterValueMatcher = new HttpUrlAnnotationAnnotatedParameterValueMatcher(annotationClazz, emptyRequestParameters);
 
         //when
-        ParameterValue actual = parameterValueMatcher.match(doesNotMustMatchParameter);
-        System.out.println(actual);
-        System.out.println(actual.isEmpty());
-
+        Optional actual = parameterValueMatcher.match(doesNotMustMatchParameter);
 
         //then
-        Assertions.assertThat(actual.isEmpty()).isTrue();
+        Assertions.assertThat(actual).isEmpty();
     }
 
 

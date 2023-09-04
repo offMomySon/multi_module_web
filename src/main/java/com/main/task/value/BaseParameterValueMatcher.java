@@ -3,6 +3,7 @@ package com.main.task.value;
 import java.lang.reflect.Parameter;
 import java.text.MessageFormat;
 import java.util.Objects;
+import java.util.Optional;
 
 public class BaseParameterValueMatcher<T> implements MethodParameterValueMatcher {
     private final T value;
@@ -13,7 +14,7 @@ public class BaseParameterValueMatcher<T> implements MethodParameterValueMatcher
     }
 
     @Override
-    public ParameterValue<?> match(Parameter parameter) {
+    public Optional<T> match(Parameter parameter) {
         Objects.requireNonNull(parameter);
 
         Class<?> parameterClazz = parameter.getType();
@@ -24,6 +25,6 @@ public class BaseParameterValueMatcher<T> implements MethodParameterValueMatcher
             throw new RuntimeException(MessageFormat.format("Does not possible assign value. Parameter clazz : `{}`, Value clazz: `{}`", parameterClazz, valueClazz));
         }
 
-        return ParameterValue.from(value);
+        return Optional.of(value);
     }
 }

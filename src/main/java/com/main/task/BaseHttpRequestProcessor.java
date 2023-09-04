@@ -2,6 +2,7 @@ package com.main.task;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.main.task.converter.ParameterValueConverterFactory;
+import com.main.task.response.ContentType;
 import com.main.task.response.ContentTypeCreator;
 import com.main.task.response.HttpResponseHeader;
 import com.main.task.response.HttpResponseHeaderCreator;
@@ -76,14 +77,10 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
             .toArray();
 
         Optional<Object> result = task.execute(parameterValues);
-        if (result.isEmpty()) {
-            throw new RuntimeException("does not exist methodResult.");
-        }
+        log.info("methodResult : `{}`, clazz : `{}`", result.orElse(null), result.map(Object::getClass).orElse(null));
 
-        log.info("methodResult : `{}`, clazz : `{}`", result.get(), result.get().getClass());
-
-        String contentType = ContentTypeCreator.from(task, result.get()).create();
-        HttpResponseHeaderCreator headerCreator = new HttpResponseHeaderCreator(simpleDateFormat, hostAddress, contentType);
+        Optional<ContentType> optionalContentType = ContentTypeCreator.from(task, result).create();
+        HttpResponseHeaderCreator headerCreator = new HttpResponseHeaderCreator(simpleDateFormat, hostAddress, optionalContentType);
         HttpResponseHeader httpResponseHeader = headerCreator.create();
 
         HttpResponseSender httpResponseSender = new HttpResponseSender(response);

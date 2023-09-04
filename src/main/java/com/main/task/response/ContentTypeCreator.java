@@ -6,24 +6,31 @@ import com.main.util.AnnotationUtils;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import task.Task;
 import task.JavaMethodInvokeTask;
+import task.Task;
+import static com.main.task.response.ContentType.APPLICATION_JSON;
+import static com.main.task.response.ContentType.TEXT_HTML;
 
 @Slf4j
 public class ContentTypeCreator {
     private final boolean isResponseBodyMethod;
-    private final Object methodResult;
+    private final Optional<Object> optionalMethodResult;
 
-    public ContentTypeCreator(boolean isResponseBodyMethod, Object methodResult) {
-        Objects.requireNonNull(methodResult);
+    public ContentTypeCreator(boolean isResponseBodyMethod, Optional<Object> optionalMethodResult) {
+        Objects.requireNonNull(optionalMethodResult);
         this.isResponseBodyMethod = isResponseBodyMethod;
-        this.methodResult = methodResult;
+        this.optionalMethodResult = optionalMethodResult;
     }
 
-    public static ContentTypeCreator from(Task task, Object methodResult) {
+    public static ContentTypeCreator from(Task task, Optional<Object> optionalMethodResult) {
         Objects.requireNonNull(task);
-        Objects.requireNonNull(methodResult);
+        Objects.requireNonNull(optionalMethodResult);
+
+        if (optionalMethodResult.isEmpty()) {
+            return new ContentTypeCreator(false, optionalMethodResult);
+        }
 
         if (task instanceof JavaMethodInvokeTask) {
             JavaMethodInvokeTask javaMethodInvokeTask = (JavaMethodInvokeTask) task;
@@ -31,27 +38,33 @@ public class ContentTypeCreator {
             Class<?> declaringClass = javaMethod.getDeclaringClass();
             boolean isResponseBodyMethod = AnnotationUtils.exist(javaMethod, ResponseBody.class) ||
                 AnnotationUtils.exist(declaringClass, RestController.class);
-            return new ContentTypeCreator(isResponseBodyMethod, methodResult);
+            return new ContentTypeCreator(isResponseBodyMethod, optionalMethodResult);
         }
 
-        return new ContentTypeCreator(false, methodResult);
+        return new ContentTypeCreator(false, optionalMethodResult);
     }
 
-    public String create() {
-        if (isResponseBodyMethod) {
-            return "application/json";
+    public Optional<ContentType> create() {
+        if(optionalMethodResult.isEmpty()){
+            return Optional.empty();
         }
 
+        if (isResponseBodyMethod) {
+            return Optional.of(APPLICATION_JSON);
+        }
+
+        Object methodResult = optionalMethodResult.get();
         if (methodResult instanceof Path) {
             Path resource = (Path) methodResult;
-            FileExtension fileExtension = getFileExtension(resource);
-            return fileExtension.getContentType();
+            FileExtension fileExtension = extractFileExtension(resource);
+            ContentType contentType = fileExtension.getContentType();
+            return Optional.of(contentType);
         }
 
-        return "text/html";
+        return Optional.of(TEXT_HTML);
     }
 
-    private static FileExtension getFileExtension(Path path) {
+    private static FileExtension extractFileExtension(Path path) {
         String fileName = path.getFileName().toString();
         log.info("fileName : {}", fileName);
 

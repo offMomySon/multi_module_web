@@ -10,18 +10,19 @@ import java.util.Optional;
 public class HttpResponseHeaderCreator {
     private final SimpleDateFormat simpleDateFormat;
     private final String hostAddress;
-    private final Optional<String> contentType;
+    private final Optional<ContentType> contentType;
 
-    public HttpResponseHeaderCreator(SimpleDateFormat simpleDateFormat, String hostAddress, String contentType) {
+    public HttpResponseHeaderCreator(SimpleDateFormat simpleDateFormat, String hostAddress, Optional<ContentType> optionalContentType) {
         Objects.requireNonNull(simpleDateFormat);
         Objects.requireNonNull(hostAddress);
+        Objects.requireNonNull(optionalContentType);
         if (hostAddress.isBlank()) {
             throw new RuntimeException("hostAddress is empty.");
         }
 
         this.simpleDateFormat = simpleDateFormat;
         this.hostAddress = hostAddress;
-        this.contentType = Optional.ofNullable(contentType);
+        this.contentType = optionalContentType;
     }
 
     public HttpResponseHeader create() {
@@ -30,7 +31,7 @@ public class HttpResponseHeaderCreator {
         Map<String, String> header = new HashMap<>();
         header.put("Date", simpleDateFormat.format(new Date()));
         header.put("Host", hostAddress);
-        contentType.ifPresent(s -> header.put("Content-Type", s));
+        contentType.ifPresent(s -> header.put("Content-Type", s.getValue()));
         header.put("Connection", "close");
 
         return new HttpResponseHeader(startLine, header);

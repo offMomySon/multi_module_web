@@ -11,15 +11,15 @@ import matcher.segment.PathUrl;
 // context
 
 // n 개의 methodResolver 를 1개 처럼 다룬다.
-public class CompositedEndpointMatcher implements EndpointMatcher {
-    private final List<EndpointMatcher> baseHttpPathMatchers;
+public class CompositedEndpointTaskMatcher implements EndpointTaskMatcher {
+    private final List<EndpointTaskMatcher> baseHttpPathMatchers;
 
-    public CompositedEndpointMatcher(List<EndpointMatcher> baseHttpPathMatchers) {
+    public CompositedEndpointTaskMatcher(List<EndpointTaskMatcher> baseHttpPathMatchers) {
         if (Objects.isNull(baseHttpPathMatchers)) {
             throw new RuntimeException("methodResolvers is null.");
         }
 
-        List<EndpointMatcher> newJavaMethodResolver = baseHttpPathMatchers.stream()
+        List<EndpointTaskMatcher> newJavaMethodResolver = baseHttpPathMatchers.stream()
             .filter(o -> !Objects.isNull(o))
             .collect(Collectors.toUnmodifiableList());
 

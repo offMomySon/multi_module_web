@@ -5,7 +5,7 @@ import matcher.segment.PathVariableValue;
 import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.Optional;
-import task.Task;
+import task.EndPointTask;
 import task.JavaMethodInvokeTask;
 
 // 생성자
@@ -13,13 +13,13 @@ import task.JavaMethodInvokeTask;
 // 2. pathUrlMatcher 를 받는다.
 // 3. java method 를 받는다.
 // 4. 객체를 생성한다.
-public class JavaMethodEndpointMatcher implements EndpointMatcher {
+public class JavaMethodEndpointTaskMatcher implements EndpointTaskMatcher {
     private final RequestMethod requestMethod;
     private final PathUrlMatcher pathUrlMatcher;
     private final Object declaringInstance;
     private final Method javaMethod;
 
-    public JavaMethodEndpointMatcher(RequestMethod requestMethod, PathUrlMatcher pathUrlMatcher, Object declaringInstance, Method javaMethod) {
+    public JavaMethodEndpointTaskMatcher(RequestMethod requestMethod, PathUrlMatcher pathUrlMatcher, Object declaringInstance, Method javaMethod) {
         Objects.requireNonNull(requestMethod);
         Objects.requireNonNull(pathUrlMatcher);
         Objects.requireNonNull(declaringInstance);
@@ -45,9 +45,9 @@ public class JavaMethodEndpointMatcher implements EndpointMatcher {
             return Optional.empty();
         }
 
-        Task task = new JavaMethodInvokeTask(declaringInstance, javaMethod);
+        EndPointTask endPointTask = new JavaMethodInvokeTask(declaringInstance, javaMethod);
         PathVariableValue pathVariableValue = optionalPathVariableValue.get();
-        MatchedEndPoint matchedEndPoint = new MatchedEndPoint(task, pathVariableValue);
+        MatchedEndPoint matchedEndPoint = new MatchedEndPoint(endPointTask, pathVariableValue);
         return Optional.of(matchedEndPoint);
     }
 

@@ -39,7 +39,7 @@ public class StaticResourceEndPointCreator {
         return new StaticResourceEndPointCreator(resourceDirectory, urlPrefix);
     }
 
-    public List<StaticResourceEndPointMatcher> create() {
+    public List<StaticResourceEndPointTaskMatcher> create() {
         List<Path> foundResources = findFilePath(resourceDirectory);
         List<ResourceUrl> resourceUrls = foundResources.stream()
             .map(foundResource -> ResourceUrl.from(resourceDirectory, foundResource, urlPrefix))
@@ -61,10 +61,10 @@ public class StaticResourceEndPointCreator {
         }
     }
 
-    private static StaticResourceEndPointMatcher createStaticResourceEndPointMatcher(ResourceUrl resourceAndUrl) {
+    private static StaticResourceEndPointTaskMatcher createStaticResourceEndPointMatcher(ResourceUrl resourceAndUrl) {
         PathUrl resourceUrl = resourceAndUrl.getUrl();
         Path resource = resourceAndUrl.getResource();
-        return new StaticResourceEndPointMatcher(resourceUrl, resource);
+        return new StaticResourceEndPointTaskMatcher(resourceUrl, resource);
     }
 
     private static class ResourceUrl {

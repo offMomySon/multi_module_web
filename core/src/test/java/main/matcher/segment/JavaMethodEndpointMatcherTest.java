@@ -1,6 +1,6 @@
 package main.matcher.segment;
 
-import matcher.JavaMethodEndpointMatcher;
+import matcher.JavaMethodEndpointTaskMatcher;
 import matcher.MatchedEndPoint;
 import matcher.PathUrlMatcher;
 import matcher.RequestMethod;
@@ -25,7 +25,7 @@ class JavaMethodEndpointMatcherTest {
         PathUrl basePathUrl = PathUrl.from(baseUrl);
         SegmentChunkFactory segmentChunkFactory = new SegmentChunkFactory(basePathUrl);
         PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(segmentChunkFactory);
-        JavaMethodEndpointMatcher baseHttpPathMatcher = new JavaMethodEndpointMatcher(RequestMethod.GET, pathUrlMatcher, new Object(), TestClass.class.getDeclaredMethod("method"));
+        JavaMethodEndpointTaskMatcher baseHttpPathMatcher = new JavaMethodEndpointTaskMatcher(RequestMethod.GET, pathUrlMatcher, new Object(), TestClass.class.getDeclaredMethod("method"));
 
         //when
         boolean actual = baseHttpPathMatcher.match(RequestMethod.GET, PathUrl.from(requestPath)).isPresent();
@@ -44,7 +44,7 @@ class JavaMethodEndpointMatcherTest {
         PathUrl basePathUrl = PathUrl.from(baseUrl);
         SegmentChunkFactory segmentChunkFactory = new SegmentChunkFactory(basePathUrl);
         PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(segmentChunkFactory);
-        JavaMethodEndpointMatcher baseHttpPathMatcher = new JavaMethodEndpointMatcher(RequestMethod.GET, pathUrlMatcher, new Object(), TestClass.class.getDeclaredMethod("method"));
+        JavaMethodEndpointTaskMatcher baseHttpPathMatcher = new JavaMethodEndpointTaskMatcher(RequestMethod.GET, pathUrlMatcher, new Object(), TestClass.class.getDeclaredMethod("method"));
 
         //when
         Optional<MatchedEndPoint> optionalResolvedMethod = baseHttpPathMatcher.match(RequestMethod.GET, PathUrl.from(requestPath));

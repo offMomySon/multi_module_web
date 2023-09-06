@@ -1,7 +1,7 @@
 package matcher.creator;
 
 import container.ObjectRepository;
-import matcher.JavaMethodEndpointMatcher;
+import matcher.JavaMethodEndpointTaskMatcher;
 import matcher.PathUrlMatcher;
 import matcher.RequestMethod;
 import matcher.annotation.RequestMapping;
@@ -27,7 +27,7 @@ public class JavaMethodPathMatcherCreator {
         this.objectRepository = objectRepository;
     }
 
-    public List<JavaMethodEndpointMatcher> create() {
+    public List<JavaMethodEndpointTaskMatcher> create() {
         List<Method> peekMethods = AnnotationUtils.peekMethods(this.clazz, REQUEST_MAPPING_CLASS).stream()
             .collect(Collectors.toUnmodifiableList());
 
@@ -48,7 +48,7 @@ public class JavaMethodPathMatcherCreator {
                 Class<?> declaringClass = javaMethod.getDeclaringClass();
                 Object declaringInstance = objectRepository.get(declaringClass);
 
-                return new JavaMethodEndpointMatcher(requestMethod, pathUrlMatcher, declaringInstance, javaMethod);
+                return new JavaMethodEndpointTaskMatcher(requestMethod, pathUrlMatcher, declaringInstance, javaMethod);
             })
             .collect(Collectors.toUnmodifiableList());
     }

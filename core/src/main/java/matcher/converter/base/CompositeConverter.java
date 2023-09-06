@@ -1,11 +1,13 @@
 package matcher.converter.base;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class CompositeConverter implements Converter<Object> {
     private static final Map<Class<?>, Converter<?>> _converters;
@@ -16,7 +18,6 @@ public class CompositeConverter implements Converter<Object> {
         ObjectConverter objectConverter = new ObjectConverter();
 
         Map<Class<?>, Converter<?>> converters = new HashMap<>();
-
         converters.put(Path.class, new PathConverter());
         converters.put(InputStream.class, new InputStreamConverter());
         converters.put(File.class, new FileConverter());
@@ -43,24 +44,17 @@ public class CompositeConverter implements Converter<Object> {
 
     @Override
     public InputStream convertToInputStream(Object object) {
-        Class<?> key = object.getClass();
-
-        Optional<Class<?>> foundkey = _converters.keySet().stream()
-            .filter(e -> e.isAssignableFrom(key))
-            .findFirst();
-
-        if(foundkey.isEmpty()){
-            return emptyConverter.convertToInputStream(object);
+        if (Objects.isNull(object)) {
+            return new ByteArrayInputStream("".getBytes(UTF_8));
         }
 
-        Class<?> targetClazz = foundkey.get();
-        Converter<Object> converter = (Converter<Object>) _converters.get(targetClazz);
+        Class<?> clazz = object.getClass();
+        Class<?> foundClazzKey = _converters.keySet().stream()
+            .filter(e -> e.isAssignableFrom(clazz))
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("does not exist convertable type."));
+
+        Converter<Object> converter = (Converter<Object>) _converters.get(foundClazzKey);
         return converter.convertToInputStream(object);
-
-//        Converter<Object> converter = (Converter<Object>) first;
-//            .map(_converters::get)
-//            .orElse(emptyConverter);
-
-//        return converter.convertToInputStream(object);
     }
 }

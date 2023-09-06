@@ -9,7 +9,7 @@ import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import task.JavaMethodInvokeTask;
-import task.Task;
+import task.EndPointTask;
 import static com.main.task.response.ContentType.APPLICATION_JSON;
 import static com.main.task.response.ContentType.TEXT_HTML;
 
@@ -24,16 +24,16 @@ public class ContentTypeCreator {
         this.optionalMethodResult = optionalMethodResult;
     }
 
-    public static ContentTypeCreator from(Task task, Optional<Object> optionalMethodResult) {
-        Objects.requireNonNull(task);
+    public static ContentTypeCreator from(EndPointTask endPointTask, Optional<Object> optionalMethodResult) {
+        Objects.requireNonNull(endPointTask);
         Objects.requireNonNull(optionalMethodResult);
 
         if (optionalMethodResult.isEmpty()) {
             return new ContentTypeCreator(false, optionalMethodResult);
         }
 
-        if (task instanceof JavaMethodInvokeTask) {
-            JavaMethodInvokeTask javaMethodInvokeTask = (JavaMethodInvokeTask) task;
+        if (endPointTask instanceof JavaMethodInvokeTask) {
+            JavaMethodInvokeTask javaMethodInvokeTask = (JavaMethodInvokeTask) endPointTask;
             Method javaMethod = javaMethodInvokeTask.getJavaMethod();
             Class<?> declaringClass = javaMethod.getDeclaringClass();
             boolean isResponseBodyMethod = AnnotationUtils.exist(javaMethod, ResponseBody.class) ||

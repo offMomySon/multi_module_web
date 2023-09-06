@@ -11,7 +11,6 @@ import com.main.task.value.BaseParameterValueMatcher;
 import com.main.task.value.CompositeMethodParameterValueMatcher;
 import com.main.task.value.HttpBodyAnnotationAnnotatedParameterValueMatcher;
 import com.main.task.value.HttpUrlAnnotationAnnotatedParameterValueMatcher;
-import container.ObjectRepository;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -19,7 +18,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import matcher.EndpointMatcher;
+import matcher.EndpointTaskMatcher;
 import matcher.MatchedEndPoint;
 import matcher.RequestMethod;
 import matcher.annotation.PathVariable;
@@ -28,7 +27,7 @@ import matcher.annotation.RequestParam;
 import matcher.converter.RequestParameters;
 import matcher.segment.PathUrl;
 import processor.HttpRequestProcessor;
-import task.Task;
+import task.EndPointTask;
 import vo.HttpRequest;
 import vo.HttpResponse;
 import vo.QueryParameters;
@@ -36,14 +35,12 @@ import vo.QueryParameters;
 @Slf4j
 public class BaseHttpRequestProcessor implements HttpRequestProcessor {
 
-    private final ObjectRepository objectRepository;
-    private final EndpointMatcher endpointMatcher;
+    private final EndpointTaskMatcher endpointTaskMatcher;
     private final SimpleDateFormat simpleDateFormat;
     private final String hostAddress;
 
-    public BaseHttpRequestProcessor(ObjectRepository objectRepository, EndpointMatcher endpointMatcher, SimpleDateFormat simpleDateFormat, String hostAddress) {
-        this.objectRepository = objectRepository;
-        this.endpointMatcher = endpointMatcher;
+    public BaseHttpRequestProcessor(EndpointTaskMatcher endpointTaskMatcher, SimpleDateFormat simpleDateFormat, String hostAddress) {
+        this.endpointTaskMatcher = endpointTaskMatcher;
         this.simpleDateFormat = simpleDateFormat;
         this.hostAddress = hostAddress;
     }
@@ -57,8 +54,8 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
         PathUrl requestUrl = PathUrl.from(request.getHttpRequestPath().getValue().toString());
         QueryParameters queryParameters = request.getQueryParameters();
 
-        MatchedEndPoint matchedEndPoint = endpointMatcher.match(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
-        Task task = matchedEndPoint.getTask();
+        MatchedEndPoint matchedEndPoint = endpointTaskMatcher.match(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
+        EndPointTask endPointTask = matchedEndPoint.getTask();
         RequestParameters pathVariableValue = new RequestParameters(matchedEndPoint.getPathVariableValue().getValues());
         RequestParameters queryParamValues = new RequestParameters(queryParameters.getParameterMap());
 
@@ -71,20 +68,20 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
         );
 
         ParameterValueGetter parameterValueGetter = new ParameterValueGetter(methodParameterValueMatcher, new ParameterValueConverterFactory(new ObjectMapper()));
-        Object[] parameterValues = Arrays.stream(task.getExecuteParameters())
+        Object[] parameterValues = Arrays.stream(endPointTask.getExecuteParameters())
             .map(parameterValueGetter::get)
             .map(v -> v.orElse(null))
             .toArray();
 
-        Optional<Object> result = task.execute(parameterValues);
-        log.info("methodResult : `{}`, clazz : `{}`", result.orElse(null), result.map(Object::getClass).orElse(null));
+        Optional<Object> optionalResult = endPointTask.execute(parameterValues);
+        log.info("methodResult : `{}`, clazz : `{}`", optionalResult.orElse(null), optionalResult.map(Object::getClass).orElse(null));
 
-        Optional<ContentType> optionalContentType = ContentTypeCreator.from(task, result).create();
+        Optional<ContentType> optionalContentType = ContentTypeCreator.from(endPointTask, optionalResult).create();
         HttpResponseHeaderCreator headerCreator = new HttpResponseHeaderCreator(simpleDateFormat, hostAddress, optionalContentType);
         HttpResponseHeader httpResponseHeader = headerCreator.create();
 
         HttpResponseSender httpResponseSender = new HttpResponseSender(response);
-        httpResponseSender.send(httpResponseHeader, result.get());
+        httpResponseSender.send(httpResponseHeader, optionalResult);
         return true;
     }
 }

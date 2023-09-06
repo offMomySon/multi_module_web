@@ -9,15 +9,17 @@ import matcher.segment.PathVariableValue;
 import task.ResourceFindTask;
 
 @Slf4j
-public class StaticResourceEndPointMatcher implements EndpointMatcher {
+public class StaticResourceEndPointTaskMatcher implements EndpointTaskMatcher {
     private static final RequestMethod REQUEST_METHOD = RequestMethod.GET;
 
     private final PathUrl endPointUrl;
     private final Path resourcePath;
 
-    public StaticResourceEndPointMatcher(PathUrl endPointUrl, Path resourcePath) {
+    public StaticResourceEndPointTaskMatcher(PathUrl endPointUrl, Path resourcePath) {
         Objects.requireNonNull(endPointUrl);
         Objects.requireNonNull(resourcePath);
+        log.info("endPointUrl : `{}`", endPointUrl);
+        log.info("resourcePath : `{}`", resourcePath);
         this.endPointUrl = endPointUrl;
         this.resourcePath = resourcePath;
     }

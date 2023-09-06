@@ -47,6 +47,7 @@ public class StaticResourceEndPointCreator {
 
         return resourceUrls.stream()
             .map(StaticResourceEndPointCreator::createStaticResourceEndPointMatcher)
+            .peek(endPointTaskMatcher -> log.info("EndpointTaskMatcher : `{}`", endPointTaskMatcher))
             .collect(Collectors.toUnmodifiableList());
     }
 
@@ -54,7 +55,6 @@ public class StaticResourceEndPointCreator {
         try (Stream<Path> fileWalk = Files.walk(resourceDirectory)) {
             return fileWalk
                 .filter(filePath -> !Files.isDirectory(filePath))
-                .peek(filePath -> log.info("filePath : {}", filePath))
                 .collect(Collectors.toUnmodifiableList());
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -86,7 +86,7 @@ public class StaticResourceEndPointCreator {
             Objects.requireNonNull(urlPrefix);
 
             Path relativeResourcePath = resourceDirectory.relativize(resource);
-            Path resourcePath = Path.of(DELIMITER).resolve(urlPrefix).resolve(DELIMITER).resolve(relativeResourcePath);
+            Path resourcePath = Path.of(DELIMITER).resolve(urlPrefix).resolve(relativeResourcePath);
             PathUrl resourceUrl = PathUrl.from(resourcePath);
             return new ResourceUrl(resource, resourceUrl);
         }

@@ -67,7 +67,7 @@ public class App {
             .map(clazz -> new JavaMethodPathMatcherCreator(clazz, objectRepository))
             .map(JavaMethodPathMatcherCreator::create)
             .flatMap(Collection::stream)
-            .peek(httpPathMatcher -> log.info("httpPathMatcher : `{}`", httpPathMatcher))
+            .peek(httpPathMatcher -> log.info("EndpointTaskMatcher : `{}`", httpPathMatcher))
             .collect(Collectors.toUnmodifiableList());
         StaticResourceEndPointCreator staticResourceEndPointCreator = StaticResourceEndPointCreator.from(App.class, "../../resources", "static");
         List<StaticResourceEndPointTaskMatcher> staticResourceEndPointJavaMethodMatchers = staticResourceEndPointCreator.create();

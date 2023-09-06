@@ -53,9 +53,10 @@ public class JavaMethodEndpointTaskMatcher implements EndpointTaskMatcher {
 
     @Override
     public String toString() {
-        return "BaseHttpPathMatcher{" +
+        return "JavaMethodEndpointTaskMatcher{" +
             "requestMethod=" + requestMethod +
-            ", baseUrlPathMatcher=" + pathUrlMatcher +
+            ", pathUrlMatcher=" + pathUrlMatcher +
+            ", declaringInstance=" + declaringInstance +
             ", javaMethod=" + javaMethod +
             '}';
     }

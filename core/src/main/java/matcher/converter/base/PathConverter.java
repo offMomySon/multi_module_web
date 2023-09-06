@@ -1,6 +1,9 @@
 package matcher.converter.base;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
@@ -13,10 +16,14 @@ public class PathConverter implements Converter<Path>{
         Objects.requireNonNull(path);
         log.info("path : `{}`", path);
 
-        String newPath = path.toString();
-        String relativePath = newPath.startsWith("/") ? newPath.substring(1) : newPath;
-        log.info("relativePath : `{}`", relativePath);
+        return getPathInputStream(path);
+    }
 
-        return Thread.currentThread().getContextClassLoader().getResourceAsStream(relativePath);
+    private static InputStream getPathInputStream(Path path){
+        try {
+            return Files.newInputStream(path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

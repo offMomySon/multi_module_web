@@ -18,8 +18,6 @@ public class StaticResourceEndPointTaskMatcher implements EndpointTaskMatcher {
     public StaticResourceEndPointTaskMatcher(PathUrl endPointUrl, Path resourcePath) {
         Objects.requireNonNull(endPointUrl);
         Objects.requireNonNull(resourcePath);
-        log.info("endPointUrl : `{}`", endPointUrl);
-        log.info("resourcePath : `{}`", resourcePath);
         this.endPointUrl = endPointUrl;
         this.resourcePath = resourcePath;
     }
@@ -40,5 +38,13 @@ public class StaticResourceEndPointTaskMatcher implements EndpointTaskMatcher {
         ResourceFindTask resourceFindTask = new ResourceFindTask(resourcePath);
         MatchedEndPoint matchedEndPoint = new MatchedEndPoint(resourceFindTask, PathVariableValue.empty());
         return Optional.of(matchedEndPoint);
+    }
+
+    @Override
+    public String toString() {
+        return "StaticResourceEndPointTaskMatcher{" +
+            "endPointUrl=" + endPointUrl +
+            ", resourcePath=" + resourcePath +
+            '}';
     }
 }

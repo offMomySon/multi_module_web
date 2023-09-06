@@ -3,6 +3,7 @@ package com.main.task.response;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Objects;
+import static com.main.task.response.ContentType.APPLICATION_JSON;
 import static com.main.task.response.ContentType.IMAGE_GIF;
 import static com.main.task.response.ContentType.IMAGE_JPEG;
 import static com.main.task.response.ContentType.TEXT_HTML;
@@ -10,7 +11,8 @@ import static com.main.task.response.ContentType.TEXT_HTML;
 public enum FileExtension {
     JPG(IMAGE_JPEG),
     GIF(IMAGE_GIF),
-    TXT(TEXT_HTML);
+    TXT(TEXT_HTML),
+    JSON(APPLICATION_JSON);
 
     private final ContentType contentType;
 

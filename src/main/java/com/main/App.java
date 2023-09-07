@@ -47,7 +47,6 @@ public class App {
     private static final Class<Component> COMPONENT_CLASS = Component.class;
     private static final Class<Controller> CONTROLLER_CLASS = Controller.class;
     private static final Class<WebFilter> WEB_FILTER_CLASS = WebFilter.class;
-    private static final Objects EMPTY_VALUE = null;
 
     public static void main(String[] args) {
         // 1. class 를 모두 찾아옴.

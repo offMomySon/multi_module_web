@@ -19,8 +19,6 @@ public class StaticResourceEndPointCreator {
     private StaticResourceEndPointCreator(Path resourceDirectory, String urlPrefix) {
         Objects.requireNonNull(resourceDirectory);
         Objects.requireNonNull(urlPrefix);
-        log.info("resourceDirectory : {}", resourceDirectory);
-        log.info("urlPrefix : {}", urlPrefix);
         this.resourceDirectory = resourceDirectory.normalize();
         this.urlPrefix = urlPrefix;
     }
@@ -34,8 +32,10 @@ public class StaticResourceEndPointCreator {
 
         Path clazzPath = FileSystemUtil.getClazzRootPath(clazz);
         Path projectPackageDirectory = clazzPath.getParent();
-        Path resourceDirectory = projectPackageDirectory.resolve(resourcePackage);
-        resourceDirectory = resourceDirectory.normalize();
+        Path resourceDirectory = projectPackageDirectory.resolve(resourcePackage).normalize();
+        log.info("clazzPath : {}", clazzPath);
+        log.info("projectPackageDirectory : {}", projectPackageDirectory);
+        log.info("resourceDirectory : {}", resourceDirectory);
         return new StaticResourceEndPointCreator(resourceDirectory, urlPrefix);
     }
 

@@ -68,7 +68,7 @@ public class App {
             .flatMap(Collection::stream)
             .peek(httpPathMatcher -> log.info("EndpointTaskMatcher : `{}`", httpPathMatcher))
             .collect(Collectors.toUnmodifiableList());
-        StaticResourceEndPointCreator staticResourceEndPointCreator = StaticResourceEndPointCreator.from(App.class, "../../resources", "static");
+        StaticResourceEndPointCreator staticResourceEndPointCreator = StaticResourceEndPointCreator.from(App.class, "../../resources/main", "static");
         List<StaticResourceEndPointTaskMatcher> staticResourceEndPointJavaMethodMatchers = staticResourceEndPointCreator.create();
         List<EndpointTaskMatcher> endpointTaskMatchers = Stream.concat(baseHttpPathMatchers.stream(), staticResourceEndPointJavaMethodMatchers.stream())
             .collect(Collectors.toUnmodifiableList());
@@ -82,7 +82,6 @@ public class App {
             .flatMap(Collection::stream)
             .collect(Collectors.toUnmodifiableList());
         Filters newFilters = new Filters(filters);
-
         log.info("newFilters : {}", newFilters);
 
         BaseHttpRequestProcessor baseHttpRequestProcessor = new BaseHttpRequestProcessor(endpointTaskMatcher, SIMPLE_DATE_FORMAT, HOST_ADDRESS);

@@ -1,7 +1,7 @@
 package com.main.task;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.main.task.converter.ParameterValueClazzConverterFactory;
+import com.main.task.converter.parameter.ParameterValueClazzConverterFactory;
 import com.main.task.response.ContentType;
 import com.main.task.response.ContentTypeCreator;
 import com.main.task.response.HttpResponseHeader;

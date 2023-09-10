@@ -1,4 +1,4 @@
-package com.main.task.converter;
+package com.main.task.converter.parameter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -7,11 +7,11 @@ import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class BaseParameterValueClazzConverter implements ParameterValueClazzConverter {
+public class BaseParameterValueConverter implements ParameterValueConverter {
     private final ObjectMapper objectMapper;
     private final Class<?> targetClazz;
 
-    public BaseParameterValueClazzConverter(ObjectMapper objectMapper, Class<?> targetClazz) {
+    public BaseParameterValueConverter(ObjectMapper objectMapper, Class<?> targetClazz) {
         Objects.requireNonNull(objectMapper);
         Objects.requireNonNull(targetClazz);
         this.objectMapper = objectMapper;
@@ -19,7 +19,7 @@ public class BaseParameterValueClazzConverter implements ParameterValueClazzConv
     }
 
     @Override
-    public Optional<?> convert(Optional<?> parameterValue) {
+    public Optional<?> convertToParameterClazz(Optional<?> parameterValue) {
         if (parameterValue.isEmpty()) {
             return parameterValue;
         }

@@ -1,7 +1,7 @@
 package com.main.task;
 
-import com.main.task.converter.ParameterValueClazzConverter;
-import com.main.task.converter.ParameterValueClazzConverterFactory;
+import com.main.task.converter.parameter.ParameterValueConverter;
+import com.main.task.converter.parameter.ParameterValueClazzConverterFactory;
 import com.main.task.value.MethodParameterValueMatcher;
 import java.lang.reflect.Parameter;
 import java.util.Objects;
@@ -26,8 +26,8 @@ public class ParameterValueGetter {
         log.info("parameter : `{}`, param class : `{}`", parameter, parameter.getType());
         Optional matchedValue = valueMatcher.match(parameter);
 
-        ParameterValueClazzConverter valueConverter = valueConverterFactory.create(parameter);
-        Optional<?> value = valueConverter.convert(matchedValue);
+        ParameterValueConverter valueConverter = valueConverterFactory.create(parameter);
+        Optional<?> value = valueConverter.convertToParameterClazz(matchedValue);
         log.info("ParameterValue. value : {}, class : {}", value.orElse(null), value.map(Object::getClass).orElse(null));
         return value;
     }

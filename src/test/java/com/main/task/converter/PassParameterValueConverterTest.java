@@ -1,5 +1,6 @@
 package com.main.task.converter;
 
+import com.main.task.converter.parameter.PassParameterValueClazzConverter;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Optional;
@@ -7,17 +8,17 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class PassParameterValueClazzConverterTest {
+class PassParameterValueConverterTest {
 
     @DisplayName("빈값을 입력 받으면 빈값을 반환한다.")
     @Test
     void test() throws Exception {
         //given
         Optional<Object> empty = Optional.empty();
-        PassParameterValueClazzClazzConverter converter = new PassParameterValueClazzClazzConverter(int.class);
+        PassParameterValueClazzConverter converter = new PassParameterValueClazzConverter(int.class);
 
         //when
-        Optional<?> optionalActual = converter.convert(empty);
+        Optional<?> optionalActual = converter.convertToParameterClazz(empty);
 
         //then
         Assertions.assertThat(optionalActual).isEmpty();
@@ -28,10 +29,10 @@ class PassParameterValueClazzConverterTest {
     void ttest() throws Exception {
         //given
         Optional<String> diffType = Optional.of("diffType");
-        PassParameterValueClazzClazzConverter converter = new PassParameterValueClazzClazzConverter(int.class);
+        PassParameterValueClazzConverter converter = new PassParameterValueClazzConverter(int.class);
 
         //when
-        Throwable actual = Assertions.catchThrowable(() -> converter.convert(diffType));
+        Throwable actual = Assertions.catchThrowable(() -> converter.convertToParameterClazz(diffType));
 
         //then
         Assertions.assertThat(actual).isNotNull();
@@ -43,10 +44,10 @@ class PassParameterValueClazzConverterTest {
         //given
         ByteArrayInputStream paramValue = new ByteArrayInputStream(new byte[2]);
         Optional<ByteArrayInputStream> parameterValue = Optional.of(paramValue);
-        PassParameterValueClazzClazzConverter passParameterValueClazzConverter = new PassParameterValueClazzClazzConverter(InputStream.class);
+        PassParameterValueClazzConverter passParameterValueClazzConverter = new PassParameterValueClazzConverter(InputStream.class);
 
         //when
-        Optional<?> optionalActual = passParameterValueClazzConverter.convert(parameterValue);
+        Optional<?> optionalActual = passParameterValueClazzConverter.convertToParameterClazz(parameterValue);
 
         //then
         Assertions.assertThat(optionalActual).isPresent();

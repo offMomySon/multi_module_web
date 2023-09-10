@@ -1,4 +1,4 @@
-package com.main.task.converter;
+package com.main.task.converter.parameter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.InputStream;
@@ -15,14 +15,14 @@ public class ParameterValueClazzConverterFactory {
         this.objectMapper = objectMapper;
     }
 
-    public ParameterValueClazzConverter create(Parameter parameter) {
+    public ParameterValueConverter create(Parameter parameter) {
         Objects.requireNonNull(parameter);
 
         Class<?> parameterType = parameter.getType();
         boolean inputStreamAssignableParam = INPUT_STREAM_CLASS.isAssignableFrom(parameterType);
         if (inputStreamAssignableParam) {
-            return new PassParameterValueClazzClazzConverter(INPUT_STREAM_CLASS);
+            return new PassParameterValueClazzConverter(INPUT_STREAM_CLASS);
         }
-        return new BaseParameterValueClazzConverter(objectMapper, parameterType);
+        return new BaseParameterValueConverter(objectMapper, parameterType);
     }
 }

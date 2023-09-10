@@ -3,6 +3,7 @@ package com.main.task.converter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.main.task.converter.parameter.BaseParameterValueConverter;
 import java.io.ByteArrayInputStream;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -13,17 +14,17 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class BaseParameterValueClazzConverterTest {
+class BaseParameterValueConverterTest {
 
     @DisplayName("ParameterValue 는 string 이 아니면 exception 이 발생합니다.")
     @Test
     void test() throws Exception {
         //given
         Optional<ByteArrayInputStream> byteArrayInputStream = Optional.of(new ByteArrayInputStream(new byte[3]));
-        BaseParameterValueClazzConverter converter = new BaseParameterValueClazzConverter(new ObjectMapper(), int.class);
+        BaseParameterValueConverter converter = new BaseParameterValueConverter(new ObjectMapper(), int.class);
 
         //when
-        Throwable actual = Assertions.catchThrowable(() -> converter.convert(byteArrayInputStream));
+        Throwable actual = Assertions.catchThrowable(() -> converter.convertToParameterClazz(byteArrayInputStream));
 
         //then
         Assertions.assertThat(actual).isNotNull();
@@ -34,10 +35,10 @@ class BaseParameterValueClazzConverterTest {
     void ttest() throws Exception {
         //given
         Optional<Object> empty = Optional.empty();
-        BaseParameterValueClazzConverter converter = new BaseParameterValueClazzConverter(new ObjectMapper(), int.class);
+        BaseParameterValueConverter converter = new BaseParameterValueConverter(new ObjectMapper(), int.class);
 
         //when
-        Optional<?> optionalActual = converter.convert(empty);
+        Optional<?> optionalActual = converter.convertToParameterClazz(empty);
 
         //then
         Assertions.assertThat(optionalActual).isEmpty();
@@ -49,10 +50,10 @@ class BaseParameterValueClazzConverterTest {
     void tttest(Class<?> clazz, String value) throws Exception {
         //given
         Optional<String> parameterValue = Optional.of(value);
-        BaseParameterValueClazzConverter converter = new BaseParameterValueClazzConverter(new ObjectMapper(), clazz);
+        BaseParameterValueConverter converter = new BaseParameterValueConverter(new ObjectMapper(), clazz);
 
         //when
-        Optional<?> optionalActual = converter.convert(parameterValue);
+        Optional<?> optionalActual = converter.convertToParameterClazz(parameterValue);
 
         //then
         Assertions.assertThat(optionalActual).isPresent();

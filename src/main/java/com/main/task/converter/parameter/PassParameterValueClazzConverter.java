@@ -1,17 +1,17 @@
-package com.main.task.converter;
+package com.main.task.converter.parameter;
 
 import java.text.MessageFormat;
 import java.util.Optional;
 
-public class PassParameterValueClazzClazzConverter implements ParameterValueClazzConverter {
+public class PassParameterValueClazzConverter implements ParameterValueConverter {
     private final Class<?> targetClazz;
 
-    public PassParameterValueClazzClazzConverter(Class<?> targetClazz) {
+    public PassParameterValueClazzConverter(Class<?> targetClazz) {
         this.targetClazz = targetClazz;
     }
 
     @Override
-    public Optional<?> convert(Optional<?> parameterValue) {
+    public Optional<?> convertToParameterClazz(Optional<?> parameterValue) {
         if (parameterValue.isEmpty()) {
             return parameterValue;
         }

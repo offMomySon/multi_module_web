@@ -15,12 +15,12 @@ import static com.main.task.response.ContentType.TEXT_HTML;
 
 @Slf4j
 public class ContentTypeCreator {
-    private final boolean isResponseBodyMethod;
+    private final boolean isRestArchitectureMethod;
     private final Optional<Object> optionalMethodResult;
 
-    public ContentTypeCreator(boolean isResponseBodyMethod, Optional<Object> optionalMethodResult) {
+    public ContentTypeCreator(boolean isRestArchitectureMethod, Optional<Object> optionalMethodResult) {
         Objects.requireNonNull(optionalMethodResult);
-        this.isResponseBodyMethod = isResponseBodyMethod;
+        this.isRestArchitectureMethod = isRestArchitectureMethod;
         this.optionalMethodResult = optionalMethodResult;
     }
 
@@ -49,7 +49,7 @@ public class ContentTypeCreator {
             return Optional.empty();
         }
 
-        if (isResponseBodyMethod) {
+        if (isRestArchitectureMethod) {
             return Optional.of(APPLICATION_JSON);
         }
 

@@ -20,7 +20,7 @@ public class HttpResponseSender {
         this.httpResponse = httpResponse;
     }
 
-    public void send(HttpResponseHeader responseHeader, Optional<Object> optionalResult) {
+    public void send(HttpResponseHeader responseHeader,  Optional<Object> optionalResult) {
         String startLine = responseHeader.getStartLine();
         Map<String, String> header = responseHeader.getHeader();
 

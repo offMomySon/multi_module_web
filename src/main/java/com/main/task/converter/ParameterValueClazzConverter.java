@@ -2,6 +2,6 @@ package com.main.task.converter;
 
 import java.util.Optional;
 
-public interface ParameterValueConverter {
+public interface ParameterValueClazzConverter {
     Optional<?> convert(Optional<?> parameterValue);
 }

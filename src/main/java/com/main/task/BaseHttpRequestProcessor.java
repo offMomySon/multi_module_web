@@ -1,7 +1,7 @@
 package com.main.task;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.main.task.converter.ParameterValueConverterFactory;
+import com.main.task.converter.ParameterValueClazzConverterFactory;
 import com.main.task.response.ContentType;
 import com.main.task.response.ContentTypeCreator;
 import com.main.task.response.HttpResponseHeader;
@@ -56,9 +56,9 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
 
         MatchedEndPoint matchedEndPoint = endpointTaskMatcher.match(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
         EndPointTask endPointTask = matchedEndPoint.getTask();
+
         RequestParameters pathVariableValue = new RequestParameters(matchedEndPoint.getPathVariableValue().getValues());
         RequestParameters queryParamValues = new RequestParameters(queryParameters.getParameterMap());
-
         CompositeMethodParameterValueMatcher methodParameterValueMatcher = new CompositeMethodParameterValueMatcher(
             Map.of(
                 InputStream.class, new BaseParameterValueMatcher<>(request.getBodyInputStream()),
@@ -67,12 +67,11 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
                 RequestParam.class, new HttpUrlAnnotationAnnotatedParameterValueMatcher<>(RequestParam.class, queryParamValues))
         );
 
-        ParameterValueGetter parameterValueGetter = new ParameterValueGetter(methodParameterValueMatcher, new ParameterValueConverterFactory(new ObjectMapper()));
+        ParameterValueGetter parameterValueGetter = new ParameterValueGetter(methodParameterValueMatcher, new ParameterValueClazzConverterFactory(new ObjectMapper()));
         Object[] parameterValues = Arrays.stream(endPointTask.getExecuteParameters())
             .map(parameterValueGetter::get)
             .map(v -> v.orElse(null))
             .toArray();
-
         Optional<Object> optionalResult = endPointTask.execute(parameterValues);
         log.info("methodResult : `{}`, clazz : `{}`", optionalResult.orElse(null), optionalResult.map(Object::getClass).orElse(null));
 

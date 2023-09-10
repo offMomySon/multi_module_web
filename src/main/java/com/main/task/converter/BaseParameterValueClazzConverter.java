@@ -7,11 +7,11 @@ import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class BaseParameterValueConverter implements ParameterValueConverter {
+public class BaseParameterValueClazzConverter implements ParameterValueClazzConverter {
     private final ObjectMapper objectMapper;
     private final Class<?> targetClazz;
 
-    public BaseParameterValueConverter(ObjectMapper objectMapper, Class<?> targetClazz) {
+    public BaseParameterValueClazzConverter(ObjectMapper objectMapper, Class<?> targetClazz) {
         Objects.requireNonNull(objectMapper);
         Objects.requireNonNull(targetClazz);
         this.objectMapper = objectMapper;

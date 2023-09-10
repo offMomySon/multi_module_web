@@ -7,14 +7,14 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class PassParameterValueConverterTest {
+class PassParameterValueClazzConverterTest {
 
     @DisplayName("빈값을 입력 받으면 빈값을 반환한다.")
     @Test
     void test() throws Exception {
         //given
         Optional<Object> empty = Optional.empty();
-        PassParameterValueConverter converter = new PassParameterValueConverter(int.class);
+        PassParameterValueClazzClazzConverter converter = new PassParameterValueClazzClazzConverter(int.class);
 
         //when
         Optional<?> optionalActual = converter.convert(empty);
@@ -28,7 +28,7 @@ class PassParameterValueConverterTest {
     void ttest() throws Exception {
         //given
         Optional<String> diffType = Optional.of("diffType");
-        PassParameterValueConverter converter = new PassParameterValueConverter(int.class);
+        PassParameterValueClazzClazzConverter converter = new PassParameterValueClazzClazzConverter(int.class);
 
         //when
         Throwable actual = Assertions.catchThrowable(() -> converter.convert(diffType));
@@ -43,10 +43,10 @@ class PassParameterValueConverterTest {
         //given
         ByteArrayInputStream paramValue = new ByteArrayInputStream(new byte[2]);
         Optional<ByteArrayInputStream> parameterValue = Optional.of(paramValue);
-        PassParameterValueConverter passParameterValueConverter = new PassParameterValueConverter(InputStream.class);
+        PassParameterValueClazzClazzConverter passParameterValueClazzConverter = new PassParameterValueClazzClazzConverter(InputStream.class);
 
         //when
-        Optional<?> optionalActual = passParameterValueConverter.convert(parameterValue);
+        Optional<?> optionalActual = passParameterValueClazzConverter.convert(parameterValue);
 
         //then
         Assertions.assertThat(optionalActual).isPresent();

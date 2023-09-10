@@ -3,10 +3,10 @@ package com.main.task.converter;
 import java.text.MessageFormat;
 import java.util.Optional;
 
-public class PassParameterValueConverter implements ParameterValueConverter {
+public class PassParameterValueClazzClazzConverter implements ParameterValueClazzConverter {
     private final Class<?> targetClazz;
 
-    public PassParameterValueConverter(Class<?> targetClazz) {
+    public PassParameterValueClazzClazzConverter(Class<?> targetClazz) {
         this.targetClazz = targetClazz;
     }
 

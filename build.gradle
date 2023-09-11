@@ -12,6 +12,8 @@ repositories {
 dependencies {
     api project(':http')
     api project(':core')
+    api project(':annotation-instance-creator')
+    api project(':util')
 
     //logback
     implementation 'ch.qos.logback:logback-core:1.2.3'

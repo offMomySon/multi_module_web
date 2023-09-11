@@ -10,7 +10,6 @@ public class ResultConverterCreatorChain {
     private final ResultConverterCreator converterCreator;
 
     public ResultConverterCreatorChain(ResultConverterCreatorChain chain, ResultConverterCreator converterCreator) {
-        Objects.requireNonNull(chain);
         Objects.requireNonNull(converterCreator);
         this.chain = chain;
         this.converterCreator = converterCreator;
@@ -21,6 +20,10 @@ public class ResultConverterCreatorChain {
 
         if (optionalResultConverter.isPresent()) {
             return optionalResultConverter;
+        }
+
+        if (Objects.isNull(chain)) {
+            return Optional.empty();
         }
 
         return chain.create();

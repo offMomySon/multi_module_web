@@ -2,11 +2,10 @@ package com.main.task.converter.result.creator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.main.task.annotation.ResponseBody;
-import com.main.task.annotation.RestController;
 import com.main.task.converter.result.RestMethodResultConverter;
 import com.main.task.converter.result.ResultConverter;
-import com.main.task.converter.result.chain.ResultConverterCreatorChain;
 import com.main.util.AnnotationUtils;
+import container.annotation.RestController;
 import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.Optional;
@@ -15,20 +14,21 @@ import task.EndPointTask;
 import task.JavaMethodInvokeTask;
 
 @Slf4j
-public class RestMethodResultConverterCreator {
+public class RestMethodResultConverterCreator implements ResultConverterCreator{
     private static final Class<?> REST_CONTROLLER = RestController.class;
     private static final Class<?> RESPONSE_BODY = ResponseBody.class;
 
     private final ObjectMapper objectMapper;
     private final EndPointTask endPointTask;
 
-    public RestMethodResultConverterCreator(ObjectMapper objectMapper, JavaMethodInvokeTask javaMethodInvokeTask) {
+    public RestMethodResultConverterCreator(ObjectMapper objectMapper, EndPointTask endPointTask) {
         Objects.requireNonNull(objectMapper);
-        Objects.requireNonNull(javaMethodInvokeTask);
+        Objects.requireNonNull(endPointTask);
         this.objectMapper = objectMapper;
-        this.endPointTask = javaMethodInvokeTask;
+        this.endPointTask = endPointTask;
     }
 
+    @Override
     public Optional<ResultConverter> create() {
         boolean doesNotJavaMethodInvokeTask = !(endPointTask instanceof JavaMethodInvokeTask);
         if (doesNotJavaMethodInvokeTask) {

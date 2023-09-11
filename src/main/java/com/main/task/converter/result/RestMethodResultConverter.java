@@ -15,12 +15,16 @@ public class RestMethodResultConverter implements ResultConverter {
     }
 
     @Override
-    public Optional<?> convert(Optional<?> optionalResult) {
+    public Optional<Object> convert(Optional<Object> optionalResult) {
         if (optionalResult.isEmpty()) {
             return optionalResult;
         }
 
         Object result = optionalResult.get();
+        if (result.getClass() == String.class) {
+            return optionalResult;
+        }
+
         String jsonResult = writeValueAsString(result);
         return Optional.of(jsonResult);
     }

@@ -2,6 +2,10 @@ package com.main.task;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.main.task.converter.ParameterValueClazzConverterFactory;
+import com.main.task.converter.result.ResultConverter;
+import com.main.task.converter.result.chain.ResultConverterCreatorChain;
+import com.main.task.converter.result.creator.PassResultConverterCreator;
+import com.main.task.converter.result.creator.RestMethodResultConverterCreator;
 import com.main.task.response.ContentType;
 import com.main.task.response.ContentTypeCreator;
 import com.main.task.response.HttpResponseHeader;
@@ -74,6 +78,13 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
             .toArray();
         Optional<Object> optionalResult = endPointTask.execute(parameterValues);
         log.info("methodResult : `{}`, clazz : `{}`", optionalResult.orElse(null), optionalResult.map(Object::getClass).orElse(null));
+
+        PassResultConverterCreator passResultConverterCreator = new PassResultConverterCreator();
+        RestMethodResultConverterCreator restMethodResultConverterCreator = new RestMethodResultConverterCreator(new ObjectMapper(), endPointTask);
+        ResultConverterCreatorChain resultConverterCreatorChain = new ResultConverterCreatorChain(null, passResultConverterCreator);
+        resultConverterCreatorChain = new ResultConverterCreatorChain(resultConverterCreatorChain, restMethodResultConverterCreator);
+        ResultConverter resultConverter = resultConverterCreatorChain.create().orElseThrow(() -> new RuntimeException("does not exist suitable convertor creator."));
+        optionalResult = resultConverter.convert(optionalResult);
 
         Optional<ContentType> optionalContentType = ContentTypeCreator.from(endPointTask, optionalResult).create();
         HttpResponseHeaderCreator headerCreator = new HttpResponseHeaderCreator(simpleDateFormat, hostAddress, optionalContentType);

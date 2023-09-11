@@ -15,12 +15,12 @@ import static com.main.task.response.ContentType.TEXT_HTML;
 
 @Slf4j
 public class ContentTypeCreator {
-    private final boolean isRestArchitectureMethod;
+    private final boolean isRestMethodTask;
     private final Optional<Object> optionalMethodResult;
 
-    public ContentTypeCreator(boolean isRestArchitectureMethod, Optional<Object> optionalMethodResult) {
+    public ContentTypeCreator(boolean isRestMethodTask, Optional<Object> optionalMethodResult) {
         Objects.requireNonNull(optionalMethodResult);
-        this.isRestArchitectureMethod = isRestArchitectureMethod;
+        this.isRestMethodTask = isRestMethodTask;
         this.optionalMethodResult = optionalMethodResult;
     }
 
@@ -36,9 +36,9 @@ public class ContentTypeCreator {
             JavaMethodInvokeTask javaMethodInvokeTask = (JavaMethodInvokeTask) endPointTask;
             Method javaMethod = javaMethodInvokeTask.getJavaMethod();
             Class<?> declaringClass = javaMethod.getDeclaringClass();
-            boolean isResponseBodyMethod = AnnotationUtils.exist(javaMethod, ResponseBody.class) ||
+            boolean isRestMethodTask = AnnotationUtils.exist(javaMethod, ResponseBody.class) ||
                 AnnotationUtils.exist(declaringClass, RestController.class);
-            return new ContentTypeCreator(isResponseBodyMethod, optionalMethodResult);
+            return new ContentTypeCreator(isRestMethodTask, optionalMethodResult);
         }
 
         return new ContentTypeCreator(false, optionalMethodResult);
@@ -49,7 +49,7 @@ public class ContentTypeCreator {
             return Optional.empty();
         }
 
-        if (isRestArchitectureMethod) {
+        if (isRestMethodTask) {
             return Optional.of(APPLICATION_JSON);
         }
 

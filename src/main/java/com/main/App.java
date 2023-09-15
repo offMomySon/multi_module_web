@@ -47,7 +47,6 @@ public class App {
 
     private static final Class<Component> COMPONENT_CLASS = Component.class;
     private static final Class<Controller> CONTROLLER_CLASS = Controller.class;
-    private static final Class<RestController> REST_CONTROLLER_CLASS = RestController.class;
     private static final Class<WebFilter> WEB_FILTER_CLASS = WebFilter.class;
 
     public static void main(String[] args) {
@@ -63,9 +62,7 @@ public class App {
         ObjectRepository objectRepository = createContainer(componentClassInitializers);
 
         // 3. class 로 httpPathMatcher 를 생성.
-        List<Class<?>> baseControllerClazzes = AnnotationUtils.filterByAnnotatedClazz(clazzes, CONTROLLER_CLASS);
-        List<Class<?>> resetControllerClazzes = AnnotationUtils.filterByAnnotatedClazz(clazzes, REST_CONTROLLER_CLASS);
-        List<Class<?>> controllerClazzes = Stream.concat(baseControllerClazzes.stream(), resetControllerClazzes.stream()).collect(Collectors.toUnmodifiableList());
+        List<Class<?>> controllerClazzes = AnnotationUtils.filterByAnnotatedClazz(clazzes, CONTROLLER_CLASS);
         List<EndpointTaskMatcher> baseHttpPathMatchers = controllerClazzes.stream()
             .map(clazz -> new JavaMethodPathMatcherCreator(clazz, objectRepository))
             .map(JavaMethodPathMatcherCreator::create)

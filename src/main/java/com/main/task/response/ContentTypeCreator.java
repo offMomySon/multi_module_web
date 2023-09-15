@@ -35,9 +35,7 @@ public class ContentTypeCreator {
         if (endPointTask instanceof JavaMethodInvokeTask) {
             JavaMethodInvokeTask javaMethodInvokeTask = (JavaMethodInvokeTask) endPointTask;
             Method javaMethod = javaMethodInvokeTask.getJavaMethod();
-            Class<?> declaringClass = javaMethod.getDeclaringClass();
-            boolean isRestMethodTask = AnnotationUtils.exist(javaMethod, ResponseBody.class) ||
-                AnnotationUtils.exist(declaringClass, RestController.class);
+            boolean isRestMethodTask = AnnotationUtils.exist(javaMethod, ResponseBody.class);
             return new ContentTypeCreator(isRestMethodTask, optionalMethodResult);
         }
 

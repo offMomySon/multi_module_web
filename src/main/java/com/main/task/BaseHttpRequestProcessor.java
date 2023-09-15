@@ -2,10 +2,6 @@ package com.main.task;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.main.task.converter.ParameterValueClazzConverterFactory;
-import com.main.task.converter.result.ResultConverter;
-import com.main.task.converter.result.chain.ResultConverterCreatorChain;
-import com.main.task.converter.result.creator.PassResultConverterCreator;
-import com.main.task.converter.result.creator.RestMethodResultConverterCreator;
 import com.main.task.response.ContentType;
 import com.main.task.response.ContentTypeCreator;
 import com.main.task.response.HttpResponseHeader;
@@ -15,6 +11,7 @@ import com.main.task.value.BaseParameterValueMatcher;
 import com.main.task.value.CompositeMethodParameterValueMatcher;
 import com.main.task.value.HttpBodyAnnotationAnnotatedParameterValueMatcher;
 import com.main.task.value.HttpUrlAnnotationAnnotatedParameterValueMatcher;
+import com.main.task.value.MethodParameterValueMatcher;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -63,12 +60,11 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
 
         RequestParameters pathVariableValue = new RequestParameters(matchedEndPoint.getPathVariableValue().getValues());
         RequestParameters queryParamValues = new RequestParameters(queryParameters.getParameterMap());
-        CompositeMethodParameterValueMatcher methodParameterValueMatcher = new CompositeMethodParameterValueMatcher(
-            Map.of(
-                InputStream.class, new BaseParameterValueMatcher<>(request.getBodyInputStream()),
-                RequestBody.class, new HttpBodyAnnotationAnnotatedParameterValueMatcher(request.getBodyInputStream()),
-                PathVariable.class, new HttpUrlAnnotationAnnotatedParameterValueMatcher<>(PathVariable.class, pathVariableValue),
-                RequestParam.class, new HttpUrlAnnotationAnnotatedParameterValueMatcher<>(RequestParam.class, queryParamValues))
+        MethodParameterValueMatcher methodParameterValueMatcher = new CompositeMethodParameterValueMatcher(
+            Map.of(InputStream.class, new BaseParameterValueMatcher<>(request.getBodyInputStream()),
+                   RequestBody.class, new HttpBodyAnnotationAnnotatedParameterValueMatcher(request.getBodyInputStream()),
+                   PathVariable.class, new HttpUrlAnnotationAnnotatedParameterValueMatcher<>(PathVariable.class, pathVariableValue),
+                   RequestParam.class, new HttpUrlAnnotationAnnotatedParameterValueMatcher<>(RequestParam.class, queryParamValues))
         );
 
         ParameterValueGetter parameterValueGetter = new ParameterValueGetter(methodParameterValueMatcher, new ParameterValueClazzConverterFactory(new ObjectMapper()));
@@ -78,13 +74,6 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
             .toArray();
         Optional<Object> optionalResult = endPointTask.execute(parameterValues);
         log.info("methodResult : `{}`, clazz : `{}`", optionalResult.orElse(null), optionalResult.map(Object::getClass).orElse(null));
-
-        PassResultConverterCreator passResultConverterCreator = new PassResultConverterCreator();
-        RestMethodResultConverterCreator restMethodResultConverterCreator = new RestMethodResultConverterCreator(new ObjectMapper(), endPointTask);
-        ResultConverterCreatorChain resultConverterCreatorChain = new ResultConverterCreatorChain(null, passResultConverterCreator);
-        resultConverterCreatorChain = new ResultConverterCreatorChain(resultConverterCreatorChain, restMethodResultConverterCreator);
-        ResultConverter resultConverter = resultConverterCreatorChain.create().orElseThrow(() -> new RuntimeException("does not exist suitable convertor creator."));
-        optionalResult = resultConverter.convert(optionalResult);
 
         Optional<ContentType> optionalContentType = ContentTypeCreator.from(endPointTask, optionalResult).create();
         HttpResponseHeaderCreator headerCreator = new HttpResponseHeaderCreator(simpleDateFormat, hostAddress, optionalContentType);

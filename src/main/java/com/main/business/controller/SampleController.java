@@ -1,16 +1,16 @@
 package com.main.business.controller;
 
 import com.main.business.domain.SampleDomain;
-import container.annotation.RestController;
+import container.annotation.Controller;
+import lombok.extern.slf4j.Slf4j;
 import matcher.RequestMethod;
 import matcher.annotation.PathVariable;
 import matcher.annotation.RequestMapping;
 import matcher.annotation.RequestParam;
-import lombok.extern.slf4j.Slf4j;
 
 
 @Slf4j
-@RestController
+@Controller
 @RequestMapping(value = "/basic")
 public class SampleController {
     public final SampleDomain sampleDomain;

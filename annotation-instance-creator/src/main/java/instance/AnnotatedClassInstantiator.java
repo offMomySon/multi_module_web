@@ -11,12 +11,12 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class AnnotatedClassInitializer {
-    private final ObjectRepository prevObjectRepository;
+public class AnnotatedClassInstantiator {
+    private final ObjectRepository objectRepository;
     private final Set<Class<?>> targetAnnotations;
 
-    public AnnotatedClassInitializer(ObjectRepository prevObjectRepository, Set<Class<?>> targetAnnotations) {
-        Objects.requireNonNull(prevObjectRepository);
+    public AnnotatedClassInstantiator(ObjectRepository objectRepository, Set<Class<?>> targetAnnotations) {
+        Objects.requireNonNull(objectRepository);
         Objects.requireNonNull(targetAnnotations);
 
         targetAnnotations = targetAnnotations.stream()
@@ -25,19 +25,18 @@ public class AnnotatedClassInitializer {
         if (targetAnnotations.isEmpty()) {
             throw new RuntimeException("does not exist targetAnnotation");
         }
-        this.prevObjectRepository = prevObjectRepository;
+        this.objectRepository = objectRepository;
         this.targetAnnotations = targetAnnotations;
     }
 
     public ObjectRepository load(Class<?> clazz) {
-        boolean doesNotExistMatchTargetAnnotation = targetAnnotations.stream()
-            .noneMatch(targetAnnotation -> AnnotationUtils.exist(clazz, targetAnnotation));
+        boolean doesNotExistMatchTargetAnnotation = targetAnnotations.stream().noneMatch(targetAnnotation -> AnnotationUtils.exist(clazz, targetAnnotation));
         if (doesNotExistMatchTargetAnnotation) {
-            return prevObjectRepository;
+            return objectRepository;
         }
 
-        ObjectRepository newObjectRepository = ObjectRepository.empty();
-        Object instantiate = instantiate(clazz, newObjectRepository, prevObjectRepository, new LinkedHashSet<>());
+        ObjectRepository newObjectRepository = objectRepository.empty();
+        Object instantiate = instantiate(clazz, newObjectRepository, objectRepository, new LinkedHashSet<>());
         newObjectRepository.put(clazz, instantiate);
         return newObjectRepository;
     }

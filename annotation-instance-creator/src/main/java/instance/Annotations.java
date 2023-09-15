@@ -1,8 +1,11 @@
 package instance;
 
 import com.main.util.AnnotationUtils;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Annotations {
@@ -27,5 +30,16 @@ public class Annotations {
 
     public boolean noneAnnotatedFrom(Class<?> clazz) {
         return !anyAnnotatedFrom(clazz);
+    }
+
+    public Set<Class<?>> peekAnnotatedFieldsFrom(Class<?> clazz) {
+        if (Objects.isNull(clazz)) {
+            return Collections.emptySet();
+        }
+
+        return values.stream()
+            .map(targetAnnotation -> AnnotationUtils.peekFieldsType(clazz, targetAnnotation))
+            .flatMap(Collection::stream)
+            .collect(Collectors.toUnmodifiableSet());
     }
 }

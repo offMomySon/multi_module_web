@@ -1,9 +1,7 @@
 package instance;
 
-import com.main.util.AnnotationUtils;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -13,30 +11,25 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AnnotatedClassInstantiator {
     private final ObjectRepository objectRepository;
-    private final Set<Class<?>> targetAnnotations;
+    private final Annotations instantiateAnnotations;
 
-    public AnnotatedClassInstantiator(ObjectRepository objectRepository, Set<Class<?>> targetAnnotations) {
+    public AnnotatedClassInstantiator(ObjectRepository objectRepository, Annotations instantiateAnnotations) {
         Objects.requireNonNull(objectRepository);
-        Objects.requireNonNull(targetAnnotations);
+        Objects.requireNonNull(instantiateAnnotations);
 
-        targetAnnotations = targetAnnotations.stream()
-            .filter(Objects::nonNull)
-            .collect(Collectors.toUnmodifiableSet());
-        if (targetAnnotations.isEmpty()) {
-            throw new RuntimeException("does not exist targetAnnotation");
-        }
         this.objectRepository = objectRepository;
-        this.targetAnnotations = targetAnnotations;
+        this.instantiateAnnotations = instantiateAnnotations;
     }
 
     public ObjectRepository load(Class<?> clazz) {
-        boolean doesNotExistMatchTargetAnnotation = targetAnnotations.stream().noneMatch(targetAnnotation -> AnnotationUtils.exist(clazz, targetAnnotation));
+        boolean doesNotExistMatchTargetAnnotation = instantiateAnnotations.noneAnnotatedFrom(clazz);
         if (doesNotExistMatchTargetAnnotation) {
             return objectRepository;
         }
 
-        ObjectRepository newObjectRepository = objectRepository.empty();
-        Object instantiate = instantiate(clazz, newObjectRepository, objectRepository, new LinkedHashSet<>());
+        ObjectRepository newObjectRepository = ObjectRepository.empty();
+        Set<Class<?>> alreadyVisitedClasses = new LinkedHashSet<>();
+        Object instantiate = instantiate(clazz, newObjectRepository, objectRepository, alreadyVisitedClasses);
         newObjectRepository.put(clazz, instantiate);
         return newObjectRepository;
     }
@@ -68,16 +61,10 @@ public class AnnotatedClassInstantiator {
     }
 
     private Object doInstantiate(Class<?> clazz, ObjectRepository newObjectRepository, ObjectRepository prevObjectRepository, Set<Class<?>> alreadyVisitedClasses) {
-        Class<?>[] memberClazzes = targetAnnotations.stream()
-            .map(targetAnnotation -> AnnotationUtils.peekFieldsType(clazz, targetAnnotation))
-            .flatMap(Collection::stream)
-            .collect(Collectors.toUnmodifiableSet())
-            .toArray(Class<?>[]::new);
-
+        Class<?>[] memberClazzes = instantiateAnnotations.peekAnnotatedFieldsFrom(clazz).toArray(Class<?>[]::new);
         Object[] memberObjects = Arrays.stream(memberClazzes)
             .map(memberClazz -> this.instantiate(memberClazz, newObjectRepository, prevObjectRepository, alreadyVisitedClasses))
             .toArray();
-
         return newObject(clazz, memberClazzes, memberObjects);
     }
 

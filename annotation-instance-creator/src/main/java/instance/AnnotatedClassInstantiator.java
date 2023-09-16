@@ -31,7 +31,8 @@ public class AnnotatedClassInstantiator {
         Set<Class<?>> alreadyVisitedClasses = new LinkedHashSet<>();
         Object instantiate = instantiate(clazz, newObjectRepository, objectRepository, alreadyVisitedClasses);
         newObjectRepository.put(clazz, instantiate);
-        return newObjectRepository;
+
+        return newObjectRepository.merge(objectRepository);
     }
 
     private Object instantiate(Class<?> clazz, ObjectRepository newObjectRepository, ObjectRepository prevObjectRepository, Set<Class<?>> alreadyVisitedClasses) {

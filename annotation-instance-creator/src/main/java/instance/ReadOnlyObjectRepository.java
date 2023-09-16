@@ -5,14 +5,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ReadOnlyObjectRepository {
     private final Map<Class<?>, Object> values;
 
     public ReadOnlyObjectRepository(Map<Class<?>, Object> values) {
         if (Objects.isNull(values)) {
-            this.values = Collections.emptyMap();
-            return;
+            values = Collections.emptyMap();
         }
 
         this.values = values.entrySet().stream()
@@ -31,6 +31,19 @@ public class ReadOnlyObjectRepository {
 
     public boolean containsKey(Class<?> key) {
         return values.containsKey(key);
+    }
+
+    public ReadOnlyObjectRepository merge(ReadOnlyObjectRepository other) {
+        if (Objects.isNull(other)) {
+            return this;
+        }
+
+        Stream<Map.Entry<Class<?>, Object>> baseValueStream = this.values.entrySet().stream();
+        Stream<Map.Entry<Class<?>, Object>> otherValueStream = other.values.entrySet().stream();
+
+        Map<Class<?>, Object> mergedValues = Stream.concat(baseValueStream, otherValueStream)
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
+        return new ReadOnlyObjectRepository(mergedValues);
     }
 
     @Override

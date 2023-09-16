@@ -10,32 +10,36 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class AnnotatedClassInstantiator {
-    private final ObjectRepository objectRepository;
     private final Annotations instantiateAnnotations;
 
-    public AnnotatedClassInstantiator(ObjectRepository objectRepository, Annotations instantiateAnnotations) {
-        Objects.requireNonNull(objectRepository);
+    public AnnotatedClassInstantiator(Annotations instantiateAnnotations) {
         Objects.requireNonNull(instantiateAnnotations);
-
-        this.objectRepository = objectRepository;
         this.instantiateAnnotations = instantiateAnnotations;
     }
 
-    public ObjectRepository load(Class<?> clazz) {
-        boolean doesNotExistMatchTargetAnnotation = instantiateAnnotations.noneAnnotatedFrom(clazz);
-        if (doesNotExistMatchTargetAnnotation) {
-            return objectRepository;
+    public ReadOnlyObjectRepository load(Class<?> clazz, ReadOnlyObjectRepository prevObjectRepository) {
+        if(Objects.isNull(clazz)){
+            throw new RuntimeException("does not exist load clazz.");
+        }
+        if(Objects.isNull(prevObjectRepository)){
+            prevObjectRepository = ReadOnlyObjectRepository.empty();
         }
 
-        ObjectRepository newObjectRepository = ObjectRepository.empty();
-        Set<Class<?>> alreadyVisitedClasses = new LinkedHashSet<>();
-        Object instantiate = instantiate(clazz, newObjectRepository, objectRepository, alreadyVisitedClasses);
-        newObjectRepository.put(clazz, instantiate);
+        boolean doesNotExistMatchTargetAnnotation = instantiateAnnotations.noneAnnotatedFrom(clazz);
+        if (doesNotExistMatchTargetAnnotation) {
+            return prevObjectRepository;
+        }
 
-        return newObjectRepository.merge(objectRepository);
+        ObjectRepository objectRepository = ObjectRepository.empty();
+        Set<Class<?>> alreadyVisitedClasses = new LinkedHashSet<>();
+        Object instantiate = instantiate(clazz, objectRepository, prevObjectRepository, alreadyVisitedClasses);
+        objectRepository.put(clazz, instantiate);
+
+        ReadOnlyObjectRepository newReadOnlyRepository = objectRepository.lock();
+        return prevObjectRepository.merge(newReadOnlyRepository);
     }
 
-    private Object instantiate(Class<?> clazz, ObjectRepository newObjectRepository, ObjectRepository prevObjectRepository, Set<Class<?>> alreadyVisitedClasses) {
+    private Object instantiate(Class<?> clazz, ObjectRepository newObjectRepository, ReadOnlyObjectRepository prevObjectRepository, Set<Class<?>> alreadyVisitedClasses) {
         if (alreadyVisitedClasses.contains(clazz)) {
             String alreadyVisitedClassesName = alreadyVisitedClasses.stream()
                 .map(Class::getSimpleName)
@@ -61,7 +65,7 @@ public class AnnotatedClassInstantiator {
         return instance;
     }
 
-    private Object doInstantiate(Class<?> clazz, ObjectRepository newObjectRepository, ObjectRepository prevObjectRepository, Set<Class<?>> alreadyVisitedClasses) {
+    private Object doInstantiate(Class<?> clazz, ObjectRepository newObjectRepository, ReadOnlyObjectRepository prevObjectRepository, Set<Class<?>> alreadyVisitedClasses) {
         Class<?>[] memberClazzes = instantiateAnnotations.peekAnnotatedFieldsFrom(clazz).toArray(Class<?>[]::new);
         Object[] memberObjects = Arrays.stream(memberClazzes)
             .map(memberClazz -> this.instantiate(memberClazz, newObjectRepository, prevObjectRepository, alreadyVisitedClasses))

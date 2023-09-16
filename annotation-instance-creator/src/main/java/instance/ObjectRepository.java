@@ -12,37 +12,23 @@ import java.util.stream.Stream;
 public class ObjectRepository {
     private final Map<Class<?>, Object> values;
 
-    private ObjectRepository() {
-        this.values = new HashMap<>();
-    }
-
     public ObjectRepository(Map<Class<?>, Object> values) {
+        if (Objects.isNull(values)) {
+            values = Collections.emptyMap();
+        }
+
         this.values = values.entrySet().stream()
-                .filter(entry -> !Objects.isNull(entry.getKey()))
-                .filter(entry -> !Objects.isNull(entry.getValue()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
+            .filter(entry -> !Objects.isNull(entry.getKey()))
+            .filter(entry -> !Objects.isNull(entry.getValue()))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
     }
 
     public static ObjectRepository empty() {
         return new ObjectRepository(new HashMap<>());
     }
 
-    public ObjectRepository merge(ObjectRepository otherObjectRepository) {
-        if (Objects.isNull(otherObjectRepository)) {
-            return this;
-        }
-
-        Stream<Map.Entry<Class<?>, Object>> baseValueStream = this.values.entrySet().stream();
-        Stream<Map.Entry<Class<?>, Object>> otherValueStream = otherObjectRepository.values.entrySet().stream();
-
-        Map<Class<?>, Object> newValue = Stream.concat(baseValueStream, otherValueStream)
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
-
-        return new ObjectRepository(newValue);
-    }
-
     public ReadOnlyObjectRepository lock() {
-        return new ReadOnlyObjectRepository((this.values));
+        return new ReadOnlyObjectRepository(this.values);
     }
 
     public Object get(Class<?> key) {

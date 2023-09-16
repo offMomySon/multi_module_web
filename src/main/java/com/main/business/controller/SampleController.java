@@ -1,7 +1,7 @@
 package com.main.business.controller;
 
 import com.main.business.domain.SampleDomain;
-import container.annotation.Controller;
+import annotation.Controller;
 import lombok.extern.slf4j.Slf4j;
 import matcher.RequestMethod;
 import matcher.annotation.PathVariable;

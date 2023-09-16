@@ -1,12 +1,17 @@
 package instance;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 
 @Slf4j
 public class AnnotatedClassInstantiator {
@@ -18,10 +23,10 @@ public class AnnotatedClassInstantiator {
     }
 
     public ReadOnlyObjectRepository load(Class<?> clazz, ReadOnlyObjectRepository prevObjectRepository) {
-        if(Objects.isNull(clazz)){
+        if (Objects.isNull(clazz)) {
             throw new RuntimeException("does not exist load clazz.");
         }
-        if(Objects.isNull(prevObjectRepository)){
+        if (Objects.isNull(prevObjectRepository)) {
             prevObjectRepository = ReadOnlyObjectRepository.empty();
         }
 
@@ -66,16 +71,31 @@ public class AnnotatedClassInstantiator {
     }
 
     private Object doInstantiate(Class<?> clazz, ObjectRepository newObjectRepository, ReadOnlyObjectRepository prevObjectRepository, Set<Class<?>> alreadyVisitedClasses) {
-        Class<?>[] memberClazzes = instantiateAnnotations.peekAnnotatedFieldsFrom(clazz).toArray(Class<?>[]::new);
-        Object[] memberObjects = Arrays.stream(memberClazzes)
+        Set<Class<?>> memberClazzes = instantiateAnnotations.peekAnnotatedFieldsFrom(clazz);
+        Constructor<?> constructor = Arrays.stream(clazz.getConstructors())
+            .filter(c -> isMatchConstructor(c, memberClazzes))
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException(""));
+
+        Map<? extends Class<?>, Object> memberObjectMap = memberClazzes.stream()
             .map(memberClazz -> this.instantiate(memberClazz, newObjectRepository, prevObjectRepository, alreadyVisitedClasses))
+            .collect(Collectors.toUnmodifiableMap(Object::getClass, Function.identity(), (prev, curr) -> prev));
+
+        Object[] memberObjects = Arrays.stream(constructor.getParameters())
+            .map(memberObjectMap::get)
             .toArray();
-        return newObject(clazz, memberClazzes, memberObjects);
+
+        return newObject(constructor, memberObjects);
     }
 
-    private static Object newObject(Class<?> clazz, Class<?>[] memberClasses, Object[] memberObjects) {
+    private static boolean isMatchConstructor(Constructor<?> constructor, Set<Class<?>> memberClazzes) {
+        return Arrays.stream(constructor.getParameters())
+            .map(Parameter::getType)
+            .allMatch(memberClazzes::contains);
+    }
+
+    private static Object newObject(Constructor<?> constructor, Object[] memberObjects) {
         try {
-            Constructor<?> constructor = clazz.getConstructor(memberClasses);
             return constructor.newInstance(memberObjects);
         } catch (Exception e) {
             throw new RuntimeException(e);

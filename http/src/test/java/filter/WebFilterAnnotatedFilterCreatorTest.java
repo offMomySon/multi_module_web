@@ -1,6 +1,6 @@
 package filter;
 
-import filter.annotation.WebFilter;
+import annotation.WebFilter;
 import filter.pattern.BasePatternMatcher;
 import filter.pattern.PatternMatcher;
 import filter.pattern.WildCardFileExtensionMatcher;

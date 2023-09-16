@@ -2,14 +2,13 @@ package com.main.task.response;
 
 import com.main.task.annotation.ResponseBody;
 import com.main.util.AnnotationUtils;
-import container.annotation.RestController;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import task.JavaMethodInvokeTask;
 import task.EndPointTask;
+import task.JavaMethodInvokeTask;
 import static com.main.task.response.ContentType.APPLICATION_JSON;
 import static com.main.task.response.ContentType.TEXT_HTML;
 
@@ -43,7 +42,7 @@ public class ContentTypeCreator {
     }
 
     public Optional<ContentType> create() {
-        if(optionalMethodResult.isEmpty()){
+        if (optionalMethodResult.isEmpty()) {
             return Optional.empty();
         }
 

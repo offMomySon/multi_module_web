@@ -1,6 +1,6 @@
 package matcher.creator;
 
-import container.ObjectRepository;
+import instance.ReadOnlyObjectRepository;
 import matcher.JavaMethodEndpointTaskMatcher;
 import matcher.PathUrlMatcher;
 import matcher.RequestMethod;
@@ -19,9 +19,9 @@ public class JavaMethodPathMatcherCreator {
 
     private final Class<?> clazz;
     private final RequestMappingValueExtractor valueExtractor;
-    private final ObjectRepository objectRepository;
+    private final ReadOnlyObjectRepository objectRepository;
 
-    public JavaMethodPathMatcherCreator(@NonNull Class<?> clazz, @NonNull ObjectRepository objectRepository) {
+    public JavaMethodPathMatcherCreator(@NonNull Class<?> clazz, ReadOnlyObjectRepository objectRepository) {
         this.clazz = clazz;
         this.valueExtractor = new RequestMappingValueExtractor(clazz);
         this.objectRepository = objectRepository;

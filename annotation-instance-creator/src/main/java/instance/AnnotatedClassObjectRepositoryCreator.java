@@ -19,7 +19,7 @@ public class AnnotatedClassObjectRepositoryCreator {
         this.instantiateAnnotations = instantiateAnnotations;
     }
 
-    public static AnnotatedClassObjectRepositoryCreator appendCustomAnnotations(Annotations customAnnotations) {
+    public static AnnotatedClassObjectRepositoryCreator registCustomAnnotations(Annotations customAnnotations) {
         if (Objects.isNull(customAnnotations)) {
             return new AnnotatedClassObjectRepositoryCreator(DEFAULT_ANNOTATIONS);
         }
@@ -31,13 +31,13 @@ public class AnnotatedClassObjectRepositoryCreator {
         if (Objects.isNull(clazzes)) {
             clazzes = Collections.emptyList();
         }
-
-        clazzes = clazzes.stream()
+        List<Class<?>> annotatedClazzes = clazzes.stream()
             .filter(Objects::nonNull)
+            .filter(instantiateAnnotations::anyAnnotatedFrom)
             .collect(Collectors.toUnmodifiableList());
 
         ReadOnlyObjectRepository repository = ReadOnlyObjectRepository.empty();
-        for (Class<?> clazz : clazzes) {
+        for (Class<?> clazz : annotatedClazzes) {
             AnnotatedClassInstantiator annotatedClassInstantiator = new AnnotatedClassInstantiator(instantiateAnnotations);
             repository = annotatedClassInstantiator.load(clazz, repository);
         }

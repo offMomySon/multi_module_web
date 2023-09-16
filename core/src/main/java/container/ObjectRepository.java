@@ -36,10 +36,6 @@ public class ObjectRepository {
         return new ObjectRepository(newValue);
     }
 
-    public ObjectRepository lock() {
-        return new ObjectRepository(Collections.unmodifiableMap(this.values));
-    }
-
     public Set<Class<?>> keySet() {
         return new HashSet<>(values.keySet());
     }

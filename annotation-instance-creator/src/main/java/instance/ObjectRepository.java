@@ -41,12 +41,8 @@ public class ObjectRepository {
         return new ObjectRepository(newValue);
     }
 
-    public ObjectRepository lock() {
-        return new ObjectRepository(Collections.unmodifiableMap(this.values));
-    }
-
-    public Set<Class<?>> keySet() {
-        return new HashSet<>(values.keySet());
+    public ReadOnlyObjectRepository lock() {
+        return new ReadOnlyObjectRepository((this.values));
     }
 
     public Object get(Class<?> key) {
@@ -59,17 +55,6 @@ public class ObjectRepository {
 
     public boolean containsKey(Class<?> key) {
         return values.containsKey(key);
-    }
-
-    public static class ReadOnlyContainer {
-        private final Map<Class<?>, Object> values;
-
-        public ReadOnlyContainer(Map<Class<?>, Object> values) {
-            this.values = values.entrySet().stream()
-                    .filter(entry -> !Objects.isNull(entry.getKey()))
-                    .filter(entry -> !Objects.isNull(entry.getValue()))
-                    .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
-        }
     }
 
     @Override

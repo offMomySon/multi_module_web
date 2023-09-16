@@ -9,7 +9,6 @@ import container.ComponentClassInitializer;
 import container.ObjectRepository;
 import container.annotation.Component;
 import container.annotation.Controller;
-import container.annotation.RestController;
 import filter.Filter;
 import filter.FilterWorker;
 import filter.Filters;

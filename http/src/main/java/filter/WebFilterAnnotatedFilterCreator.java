@@ -6,8 +6,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import util.AnnotationUtils;
 
+@Slf4j
 public class WebFilterAnnotatedFilterCreator {
     private static final Class<WebFilter> WEB_FILTER_CLASS = WebFilter.class;
 

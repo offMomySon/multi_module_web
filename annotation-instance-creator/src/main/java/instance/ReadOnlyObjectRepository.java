@@ -47,13 +47,13 @@ public class ReadOnlyObjectRepository {
         return new ReadOnlyObjectRepository(mergedValues);
     }
 
-    public List<Object> findObjectByClazz(Class<?> findClazz) {
+    public <T> List<T> findObjectByClazz(Class<T> findClazz) {
         List<Class<?>> foundClazzes = values.keySet().stream()
-            .filter(c -> c.isAssignableFrom(findClazz))
+            .filter(findClazz::isAssignableFrom)
             .collect(Collectors.toUnmodifiableList());
 
         return foundClazzes.stream()
-            .map(values::get)
+            .map(foundClazze -> (T) values.get(foundClazze))
             .collect(Collectors.toUnmodifiableList());
     }
 

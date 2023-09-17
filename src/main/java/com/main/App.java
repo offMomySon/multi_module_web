@@ -10,6 +10,7 @@ import filter.Filter;
 import filter.FilterWorker;
 import filter.Filters;
 import annotation.WebFilter;
+import filter.WebFilterAnnotatedFilterCreator;
 import filter.pattern.PatternMatcher;
 import filter.pattern.PatternMatcherStrategy;
 import instance.AnnotatedClassObjectRepositoryCreator;
@@ -53,6 +54,13 @@ public class App {
         AnnotatedClassObjectRepositoryCreator objectRepositoryCreator = AnnotatedClassObjectRepositoryCreator.registCustomAnnotations(customAnnotations);
         ReadOnlyObjectRepository objectRepository = objectRepositoryCreator.create(clazzes);
 
+        // 3. webfilter 생성.
+        List<FilterWorker> filterWorkerObjects = objectRepository.findObjectByClazz(FilterWorker.class);
+        Filters filters = filterWorkerObjects.stream()
+            .map(WebFilterAnnotatedFilterCreator::new)
+            .map(WebFilterAnnotatedFilterCreator::create)
+            .reduce(Filters.empty(),Filters::merge);
+
         // 3. class 로 httpPathMatcher 를 생성.
         List<Class<?>> controllerClazzes = AnnotationUtils.filterByAnnotatedClazz(clazzes, Controller.class);
         List<EndpointTaskMatcher> baseHttpPathMatchers = controllerClazzes.stream()
@@ -67,43 +75,14 @@ public class App {
             .collect(Collectors.toUnmodifiableList());
         EndpointTaskMatcher endpointTaskMatcher = new CompositedEndpointTaskMatcher(endpointTaskMatchers);
 
-        // 4. class 로 webfilter 를 생성.
-//        List<Class<?>> webFilterAnnotatedClazzes = AnnotationUtils.filterByAnnotatedClazz(clazzes, WEB_FILTER_CLASS);
-//        log.info("webFilterAnnotatedClazzes : {}", webFilterAnnotatedClazzes);
-//        List<Filter> filters = webFilterAnnotatedClazzes.stream()
-//            .map(webFilterAnnotatedClazz -> createFilters(objectRepository, webFilterAnnotatedClazz))
-//            .flatMap(Collection::stream)
-//            .collect(Collectors.toUnmodifiableList());
-//        Filters newFilters = new Filters(filters);
-//        log.info("newFilters : {}", newFilters);
-
         BaseHttpRequestProcessor baseHttpRequestProcessor = new BaseHttpRequestProcessor(endpointTaskMatcher, SIMPLE_DATE_FORMAT, HOST_ADDRESS);
-        HttpService httpService = HttpService.from(baseHttpRequestProcessor, new Filters(Collections.emptyList()),
+        HttpService httpService = HttpService.from(baseHttpRequestProcessor, filters,
                                                    HttpConfig.INSTANCE.getPort(),
                                                    HttpConfig.INSTANCE.getMaxConnection(),
                                                    HttpConfig.INSTANCE.getWaitConnection(),
                                                    HttpConfig.INSTANCE.getKeepAliveTime());
         httpService.start();
     }
-
-//    public static List<Filter> createFilters(ObjectRepository objectRepository, Class<?> filterWorkerClazz) {
-//        Objects.requireNonNull(filterWorkerClazz);
-//        if (util.AnnotationUtils.doesNotExist(filterWorkerClazz, WEB_FILTER_CLASS)) {
-//            throw new RuntimeException("does not exist component annotation");
-//        }
-//
-//        Class<?>[] memberClasses = util.AnnotationUtils.peekFieldsType(filterWorkerClazz, COMPONENT_CLASS).toArray(Class<?>[]::new);
-//        Object[] memberObjects = Arrays.stream(memberClasses).map(objectRepository::get).toArray(Object[]::new);
-//        FilterWorker filterWorker = (FilterWorker) newObject(filterWorkerClazz, memberClasses, memberObjects);
-//
-//        WebFilter webFilter = AnnotationUtils.find(filterWorkerClazz, WEB_FILTER_CLASS).orElseThrow(() -> new RuntimeException("filter does not annotated WebFilter."));
-//        String filterName = webFilter.filterName().isEmpty() ? filterWorker.getClass().getSimpleName() : webFilter.filterName();
-//        List<String> basePaths = Arrays.stream(webFilter.patterns()).collect(Collectors.toUnmodifiableList());
-//
-//        return basePaths.stream()
-//            .map(basePath -> createFilter(filterName, basePath, filterWorker))
-//            .collect(Collectors.toUnmodifiableList());
-//    }
 
     private static String getHostAddress() {
         try {

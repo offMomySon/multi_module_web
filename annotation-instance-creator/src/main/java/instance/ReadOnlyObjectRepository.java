@@ -2,6 +2,7 @@ package instance;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -44,6 +45,16 @@ public class ReadOnlyObjectRepository {
         Map<Class<?>, Object> mergedValues = Stream.concat(baseValueStream, otherValueStream)
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
         return new ReadOnlyObjectRepository(mergedValues);
+    }
+
+    public List<Object> findObjectByClazz(Class<?> findClazz) {
+        List<Class<?>> foundClazzes = values.keySet().stream()
+            .filter(c -> c.isAssignableFrom(findClazz))
+            .collect(Collectors.toUnmodifiableList());
+
+        return foundClazzes.stream()
+            .map(values::get)
+            .collect(Collectors.toUnmodifiableList());
     }
 
     @Override

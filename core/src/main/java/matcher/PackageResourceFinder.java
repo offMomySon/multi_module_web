@@ -1,5 +1,6 @@
 package matcher;
 
+import com.main.util.FileSystemUtil;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -8,7 +9,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
-import util.FileSystemUtil;
 
 @Slf4j
 public class PackageResourceFinder {
@@ -56,7 +56,7 @@ public class PackageResourceFinder {
         return Path.of(DIRECTORY_DELIMITER).resolve(packageResourcePath);
     }
 
-//    1. resource 를 찾기 위한 path 를 받는다.
+    //    1. resource 를 찾기 위한 path 를 받는다.
 //    2. findUrl 을 일반화한다.
 //    3. 등록된 url 에 findUrl 이 존재하는 지 확인한다.
 //    4. resource directory path, find url path 를 조합하여 resource path 를 생성한다.

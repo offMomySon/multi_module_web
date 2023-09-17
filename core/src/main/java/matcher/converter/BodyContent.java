@@ -5,8 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
-import util.IoUtils;
-import static util.IoUtils.*;
+import static com.main.util.IoUtils.createBufferedInputStream;
 
 @Slf4j
 public class BodyContent {
@@ -33,7 +32,7 @@ public class BodyContent {
         return new String(readAllBytes);
     }
 
-    private static byte[] readAllBytes(BufferedInputStream bufferedInputStream){
+    private static byte[] readAllBytes(BufferedInputStream bufferedInputStream) {
         try {
             return bufferedInputStream.readAllBytes();
         } catch (IOException e) {

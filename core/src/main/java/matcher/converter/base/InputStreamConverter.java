@@ -1,9 +1,8 @@
 package matcher.converter.base;
 
-import util.IoUtils;
-
 import java.io.InputStream;
 import java.util.Objects;
+import static com.main.util.IoUtils.createBufferedInputStream;
 
 public class InputStreamConverter implements Converter {
     @Override
@@ -13,6 +12,6 @@ public class InputStreamConverter implements Converter {
     }
 
     public InputStream convertToInputStream(InputStream inputStream) {
-        return IoUtils.createBufferedInputStream(inputStream);
+        return createBufferedInputStream(inputStream);
     }
 }

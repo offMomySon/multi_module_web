@@ -1,15 +1,19 @@
 package matcher.creator;
 
+import com.main.util.AnnotationUtils;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 import matcher.RequestMethod;
 import matcher.annotation.RequestMapping;
-import util.AnnotationUtils;
-
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.stream.Collectors;
 
 public class RequestMappingValueExtractor {
     private static final Class<RequestMapping> REQUEST_MAPPING_CLASS = RequestMapping.class;
@@ -20,7 +24,7 @@ public class RequestMappingValueExtractor {
     public RequestMappingValueExtractor(@NonNull Class<?> clazz) {
         this.clazz = clazz;
         this.methods = AnnotationUtils.peekMethods(this.clazz, REQUEST_MAPPING_CLASS).stream()
-                .collect(Collectors.toUnmodifiableSet());
+            .collect(Collectors.toUnmodifiableSet());
     }
 
     public List<RequestMappedMethod> extractRequestMappedMethods(Method javaMethod) {
@@ -33,24 +37,24 @@ public class RequestMappingValueExtractor {
 
         Optional<RequestMapping> clazzRequestMapping = AnnotationUtils.find(clazz, REQUEST_MAPPING_CLASS);
         RequestMapping methodRequestMapping = AnnotationUtils.find(javaMethod, REQUEST_MAPPING_CLASS)
-                .orElseThrow(() -> new RuntimeException("method does not have RequestMapping."));
+            .orElseThrow(() -> new RuntimeException("method does not have RequestMapping."));
 
         List<RequestMethod> requestMethods = Arrays.stream(methodRequestMapping.method()).collect(Collectors.toUnmodifiableList());
         List<String> clazzUrls = clazzRequestMapping
-                .map(c -> Arrays.asList(c.value()))
-                .orElseGet(Collections::emptyList);
+            .map(c -> Arrays.asList(c.value()))
+            .orElseGet(Collections::emptyList);
         List<String> methodUrls = Arrays.stream(methodRequestMapping.value())
-                .collect(Collectors.toUnmodifiableList());
+            .collect(Collectors.toUnmodifiableList());
 
         List<String> fullMethodUrls = clazzUrls.stream()
-                .flatMap(clazzUrl -> methodUrls.stream()
-                        .map(methodUrl -> clazzUrl + methodUrl))
-                .collect(Collectors.toUnmodifiableList());
+            .flatMap(clazzUrl -> methodUrls.stream()
+                .map(methodUrl -> clazzUrl + methodUrl))
+            .collect(Collectors.toUnmodifiableList());
 
         return requestMethods.stream()
-                .flatMap(httpMethod -> fullMethodUrls.stream()
-                        .map(methodUrl -> new RequestMappedMethod(httpMethod, methodUrl, javaMethod)))
-                .collect(Collectors.toUnmodifiableList());
+            .flatMap(httpMethod -> fullMethodUrls.stream()
+                .map(methodUrl -> new RequestMappedMethod(httpMethod, methodUrl, javaMethod)))
+            .collect(Collectors.toUnmodifiableList());
     }
 
     @EqualsAndHashCode
@@ -62,7 +66,7 @@ public class RequestMappingValueExtractor {
 
         public RequestMappedMethod(RequestMethod requestMethod, String url, Method javaMethod) {
             if (Objects.isNull(requestMethod) || Objects.isNull(javaMethod) ||
-                    Objects.isNull(url) || url.isBlank() || url.isBlank()) {
+                Objects.isNull(url) || url.isBlank() || url.isBlank()) {
                 throw new RuntimeException("value is invalid.");
             }
 

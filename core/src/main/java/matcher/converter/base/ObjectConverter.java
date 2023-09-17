@@ -22,7 +22,7 @@ public class ObjectConverter implements Converter {
     }
 
     public <T> T convert(String value, Class<T> targetClazz) {
-        if(String.class == targetClazz){
+        if (String.class == targetClazz) {
             return (T) value;
         }
 

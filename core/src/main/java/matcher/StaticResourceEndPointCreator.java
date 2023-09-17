@@ -1,5 +1,6 @@
 package matcher;
 
+import com.main.util.FileSystemUtil;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -8,7 +9,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import matcher.segment.PathUrl;
-import util.FileSystemUtil;
 
 @Slf4j
 public class StaticResourceEndPointCreator {
@@ -80,7 +80,7 @@ public class StaticResourceEndPointCreator {
             this.url = url;
         }
 
-        public static ResourceUrl from(Path resourceDirectory, Path resource, String urlPrefix){
+        public static ResourceUrl from(Path resourceDirectory, Path resource, String urlPrefix) {
             Objects.requireNonNull(resourceDirectory);
             Objects.requireNonNull(resource);
             Objects.requireNonNull(urlPrefix);

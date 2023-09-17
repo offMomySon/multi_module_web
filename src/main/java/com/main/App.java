@@ -59,7 +59,10 @@ public class App {
         // 3. class 로 httpPathMatcher 를 생성.
         List<Class<?>> controllerClazzes = AnnotationUtils.filterByAnnotatedClazz(clazzes, Controller.class);
         List<EndpointTaskMatcher> baseHttpPathMatchers = controllerClazzes.stream()
-            .map(clazz -> new JavaMethodPathMatcherCreator(clazz, objectRepository))
+            .map(clazz -> {
+                Object clazzObject = objectRepository.get(clazz);
+                return new JavaMethodPathMatcherCreator(clazz, clazzObject);
+            })
             .map(JavaMethodPathMatcherCreator::create)
             .flatMap(Collection::stream)
             .peek(httpPathMatcher -> log.info("EndpointTaskMatcher : `{}`", httpPathMatcher))

@@ -1,15 +1,15 @@
 package taskmatcher.creator;
 
+import annotation.RequestMapping;
 import com.main.util.AnnotationUtils;
-import instance.ReadOnlyObjectRepository;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import taskmatcher.JavaMethodEndpointTaskMatcher;
 import taskmatcher.PathUrlMatcher;
 import taskmatcher.RequestMethod;
-import annotation.RequestMapping;
 import taskmatcher.creator.RequestMappingValueExtractor.RequestMappedMethod;
 import taskmatcher.segment.PathUrl;
 import taskmatcher.segment.creator.SegmentChunkFactory;
@@ -18,13 +18,21 @@ public class JavaMethodPathMatcherCreator {
     private final static Class<RequestMapping> REQUEST_MAPPING_CLASS = RequestMapping.class;
 
     private final Class<?> clazz;
+    private final Object clazzObject;
     private final RequestMappingValueExtractor valueExtractor;
-    private final ReadOnlyObjectRepository objectRepository;
 
-    public JavaMethodPathMatcherCreator(@NonNull Class<?> clazz, ReadOnlyObjectRepository objectRepository) {
+    public JavaMethodPathMatcherCreator(@NonNull Class<?> clazz, Object clazzObject) {
+        Objects.requireNonNull(clazz);
+        Objects.requireNonNull(clazzObject);
+
+        boolean doesNotClazzInstance = clazz != clazzObject.getClass();
+        if (doesNotClazzInstance) {
+            throw new RuntimeException("object must be clazz instance.");
+        }
+
         this.clazz = clazz;
+        this.clazzObject = clazzObject;
         this.valueExtractor = new RequestMappingValueExtractor(clazz);
-        this.objectRepository = objectRepository;
     }
 
     public List<JavaMethodEndpointTaskMatcher> create() {
@@ -45,10 +53,8 @@ public class JavaMethodPathMatcherCreator {
                 PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(segmentChunkFactory);
 
                 Method javaMethod = requestMappedMethod.getJavaMethod();
-                Class<?> declaringClass = javaMethod.getDeclaringClass();
-                Object declaringInstance = objectRepository.get(declaringClass);
 
-                return new JavaMethodEndpointTaskMatcher(requestMethod, pathUrlMatcher, declaringInstance, javaMethod);
+                return new JavaMethodEndpointTaskMatcher(requestMethod, pathUrlMatcher, clazzObject, javaMethod);
             })
             .collect(Collectors.toUnmodifiableList());
     }

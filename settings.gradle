@@ -1,8 +1,7 @@
 rootProject.name = 'multi_module_web_server'
 
-include 'http'
-include 'core'
 include 'annotation-instance-creator'
-include 'util'
+include 'http'
 include 'http-task-executor'
+include 'util'
 

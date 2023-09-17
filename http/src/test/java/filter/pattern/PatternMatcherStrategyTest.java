@@ -15,7 +15,8 @@ class PatternMatcherStrategyTest {
     void test(String basePath, Class<?> expect) throws Exception {
         //given
         //when
-        PatternMatcher actual = PatternMatcherStrategy.create(basePath);
+        PatternMatcherStrategy patternMatcherStrategy = new PatternMatcherStrategy(basePath);
+        PatternMatcher actual = patternMatcherStrategy.create();
 
         //then
         Assertions.assertThat(actual).isInstanceOf(expect);

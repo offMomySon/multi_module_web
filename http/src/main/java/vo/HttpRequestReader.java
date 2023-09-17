@@ -25,8 +25,7 @@ public class HttpRequestReader implements Closeable {
         try {
             Objects.requireNonNull(requestStream);
 
-            BufferedReader reader = IoUtils.creatBufferedReader(requestStream);
-
+            BufferedReader reader = IoUtils.createBufferedReader(requestStream);
             String startLine = reader.readLine();
             String[] startLineElements = startLine.split(REQUEST_LINE_DELIMITER, 3);
             String[] uriElements = startLineElements[1].split(QUERY_PARAM_STARTER, 2);

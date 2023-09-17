@@ -11,8 +11,8 @@ repositories {
 
 dependencies {
     api project(':http')
-    api project(':core')
     api project(':annotation-instance-creator')
+    api project(':http-task-executor')
     api project(':util')
 
     //logback

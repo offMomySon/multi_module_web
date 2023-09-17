@@ -10,12 +10,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import annotation.RequestParam;
-import com.main.task.executor.RequestParameters;
+import parameter.RequestParameters;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import com.main.task.matcher.HttpUrlAnnotationAnnotatedParameterValueMatcher;
-import static com.main.task.matcher.HttpUrlAnnotationAnnotatedParameterValueMatcher.HttpUrlAnnotation;
+import parameter.HttpUrlAnnotationAnnotatedParameterValueMatcher;
+import static parameter.HttpUrlAnnotationAnnotatedParameterValueMatcher.HttpUrlAnnotation;
 
 class HttpUrlAnnotationAnnotatedParameterValueMatcherTest {
 

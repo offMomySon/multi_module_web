@@ -7,7 +7,7 @@ import java.lang.reflect.Parameter;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import com.main.task.matcher.BaseParameterValueMatcher;
+import parameter.BaseParameterValueMatcher;
 
 class BaseParameterValueMatcherTest {
 

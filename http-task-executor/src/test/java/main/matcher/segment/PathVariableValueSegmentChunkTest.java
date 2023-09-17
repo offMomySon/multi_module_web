@@ -1,8 +1,8 @@
 package main.matcher.segment;
 
-import taskmatcher.segment.PathUrl;
-import taskmatcher.segment.PathVariableSegmentChunk;
-import taskmatcher.segment.PathVariableValue;
+import matcher.segment.PathUrl;
+import matcher.segment.PathVariableSegmentChunk;
+import matcher.segment.PathVariableValue;
 import java.util.List;
 import java.util.Map;
 import org.assertj.core.api.Assertions;

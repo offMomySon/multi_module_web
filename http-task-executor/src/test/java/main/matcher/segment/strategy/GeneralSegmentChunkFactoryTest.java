@@ -1,11 +1,11 @@
 package main.matcher.segment.strategy;
 
-import taskmatcher.segment.EmptySegmentChunk;
-import taskmatcher.segment.creator.GeneralSegmentChunkCreateStrategy;
-import taskmatcher.segment.NormalSegmentChunk;
-import taskmatcher.segment.PathUrl;
-import taskmatcher.segment.PathVariableSegmentChunk;
-import taskmatcher.segment.SegmentChunk;
+import matcher.segment.EmptySegmentChunk;
+import matcher.segment.creator.GeneralSegmentChunkCreateStrategy;
+import matcher.segment.NormalSegmentChunk;
+import matcher.segment.PathUrl;
+import matcher.segment.PathVariableSegmentChunk;
+import matcher.segment.SegmentChunk;
 import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;

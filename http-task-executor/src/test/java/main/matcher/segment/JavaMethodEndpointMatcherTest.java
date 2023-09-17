@@ -1,12 +1,12 @@
 package main.matcher.segment;
 
-import taskmatcher.JavaMethodEndpointTaskMatcher;
-import taskmatcher.MatchedEndPoint;
-import taskmatcher.PathUrlMatcher;
-import taskmatcher.RequestMethod;
-import taskmatcher.segment.PathUrl;
-import taskmatcher.segment.PathVariableValue;
-import taskmatcher.segment.creator.SegmentChunkFactory;
+import matcher.JavaMethodEndpointTaskMatcher;
+import matcher.MatchedEndPoint;
+import matcher.PathUrlMatcher;
+import matcher.RequestMethod;
+import matcher.segment.PathUrl;
+import matcher.segment.PathVariableValue;
+import matcher.segment.creator.SegmentChunkFactory;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;

@@ -1,7 +1,7 @@
 package main.matcher.segment;
 
-import taskmatcher.segment.NormalSegmentChunk;
-import taskmatcher.segment.PathUrl;
+import matcher.segment.NormalSegmentChunk;
+import matcher.segment.PathUrl;
 import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;

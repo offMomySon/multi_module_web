@@ -1,13 +1,13 @@
 package main.matcher.segment.strategy;
 
-import taskmatcher.segment.EmptySegmentChunk;
-import taskmatcher.segment.NormalSegmentChunk;
-import taskmatcher.segment.PathUrl;
-import taskmatcher.segment.PathVariableSegmentChunk;
-import taskmatcher.segment.SegmentChunk;
-import taskmatcher.segment.creator.SegmentChunkFactory;
-import taskmatcher.segment.WildCardPathVariableSegmentChunk;
-import taskmatcher.segment.WildCardSegmentChunk;
+import matcher.segment.EmptySegmentChunk;
+import matcher.segment.NormalSegmentChunk;
+import matcher.segment.PathUrl;
+import matcher.segment.PathVariableSegmentChunk;
+import matcher.segment.SegmentChunk;
+import matcher.segment.creator.SegmentChunkFactory;
+import matcher.segment.WildCardPathVariableSegmentChunk;
+import matcher.segment.WildCardSegmentChunk;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

@@ -1,7 +1,7 @@
 package com.main.business.controller;
 
 import com.main.business.domain.SampleDomain1;
-import taskmatcher.RequestMethod;
+import matcher.RequestMethod;
 import annotation.PathVariable;
 import annotation.RequestMapping;
 import annotation.RequestParam;

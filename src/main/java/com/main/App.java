@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import matcher.CompositedEndpointTaskMatcher;
 import matcher.EndpointTaskMatcher;
-import matcher.StaticResourceEndPointCreator;
+import matcher.creator.StaticResourceEndPointCreator;
 import matcher.StaticResourceEndPointTaskMatcher;
 import matcher.creator.JavaMethodPathMatcherCreator;
 import executor.HttpService;

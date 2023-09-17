@@ -9,10 +9,10 @@ import lombok.NonNull;
 import matcher.JavaMethodEndpointTaskMatcher;
 import matcher.PathUrlMatcher;
 import matcher.RequestMethod;
-import matcher.annotation.RequestMapping;
+import annotation.RequestMapping;
 import matcher.creator.RequestMappingValueExtractor.RequestMappedMethod;
 import matcher.segment.PathUrl;
-import matcher.segment.SegmentChunkFactory;
+import matcher.segment.creator.SegmentChunkFactory;
 
 public class JavaMethodPathMatcherCreator {
     private final static Class<RequestMapping> REQUEST_MAPPING_CLASS = RequestMapping.class;

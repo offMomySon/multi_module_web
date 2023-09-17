@@ -1,7 +1,5 @@
 package matcher.segment;
 
-import matcher.creator.PathVariableUtil;
-
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;

@@ -22,10 +22,10 @@ import lombok.extern.slf4j.Slf4j;
 import matcher.EndpointTaskMatcher;
 import matcher.MatchedEndPoint;
 import matcher.RequestMethod;
-import matcher.annotation.PathVariable;
-import matcher.annotation.RequestBody;
-import matcher.annotation.RequestParam;
-import matcher.converter.RequestParameters;
+import annotation.PathVariable;
+import annotation.RequestBody;
+import annotation.RequestParam;
+import vo.RequestParameters;
 import matcher.segment.PathUrl;
 import executor.HttpRequestProcessor;
 import task.EndPointTask;
@@ -41,6 +41,9 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
     private final String hostAddress;
 
     public BaseHttpRequestProcessor(EndpointTaskMatcher endpointTaskMatcher, SimpleDateFormat simpleDateFormat, String hostAddress) {
+        Objects.requireNonNull(endpointTaskMatcher);
+        Objects.requireNonNull(simpleDateFormat);
+        Objects.requireNonNull(hostAddress);
         this.endpointTaskMatcher = endpointTaskMatcher;
         this.simpleDateFormat = simpleDateFormat;
         this.hostAddress = hostAddress;

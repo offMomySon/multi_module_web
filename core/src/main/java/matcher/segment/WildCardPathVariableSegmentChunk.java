@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
-import matcher.creator.PathVariableUtil;
 
 @Slf4j
 public class WildCardPathVariableSegmentChunk extends AbstractPathVariableSegmentChunk {

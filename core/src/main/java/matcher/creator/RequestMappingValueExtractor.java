@@ -13,7 +13,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 import matcher.RequestMethod;
-import matcher.annotation.RequestMapping;
+import annotation.RequestMapping;
 
 public class RequestMappingValueExtractor {
     private static final Class<RequestMapping> REQUEST_MAPPING_CLASS = RequestMapping.class;

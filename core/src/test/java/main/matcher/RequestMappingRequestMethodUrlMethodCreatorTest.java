@@ -1,7 +1,7 @@
 package main.matcher;
 
 import matcher.RequestMethod;
-import matcher.annotation.RequestMapping;
+import annotation.RequestMapping;
 import matcher.creator.RequestMappingValueExtractor;
 import matcher.creator.RequestMappingValueExtractor.RequestMappedMethod;
 import java.lang.reflect.Method;

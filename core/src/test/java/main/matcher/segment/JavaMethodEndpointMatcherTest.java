@@ -6,7 +6,7 @@ import matcher.PathUrlMatcher;
 import matcher.RequestMethod;
 import matcher.segment.PathUrl;
 import matcher.segment.PathVariableValue;
-import matcher.segment.SegmentChunkFactory;
+import matcher.segment.creator.SegmentChunkFactory;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;

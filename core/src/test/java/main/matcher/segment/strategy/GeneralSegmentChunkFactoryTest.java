@@ -1,7 +1,7 @@
 package main.matcher.segment.strategy;
 
 import matcher.segment.EmptySegmentChunk;
-import matcher.segment.GeneralSegmentChunkCreateStrategy;
+import matcher.segment.creator.GeneralSegmentChunkCreateStrategy;
 import matcher.segment.NormalSegmentChunk;
 import matcher.segment.PathUrl;
 import matcher.segment.PathVariableSegmentChunk;

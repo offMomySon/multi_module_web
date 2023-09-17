@@ -1,14 +1,12 @@
 package com.main.task.response;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import matcher.converter.base.CompositeConverter;
+import converter.CompositeConverter;
 import vo.HttpResponse;
 import vo.HttpResponseWriter;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class HttpResponseSender {
     private static final CompositeConverter converter = new CompositeConverter();
@@ -20,7 +18,7 @@ public class HttpResponseSender {
         this.httpResponse = httpResponse;
     }
 
-    public void send(HttpResponseHeader responseHeader,  Optional<Object> optionalResult) {
+    public void send(HttpResponseHeader responseHeader, Optional<Object> optionalResult) {
         String startLine = responseHeader.getStartLine();
         Map<String, String> header = responseHeader.getHeader();
 

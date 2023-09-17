@@ -1,12 +1,12 @@
-package com.main.task.response;
+package vo;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Objects;
-import static com.main.task.response.ContentType.APPLICATION_JSON;
-import static com.main.task.response.ContentType.IMAGE_GIF;
-import static com.main.task.response.ContentType.IMAGE_JPEG;
-import static com.main.task.response.ContentType.TEXT_HTML;
+import static vo.ContentType.APPLICATION_JSON;
+import static vo.ContentType.IMAGE_GIF;
+import static vo.ContentType.IMAGE_JPEG;
+import static vo.ContentType.TEXT_HTML;
 
 public enum FileExtension {
     JPG(IMAGE_JPEG),

@@ -1,4 +1,4 @@
-package com.main.task.response;
+package response;
 
 import java.util.HashMap;
 import java.util.Map;

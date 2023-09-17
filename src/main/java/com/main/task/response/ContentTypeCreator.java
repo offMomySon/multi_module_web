@@ -9,8 +9,10 @@ import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import task.EndPointTask;
 import task.JavaMethodInvokeTask;
-import static com.main.task.response.ContentType.APPLICATION_JSON;
-import static com.main.task.response.ContentType.TEXT_HTML;
+import vo.ContentType;
+import vo.FileExtension;
+import static vo.ContentType.APPLICATION_JSON;
+import static vo.ContentType.TEXT_HTML;
 
 @Slf4j
 public class ContentTypeCreator {

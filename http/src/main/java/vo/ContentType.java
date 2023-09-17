@@ -1,4 +1,4 @@
-package com.main.task.response;
+package vo;
 
 import java.text.MessageFormat;
 import java.util.Arrays;

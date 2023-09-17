@@ -1,4 +1,4 @@
-package com.main.task.response;
+package response;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import response.HttpResponseHeader;
+import vo.ContentType;
 
 public class HttpResponseHeaderCreator {
     private final SimpleDateFormat simpleDateFormat;

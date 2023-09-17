@@ -1,8 +1,8 @@
 package main.matcher.segment;
 
-import matcher.segment.PathUrl;
-import matcher.segment.PathVariableValue;
-import matcher.segment.WildCardPathVariableSegmentChunk;
+import taskmatcher.segment.PathUrl;
+import taskmatcher.segment.PathVariableValue;
+import taskmatcher.segment.WildCardPathVariableSegmentChunk;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;

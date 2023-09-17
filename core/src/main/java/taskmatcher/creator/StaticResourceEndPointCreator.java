@@ -1,4 +1,4 @@
-package matcher.creator;
+package taskmatcher.creator;
 
 import com.main.util.FileSystemUtil;
 import java.nio.file.Files;
@@ -8,8 +8,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
-import matcher.StaticResourceEndPointTaskMatcher;
-import matcher.segment.PathUrl;
+import taskmatcher.StaticResourceEndPointTaskMatcher;
+import taskmatcher.segment.PathUrl;
 
 @Slf4j
 public class StaticResourceEndPointCreator {

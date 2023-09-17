@@ -1,6 +1,6 @@
 package main.matcher.segment;
 
-import matcher.segment.PathUrl;
+import taskmatcher.segment.PathUrl;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;

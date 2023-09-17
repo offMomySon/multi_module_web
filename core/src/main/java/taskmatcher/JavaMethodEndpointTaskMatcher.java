@@ -1,7 +1,7 @@
-package matcher;
+package taskmatcher;
 
-import matcher.segment.PathUrl;
-import matcher.segment.PathVariableValue;
+import taskmatcher.segment.PathUrl;
+import taskmatcher.segment.PathVariableValue;
 import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.Optional;

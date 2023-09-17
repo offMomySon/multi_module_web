@@ -1,11 +1,11 @@
-package matcher;
+package taskmatcher;
 
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import matcher.segment.PathUrl;
-import matcher.segment.PathVariableValue;
+import taskmatcher.segment.PathUrl;
+import taskmatcher.segment.PathVariableValue;
 import task.ResourceFindTask;
 
 @Slf4j

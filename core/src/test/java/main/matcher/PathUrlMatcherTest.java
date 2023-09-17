@@ -1,10 +1,10 @@
 package main.matcher;
 
 import main.matcher.segment.PathMatchTestSuite;
-import matcher.PathUrlMatcher;
-import matcher.segment.PathUrl;
-import matcher.segment.PathVariableValue;
-import matcher.segment.creator.SegmentChunkFactory;
+import taskmatcher.PathUrlMatcher;
+import taskmatcher.segment.PathUrl;
+import taskmatcher.segment.PathVariableValue;
+import taskmatcher.segment.creator.SegmentChunkFactory;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;

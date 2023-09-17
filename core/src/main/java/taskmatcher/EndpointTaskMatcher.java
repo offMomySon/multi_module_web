@@ -1,6 +1,6 @@
-package matcher;
+package taskmatcher;
 
-import matcher.segment.PathUrl;
+import taskmatcher.segment.PathUrl;
 import java.util.Optional;
 
 /**

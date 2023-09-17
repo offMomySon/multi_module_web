@@ -1,7 +1,7 @@
 package main.matcher.segment;
 
-import matcher.segment.PathUrl;
-import matcher.segment.WildCardSegmentChunk;
+import taskmatcher.segment.PathUrl;
+import taskmatcher.segment.WildCardSegmentChunk;
 import java.util.List;
 import java.util.stream.Stream;
 import org.assertj.core.api.Assertions;

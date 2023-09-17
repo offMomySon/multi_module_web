@@ -1,4 +1,4 @@
-package matcher;
+package taskmatcher;
 
 import java.text.MessageFormat;
 import java.util.Arrays;

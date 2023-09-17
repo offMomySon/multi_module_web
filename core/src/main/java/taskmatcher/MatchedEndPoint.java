@@ -1,7 +1,7 @@
-package matcher;
+package taskmatcher;
 
 import java.util.Objects;
-import matcher.segment.PathVariableValue;
+import taskmatcher.segment.PathVariableValue;
 import task.EndPointTask;
 
 public class MatchedEndPoint {

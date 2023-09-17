@@ -1,14 +1,14 @@
-package matcher.segment.creator;
+package taskmatcher.segment.creator;
 
-import matcher.segment.PathVariableUtil;
+import taskmatcher.segment.PathVariableUtil;
 
 import java.util.List;
 import java.util.Objects;
-import matcher.segment.EmptySegmentChunk;
-import matcher.segment.NormalSegmentChunk;
-import matcher.segment.PathUrl;
-import matcher.segment.PathVariableSegmentChunk;
-import matcher.segment.SegmentChunk;
+import taskmatcher.segment.EmptySegmentChunk;
+import taskmatcher.segment.NormalSegmentChunk;
+import taskmatcher.segment.PathUrl;
+import taskmatcher.segment.PathVariableSegmentChunk;
+import taskmatcher.segment.SegmentChunk;
 
 public class GeneralSegmentChunkCreateStrategy {
     public static List<SegmentChunk> create(PathUrl basePathUrl) {

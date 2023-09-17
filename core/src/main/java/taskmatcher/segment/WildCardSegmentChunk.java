@@ -1,4 +1,4 @@
-package matcher.segment;
+package taskmatcher.segment;
 
 import java.util.ArrayList;
 import java.util.List;

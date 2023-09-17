@@ -1,11 +1,11 @@
-package matcher.segment.creator;
+package taskmatcher.segment.creator;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import matcher.segment.PathUrl;
-import matcher.segment.SegmentChunk;
+import taskmatcher.segment.PathUrl;
+import taskmatcher.segment.SegmentChunk;
 
 public class SegmentChunkFactory {
     private static final String WILD_CARD = "/**";

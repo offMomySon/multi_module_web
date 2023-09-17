@@ -1,4 +1,4 @@
-package matcher.segment;
+package taskmatcher.segment;
 
 import java.nio.file.Path;
 import java.util.Arrays;

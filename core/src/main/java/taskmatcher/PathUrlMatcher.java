@@ -1,15 +1,15 @@
-package matcher;
+package taskmatcher;
 
-import matcher.segment.PathUrl;
-import matcher.segment.PathVariableCollectChain;
-import matcher.segment.PathVariableValue;
-import matcher.segment.SegmentChunk;
-import matcher.segment.creator.SegmentChunkFactory;
+import taskmatcher.segment.PathUrl;
+import taskmatcher.segment.PathVariableCollectChain;
+import taskmatcher.segment.PathVariableValue;
+import taskmatcher.segment.SegmentChunk;
+import taskmatcher.segment.creator.SegmentChunkFactory;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import static matcher.segment.PathVariableCollectChain.ConsumeResult;
+import static taskmatcher.segment.PathVariableCollectChain.ConsumeResult;
 
 public class PathUrlMatcher {
     private final PathVariableCollectChain segmentChunkChain;

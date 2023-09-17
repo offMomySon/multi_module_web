@@ -1,16 +1,16 @@
-package matcher.segment.creator;
+package taskmatcher.segment.creator;
 
-import matcher.segment.PathVariableUtil;
+import taskmatcher.segment.PathVariableUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import matcher.segment.PathUrl;
-import matcher.segment.SegmentChunk;
-import matcher.segment.WildCardPathVariableSegmentChunk;
-import matcher.segment.WildCardSegmentChunk;
+import taskmatcher.segment.PathUrl;
+import taskmatcher.segment.SegmentChunk;
+import taskmatcher.segment.WildCardPathVariableSegmentChunk;
+import taskmatcher.segment.WildCardSegmentChunk;
 
 public class WildCardSegmentChunkCreateStrategy {
     private static final String WILD_CARD = "/**";

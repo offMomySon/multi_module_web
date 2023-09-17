@@ -3,7 +3,7 @@ package vo;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
-import static util.IoUtils.createBufferedInputStream;
+import static com.main.util.IoUtils.createBufferedInputStream;
 
 public class HttpRequest {
     private final HttpMethod httpMethod;

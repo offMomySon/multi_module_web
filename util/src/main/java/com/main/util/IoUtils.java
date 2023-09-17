@@ -14,6 +14,11 @@ import java.util.Objects;
 public class IoUtils {
     private static final int BUFFER_SIZE = 8192;
 
+    public static BufferedReader creatBufferedReader(InputStream inputStream) {
+        Objects.requireNonNull(inputStream);
+        return new BufferedReader(new InputStreamReader(createBufferedInputStream(inputStream), StandardCharsets.UTF_8), BUFFER_SIZE);
+    }
+
     public static BufferedReader createBufferedReader(InputStream inputStream) {
         Objects.requireNonNull(inputStream);
 

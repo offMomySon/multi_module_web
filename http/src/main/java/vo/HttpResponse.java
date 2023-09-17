@@ -12,8 +12,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.ObjectUtils;
+import static com.main.util.IoUtils.createBufferedInputStream;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static util.IoUtils.createBufferedInputStream;
 
 public class HttpResponse implements Closeable {
     private static final String END_OF_LINE = "\r\n";

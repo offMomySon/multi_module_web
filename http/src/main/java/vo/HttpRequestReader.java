@@ -1,5 +1,6 @@
 package vo;
 
+import com.main.util.IoUtils;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
@@ -7,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.SequenceInputStream;
 import java.util.Objects;
-import util.IoUtils;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class HttpRequestReader implements Closeable {

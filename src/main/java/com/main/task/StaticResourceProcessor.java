@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import matcher.PackageResourceFinder;
-import processor.HttpRequestProcessor;
+import executor.HttpRequestProcessor;
 import vo.HttpRequest;
 import vo.HttpResponse;
 import vo.HttpResponseWriter;

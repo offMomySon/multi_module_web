@@ -1,4 +1,4 @@
-package processor;
+package executor;
 
 import filter.FilterWorker;
 import filter.Filters;

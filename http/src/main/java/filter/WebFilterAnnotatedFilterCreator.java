@@ -1,7 +1,6 @@
 package filter;
 
 import annotation.WebFilter;
-import filter.pattern.PatternMatcher;
 import filter.pattern.PatternMatcherStrategy;
 import java.util.Arrays;
 import java.util.List;
@@ -9,7 +8,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import util.AnnotationUtils;
 
-public class WebFilterAnnotatedFilterCreator implements AbstractFilterCreator {
+public class WebFilterAnnotatedFilterCreator {
     private static final Class<WebFilter> WEB_FILTER_CLASS = WebFilter.class;
 
     private final WebFilter webFilter;
@@ -19,26 +18,19 @@ public class WebFilterAnnotatedFilterCreator implements AbstractFilterCreator {
         Objects.requireNonNull(filterWorker);
 
         Class<? extends FilterWorker> filterClazz = filterWorker.getClass();
-
-        this.webFilter = AnnotationUtils.find(filterClazz, WEB_FILTER_CLASS)
-            .orElseThrow(() -> new RuntimeException("filter does not annotated WebFilter."));
+        this.webFilter = AnnotationUtils.find(filterClazz, WEB_FILTER_CLASS).orElseThrow(() -> new RuntimeException("For create Filter, FilterWorker must exist WebFilter annotation."));
         this.filterWorker = filterWorker;
     }
 
-    @Override
     public Filters create() {
-        String filterName = webFilter.filterName().isEmpty() ? filterWorker.getClass().getSimpleName() : webFilter.filterName();
-        List<String> basePaths = Arrays.stream(webFilter.patterns()).collect(Collectors.toUnmodifiableList());
-
-        List<Filter> filters = basePaths.stream()
-            .map(basePath -> createFilter(filterName, basePath, filterWorker))
+        String name = webFilter.filterName().isEmpty() ? filterWorker.getClass().getSimpleName() : webFilter.filterName();
+        List<PatternMatcherStrategy> strategies = Arrays.stream(webFilter.patterns())
+            .map(PatternMatcherStrategy::new)
             .collect(Collectors.toUnmodifiableList());
 
+        List<Filter> filters = strategies.stream()
+            .map(strategy -> Filter.from(name, strategy, filterWorker))
+            .collect(Collectors.toUnmodifiableList());
         return new Filters(filters);
-    }
-
-    private static Filter createFilter(String filterName, String basePath, FilterWorker filterWorker) {
-        PatternMatcher patternMatcher = PatternMatcherStrategy.create(basePath);
-        return new Filter(filterName, patternMatcher, filterWorker);
     }
 }

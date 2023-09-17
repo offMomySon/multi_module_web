@@ -105,20 +105,6 @@ public class App {
 //            .collect(Collectors.toUnmodifiableList());
 //    }
 
-    private static Object newObject(Class<?> filterWorkerClazz, Class<?>[] memberClasses, Object[] memberObjects) {
-        try {
-            Constructor<?> constructor = filterWorkerClazz.getConstructor(memberClasses);
-            return constructor.newInstance(memberObjects);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static Filter createFilter(String filterName, String basePath, FilterWorker filterWorker) {
-        PatternMatcher patternMatcher = PatternMatcherStrategy.create(basePath);
-        return new Filter(filterName, patternMatcher, filterWorker);
-    }
-
     private static String getHostAddress() {
         try {
             InetAddress localHost = InetAddress.getLocalHost();

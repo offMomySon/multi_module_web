@@ -6,7 +6,7 @@ import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import matcher.segment.PathUrl;
 import matcher.segment.PathVariableValue;
-import task.ResourceFindTask;
+import task.endpoint.ResourceFindTask;
 
 @Slf4j
 public class StaticResourceEndPointTaskMatcher implements EndpointTaskMatcher {

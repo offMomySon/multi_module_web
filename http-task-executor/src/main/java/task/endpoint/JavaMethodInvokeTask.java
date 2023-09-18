@@ -1,4 +1,4 @@
-package task;
+package task.endpoint;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

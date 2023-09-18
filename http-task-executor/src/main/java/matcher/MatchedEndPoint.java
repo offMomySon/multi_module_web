@@ -2,7 +2,7 @@ package matcher;
 
 import java.util.Objects;
 import matcher.segment.PathVariableValue;
-import task.EndPointTask;
+import task.endpoint.EndPointTask;
 
 public class MatchedEndPoint {
     private final EndPointTask endPointTask;

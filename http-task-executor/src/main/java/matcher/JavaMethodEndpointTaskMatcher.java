@@ -5,8 +5,8 @@ import matcher.segment.PathVariableValue;
 import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.Optional;
-import task.EndPointTask;
-import task.JavaMethodInvokeTask;
+import task.endpoint.EndPointTask;
+import task.endpoint.JavaMethodInvokeTask;
 
 // 생성자
 // 1. requestMethod 를 받는다.

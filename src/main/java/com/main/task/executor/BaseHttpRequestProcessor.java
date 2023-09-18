@@ -25,7 +25,7 @@ import parameter.HttpUrlAnnotationAnnotatedParameterValueMatcher;
 import parameter.MethodParameterValueMatcher;
 import parameter.ParameterValueGetter;
 import parameter.RequestParameters;
-import task.EndPointTask;
+import task.endpoint.EndPointTask;
 import matcher.EndpointTaskMatcher;
 import matcher.MatchedEndPoint;
 import matcher.RequestMethod;

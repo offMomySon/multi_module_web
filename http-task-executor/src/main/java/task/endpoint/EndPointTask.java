@@ -1,4 +1,4 @@
-package task;
+package task.endpoint;
 
 import java.lang.reflect.Parameter;
 import java.util.Optional;

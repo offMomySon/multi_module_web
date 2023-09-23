@@ -5,6 +5,7 @@ import matcher.segment.PathVariableValue;
 import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.Optional;
+import task.HttpEndPointTask;
 import task.endpoint.EndPointTask;
 import task.endpoint.JavaMethodInvokeTask;
 
@@ -16,18 +17,15 @@ import task.endpoint.JavaMethodInvokeTask;
 public class JavaMethodEndpointTaskMatcher implements EndpointTaskMatcher {
     private final RequestMethod requestMethod;
     private final PathUrlMatcher pathUrlMatcher;
-    private final Object declaringInstance;
-    private final Method javaMethod;
+    private final HttpEndPointTask httpEndPointTask;
 
-    public JavaMethodEndpointTaskMatcher(RequestMethod requestMethod, PathUrlMatcher pathUrlMatcher, Object declaringInstance, Method javaMethod) {
+    public JavaMethodEndpointTaskMatcher(RequestMethod requestMethod, PathUrlMatcher pathUrlMatcher, HttpEndPointTask httpEndPointTask) {
         Objects.requireNonNull(requestMethod);
         Objects.requireNonNull(pathUrlMatcher);
-        Objects.requireNonNull(declaringInstance);
-        Objects.requireNonNull(javaMethod);
+        Objects.requireNonNull(httpEndPointTask);
         this.requestMethod = requestMethod;
         this.pathUrlMatcher = pathUrlMatcher;
-        this.declaringInstance = declaringInstance;
-        this.javaMethod = javaMethod;
+        this.httpEndPointTask = httpEndPointTask;
     }
 
     @Override
@@ -45,19 +43,9 @@ public class JavaMethodEndpointTaskMatcher implements EndpointTaskMatcher {
             return Optional.empty();
         }
 
-        EndPointTask endPointTask = new JavaMethodInvokeTask(declaringInstance, javaMethod);
         PathVariableValue pathVariableValue = optionalPathVariableValue.get();
-        MatchedEndPoint matchedEndPoint = new MatchedEndPoint(endPointTask, pathVariableValue);
+        MatchedEndPoint matchedEndPoint = new MatchedEndPoint(httpEndPointTask, pathVariableValue);
         return Optional.of(matchedEndPoint);
     }
 
-    @Override
-    public String toString() {
-        return "JavaMethodEndpointTaskMatcher{" +
-            "requestMethod=" + requestMethod +
-            ", pathUrlMatcher=" + pathUrlMatcher +
-            ", declaringInstance=" + declaringInstance +
-            ", javaMethod=" + javaMethod +
-            '}';
-    }
 }

@@ -58,7 +58,6 @@ public class App {
 
         // 3. class 로 httpPathMatcher 를 생성.
         List<Class<?>> controllerClazzes = AnnotationUtils.filterByAnnotatedClazz(clazzes, Controller.class);
-
         List<EndpointTaskMatcher> baseHttpPathMatchers = controllerClazzes.stream()
             .map(clazz -> {
                 Object clazzObject = objectRepository.get(clazz);
@@ -75,7 +74,8 @@ public class App {
         EndpointTaskMatcher endpointTaskMatcher = new CompositedEndpointTaskMatcher(endpointTaskMatchers);
 
         BaseHttpRequestProcessor baseHttpRequestProcessor = new BaseHttpRequestProcessor(endpointTaskMatcher, SIMPLE_DATE_FORMAT, HOST_ADDRESS);
-        HttpService httpService = HttpService.from(baseHttpRequestProcessor, filters,
+        HttpService httpService = HttpService.from(baseHttpRequestProcessor,
+                                                   filters,
                                                    HttpConfig.INSTANCE.getPort(),
                                                    HttpConfig.INSTANCE.getMaxConnection(),
                                                    HttpConfig.INSTANCE.getWaitConnection(),

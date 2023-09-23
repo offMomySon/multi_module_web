@@ -12,9 +12,9 @@ import vo.ContentType;
 public class HttpResponseHeaderCreator {
     private final SimpleDateFormat simpleDateFormat;
     private final String hostAddress;
-    private final Optional<ContentType> contentType;
+    private final ContentType contentType;
 
-    public HttpResponseHeaderCreator(SimpleDateFormat simpleDateFormat, String hostAddress, Optional<ContentType> optionalContentType) {
+    public HttpResponseHeaderCreator(SimpleDateFormat simpleDateFormat, String hostAddress, ContentType optionalContentType) {
         Objects.requireNonNull(simpleDateFormat);
         Objects.requireNonNull(hostAddress);
         Objects.requireNonNull(optionalContentType);
@@ -33,7 +33,7 @@ public class HttpResponseHeaderCreator {
         Map<String, String> header = new HashMap<>();
         header.put("Date", simpleDateFormat.format(new Date()));
         header.put("Host", hostAddress);
-        contentType.ifPresent(s -> header.put("Content-Type", s.getValue()));
+        header.put("Content-Type", contentType.getValue());
         header.put("Connection", "close");
 
         return new HttpResponseHeader(startLine, header);

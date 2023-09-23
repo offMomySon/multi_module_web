@@ -2,6 +2,8 @@ package matcher.creator;
 
 import annotation.RequestMapping;
 import com.main.util.AnnotationUtils;
+import converter.Converter;
+import converter.ObjectConverter;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Objects;
@@ -13,6 +15,13 @@ import matcher.RequestMethod;
 import matcher.creator.RequestMappingValueExtractor.RequestMappedMethod;
 import matcher.segment.PathUrl;
 import matcher.segment.creator.SegmentChunkFactory;
+import task.HttpConvertEndPointTask;
+import task.HttpEmptyEndPointTask;
+import task.HttpEndPointTask;
+import task.HttpTextEndPointTask;
+import task.endpoint.EndPointTask;
+import task.endpoint.JavaMethodInvokeTask;
+import vo.ContentType;
 
 public class JavaMethodPathMatcherCreator {
     private final static Class<RequestMapping> REQUEST_MAPPING_CLASS = RequestMapping.class;
@@ -53,8 +62,20 @@ public class JavaMethodPathMatcherCreator {
                 PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(segmentChunkFactory);
 
                 Method javaMethod = requestMappedMethod.getJavaMethod();
+                EndPointTask endPointTask = new JavaMethodInvokeTask(clazzObject, javaMethod);
 
-                return new JavaMethodEndpointTaskMatcher(requestMethod, pathUrlMatcher, clazzObject, javaMethod);
+                Class<?> returnType = javaMethod.getReturnType();
+                HttpEndPointTask httpEndPointTask;
+                if(returnType == Void.TYPE){
+                    httpEndPointTask = new HttpEmptyEndPointTask(endPointTask);
+                } else if(returnType == String.class) {
+                    httpEndPointTask = new HttpTextEndPointTask(endPointTask);
+                } else {
+                    Converter converter = new ObjectConverter();
+                    httpEndPointTask = new HttpConvertEndPointTask(ContentType.APPLICATION_JSON, converter, endPointTask);
+                }
+
+                return new JavaMethodEndpointTaskMatcher(requestMethod, pathUrlMatcher, httpEndPointTask);
             })
             .collect(Collectors.toUnmodifiableList());
     }

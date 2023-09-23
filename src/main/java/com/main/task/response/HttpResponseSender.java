@@ -19,11 +19,10 @@ public class HttpResponseSender {
         this.httpResponse = httpResponse;
     }
 
-    public void send(HttpResponseHeader responseHeader, Optional<Object> optionalResult) {
+    public void send(HttpResponseHeader responseHeader, InputStream methodResult) {
         String startLine = responseHeader.getStartLine();
         Map<String, String> header = responseHeader.getHeader();
 
-        Object methodResult = optionalResult.isEmpty() ? null : optionalResult.get();
         InputStream inputStream = converter.convertToInputStream(methodResult);
 
         httpResponse.setStartLine(startLine);

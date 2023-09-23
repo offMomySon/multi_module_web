@@ -4,6 +4,8 @@ import annotation.PathVariable;
 import annotation.RequestBody;
 import annotation.RequestParam;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import task.HttpEndPointTask;
+import task.HttpEndPointTask.HttpTaskResult;
 import vo.ContentType;
 import com.main.task.response.ContentTypeCreator;
 import response.HttpResponseHeader;
@@ -60,7 +62,7 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
         QueryParameters queryParameters = request.getQueryParameters();
 
         MatchedEndPoint matchedEndPoint = endpointTaskMatcher.match(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
-        EndPointTask endPointTask = matchedEndPoint.getTask();
+        HttpEndPointTask httpEndPointTask = matchedEndPoint.getHttpEndPointTask();
 
         RequestParameters pathVariableValue = new RequestParameters(matchedEndPoint.getPathVariableValue().getValues());
         RequestParameters queryParamValues = new RequestParameters(queryParameters.getParameterMap());
@@ -72,19 +74,27 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
         );
 
         ParameterValueGetter parameterValueGetter = new ParameterValueGetter(methodParameterValueMatcher, new ParameterValueClazzConverterFactory(new ObjectMapper()));
-        Object[] parameterValues = Arrays.stream(endPointTask.getExecuteParameters())
+        Object[] parameterValues = Arrays.stream(httpEndPointTask.getExecuteParameters())
             .map(parameterValueGetter::get)
             .map(v -> v.orElse(null))
             .toArray();
-        Optional<Object> optionalResult = endPointTask.execute(parameterValues);
+        Optional<HttpTaskResult> optionalResult = httpEndPointTask.execute(parameterValues);
+
         log.info("methodResult : `{}`, clazz : `{}`", optionalResult.orElse(null), optionalResult.map(Object::getClass).orElse(null));
 
-        Optional<ContentType> optionalContentType = ContentTypeCreator.from(endPointTask, optionalResult).create();
-        HttpResponseHeaderCreator headerCreator = new HttpResponseHeaderCreator(simpleDateFormat, hostAddress, optionalContentType);
+        if(optionalResult.isEmpty()){
+            return true;
+        }
+
+        HttpTaskResult httpTaskResult = optionalResult.get();
+        ContentType contentType = httpTaskResult.getContentType();
+        InputStream content = httpTaskResult.getContent();
+
+        HttpResponseHeaderCreator headerCreator = new HttpResponseHeaderCreator(simpleDateFormat, hostAddress, contentType);
         HttpResponseHeader httpResponseHeader = headerCreator.create();
 
         HttpResponseSender httpResponseSender = new HttpResponseSender(response);
-        httpResponseSender.send(httpResponseHeader, optionalResult);
+        httpResponseSender.send(httpResponseHeader, content);
         return true;
     }
 }

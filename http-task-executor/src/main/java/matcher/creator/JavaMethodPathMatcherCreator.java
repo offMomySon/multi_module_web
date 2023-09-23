@@ -30,16 +30,9 @@ public class JavaMethodPathMatcherCreator {
     private final Object clazzObject;
     private final RequestMappingValueExtractor valueExtractor;
 
-    public JavaMethodPathMatcherCreator(@NonNull Class<?> clazz, Object clazzObject) {
-        Objects.requireNonNull(clazz);
+    public JavaMethodPathMatcherCreator(Object clazzObject) {
         Objects.requireNonNull(clazzObject);
-
-        boolean doesNotClazzInstance = clazz != clazzObject.getClass();
-        if (doesNotClazzInstance) {
-            throw new RuntimeException("object must be clazz instance.");
-        }
-
-        this.clazz = clazz;
+        this.clazz = clazzObject.getClass();
         this.clazzObject = clazzObject;
         this.valueExtractor = new RequestMappingValueExtractor(clazz);
     }

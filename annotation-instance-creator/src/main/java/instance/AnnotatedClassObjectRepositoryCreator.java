@@ -4,19 +4,23 @@ import annotation.Component;
 import annotation.Domain;
 import annotation.Repository;
 import annotation.Service;
-import java.util.Collections;
+import com.main.util.ClassFinder;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class AnnotatedClassObjectRepositoryCreator {
     private static final Annotations DEFAULT_ANNOTATIONS = new Annotations(List.of(Component.class, Domain.class, Repository.class, Service.class));
 
     private final Annotations instantiateAnnotations;
+    private final AnnotatedClassInstantiator annotatedClassInstantiator;
 
     private AnnotatedClassObjectRepositoryCreator(Annotations instantiateAnnotations) {
         Objects.requireNonNull(instantiateAnnotations);
         this.instantiateAnnotations = instantiateAnnotations;
+        this.annotatedClassInstantiator = new AnnotatedClassInstantiator(instantiateAnnotations);
     }
 
     public static AnnotatedClassObjectRepositoryCreator registCustomAnnotations(Annotations customAnnotations) {
@@ -27,10 +31,14 @@ public class AnnotatedClassObjectRepositoryCreator {
         return new AnnotatedClassObjectRepositoryCreator(annotations);
     }
 
-    public ReadOnlyObjectRepository create(List<Class<?>> clazzes) {
-        if (Objects.isNull(clazzes)) {
-            clazzes = Collections.emptyList();
+    public ReadOnlyObjectRepository createFromPackage(Class<?> rootClazz, String classPackage) {
+        if (Objects.isNull(rootClazz) || Objects.isNull(classPackage) || classPackage.isBlank()) {
+            return ReadOnlyObjectRepository.empty();
         }
+
+        List<Class<?>> clazzes = ClassFinder.from(rootClazz, classPackage).findClazzes();
+        log.info("clazzes : {}", clazzes);
+
         List<Class<?>> annotatedClazzes = clazzes.stream()
             .filter(Objects::nonNull)
             .filter(instantiateAnnotations::anyAnnotatedFrom)
@@ -38,10 +46,8 @@ public class AnnotatedClassObjectRepositoryCreator {
 
         ReadOnlyObjectRepository repository = ReadOnlyObjectRepository.empty();
         for (Class<?> clazz : annotatedClazzes) {
-            AnnotatedClassInstantiator annotatedClassInstantiator = new AnnotatedClassInstantiator(instantiateAnnotations);
             repository = annotatedClassInstantiator.load(clazz, repository);
         }
-
         return repository;
     }
 }

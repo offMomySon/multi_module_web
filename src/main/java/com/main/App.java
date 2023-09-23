@@ -3,8 +3,6 @@ package com.main;
 
 import com.main.config.HttpConfig;
 import com.main.task.executor.BaseHttpRequestProcessor;
-import com.main.util.AnnotationUtils;
-import com.main.util.ClassFinder;
 import annotation.Controller;
 import filter.FilterWorker;
 import filter.Filters;
@@ -40,16 +38,12 @@ public class App {
     }
 
     public static void main(String[] args) {
-        // 1. class 를 모두 찾아옴.
-        List<Class<?>> clazzes = ClassFinder.from(App.class, "com.main").findClazzes();
-        log.info("clazzes : {}", clazzes);
-
-        // 2. class 로 container 를 생성.
+        // 1. 등록된 annotation 이 마킹된 class 들에 대해 instance 를 생성한다.
         Annotations customAnnotations = new Annotations(List.of(WebFilter.class, Controller.class));
         AnnotatedClassObjectRepositoryCreator objectRepositoryCreator = AnnotatedClassObjectRepositoryCreator.registCustomAnnotations(customAnnotations);
-        ReadOnlyObjectRepository objectRepository = objectRepositoryCreator.create(clazzes);
+        ReadOnlyObjectRepository objectRepository = objectRepositoryCreator.createFromPackage(App.class, "com.main");
 
-        // 3. webfilter 생성.
+        // 2. webfilter 생성.
         List<FilterWorker> filterWorkerObjects = objectRepository.findObjectByClazz(FilterWorker.class);
         Filters filters = filterWorkerObjects.stream()
             .map(WebFilterAnnotatedFilterCreator::new)
@@ -57,12 +51,9 @@ public class App {
             .reduce(Filters.empty(),Filters::merge);
 
         // 3. class 로 httpPathMatcher 를 생성.
-        List<Class<?>> controllerClazzes = AnnotationUtils.filterByAnnotatedClazz(clazzes, Controller.class);
-        List<EndpointTaskMatcher> baseHttpPathMatchers = controllerClazzes.stream()
-            .map(clazz -> {
-                Object clazzObject = objectRepository.get(clazz);
-                return new JavaMethodPathMatcherCreator(clazz, clazzObject);
-            })
+        List<Object> controllerObjects = objectRepository.findAnnotatedObjectFrom(Controller.class);
+        List<EndpointTaskMatcher> baseHttpPathMatchers = controllerObjects.stream()
+            .map(JavaMethodPathMatcherCreator::new)
             .map(JavaMethodPathMatcherCreator::create)
             .flatMap(Collection::stream)
             .peek(httpPathMatcher -> log.info("EndpointTaskMatcher : `{}`", httpPathMatcher))
@@ -73,6 +64,7 @@ public class App {
             .collect(Collectors.toUnmodifiableList());
         EndpointTaskMatcher endpointTaskMatcher = new CompositedEndpointTaskMatcher(endpointTaskMatchers);
 
+        // 4. http service start.
         BaseHttpRequestProcessor baseHttpRequestProcessor = new BaseHttpRequestProcessor(endpointTaskMatcher, SIMPLE_DATE_FORMAT, HOST_ADDRESS);
         HttpService httpService = HttpService.from(baseHttpRequestProcessor,
                                                    filters,

@@ -1,5 +1,6 @@
 package instance;
 
+import com.main.util.AnnotationUtils;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -48,12 +49,27 @@ public class ReadOnlyObjectRepository {
     }
 
     public <T> List<T> findObjectByClazz(Class<T> findClazz) {
-        List<Class<?>> foundClazzes = values.keySet().stream()
-            .filter(findClazz::isAssignableFrom)
-            .collect(Collectors.toUnmodifiableList());
+        if (Objects.isNull(findClazz)) {
+            return Collections.emptyList();
+        }
 
-        return foundClazzes.stream()
-            .map(foundClazze -> (T) values.get(foundClazze))
+        return values.entrySet().stream()
+            .filter(entry -> findClazz.isAssignableFrom(entry.getKey()))
+            .map(entry -> (T) entry.getValue())
+            .collect(Collectors.toUnmodifiableList());
+    }
+
+    public List<Object> findAnnotatedObjectFrom(Class<?> findAnnotation) {
+        if (Objects.isNull(findAnnotation)) {
+            return Collections.emptyList();
+        }
+        if (!findAnnotation.isAnnotation()) {
+            return Collections.emptyList();
+        }
+
+        return values.entrySet().stream()
+            .filter(entry -> AnnotationUtils.exist(entry.getKey(), findAnnotation))
+            .map(Map.Entry::getValue)
             .collect(Collectors.toUnmodifiableList());
     }
 

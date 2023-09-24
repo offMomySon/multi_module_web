@@ -1,6 +1,6 @@
 package com.main.filter;
 
-import filter.FilterWorker;
+import filter.PreTaskWorker;
 import annotation.WebFilter;
 import lombok.extern.slf4j.Slf4j;
 import vo.HttpRequest;
@@ -8,7 +8,7 @@ import vo.HttpResponse;
 
 @Slf4j
 @WebFilter
-public class LoggingFilterWorker implements FilterWorker {
+public class LoggingPreTaskWorker implements PreTaskWorker {
 
     @Override
     public boolean prevExecute(HttpRequest httpRequest, HttpResponse httpResponse) {

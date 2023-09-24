@@ -7,11 +7,14 @@ import com.main.config.HttpConfig;
 import com.main.task.executor.BaseHttpRequestProcessor;
 import com.main.util.AnnotationUtils;
 import executor.HttpService;
-import filter.FilterCreator;
-import filter.FilterInfo;
-import filter.FilterWorker;
-import filter.Filters;
-import filter.Filters.ReadOnlyFilters;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import pretask.PreTaskCreator;
+import pretask.PreTaskInfo;
+import filter.PreTaskWorker;
+import filter.PreTasks;
+import filter.PreTasks.ReadOnlyPreTasks;
 import instance.AnnotatedClassObjectRepositoryCreator;
 import instance.Annotations;
 import instance.ReadOnlyObjectRepository;
@@ -52,12 +55,12 @@ public class App {
         ReadOnlyObjectRepository objectRepository = objectRepositoryCreator.createFromPackage(App.class, "com.main");
 
         // 2. webfilter 생성.
-        List<FilterWorker> filterWorkerObjects = objectRepository.findObjectByClazz(FilterWorker.class);
-        ReadOnlyFilters filters = filterWorkerObjects.stream()
-            .map(App::extractFilterInfos)
+        List<PreTaskWorker> preTaskWorkerObjects = objectRepository.findObjectByClazz(PreTaskWorker.class);
+        ReadOnlyPreTasks preTasks = preTaskWorkerObjects.stream()
+            .map(App::extractPreTaskInfos)
             .flatMap(Collection::stream)
-            .map(FilterCreator::create)
-            .reduce(Filters.empty(), Filters::add, Filters::merge)
+            .map(PreTaskCreator::create)
+            .reduce(PreTasks.empty(), PreTasks::add, PreTasks::merge)
             .lock();
 
         // 3. class 로 httpPathMatcher 를 생성.
@@ -77,7 +80,7 @@ public class App {
         // 4. http service start.
         BaseHttpRequestProcessor baseHttpRequestProcessor = new BaseHttpRequestProcessor(endpointTaskMatcher, SIMPLE_DATE_FORMAT, HOST_ADDRESS);
         HttpService httpService = HttpService.from(baseHttpRequestProcessor,
-                                                   filters,
+                                                   preTasks,
                                                    HttpConfig.INSTANCE.getPort(),
                                                    HttpConfig.INSTANCE.getMaxConnection(),
                                                    HttpConfig.INSTANCE.getWaitConnection(),
@@ -85,20 +88,20 @@ public class App {
         httpService.start();
     }
 
-    private static List<FilterInfo> extractFilterInfos(FilterWorker filterWorker) {
-        if (Objects.isNull(filterWorker)) {
+    private static List<PreTaskInfo> extractPreTaskInfos(PreTaskWorker preTaskWorker) {
+        if (Objects.isNull(preTaskWorker)) {
             throw new RuntimeException("filterWorker is emtpy.");
         }
 
-        Class<? extends FilterWorker> filterWorkerClass = filterWorker.getClass();
+        Class<? extends PreTaskWorker> filterWorkerClass = preTaskWorker.getClass();
         WebFilter webFilter = AnnotationUtils.find(filterWorkerClass, WebFilter.class)
             .orElseThrow(() -> new RuntimeException("For create Filter, FilterWorker must exist WebFilter annotation."));
 
-        String name = webFilter.filterName().isEmpty() ? filterWorker.getClass().getSimpleName() : webFilter.filterName();
+        String name = webFilter.filterName().isEmpty() ? preTaskWorker.getClass().getSimpleName() : webFilter.filterName();
         String[] patterns = webFilter.patterns();
 
         return Arrays.stream(patterns)
-            .map(p -> new FilterInfo(name, p, filterWorker))
+            .map(p -> new PreTaskInfo(name, p, preTaskWorker))
             .collect(Collectors.toUnmodifiableList());
     }
 

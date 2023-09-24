@@ -6,28 +6,28 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class Filters {
-    private List<Filter> values;
+public class PreTasks {
+    private List<PreTask> values;
 
-    public Filters(List<Filter> values) {
+    public PreTasks(List<PreTask> values) {
         Objects.requireNonNull(values);
         this.values = values.stream().filter(Objects::nonNull).collect(Collectors.toList());
     }
 
-    public static Filters empty() {
-        return new Filters(Collections.emptyList());
+    public static PreTasks empty() {
+        return new PreTasks(Collections.emptyList());
     }
 
-    public Filters merge(Filters otherFilters) {
-        if (Objects.isNull(otherFilters)) {
+    public PreTasks merge(PreTasks otherPreTasks) {
+        if (Objects.isNull(otherPreTasks)) {
             return this;
         }
 
-        this.values.addAll(otherFilters.values);
+        this.values.addAll(otherPreTasks.values);
         return this;
     }
 
-    public Filters add(Filter filter) {
+    public PreTasks add(PreTask filter) {
         if (Objects.isNull(filter)) {
             return this;
         }
@@ -36,39 +36,39 @@ public class Filters {
         return this;
     }
 
-    public List<Filter> getValues() {
+    public List<PreTask> getValues() {
         return new ArrayList<>(values);
     }
 
-    public ReadOnlyFilters lock() {
-        return new ReadOnlyFilters(this.values);
+    public ReadOnlyPreTasks lock() {
+        return new ReadOnlyPreTasks(this.values);
     }
 
     private static class MatchedFilter {
         private final String filterName;
-        private final FilterWorker filterWorker;
+        private final PreTaskWorker preTaskWorker;
 
-        public MatchedFilter(String filterName, FilterWorker filterWorker) {
+        public MatchedFilter(String filterName, PreTaskWorker preTaskWorker) {
             if (Objects.isNull(filterName) || filterName.isBlank()) {
                 throw new RuntimeException("filterName is empty.");
             }
-            Objects.requireNonNull(filterWorker);
+            Objects.requireNonNull(preTaskWorker);
 
             this.filterName = filterName;
-            this.filterWorker = filterWorker;
+            this.preTaskWorker = preTaskWorker;
         }
 
-        public static MatchedFilter from(Filter filter) {
+        public static MatchedFilter from(PreTask filter) {
             Objects.requireNonNull(filter);
 
             String filterName = filter.getName();
-            FilterWorker filterWorker = filter.getFilterWorker2();
+            PreTaskWorker preTaskWorker = filter.getFilterWorker();
 
-            return new MatchedFilter(filterName, filterWorker);
+            return new MatchedFilter(filterName, preTaskWorker);
         }
 
-        public FilterWorker getFilterWorker() {
-            return filterWorker;
+        public PreTaskWorker getFilterWorker() {
+            return preTaskWorker;
         }
 
         @Override
@@ -88,7 +88,7 @@ public class Filters {
         public String toString() {
             return "MatchedFilter{" +
                 "filterName='" + filterName + '\'' +
-                ", filterWorker=" + filterWorker +
+                ", filterWorker=" + preTaskWorker +
                 '}';
         }
     }
@@ -100,15 +100,15 @@ public class Filters {
             '}';
     }
 
-    public static class ReadOnlyFilters {
-        private final List<Filter> values;
+    public static class ReadOnlyPreTasks {
+        private final List<PreTask> values;
 
-        public ReadOnlyFilters(List<Filter> values) {
+        public ReadOnlyPreTasks(List<PreTask> values) {
             Objects.requireNonNull(values);
             this.values = values.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableList());
         }
 
-        public List<FilterWorker> findFilterWorkers(String requestUrl) {
+        public List<PreTaskWorker> findFilterWorkers(String requestUrl) {
             if (Objects.isNull(requestUrl) || requestUrl.isBlank()) {
                 return Collections.emptyList();
             }

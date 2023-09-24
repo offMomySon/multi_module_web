@@ -1,27 +1,28 @@
-package filter;
+package pretask;
 
+import filter.PreTaskWorker;
 import java.util.Objects;
 import lombok.Getter;
 
 
 @Getter
-public class FilterInfo {
+public class PreTaskInfo {
     private final String name;
     private final String pattern;
-    private final FilterWorker filterWorker;
+    private final PreTaskWorker preTaskWorker;
 
-    public FilterInfo(String name, String pattern, FilterWorker filterWorker) {
+    public PreTaskInfo(String name, String pattern, PreTaskWorker preTaskWorker) {
         if(Objects.isNull(name) || name.isBlank()){
             throw new RuntimeException("name is empty.");
         }
         if(Objects.isNull(pattern) || pattern.isBlank()){
             throw new RuntimeException("pattern is empty.");
         }
-        if(Objects.isNull(filterWorker)){
+        if(Objects.isNull(preTaskWorker)){
             throw new RuntimeException("filterWorker is empty.");
         }
         this.name = name;
         this.pattern = pattern;
-        this.filterWorker = filterWorker;
+        this.preTaskWorker = preTaskWorker;
     }
 }

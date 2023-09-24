@@ -1,44 +1,46 @@
-package filter;
+package pretask;
 
+import filter.PreTask;
+import filter.PreTaskWorker;
 import filter.pattern.PatternMatcher;
-import filter.pattern.PatternMatcherStrategy;
 import java.util.Objects;
 import java.util.Optional;
+import pretask.pattern.PatternMatcherStrategy;
 
-public class Filter {
+public class BasePreTask implements PreTask {
     private final String name;
     private final PatternMatcher patternMatcher;
-    private final FilterWorker filterWorker;
+    private final PreTaskWorker preTaskWorker;
 
-    public Filter(String name, PatternMatcher patternMatcher, FilterWorker filterWorker) {
+    public BasePreTask(String name, PatternMatcher patternMatcher, PreTaskWorker preTaskWorker) {
         if (Objects.isNull(name) || name.isBlank()) {
             throw new RuntimeException("name is empty.");
         }
         Objects.requireNonNull(patternMatcher);
-        Objects.requireNonNull(filterWorker);
+        Objects.requireNonNull(preTaskWorker);
 
         this.name = name;
         this.patternMatcher = patternMatcher;
-        this.filterWorker = filterWorker;
+        this.preTaskWorker = preTaskWorker;
     }
 
-    public static Filter from(String name, PatternMatcherStrategy patternMatcherStrategy, FilterWorker filterWorker) {
+    public static BasePreTask from(String name, PatternMatcherStrategy patternMatcherStrategy, PreTaskWorker preTaskWorker) {
         if (Objects.isNull(name) || name.isBlank()) {
             throw new RuntimeException("Does not exist name.");
         }
         Objects.requireNonNull(patternMatcherStrategy);
-        Objects.requireNonNull(filterWorker);
+        Objects.requireNonNull(preTaskWorker);
 
         PatternMatcher patternMatcher = patternMatcherStrategy.create();
-        return new Filter(name, patternMatcher, filterWorker);
+        return new BasePreTask(name, patternMatcher, preTaskWorker);
     }
 
     public String getName() {
         return name;
     }
 
-    public FilterWorker getFilterWorker2() {
-        return filterWorker;
+    public PreTaskWorker getFilterWorker() {
+        return preTaskWorker;
     }
 
     public PatternMatcher getPatternMatcher() {
@@ -49,13 +51,13 @@ public class Filter {
         return matchUrl(requestUrl).isPresent();
     }
 
-    public Optional<FilterWorker> matchUrl(String requestUrl) {
+    public Optional<PreTaskWorker> matchUrl(String requestUrl) {
         if (Objects.isNull(requestUrl) || requestUrl.isBlank()) {
             throw new RuntimeException("requestUrl is empty.");
         }
 
         if (patternMatcher.isMatch(requestUrl)) {
-            return Optional.of(filterWorker);
+            return Optional.of(preTaskWorker);
         }
         return Optional.empty();
     }

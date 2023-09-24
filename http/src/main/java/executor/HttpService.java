@@ -1,8 +1,7 @@
 package executor;
 
-import filter.FilterWorker;
-import filter.Filters;
-import filter.Filters.ReadOnlyFilters;
+import filter.PreTaskWorker;
+import filter.PreTasks.ReadOnlyPreTasks;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.text.MessageFormat;
@@ -21,11 +20,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class HttpService {
     private final HttpRequestProcessor httpRequestProcessor;
-    private final ReadOnlyFilters filters;
+    private final ReadOnlyPreTasks filters;
     private final ThreadPoolExecutor threadPoolExecutor;
     private final ServerSocket serverSocket;
 
-    public HttpService(HttpRequestProcessor httpRequestProcessor, ReadOnlyFilters filters, ThreadPoolExecutor threadPoolExecutor, ServerSocket serverSocket) {
+    public HttpService(HttpRequestProcessor httpRequestProcessor, ReadOnlyPreTasks filters, ThreadPoolExecutor threadPoolExecutor, ServerSocket serverSocket) {
         Objects.requireNonNull(httpRequestProcessor);
         Objects.requireNonNull(filters);
         Objects.requireNonNull(threadPoolExecutor);
@@ -36,10 +35,11 @@ public class HttpService {
         this.serverSocket = serverSocket;
     }
 
-    public static HttpService from(HttpRequestProcessor httpRequestProcessor, ReadOnlyFilters filters,
+    public static HttpService from(HttpRequestProcessor httpRequestProcessor,
+                                   ReadOnlyPreTasks preTasks,
                                    int port, int maxConnection, int waitConnection, long keepAliveTime) {
         Objects.requireNonNull(httpRequestProcessor);
-        Objects.requireNonNull(filters);
+        Objects.requireNonNull(preTasks);
 
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(maxConnection,
                                                                        maxConnection,
@@ -47,7 +47,7 @@ public class HttpService {
                                                                        TimeUnit.MILLISECONDS,
                                                                        new LinkedBlockingQueue<>(waitConnection));
         ServerSocket serverSocket = createServerSocket(port);
-        return new HttpService(httpRequestProcessor, filters, threadPoolExecutor, serverSocket);
+        return new HttpService(httpRequestProcessor, preTasks, threadPoolExecutor, serverSocket);
     }
 
     private static ServerSocket createServerSocket(int port) {
@@ -69,16 +69,16 @@ public class HttpService {
 
         SocketHttpTaskExecutor socketHttpTaskExecutor = new SocketHttpTaskExecutor(threadPoolExecutor, serverSocket);
         socketHttpTaskExecutor.execute(((httpRequest, httpResponse) -> {
-            List<FilterWorker> filterWorkers = filters.findFilterWorkers(httpRequest.getHttpRequestPath().getValue().toString());
+            List<PreTaskWorker> preTaskWorkers = filters.findFilterWorkers(httpRequest.getHttpRequestPath().getValue().toString());
 
-            for (FilterWorker filterWorker : filterWorkers) {
-                filterWorker.prevExecute(httpRequest, httpResponse);
+            for (PreTaskWorker preTaskWorker : preTaskWorkers) {
+                preTaskWorker.prevExecute(httpRequest, httpResponse);
             }
 
             httpRequestProcessor.execute(httpRequest, httpResponse);
 
-            for (FilterWorker filterWorker : filterWorkers) {
-                filterWorker.postExecute(httpRequest, httpResponse);
+            for (PreTaskWorker preTaskWorker : preTaskWorkers) {
+                preTaskWorker.postExecute(httpRequest, httpResponse);
             }
         }));
     }

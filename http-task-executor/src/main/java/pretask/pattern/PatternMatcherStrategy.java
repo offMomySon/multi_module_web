@@ -1,5 +1,6 @@
-package filter.pattern;
+package pretask.pattern;
 
+import filter.pattern.PatternMatcher;
 import java.util.Objects;
 
 public class PatternMatcherStrategy {

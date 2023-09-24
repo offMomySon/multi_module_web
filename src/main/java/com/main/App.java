@@ -1,31 +1,36 @@
 package com.main;
 
 
+import annotation.Controller;
+import annotation.WebFilter;
 import com.main.config.HttpConfig;
 import com.main.task.executor.BaseHttpRequestProcessor;
-import annotation.Controller;
+import com.main.util.AnnotationUtils;
+import executor.HttpService;
+import filter.FilterCreator;
+import filter.FilterInfo;
 import filter.FilterWorker;
 import filter.Filters;
-import annotation.WebFilter;
-import filter.WebFilterAnnotatedFilterCreator;
+import filter.Filters.ReadOnlyFilters;
 import instance.AnnotatedClassObjectRepositoryCreator;
 import instance.Annotations;
 import instance.ReadOnlyObjectRepository;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import matcher.CompositedEndpointTaskMatcher;
 import matcher.EndpointTaskMatcher;
-import matcher.creator.StaticResourceEndPointCreator;
 import matcher.StaticResourceEndPointTaskMatcher;
 import matcher.creator.JavaMethodPathMatcherCreator;
-import executor.HttpService;
+import matcher.creator.StaticResourceEndPointCreator;
 
 @Slf4j
 public class App {
@@ -39,16 +44,21 @@ public class App {
 
     public static void main(String[] args) {
         // 1. 등록된 annotation 이 마킹된 class 들에 대해 instance 를 생성한다.
+        // todo
+        // 만약 같은 모듈이면 괜찮은가?
+        // List<Class<?>> clazzes = ClassFinder.from(rootClazz, classPackage).findClazzes();
         Annotations customAnnotations = new Annotations(List.of(WebFilter.class, Controller.class));
         AnnotatedClassObjectRepositoryCreator objectRepositoryCreator = AnnotatedClassObjectRepositoryCreator.registCustomAnnotations(customAnnotations);
         ReadOnlyObjectRepository objectRepository = objectRepositoryCreator.createFromPackage(App.class, "com.main");
 
         // 2. webfilter 생성.
         List<FilterWorker> filterWorkerObjects = objectRepository.findObjectByClazz(FilterWorker.class);
-        Filters filters = filterWorkerObjects.stream()
-            .map(WebFilterAnnotatedFilterCreator::new)
-            .map(WebFilterAnnotatedFilterCreator::create)
-            .reduce(Filters.empty(),Filters::merge);
+        ReadOnlyFilters filters = filterWorkerObjects.stream()
+            .map(App::extractFilterInfos)
+            .flatMap(Collection::stream)
+            .map(FilterCreator::create)
+            .reduce(Filters.empty(), Filters::add, Filters::merge)
+            .lock();
 
         // 3. class 로 httpPathMatcher 를 생성.
         List<Object> controllerObjects = objectRepository.findAnnotatedObjectFrom(Controller.class);
@@ -74,6 +84,24 @@ public class App {
                                                    HttpConfig.INSTANCE.getKeepAliveTime());
         httpService.start();
     }
+
+    private static List<FilterInfo> extractFilterInfos(FilterWorker filterWorker) {
+        if (Objects.isNull(filterWorker)) {
+            throw new RuntimeException("filterWorker is emtpy.");
+        }
+
+        Class<? extends FilterWorker> filterWorkerClass = filterWorker.getClass();
+        WebFilter webFilter = AnnotationUtils.find(filterWorkerClass, WebFilter.class)
+            .orElseThrow(() -> new RuntimeException("For create Filter, FilterWorker must exist WebFilter annotation."));
+
+        String name = webFilter.filterName().isEmpty() ? filterWorker.getClass().getSimpleName() : webFilter.filterName();
+        String[] patterns = webFilter.patterns();
+
+        return Arrays.stream(patterns)
+            .map(p -> new FilterInfo(name, p, filterWorker))
+            .collect(Collectors.toUnmodifiableList());
+    }
+
 
     private static String getHostAddress() {
         try {

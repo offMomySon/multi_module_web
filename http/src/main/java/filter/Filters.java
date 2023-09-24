@@ -1,22 +1,17 @@
 package filter;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Filters {
-    private final List<Filter> values;
+    private List<Filter> values;
 
     public Filters(List<Filter> values) {
         Objects.requireNonNull(values);
-        this.values = values.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableList());
+        this.values = values.stream().filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     public static Filters empty() {
@@ -28,42 +23,25 @@ public class Filters {
             return this;
         }
 
-        Set<String> otherFilterNames = otherFilters.values.stream()
-            .map(Filter::getName)
-            .collect(Collectors.toUnmodifiableSet());
-
-        Optional<String> optionalDuplicatFilterName = this.values.stream().map(Filter::getName).filter(otherFilterNames::contains).findAny();
-        if (optionalDuplicatFilterName.isPresent()) {
-            String duplicateFilterName = optionalDuplicatFilterName.get();
-            throw new RuntimeException(MessageFormat.format("Has duplicate filter name. FilterName : `{}`", duplicateFilterName));
-        }
-
-        List<Filter> mergedValues = Stream.of(this.values, otherFilters.values)
-            .flatMap(Collection::stream)
-            .collect(Collectors.toUnmodifiableList());
-        return new Filters(mergedValues);
+        this.values.addAll(otherFilters.values);
+        return this;
     }
 
-    // todo
-    // 받은 입력이 null 이면 excpeiton 이 좋을까?, emtpy 가 좋을까?
-    public List<FilterWorker> findFilterWorkers(String requestUrl) {
-        if (Objects.isNull(requestUrl) || requestUrl.isBlank()) {
-            return Collections.emptyList();
+    public Filters add(Filter filter) {
+        if (Objects.isNull(filter)) {
+            return this;
         }
 
-        List<MatchedFilter> matchedFilters = values.stream()
-            .filter(value -> value.isMatchUrl(requestUrl))
-            .map(MatchedFilter::from)
-            .distinct()
-            .collect(Collectors.toUnmodifiableList());
-
-        return matchedFilters.stream()
-            .map(MatchedFilter::getFilterWorker)
-            .collect(Collectors.toUnmodifiableList());
+        this.values.add(filter);
+        return this;
     }
 
     public List<Filter> getValues() {
         return new ArrayList<>(values);
+    }
+
+    public ReadOnlyFilters lock() {
+        return new ReadOnlyFilters(this.values);
     }
 
     private static class MatchedFilter {
@@ -120,5 +98,30 @@ public class Filters {
         return "Filters{" +
             "values=" + values +
             '}';
+    }
+
+    public static class ReadOnlyFilters {
+        private final List<Filter> values;
+
+        public ReadOnlyFilters(List<Filter> values) {
+            Objects.requireNonNull(values);
+            this.values = values.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableList());
+        }
+
+        public List<FilterWorker> findFilterWorkers(String requestUrl) {
+            if (Objects.isNull(requestUrl) || requestUrl.isBlank()) {
+                return Collections.emptyList();
+            }
+
+            List<MatchedFilter> matchedFilters = values.stream()
+                .filter(value -> value.isMatchUrl(requestUrl))
+                .map(MatchedFilter::from)
+                .distinct()
+                .collect(Collectors.toUnmodifiableList());
+
+            return matchedFilters.stream()
+                .map(MatchedFilter::getFilterWorker)
+                .collect(Collectors.toUnmodifiableList());
+        }
     }
 }

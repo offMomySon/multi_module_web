@@ -2,6 +2,7 @@ package executor;
 
 import filter.FilterWorker;
 import filter.Filters;
+import filter.Filters.ReadOnlyFilters;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.text.MessageFormat;
@@ -20,11 +21,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class HttpService {
     private final HttpRequestProcessor httpRequestProcessor;
-    private final Filters filters;
+    private final ReadOnlyFilters filters;
     private final ThreadPoolExecutor threadPoolExecutor;
     private final ServerSocket serverSocket;
 
-    public HttpService(HttpRequestProcessor httpRequestProcessor, Filters filters, ThreadPoolExecutor threadPoolExecutor, ServerSocket serverSocket) {
+    public HttpService(HttpRequestProcessor httpRequestProcessor, ReadOnlyFilters filters, ThreadPoolExecutor threadPoolExecutor, ServerSocket serverSocket) {
         Objects.requireNonNull(httpRequestProcessor);
         Objects.requireNonNull(filters);
         Objects.requireNonNull(threadPoolExecutor);
@@ -35,7 +36,7 @@ public class HttpService {
         this.serverSocket = serverSocket;
     }
 
-    public static HttpService from(HttpRequestProcessor httpRequestProcessor, Filters filters,
+    public static HttpService from(HttpRequestProcessor httpRequestProcessor, ReadOnlyFilters filters,
                                    int port, int maxConnection, int waitConnection, long keepAliveTime) {
         Objects.requireNonNull(httpRequestProcessor);
         Objects.requireNonNull(filters);

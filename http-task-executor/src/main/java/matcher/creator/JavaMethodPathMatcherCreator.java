@@ -8,11 +8,9 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import lombok.NonNull;
 import matcher.JavaMethodEndpointTaskMatcher;
 import matcher.PathUrlMatcher;
 import matcher.RequestMethod;
-import matcher.creator.RequestMappingValueExtractor.RequestMappedMethod;
 import matcher.segment.PathUrl;
 import matcher.segment.creator.SegmentChunkFactory;
 import task.HttpConvertEndPointTask;
@@ -59,9 +57,9 @@ public class JavaMethodPathMatcherCreator {
 
                 Class<?> returnType = javaMethod.getReturnType();
                 HttpEndPointTask httpEndPointTask;
-                if(returnType == Void.TYPE){
+                if (returnType == Void.TYPE) {
                     httpEndPointTask = new HttpEmptyEndPointTask(endPointTask);
-                } else if(returnType == String.class) {
+                } else if (returnType == String.class) {
                     httpEndPointTask = new HttpTextEndPointTask(endPointTask);
                 } else {
                     Converter converter = new ObjectConverter();

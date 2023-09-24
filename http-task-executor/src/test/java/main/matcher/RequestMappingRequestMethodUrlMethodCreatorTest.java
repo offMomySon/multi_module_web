@@ -1,11 +1,11 @@
 package main.matcher;
 
-import matcher.RequestMethod;
 import annotation.RequestMapping;
-import matcher.creator.RequestMappingValueExtractor;
-import matcher.creator.RequestMappingValueExtractor.RequestMappedMethod;
 import java.lang.reflect.Method;
 import java.util.List;
+import matcher.RequestMethod;
+import matcher.creator.RequestMappedMethod;
+import matcher.creator.RequestMappingValueExtractor;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -78,14 +78,14 @@ class RequestMappingRequestMethodUrlMethodCreatorTest {
         public static List<RequestMappedMethod> getCartesianProduct() {
             Method annotatedMethod = getAnnotatedMethod();
             return List.of(
-                new RequestMappedMethod(RequestMethod.GET, "/testclass1" + "/testMethod1", annotatedMethod),
-                new RequestMappedMethod(RequestMethod.GET, "/testclass1" + "/testMethod2", annotatedMethod),
-                new RequestMappedMethod(RequestMethod.GET, "/testclass2" + "/testMethod1", annotatedMethod),
-                new RequestMappedMethod(RequestMethod.GET, "/testclass2" + "/testMethod2", annotatedMethod),
-                new RequestMappedMethod(RequestMethod.POST, "/testclass1" + "/testMethod1", annotatedMethod),
-                new RequestMappedMethod(RequestMethod.POST, "/testclass1" + "/testMethod2", annotatedMethod),
-                new RequestMappedMethod(RequestMethod.POST, "/testclass2" + "/testMethod1", annotatedMethod),
-                new RequestMappedMethod(RequestMethod.POST, "/testclass2" + "/testMethod2", annotatedMethod)
+                new RequestMappedMethod(RequestMethod.GET, "/testclass1" + "/testMethod1", null, annotatedMethod),
+                new RequestMappedMethod(RequestMethod.GET, "/testclass1" + "/testMethod2", null, annotatedMethod),
+                new RequestMappedMethod(RequestMethod.GET, "/testclass2" + "/testMethod1", null, annotatedMethod),
+                new RequestMappedMethod(RequestMethod.GET, "/testclass2" + "/testMethod2", null, annotatedMethod),
+                new RequestMappedMethod(RequestMethod.POST, "/testclass1" + "/testMethod1", null, annotatedMethod),
+                new RequestMappedMethod(RequestMethod.POST, "/testclass1" + "/testMethod2", null, annotatedMethod),
+                new RequestMappedMethod(RequestMethod.POST, "/testclass2" + "/testMethod1", null, annotatedMethod),
+                new RequestMappedMethod(RequestMethod.POST, "/testclass2" + "/testMethod2", null, annotatedMethod)
             );
         }
     }

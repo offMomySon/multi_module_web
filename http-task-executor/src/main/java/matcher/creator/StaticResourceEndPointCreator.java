@@ -13,7 +13,6 @@ import matcher.segment.PathUrl;
 
 @Slf4j
 public class StaticResourceEndPointCreator {
-
     private final Path resourceDirectory;
     private final String urlPrefix;
 

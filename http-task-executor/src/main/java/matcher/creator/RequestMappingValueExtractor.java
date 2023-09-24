@@ -9,8 +9,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.NonNull;
 import matcher.RequestMethod;
 import annotation.RequestMapping;
@@ -53,26 +51,7 @@ public class RequestMappingValueExtractor {
 
         return requestMethods.stream()
             .flatMap(httpMethod -> fullMethodUrls.stream()
-                .map(methodUrl -> new RequestMappedMethod(httpMethod, methodUrl, javaMethod)))
+                .map(methodUrl -> new RequestMappedMethod(httpMethod, methodUrl, null, javaMethod)))
             .collect(Collectors.toUnmodifiableList());
-    }
-
-    @EqualsAndHashCode
-    @Getter
-    public static class RequestMappedMethod {
-        private final RequestMethod requestMethod;
-        private final String url;
-        private final Method javaMethod;
-
-        public RequestMappedMethod(RequestMethod requestMethod, String url, Method javaMethod) {
-            if (Objects.isNull(requestMethod) || Objects.isNull(javaMethod) ||
-                Objects.isNull(url) || url.isBlank() || url.isBlank()) {
-                throw new RuntimeException("value is invalid.");
-            }
-
-            this.requestMethod = requestMethod;
-            this.url = url;
-            this.javaMethod = javaMethod;
-        }
     }
 }

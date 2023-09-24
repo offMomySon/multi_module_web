@@ -6,12 +6,7 @@ import annotation.WebFilter;
 import com.main.config.HttpConfig;
 import com.main.task.executor.BaseHttpRequestProcessor;
 import com.main.util.AnnotationUtils;
-import executor.HttpService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import pretask.PreTaskCreator;
-import pretask.PreTaskInfo;
+import executor.SocketHttpTaskExecutor;
 import filter.PreTaskWorker;
 import filter.PreTasks;
 import filter.PreTasks.ReadOnlyPreTasks;
@@ -34,6 +29,8 @@ import matcher.EndpointTaskMatcher;
 import matcher.StaticResourceEndPointTaskMatcher;
 import matcher.creator.JavaMethodPathMatcherCreator;
 import matcher.creator.StaticResourceEndPointCreator;
+import pretask.PreTaskCreator;
+import pretask.PreTaskInfo;
 
 @Slf4j
 public class App {
@@ -79,13 +76,20 @@ public class App {
 
         // 4. http service start.
         BaseHttpRequestProcessor baseHttpRequestProcessor = new BaseHttpRequestProcessor(endpointTaskMatcher, SIMPLE_DATE_FORMAT, HOST_ADDRESS);
-        HttpService httpService = HttpService.from(baseHttpRequestProcessor,
-                                                   preTasks,
-                                                   HttpConfig.INSTANCE.getPort(),
-                                                   HttpConfig.INSTANCE.getMaxConnection(),
-                                                   HttpConfig.INSTANCE.getWaitConnection(),
-                                                   HttpConfig.INSTANCE.getKeepAliveTime());
-        httpService.start();
+        SocketHttpTaskExecutor socketHttpTaskExecutor = SocketHttpTaskExecutor.create(HttpConfig.INSTANCE.getPort(),
+                                                                                      HttpConfig.INSTANCE.getMaxConnection(),
+                                                                                      HttpConfig.INSTANCE.getWaitConnection(),
+                                                                                      HttpConfig.INSTANCE.getKeepAliveTime());
+        socketHttpTaskExecutor.execute(((httpRequest, httpResponse) -> {
+            List<PreTaskWorker> preTaskWorkers = preTasks.findFilterWorkers(httpRequest.getHttpRequestPath().getValue().toString());
+            for (PreTaskWorker preTaskWorker : preTaskWorkers) {
+                preTaskWorker.prevExecute(httpRequest, httpResponse);
+            }
+            baseHttpRequestProcessor.execute(httpRequest, httpResponse);
+            for (PreTaskWorker preTaskWorker : preTaskWorkers) {
+                preTaskWorker.postExecute(httpRequest, httpResponse);
+            }
+        }));
     }
 
     private static List<PreTaskInfo> extractPreTaskInfos(PreTaskWorker preTaskWorker) {

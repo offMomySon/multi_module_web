@@ -7,6 +7,9 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import vo.HttpRequest;
 import vo.HttpRequestReader;
@@ -25,6 +28,16 @@ public class SocketHttpTaskExecutor {
         ExecutorService executorService = Executors.newFixedThreadPool(threadPoolCount);
         ServerSocket serverSocket = createServerSocket(port);
         return new SocketHttpTaskExecutor(executorService, serverSocket);
+    }
+
+    public static SocketHttpTaskExecutor create(int port, int maxConnection, int waitConnection, long keepAliveTime){
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(maxConnection,
+                                                                       maxConnection,
+                                                                       keepAliveTime,
+                                                                       TimeUnit.MILLISECONDS,
+                                                                       new LinkedBlockingQueue<>(waitConnection));
+        ServerSocket serverSocket = createServerSocket(port);
+        return new SocketHttpTaskExecutor(threadPoolExecutor, serverSocket);
     }
 
     private static ServerSocket createServerSocket(int port) {

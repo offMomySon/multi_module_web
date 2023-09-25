@@ -2,12 +2,29 @@ package com.main;
 
 
 import annotation.Controller;
+import annotation.PathVariable;
+import annotation.RequestBody;
 import annotation.RequestMapping;
+import annotation.RequestParam;
 import annotation.WebFilter;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.main.config.HttpConfig;
 import com.main.task.executor.BaseHttpRequestProcessor;
+import com.main.task.matcher.HttpBodyAnnotationAnnotatedParameterValueMatcher;
+import com.main.task.response.HttpResponseSender;
 import com.main.util.AnnotationUtils;
 import executor.SocketHttpTaskExecutor;
+import java.io.InputStream;
+import java.util.Map;
+import matcher.MatchedEndPoint;
+import matcher.segment.PathUrl;
+import parameter.BaseParameterValueMatcher;
+import parameter.CompositeMethodParameterValueMatcher;
+import parameter.HttpUrlAnnotationAnnotatedParameterValueMatcher;
+import parameter.MethodParameterValueMatcher;
+import parameter.ParameterValueClazzConverterFactory;
+import parameter.ParameterValueGetter;
+import parameter.RequestParameters;
 import pretask.PreTaskWorker;
 import pretask.PreTasks;
 import pretask.PreTasks.ReadOnlyPreTasks;
@@ -37,6 +54,11 @@ import matcher.creator.RequestMappedMethod;
 import matcher.creator.StaticResourceEndPointCreator;
 import pretask.PreTaskCreator;
 import pretask.PreTaskInfo;
+import response.HttpResponseHeader;
+import response.HttpResponseHeaderCreator;
+import task.HttpEndPointTask;
+import vo.ContentType;
+import vo.QueryParameters;
 
 @Slf4j
 public class App {
@@ -85,20 +107,61 @@ public class App {
         EndpointTaskMatcher endpointTaskMatcher = new CompositedEndpointTaskMatcher(endpointTaskMatchers);
 
         // 4. http service start.
-        BaseHttpRequestProcessor baseHttpRequestProcessor = new BaseHttpRequestProcessor(endpointTaskMatcher, SIMPLE_DATE_FORMAT, HOST_ADDRESS);
         SocketHttpTaskExecutor socketHttpTaskExecutor = SocketHttpTaskExecutor.create(HttpConfig.INSTANCE.getPort(),
                                                                                       HttpConfig.INSTANCE.getMaxConnection(),
                                                                                       HttpConfig.INSTANCE.getWaitConnection(),
                                                                                       HttpConfig.INSTANCE.getKeepAliveTime());
-        socketHttpTaskExecutor.execute(((httpRequest, httpResponse) -> {
-            List<PreTaskWorker> preTaskWorkers = preTasks.findFilterWorkers(httpRequest.getHttpRequestPath().getValue().toString());
+        // 구조화 필요.
+        socketHttpTaskExecutor.execute(((request, response) -> {
+            List<PreTaskWorker> preTaskWorkers = preTasks.findFilterWorkers(request.getHttpRequestPath().getValue().toString());
             for (PreTaskWorker preTaskWorker : preTaskWorkers) {
-                preTaskWorker.prevExecute(httpRequest, httpResponse);
+                preTaskWorker.prevExecute(request, response);
             }
-            baseHttpRequestProcessor.execute(httpRequest, httpResponse);
-            for (PreTaskWorker preTaskWorker : preTaskWorkers) {
-                preTaskWorker.postExecute(httpRequest, httpResponse);
-            }
+
+            RequestMethod method = RequestMethod.find(request.getHttpMethod().name());
+            PathUrl requestUrl = PathUrl.from(request.getHttpRequestPath().getValue().toString());
+            QueryParameters queryParameters = request.getQueryParameters();
+
+            MatchedEndPoint matchedEndPoint = endpointTaskMatcher.match(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
+            HttpEndPointTask httpEndPointTask = matchedEndPoint.getHttpEndPointTask();
+
+            RequestParameters pathVariableValue = new RequestParameters(matchedEndPoint.getPathVariableValue().getValues());
+            RequestParameters queryParamValues = new RequestParameters(queryParameters.getParameterMap());
+            MethodParameterValueMatcher methodParameterValueMatcher = new CompositeMethodParameterValueMatcher(
+                Map.of(InputStream.class, new BaseParameterValueMatcher<>(request.getBodyInputStream()),
+                       RequestBody.class, new HttpBodyAnnotationAnnotatedParameterValueMatcher(request.getBodyInputStream()),
+                       PathVariable.class, new HttpUrlAnnotationAnnotatedParameterValueMatcher<>(PathVariable.class, pathVariableValue),
+                       RequestParam.class, new HttpUrlAnnotationAnnotatedParameterValueMatcher<>(RequestParam.class, queryParamValues))
+            );
+
+            ParameterValueGetter parameterValueGetter = new ParameterValueGetter(methodParameterValueMatcher, new ParameterValueClazzConverterFactory(new ObjectMapper()));
+            Object[] parameterValues = Arrays.stream(httpEndPointTask.getExecuteParameters())
+                .map(parameterValueGetter::get)
+                .map(v -> v.orElse(null))
+                .toArray();
+            Optional<HttpEndPointTask.HttpTaskResult> optionalResult = httpEndPointTask.execute(parameterValues);
+
+            log.info("methodResult : `{}`, clazz : `{}`", optionalResult.orElse(null), optionalResult.map(Object::getClass).orElse(null));
+
+            // 빈값 처리 핗요함
+//            if (optionalResult.isEmpty()) {
+//                return true;
+//            }
+
+            HttpEndPointTask.HttpTaskResult httpTaskResult = optionalResult.get();
+            ContentType contentType = httpTaskResult.getContentType();
+            InputStream content = httpTaskResult.getContent();
+
+            HttpResponseHeaderCreator headerCreator = new HttpResponseHeaderCreator(SIMPLE_DATE_FORMAT, HOST_ADDRESS, contentType);
+            HttpResponseHeader httpResponseHeader = headerCreator.create();
+
+            HttpResponseSender httpResponseSender = new HttpResponseSender(response);
+            httpResponseSender.send(httpResponseHeader, content);
+
+            // post task 들어갈 자리
+//            for (PreTaskWorker preTaskWorker : preTaskWorkers) {
+//                preTaskWorker.postExecute(request, response);
+//            }
         }));
     }
 

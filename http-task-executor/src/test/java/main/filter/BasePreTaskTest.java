@@ -1,8 +1,8 @@
 package main.filter;
 
 import pretask.BasePreTask;
-import filter.PreTaskWorker;
-import filter.pattern.PatternMatcher;
+import pretask.PreTaskWorker;
+import pretask.pattern.PatternMatcher;
 import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;

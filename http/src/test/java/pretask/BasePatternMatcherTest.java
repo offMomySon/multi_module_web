@@ -1,6 +1,6 @@
-package filter;
+package pretask;
 
-import filter.pattern.BasePatternMatcher;
+import pretask.pattern.BasePatternMatcher;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;

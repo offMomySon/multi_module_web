@@ -1,4 +1,4 @@
-package filter;
+package pretask;
 
 public interface PreTask {
     String getName();

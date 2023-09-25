@@ -1,6 +1,5 @@
 package pretask;
 
-import filter.PreTaskWorker;
 import java.util.Objects;
 import lombok.Getter;
 

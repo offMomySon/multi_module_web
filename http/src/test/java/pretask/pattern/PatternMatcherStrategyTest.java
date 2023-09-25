@@ -1,4 +1,4 @@
-package filter.pattern;
+package pretask.pattern;
 
 import java.util.stream.Stream;
 import org.assertj.core.api.Assertions;

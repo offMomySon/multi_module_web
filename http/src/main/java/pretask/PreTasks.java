@@ -1,4 +1,4 @@
-package filter;
+package pretask;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,27 +44,27 @@ public class PreTasks {
         return new ReadOnlyPreTasks(this.values);
     }
 
-    private static class MatchedFilter {
-        private final String filterName;
+    private static class MatchedPreTask {
+        private final String preTaskName;
         private final PreTaskWorker preTaskWorker;
 
-        public MatchedFilter(String filterName, PreTaskWorker preTaskWorker) {
-            if (Objects.isNull(filterName) || filterName.isBlank()) {
+        public MatchedPreTask(String preTaskName, PreTaskWorker preTaskWorker) {
+            if (Objects.isNull(preTaskName) || preTaskName.isBlank()) {
                 throw new RuntimeException("filterName is empty.");
             }
             Objects.requireNonNull(preTaskWorker);
 
-            this.filterName = filterName;
+            this.preTaskName = preTaskName;
             this.preTaskWorker = preTaskWorker;
         }
 
-        public static MatchedFilter from(PreTask filter) {
+        public static MatchedPreTask from(PreTask filter) {
             Objects.requireNonNull(filter);
 
             String filterName = filter.getName();
             PreTaskWorker preTaskWorker = filter.getFilterWorker();
 
-            return new MatchedFilter(filterName, preTaskWorker);
+            return new MatchedPreTask(filterName, preTaskWorker);
         }
 
         public PreTaskWorker getFilterWorker() {
@@ -75,19 +75,19 @@ public class PreTasks {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            MatchedFilter that = (MatchedFilter) o;
-            return Objects.equals(filterName, that.filterName);
+            MatchedPreTask that = (MatchedPreTask) o;
+            return Objects.equals(preTaskName, that.preTaskName);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(filterName);
+            return Objects.hash(preTaskName);
         }
 
         @Override
         public String toString() {
             return "MatchedFilter{" +
-                "filterName='" + filterName + '\'' +
+                "filterName='" + preTaskName + '\'' +
                 ", filterWorker=" + preTaskWorker +
                 '}';
         }
@@ -113,14 +113,14 @@ public class PreTasks {
                 return Collections.emptyList();
             }
 
-            List<MatchedFilter> matchedFilters = values.stream()
+            List<MatchedPreTask> matchedPreTasks = values.stream()
                 .filter(value -> value.isMatchUrl(requestUrl))
-                .map(MatchedFilter::from)
+                .map(MatchedPreTask::from)
                 .distinct()
                 .collect(Collectors.toUnmodifiableList());
 
-            return matchedFilters.stream()
-                .map(MatchedFilter::getFilterWorker)
+            return matchedPreTasks.stream()
+                .map(MatchedPreTask::getFilterWorker)
                 .collect(Collectors.toUnmodifiableList());
         }
     }

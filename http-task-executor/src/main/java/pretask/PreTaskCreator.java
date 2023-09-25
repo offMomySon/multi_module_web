@@ -1,7 +1,6 @@
 package pretask;
 
-import filter.PreTaskWorker;
-import filter.pattern.PatternMatcher;
+import pretask.pattern.PatternMatcher;
 import pretask.pattern.PatternMatcherStrategy;
 import java.util.Objects;
 

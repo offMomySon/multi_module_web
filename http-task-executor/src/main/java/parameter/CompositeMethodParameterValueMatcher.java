@@ -19,7 +19,6 @@ public class CompositeMethodParameterValueMatcher implements MethodParameterValu
             .filter(entry -> Objects.nonNull(entry.getKey()))
             .filter(entry -> Objects.nonNull(entry.getValue()))
             .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
-
         this.matchers = matchers;
     }
 

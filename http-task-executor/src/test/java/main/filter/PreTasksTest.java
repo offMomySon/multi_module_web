@@ -1,9 +1,9 @@
 package main.filter;
 
-import filter.PreTask;
+import pretask.PreTask;
 import pretask.BasePreTask;
-import filter.PreTaskWorker;
-import filter.PreTasks;
+import pretask.PreTaskWorker;
+import pretask.PreTasks;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;

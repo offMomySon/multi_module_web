@@ -142,9 +142,9 @@ class HttpUrlAnnotationAnnotatedParameterValueMatcherTest {
         }
 
         public int testMethod(int param,
-                              @RequestParam(value = "param1") int param1,
-                              @RequestParam(value = "param2", defaultValue = "2") int param2,
-                              @RequestParam(value = "param3", required = false) int param3
+                              @RequestParam(name = "param1") int param1,
+                              @RequestParam(name = "param2", defaultValue = "2") int param2,
+                              @RequestParam(name = "param3", required = false) int param3
         ) {
             return 1;
         }

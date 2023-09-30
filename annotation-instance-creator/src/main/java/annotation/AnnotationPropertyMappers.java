@@ -9,17 +9,13 @@ import java.util.stream.Collectors;
 
 public class AnnotationPropertyMappers {
     private final Map<Class<?>, AnnotationPropertyMapper> annotationPropertyMappers2;
-    private final List<AnnotationPropertyMapper> annotationPropertyMappers;
 
-    public AnnotationPropertyMappers(Map<Class<?>, AnnotationPropertyMapper> annotationPropertyMappers2) {
-        this.annotationPropertyMappers2 = annotationPropertyMappers2;
-        this.annotationPropertyMappers = null;
-    }
-
-    public AnnotationPropertyMappers(List<AnnotationPropertyMapper> annotationPropertyMappers) {
+    public AnnotationPropertyMappers(Map<Class<?>, AnnotationPropertyMapper> annotationPropertyMappers) {
         Objects.requireNonNull(annotationPropertyMappers);
-        this.annotationPropertyMappers = annotationPropertyMappers.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableList());
-        this.annotationPropertyMappers2 = null;
+        this.annotationPropertyMappers2 = annotationPropertyMappers.entrySet().stream()
+            .filter(entry -> Objects.nonNull(entry.getKey()))
+            .filter(entry -> Objects.nonNull(entry.getValue()))
+            .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
     }
 
     public Map<String, Object> getPropertyValue(Annotation annotation, List<String> properties) {

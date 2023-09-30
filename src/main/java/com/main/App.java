@@ -1,6 +1,8 @@
 package com.main;
 
 
+import annotation.AnnotationPropertyMapper;
+import annotation.AnnotationPropertyMappers;
 import annotation.Controller;
 import annotation.PathVariable;
 import annotation.RequestBody;
@@ -58,16 +60,38 @@ import response.HttpResponseHeaderCreator;
 import task.HttpEndPointTask;
 import vo.ContentType;
 import vo.QueryParameters;
-import static instance.ReadOnlyObjectRepository.*;
+import static instance.ReadOnlyObjectRepository.AnnotatedObject;
 
 @Slf4j
 public class App {
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
     private static final String HOST_ADDRESS;
+    private static final AnnotationPropertyMappers PROPERTY_MAPPERS;
 
     static {
         SIMPLE_DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
         HOST_ADDRESS = getHostAddress();
+        AnnotationPropertyMapper webFilterPropertyMapper = new AnnotationPropertyMapper(WebFilter.class,
+                                                                                        Map.of("patterns", (a) -> ((WebFilter) a).patterns(),
+                                                                                               "filterName", (a) -> ((WebFilter) a).filterName()));
+        AnnotationPropertyMapper pathVariablePropertyMapper = new AnnotationPropertyMapper(PathVariable.class,
+                                                                                           Map.of("name", (a) -> ((PathVariable) a).name(),
+                                                                                                  "required", (a) -> ((PathVariable) a).required()));
+        AnnotationPropertyMapper requestBodyPropertyMapper = new AnnotationPropertyMapper(RequestBody.class,
+                                                                                          Map.of("required", (a) -> ((RequestBody) a).required()));
+
+        AnnotationPropertyMapper requestMappingPropertyMapper = new AnnotationPropertyMapper(RequestMapping.class,
+                                                                                             Map.of("url", (a) -> ((RequestMapping) a).url(),
+                                                                                                    "method", (a) -> ((RequestMapping) a).method()));
+        AnnotationPropertyMapper requestParamPropertyMapper = new AnnotationPropertyMapper(RequestParam.class,
+                                                                                           Map.of("name", (a) -> ((RequestParam) a).name(),
+                                                                                                  "defaultValue", (a) -> ((RequestParam) a).defaultValue(),
+                                                                                                  "required", (a) -> ((RequestParam) a).required()));
+        PROPERTY_MAPPERS = new AnnotationPropertyMappers(Map.of(WebFilter.class, webFilterPropertyMapper,
+                                                                PathVariable.class, pathVariablePropertyMapper,
+                                                                RequestBody.class, requestBodyPropertyMapper,
+                                                                RequestMapping.class, requestMappingPropertyMapper,
+                                                                RequestParam.class, requestParamPropertyMapper));
     }
 
     public static void main(String[] args) {
@@ -243,9 +267,9 @@ public class App {
 
             List<RequestMethod> requestMethods = Arrays.stream(methodRequestMapping.method()).collect(Collectors.toUnmodifiableList());
             List<String> clazzUrls = clazzRequestMapping
-                .map(c -> Arrays.asList(c.value()))
+                .map(c -> Arrays.asList(c.url()))
                 .orElseGet(Collections::emptyList);
-            List<String> methodUrls = Arrays.stream(methodRequestMapping.value())
+            List<String> methodUrls = Arrays.stream(methodRequestMapping.url())
                 .collect(Collectors.toUnmodifiableList());
 
             List<String> fullMethodUrls = clazzUrls.stream()

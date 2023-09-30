@@ -48,10 +48,10 @@ class RequestMappingRequestMethodUrlMethodCreatorTest {
     }
 
 
-    @RequestMapping(value = {"/testclass1", "/testclass2"})
+    @RequestMapping(url = {"/testclass1", "/testclass2"})
     private static class TestAnnotatedClass {
 
-        @RequestMapping(value = {"/testMethod1", "/testMethod2"}, method = {RequestMethod.GET, RequestMethod.POST})
+        @RequestMapping(url = {"/testMethod1", "/testMethod2"}, method = {RequestMethod.GET, RequestMethod.POST})
         public void annotatedMethod() {
         }
 
@@ -91,7 +91,7 @@ class RequestMappingRequestMethodUrlMethodCreatorTest {
     }
 
     private static class TestDoesNotAnnotatedClass {
-        @RequestMapping(value = {"/testMethod1", "/testMethod2"}, method = {RequestMethod.GET, RequestMethod.POST})
+        @RequestMapping(url = {"/testMethod1", "/testMethod2"}, method = {RequestMethod.GET, RequestMethod.POST})
         public void annotatedMethod() {
 
         }

@@ -39,9 +39,9 @@ public class RequestMappingValueExtractor {
 
         List<RequestMethod> requestMethods = Arrays.stream(methodRequestMapping.method()).collect(Collectors.toUnmodifiableList());
         List<String> clazzUrls = clazzRequestMapping
-            .map(c -> Arrays.asList(c.value()))
+            .map(c -> Arrays.asList(c.url()))
             .orElseGet(Collections::emptyList);
-        List<String> methodUrls = Arrays.stream(methodRequestMapping.value())
+        List<String> methodUrls = Arrays.stream(methodRequestMapping.url())
             .collect(Collectors.toUnmodifiableList());
 
         List<String> fullMethodUrls = clazzUrls.stream()

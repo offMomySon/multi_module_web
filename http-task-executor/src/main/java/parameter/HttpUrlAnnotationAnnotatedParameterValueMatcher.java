@@ -2,8 +2,6 @@ package parameter;
 
 import annotation.PathVariable;
 import annotation.RequestParam;
-import parameter.MethodParameterValueMatcher;
-import parameter.RequestParameters;
 import com.main.util.AnnotationUtils;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
@@ -88,7 +86,7 @@ public class HttpUrlAnnotationAnnotatedParameterValueMatcher<T> implements Metho
 
             if (annotation instanceof RequestParam) {
                 RequestParam requestParam = (RequestParam) annotation;
-                String parameterName = requestParam.value();
+                String parameterName = requestParam.name();
                 String defaultValue = requestParam.defaultValue().isBlank() ? EMPTY_VALUE : requestParam.defaultValue();
                 boolean required = requestParam.required();
 
@@ -97,7 +95,7 @@ public class HttpUrlAnnotationAnnotatedParameterValueMatcher<T> implements Metho
 
             if (annotation instanceof PathVariable) {
                 PathVariable pathVariable = (PathVariable) annotation;
-                String parameterName = pathVariable.value();
+                String parameterName = pathVariable.name();
                 boolean required = pathVariable.required();
                 return new HttpUrlAnnotation(parameterName, EMPTY_VALUE, required);
             }

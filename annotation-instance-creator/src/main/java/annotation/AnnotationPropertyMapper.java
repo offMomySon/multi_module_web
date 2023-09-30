@@ -28,12 +28,12 @@ public class AnnotationPropertyMapper {
         return propertyFunctions.keySet().stream().collect(Collectors.toUnmodifiableList());
     }
 
-    public Map<String, Object> getPropertyValue(Annotation annotation, List<String> properties) {
+    public AnnotationProperties getPropertyValue(Annotation annotation, List<String> properties) {
         if (Objects.isNull(annotation) || Objects.isNull(properties)) {
-            return Collections.emptyMap();
+            return AnnotationProperties.empty();
         }
         if (isSupportAnnotation(annotation.getClass())) {
-            return Collections.emptyMap();
+            return AnnotationProperties.empty();
         }
         properties = properties.stream()
             .filter(Objects::nonNull)
@@ -50,6 +50,30 @@ public class AnnotationPropertyMapper {
             Object value = annotationFunction.apply(annotation);
             propertyValues.put(property, value);
         }
-        return propertyValues;
+        return new AnnotationProperties(propertyValues);
+    }
+
+    public static class AnnotationProperties {
+        private final Map<String, Object> values;
+
+        public AnnotationProperties(Map<String, Object> values) {
+            Objects.requireNonNull(values);
+            this.values = values.entrySet().stream()
+                .filter(entry -> Objects.nonNull(entry.getKey()))
+                .filter(entry -> Objects.nonNull(entry.getValue()))
+                .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
+        }
+
+        public static AnnotationProperties empty() {
+            return new AnnotationProperties(Collections.emptyMap());
+        }
+
+        public Object getValue(String property) {
+            Objects.requireNonNull(property);
+            if (!values.containsKey(property)) {
+                throw new RuntimeException("does not contain property");
+            }
+            return values.get(property);
+        }
     }
 }

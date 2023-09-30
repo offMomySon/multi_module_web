@@ -104,7 +104,8 @@ public class App {
         ReadOnlyObjectRepository objectRepository = objectRepositoryCreator.createFromPackage(App.class, "com.main");
 
         // 2. webfilter 생성.
-        List<PreTaskWorker> preTaskWorkerObjects = objectRepository.findObjectByClazz(PreTaskWorker.class);
+        List<AnnotatedObject> webFilterAnnotatedPreTaskWorkers = objectRepository.findObjectByClassAndAnnotatedClass(PreTaskWorker.class, WebFilter.class);
+
         ReadOnlyPreTasks preTasks = preTaskWorkerObjects.stream()
             .map(App::extractPreTaskInfos)
             .flatMap(Collection::stream)

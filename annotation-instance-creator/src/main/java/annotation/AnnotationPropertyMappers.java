@@ -1,11 +1,11 @@
 package annotation;
 
 import java.lang.annotation.Annotation;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import static annotation.AnnotationPropertyMapper.*;
 
 public class AnnotationPropertyMappers {
     private final Map<Class<?>, AnnotationPropertyMapper> annotationPropertyMappers2;
@@ -18,14 +18,14 @@ public class AnnotationPropertyMappers {
             .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
     }
 
-    public Map<String, Object> getPropertyValue(Annotation annotation, List<String> properties) {
+    public AnnotationProperties getPropertyValue(Annotation annotation, List<String> properties) {
         if (Objects.isNull(annotation) || Objects.isNull(properties)) {
-            return Collections.emptyMap();
+            return AnnotationProperties.empty();
         }
         Class<? extends Annotation> annotationClass = annotation.getClass();
 
         if (!annotationPropertyMappers2.containsKey(annotationClass)) {
-            return Collections.emptyMap();
+            return AnnotationProperties.empty();
         }
 
         AnnotationPropertyMapper annotationPropertyMapper = annotationPropertyMappers2.get(annotationClass);

@@ -9,28 +9,14 @@ import annotation.RequestParam;
 import annotation.WebFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.main.config.HttpConfig;
-import com.main.task.executor.BaseHttpRequestProcessor;
 import com.main.task.matcher.HttpBodyAnnotationAnnotatedParameterValueMatcher;
 import com.main.task.response.HttpResponseSender;
 import com.main.util.AnnotationUtils;
 import executor.SocketHttpTaskExecutor;
-import java.io.InputStream;
-import java.util.Map;
-import matcher.MatchedEndPoint;
-import matcher.segment.PathUrl;
-import parameter.BaseParameterValueMatcher;
-import parameter.CompositeMethodParameterValueMatcher;
-import parameter.HttpUrlAnnotationAnnotatedParameterValueMatcher;
-import parameter.MethodParameterValueMatcher;
-import parameter.ParameterValueClazzConverterFactory;
-import parameter.ParameterValueGetter;
-import parameter.RequestParameters;
-import pretask.PreTaskWorker;
-import pretask.PreTasks;
-import pretask.PreTasks.ReadOnlyPreTasks;
 import instance.AnnotatedClassObjectRepositoryCreator;
 import instance.Annotations;
 import instance.ReadOnlyObjectRepository;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -39,6 +25,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.TimeZone;
@@ -47,13 +34,25 @@ import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import matcher.CompositedEndpointTaskMatcher;
 import matcher.EndpointTaskMatcher;
+import matcher.MatchedEndPoint;
 import matcher.RequestMethod;
 import matcher.StaticResourceEndPointTaskMatcher;
 import matcher.creator.JavaMethodPathMatcherCreator2;
 import matcher.creator.RequestMappedMethod;
 import matcher.creator.StaticResourceEndPointCreator;
+import matcher.segment.PathUrl;
+import parameter.BaseParameterValueMatcher;
+import parameter.CompositeMethodParameterValueMatcher;
+import parameter.HttpUrlAnnotationAnnotatedParameterValueMatcher;
+import parameter.MethodParameterValueMatcher;
+import parameter.ParameterValueClazzConverterFactory;
+import parameter.ParameterValueGetter;
+import parameter.RequestParameters;
 import pretask.PreTaskCreator;
 import pretask.PreTaskInfo;
+import pretask.PreTaskWorker;
+import pretask.PreTasks;
+import pretask.PreTasks.ReadOnlyPreTasks;
 import response.HttpResponseHeader;
 import response.HttpResponseHeaderCreator;
 import task.HttpEndPointTask;
@@ -219,7 +218,9 @@ public class App {
                 .collect(Collectors.toUnmodifiableList());
         }
 
-        private static List<RequestMappedMethod> doExtract(Object object, Class<?> clazz, Method javaMethod){
+        // [input] annotation, [output] (1:N class:Methods  reuestMapping, RequestMapping) => N개
+        // class - method ->
+        private static List<RequestMappedMethod> doExtract(Object object, Class<?> clazz, Method javaMethod) {
             Optional<RequestMapping> clazzRequestMapping = AnnotationUtils.find(clazz, REQUEST_MAPPING_CLASS);
             RequestMapping methodRequestMapping = AnnotationUtils.find(javaMethod, REQUEST_MAPPING_CLASS)
                 .orElseThrow(() -> new RuntimeException("method does not have RequestMapping."));

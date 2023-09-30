@@ -1,10 +1,11 @@
 package annotation;
 
 import java.lang.annotation.Annotation;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -19,30 +20,36 @@ public class AnnotationPropertyMapper {
         this.propertyFunctions = propertyFunctions;
     }
 
-    public boolean isSupportAnnotation(Annotation annotation){
-        if(Objects.isNull(annotation)){
-            return false;
-        }
-        return annotation.getClass() == targetAnnotation;
+    public boolean isSupportAnnotation(Class<?> annotationClazz) {
+        return annotationClazz == this.targetAnnotation;
     }
 
     public List<String> getProperties() {
         return propertyFunctions.keySet().stream().collect(Collectors.toUnmodifiableList());
     }
 
-    public Optional<Object> getPropertyValue(Annotation annotation, String property) {
-        if (Objects.isNull(annotation) || Objects.isNull(property) || property.isBlank()) {
-            return Optional.empty();
+    public Map<String, Object> getPropertyValue(Annotation annotation, List<String> properties) {
+        if (Objects.isNull(annotation) || Objects.isNull(properties)) {
+            return Collections.emptyMap();
         }
-        if (targetAnnotation != annotation.getClass()) {
-            return Optional.empty();
+        if (isSupportAnnotation(annotation.getClass())) {
+            return Collections.emptyMap();
         }
-        if (!propertyFunctions.containsKey(property)) {
-            return Optional.empty();
-        }
+        properties = properties.stream()
+            .filter(Objects::nonNull)
+            .filter(String::isBlank)
+            .collect(Collectors.toUnmodifiableList());
 
-        Function<Annotation, ?> annotationFunction = this.propertyFunctions.get(property);
-        Object value = annotationFunction.apply(annotation);
-        return Optional.of(value);
+        Map<String, Object> propertyValues = new HashMap<>();
+        for (String property : properties) {
+            if (!propertyFunctions.containsKey(property)) {
+                propertyValues.put(property, "");
+                continue;
+            }
+            Function<Annotation, ?> annotationFunction = this.propertyFunctions.get(property);
+            Object value = annotationFunction.apply(annotation);
+            propertyValues.put(property, value);
+        }
+        return propertyValues;
     }
 }

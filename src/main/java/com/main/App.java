@@ -58,6 +58,7 @@ import response.HttpResponseHeaderCreator;
 import task.HttpEndPointTask;
 import vo.ContentType;
 import vo.QueryParameters;
+import static instance.ReadOnlyObjectRepository.*;
 
 @Slf4j
 public class App {
@@ -88,7 +89,9 @@ public class App {
             .lock();
 
         // 3. class 로 httpPathMatcher 를 생성.
-        List<Object> controllerObjects1 = objectRepository.findAnnotatedObjectFrom(Controller.class);
+        List<Object> controllerObjects1 = objectRepository.findObjectByAnnotatedClass(Controller.class).stream()
+            .map(AnnotatedObject::getObject)
+            .collect(Collectors.toUnmodifiableList());
         List<RequestMappedMethod> requestMappedMethods = controllerObjects1.stream()
             .map(RequestMappedMethodExtractor::new)
             .map(RequestMappedMethodExtractor::extract)

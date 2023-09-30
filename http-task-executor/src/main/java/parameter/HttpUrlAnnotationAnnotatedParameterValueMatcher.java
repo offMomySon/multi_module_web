@@ -12,13 +12,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-/*
- *  todo
- *   HttpUrlAnnotationAnnotatedParameterValueMatcher 네이밍의 판단 근거.
- *   requestParam, pathVariable 각각의 개념이 존재하지만,
- *   근본적으로 http url 로 부터 parameter 에 값을 할당한다.
- *   그렇기 때문에 requestParam, pathVairalbe 을 아우르기 위해서 http url annotation 이란 키워드를 바탕으로 네이밍을 하였다.
- */
+// 5. todo [annotation]
+// parameter 에 RequestParam, PathVariable 어노테이션이 존재하는지 검증한다.
+// 해당 어노테이팅이 필요한지 체크하고
+// 필요하다면 annotation 모듈의 역할로 처리가 가능하게 수정하자.
 public class HttpUrlAnnotationAnnotatedParameterValueMatcher<T> implements MethodParameterValueMatcher {
     private static final String EMPTY_VALUE = null;
     private static final Set<Class<?>> HTTP_URL_ANNOTATION_CLASSES = Set.of(RequestParam.class, PathVariable.class);
@@ -68,6 +65,10 @@ public class HttpUrlAnnotationAnnotatedParameterValueMatcher<T> implements Metho
         return Optional.of(matchValue);
     }
 
+
+    // 5. todo [annotation]
+    // parameter 에 RequestParam, PathVariable 어노테이션의 값변환을 수행하고 있다.
+    // 해당 역할을 annotation 모듈에서 처리가 가능하도록 역할을 이전한다.
     public static class HttpUrlAnnotation {
         private static final String EMPTY_VALUE = null;
 

@@ -126,6 +126,10 @@ public class App {
 
             RequestParameters pathVariableValue = new RequestParameters(matchedEndPoint.getPathVariableValue().getValues());
             RequestParameters queryParamValues = new RequestParameters(queryParameters.getParameterMap());
+
+            // 3. todo [annotation]
+            // parameter 의 타입, 어노테이팅된 어노테이션 RequestBody, PathVariable, RequestParam 을 기준으로 request 의 값을 variable 에 매칭하고 있다.
+            // 판단을 annotation 모듈의 역할로 변형하자.
             MethodParameterValueMatcher methodParameterValueMatcher = new CompositeMethodParameterValueMatcher(
                 Map.of(InputStream.class, new BaseParameterValueMatcher<>(request.getBodyInputStream()),
                        RequestBody.class, new HttpBodyAnnotationAnnotatedParameterValueMatcher(request.getBodyInputStream()),
@@ -164,6 +168,11 @@ public class App {
         }));
     }
 
+    // 1. todo [annotation]
+    // WebFilter 어노테이션을 참조하고 있다.
+    // 해당 어노테이션의 사용법을 알고 있다.
+    // 시나리오 중심의 개념이다.
+    // 정책적인 부분으로 변환해 보자.
     private static List<PreTaskInfo> extractPreTaskInfos(PreTaskWorker preTaskWorker) {
         if (Objects.isNull(preTaskWorker)) {
             throw new RuntimeException("filterWorker is emtpy.");
@@ -181,7 +190,11 @@ public class App {
             .collect(Collectors.toUnmodifiableList());
     }
 
-    // method n 개를 1개로 분할 해야하지만 넘어가자.
+    // 2. todo [annotation]
+    // RequestMapping, Controller 어노테이션을 참조하고 있다.
+    // 해당 어노테이션의 사용법을 알고 있다.
+    // 시나리오 중심의 개념이다.
+    // 정책적인 부분으로 변환해 보자.
     private static class RequestMappedMethodExtractor {
         private static final Class<RequestMapping> REQUEST_MAPPING_CLASS = RequestMapping.class;
         private static final Class<Controller> CONTROLLER_CLASS = Controller.class;

@@ -51,28 +51,25 @@ import parameter.MethodParameterValueMatcher;
 import parameter.ParameterValueClazzConverterFactory;
 import parameter.ParameterValueGetter;
 import parameter.RequestParameters;
-import pretask.BasePreTask;
 import pretask.PreTaskCreator;
 import pretask.PreTaskInfo;
 import pretask.PreTaskWorker;
 import pretask.PreTasks;
 import pretask.PreTasks.ReadOnlyPreTasks;
-import pretask.pattern.PatternMatcher;
-import pretask.pattern.PatternMatcherStrategy;
 import response.HttpResponseHeader;
 import response.HttpResponseHeaderCreator;
 import task.HttpEndPointTask;
 import vo.ContentType;
 import vo.QueryParameters;
-import static annotation.AnnotationPropertyMapper.*;
-import static instance.AnnotatedObjectRepository.*;
+import static annotation.AnnotationPropertyMapper.AnnotationProperties;
+import static instance.AnnotatedObjectRepository.AnnotatedObjectAndProperties;
 import static instance.ReadOnlyObjectRepository.AnnotatedObject;
 
 @Slf4j
 public class App {
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
     private static final String HOST_ADDRESS;
-    private static final AnnotationPropertyMappers PROPERTY_MAPPERS;
+    private static final AnnotationPropertyMappers ANNOTATION_PROPERTY_MAPPERS;
 
     static {
         SIMPLE_DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -93,11 +90,11 @@ public class App {
                                                                                            Map.of("name", (a) -> ((RequestParam) a).name(),
                                                                                                   "defaultValue", (a) -> ((RequestParam) a).defaultValue(),
                                                                                                   "required", (a) -> ((RequestParam) a).required()));
-        PROPERTY_MAPPERS = new AnnotationPropertyMappers(Map.of(WebFilter.class, webFilterPropertyMapper,
-                                                                PathVariable.class, pathVariablePropertyMapper,
-                                                                RequestBody.class, requestBodyPropertyMapper,
-                                                                RequestMapping.class, requestMappingPropertyMapper,
-                                                                RequestParam.class, requestParamPropertyMapper));
+        ANNOTATION_PROPERTY_MAPPERS = new AnnotationPropertyMappers(Map.of(WebFilter.class, webFilterPropertyMapper,
+                                                                           PathVariable.class, pathVariablePropertyMapper,
+                                                                           RequestBody.class, requestBodyPropertyMapper,
+                                                                           RequestMapping.class, requestMappingPropertyMapper,
+                                                                           RequestParam.class, requestParamPropertyMapper));
     }
 
     public static void main(String[] args) {
@@ -108,18 +105,18 @@ public class App {
         Annotations customAnnotations = new Annotations(List.of(WebFilter.class, Controller.class));
         AnnotatedClassObjectRepositoryCreator objectRepositoryCreator = AnnotatedClassObjectRepositoryCreator.registCustomAnnotations(customAnnotations);
         ReadOnlyObjectRepository readOnlyObjectRepository = objectRepositoryCreator.createFromPackage(App.class, "com.main");
-        AnnotatedObjectRepository objectRepository = new AnnotatedObjectRepository(readOnlyObjectRepository, PROPERTY_MAPPERS);
+        AnnotatedObjectRepository objectRepository = new AnnotatedObjectRepository(readOnlyObjectRepository, ANNOTATION_PROPERTY_MAPPERS);
 
         // 2. webfilter 생성.
-        List<AnnotatedObjectProperties> webFilterAnnotatedPreTaskWorkersProperties = objectRepository.findObjectAnnotationPropertiesByClassAndAnnotatedClass(PreTaskWorker.class, WebFilter.class, List.of("pattern", "filterName"));
-
+        List<AnnotatedObjectAndProperties> webFilterAnnotatedPreTaskWorkersProperties = objectRepository.findObjectAndAnnotationPropertiesByClassAndAnnotatedClass(PreTaskWorker.class, WebFilter.class,
+                                                                                                                                                                   List.of("patterns", "filterName"));
         ReadOnlyPreTasks preTasks = webFilterAnnotatedPreTaskWorkersProperties.stream()
             .map(objectAndProperties -> {
                 PreTaskWorker preTaskWorker = (PreTaskWorker) objectAndProperties.getObject();
 
                 AnnotationProperties annotationProperties = objectAndProperties.getAnnotationProperties();
-                String filterName = (String) annotationProperties.getValue("filterName");
-                String[] patterns = (String[]) annotationProperties.getValue("pattern");
+                String filterName = ((String) annotationProperties.getValue("filterName")).isBlank() ? preTaskWorker.getClass().getSimpleName() : (String) annotationProperties.getValue("filterName");
+                String[] patterns = (String[]) annotationProperties.getValue("patterns");
 
                 return Arrays.stream(patterns)
                     .map(pattern -> new PreTaskInfo(filterName, pattern, preTaskWorker))
@@ -131,10 +128,10 @@ public class App {
             .lock();
 
         // 3. class 로 httpPathMatcher 를 생성.
-        List<Object> controllerObjects1 = readOnlyObjectRepository.findObjectByAnnotatedClass(Controller.class).stream()
+        List<Object> controllerObjects = objectRepository.findObjectByAnnotatedClass(Controller.class).stream()
             .map(AnnotatedObject::getObject)
             .collect(Collectors.toUnmodifiableList());
-        List<RequestMappedMethod> requestMappedMethods = controllerObjects1.stream()
+        List<RequestMappedMethod> requestMappedMethods = controllerObjects.stream()
             .map(RequestMappedMethodExtractor::new)
             .map(RequestMappedMethodExtractor::extract)
             .flatMap(Collection::stream)
@@ -211,28 +208,6 @@ public class App {
 //                preTaskWorker.postExecute(request, response);
 //            }
         }));
-    }
-
-    // 1. todo [annotation]
-    // WebFilter 어노테이션을 참조하고 있다.
-    // 해당 어노테이션의 사용법을 알고 있다.
-    // 시나리오 중심의 개념이다.
-    // 정책적인 부분으로 변환해 보자.
-    private static List<PreTaskInfo> extractPreTaskInfos(PreTaskWorker preTaskWorker) {
-        if (Objects.isNull(preTaskWorker)) {
-            throw new RuntimeException("filterWorker is emtpy.");
-        }
-
-        Class<? extends PreTaskWorker> filterWorkerClass = preTaskWorker.getClass();
-        WebFilter webFilter = AnnotationUtils.find(filterWorkerClass, WebFilter.class)
-            .orElseThrow(() -> new RuntimeException("For create Filter, FilterWorker must exist WebFilter annotation."));
-
-        String name = webFilter.filterName().isEmpty() ? preTaskWorker.getClass().getSimpleName() : webFilter.filterName();
-        String[] patterns = webFilter.patterns();
-
-        return Arrays.stream(patterns)
-            .map(p -> new PreTaskInfo(name, p, preTaskWorker))
-            .collect(Collectors.toUnmodifiableList());
     }
 
     // 2. todo [annotation]

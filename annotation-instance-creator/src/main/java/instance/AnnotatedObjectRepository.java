@@ -36,7 +36,7 @@ public class AnnotatedObjectRepository {
     // dto, method 이름이 모든걸 표현해주지 못하고있다.
     // 이름이 이미 길기 때문에 더 장황하게 설명하기 두렵다.
     // 아니면 class 의 개념이 잘못된 걸까..?
-    public List<AnnotatedObjectProperties> findObjectAnnotationPropertiesByClassAndAnnotatedClass(Class<?> findClazz, Class<?> findAnnotation, List<String> properties) {
+    public List<AnnotatedObjectAndProperties> findObjectAndAnnotationPropertiesByClassAndAnnotatedClass(Class<?> findClazz, Class<?> findAnnotation, List<String> properties) {
         List<AnnotatedObject> annotatedObjects = findObjectByClassAndAnnotatedClass(findClazz, findAnnotation);
 
         return annotatedObjects.stream()
@@ -44,18 +44,18 @@ public class AnnotatedObjectRepository {
                 Object object = ao.getObject();
                 Annotation annotation = ao.getAnnotation();
                 AnnotationProperties propertyValue = propertyMappers.getPropertyValue(annotation, properties);
-                return new AnnotatedObjectProperties(object, propertyValue);
+                return new AnnotatedObjectAndProperties(object, propertyValue);
             })
             .collect(Collectors.toUnmodifiableList());
     }
 
 
     @Getter
-    public static class AnnotatedObjectProperties {
+    public static class AnnotatedObjectAndProperties {
         private final Object object;
         private final AnnotationProperties annotationProperties;
 
-        public AnnotatedObjectProperties(Object object, AnnotationProperties annotationProperties) {
+        public AnnotatedObjectAndProperties(Object object, AnnotationProperties annotationProperties) {
             Objects.requireNonNull(object);
             Objects.requireNonNull(annotationProperties);
             this.object = object;

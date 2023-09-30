@@ -107,11 +107,4 @@ public class ReadOnlyObjectRepository {
             this.annotation = annotation;
         }
     }
-
-    @Override
-    public String toString() {
-        return "Container{" +
-            "values=" + values +
-            '}';
-    }
 }

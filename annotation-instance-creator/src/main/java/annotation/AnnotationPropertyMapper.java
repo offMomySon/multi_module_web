@@ -37,7 +37,7 @@ public class AnnotationPropertyMapper {
         }
         properties = properties.stream()
             .filter(Objects::nonNull)
-            .filter(String::isBlank)
+            .filter(p -> !p.isBlank())
             .collect(Collectors.toUnmodifiableList());
 
         Map<String, Object> propertyValues = new HashMap<>();

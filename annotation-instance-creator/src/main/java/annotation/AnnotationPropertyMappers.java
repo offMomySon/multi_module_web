@@ -5,14 +5,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import static annotation.AnnotationPropertyMapper.*;
+import static annotation.AnnotationPropertyMapper.AnnotationProperties;
 
 public class AnnotationPropertyMappers {
-    private final Map<Class<?>, AnnotationPropertyMapper> annotationPropertyMappers2;
+    private final Map<Class<?>, AnnotationPropertyMapper> targetMappers;
 
-    public AnnotationPropertyMappers(Map<Class<?>, AnnotationPropertyMapper> annotationPropertyMappers) {
-        Objects.requireNonNull(annotationPropertyMappers);
-        this.annotationPropertyMappers2 = annotationPropertyMappers.entrySet().stream()
+    public AnnotationPropertyMappers(Map<Class<?>, AnnotationPropertyMapper> targetMappers) {
+        Objects.requireNonNull(targetMappers);
+        this.targetMappers = targetMappers.entrySet().stream()
             .filter(entry -> Objects.nonNull(entry.getKey()))
             .filter(entry -> Objects.nonNull(entry.getValue()))
             .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
@@ -22,13 +22,13 @@ public class AnnotationPropertyMappers {
         if (Objects.isNull(annotation) || Objects.isNull(properties)) {
             return AnnotationProperties.empty();
         }
-        Class<? extends Annotation> annotationClass = annotation.getClass();
+        Class<? extends Annotation> annotationType = annotation.annotationType();
 
-        if (!annotationPropertyMappers2.containsKey(annotationClass)) {
+        if (!targetMappers.containsKey(annotationType)) {
             return AnnotationProperties.empty();
         }
 
-        AnnotationPropertyMapper annotationPropertyMapper = annotationPropertyMappers2.get(annotationClass);
+        AnnotationPropertyMapper annotationPropertyMapper = targetMappers.get(annotationType);
         return annotationPropertyMapper.getPropertyValue(annotation, properties);
     }
 }

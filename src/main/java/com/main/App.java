@@ -16,6 +16,7 @@ import com.main.task.response.HttpResponseSender;
 import com.main.util.AnnotationUtils;
 import executor.SocketHttpTaskExecutor;
 import instance.AnnotatedClassObjectRepositoryCreator;
+import instance.AnnotatedObjectRepository;
 import instance.Annotations;
 import instance.ReadOnlyObjectRepository;
 import java.io.InputStream;
@@ -50,16 +51,21 @@ import parameter.MethodParameterValueMatcher;
 import parameter.ParameterValueClazzConverterFactory;
 import parameter.ParameterValueGetter;
 import parameter.RequestParameters;
+import pretask.BasePreTask;
 import pretask.PreTaskCreator;
 import pretask.PreTaskInfo;
 import pretask.PreTaskWorker;
 import pretask.PreTasks;
 import pretask.PreTasks.ReadOnlyPreTasks;
+import pretask.pattern.PatternMatcher;
+import pretask.pattern.PatternMatcherStrategy;
 import response.HttpResponseHeader;
 import response.HttpResponseHeaderCreator;
 import task.HttpEndPointTask;
 import vo.ContentType;
 import vo.QueryParameters;
+import static annotation.AnnotationPropertyMapper.*;
+import static instance.AnnotatedObjectRepository.*;
 import static instance.ReadOnlyObjectRepository.AnnotatedObject;
 
 @Slf4j
@@ -101,20 +107,31 @@ public class App {
         // List<Class<?>> clazzes = ClassFinder.from(rootClazz, classPackage).findClazzes();
         Annotations customAnnotations = new Annotations(List.of(WebFilter.class, Controller.class));
         AnnotatedClassObjectRepositoryCreator objectRepositoryCreator = AnnotatedClassObjectRepositoryCreator.registCustomAnnotations(customAnnotations);
-        ReadOnlyObjectRepository objectRepository = objectRepositoryCreator.createFromPackage(App.class, "com.main");
+        ReadOnlyObjectRepository readOnlyObjectRepository = objectRepositoryCreator.createFromPackage(App.class, "com.main");
+        AnnotatedObjectRepository objectRepository = new AnnotatedObjectRepository(readOnlyObjectRepository, PROPERTY_MAPPERS);
 
         // 2. webfilter 생성.
-        List<AnnotatedObject> webFilterAnnotatedPreTaskWorkers = objectRepository.findObjectByClassAndAnnotatedClass(PreTaskWorker.class, WebFilter.class);
+        List<AnnotatedObjectProperties> webFilterAnnotatedPreTaskWorkersProperties = objectRepository.findObjectAnnotationPropertiesByClassAndAnnotatedClass(PreTaskWorker.class, WebFilter.class, List.of("pattern", "filterName"));
 
-        ReadOnlyPreTasks preTasks = preTaskWorkerObjects.stream()
-            .map(App::extractPreTaskInfos)
+        ReadOnlyPreTasks preTasks = webFilterAnnotatedPreTaskWorkersProperties.stream()
+            .map(objectAndProperties -> {
+                PreTaskWorker preTaskWorker = (PreTaskWorker) objectAndProperties.getObject();
+
+                AnnotationProperties annotationProperties = objectAndProperties.getAnnotationProperties();
+                String filterName = (String) annotationProperties.getValue("filterName");
+                String[] patterns = (String[]) annotationProperties.getValue("pattern");
+
+                return Arrays.stream(patterns)
+                    .map(pattern -> new PreTaskInfo(filterName, pattern, preTaskWorker))
+                    .collect(Collectors.toUnmodifiableList());
+            })
             .flatMap(Collection::stream)
             .map(PreTaskCreator::create)
             .reduce(PreTasks.empty(), PreTasks::add, PreTasks::merge)
             .lock();
 
         // 3. class 로 httpPathMatcher 를 생성.
-        List<Object> controllerObjects1 = objectRepository.findObjectByAnnotatedClass(Controller.class).stream()
+        List<Object> controllerObjects1 = readOnlyObjectRepository.findObjectByAnnotatedClass(Controller.class).stream()
             .map(AnnotatedObject::getObject)
             .collect(Collectors.toUnmodifiableList());
         List<RequestMappedMethod> requestMappedMethods = controllerObjects1.stream()

@@ -32,6 +32,10 @@ public class AnnotatedObjectRepository {
         return objectRepository.findObjectByClassAndAnnotatedClass(findClazz, findAnnotation);
     }
 
+    // todo
+    // dto, method 이름이 모든걸 표현해주지 못하고있다.
+    // 이름이 이미 길기 때문에 더 장황하게 설명하기 두렵다.
+    // 아니면 class 의 개념이 잘못된 걸까..?
     public List<AnnotatedObjectProperties> findObjectAnnotationPropertiesByClassAndAnnotatedClass(Class<?> findClazz, Class<?> findAnnotation, List<String> properties) {
         List<AnnotatedObject> annotatedObjects = findObjectByClassAndAnnotatedClass(findClazz, findAnnotation);
 

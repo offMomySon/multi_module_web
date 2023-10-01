@@ -9,11 +9,11 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 import static instance.ReadOnlyObjectRepository.AnnotatedObject;
 
-public class AnnotatedObjectRepository {
+public class FailAnnotatedObjectRepository {
     private final ReadOnlyObjectRepository objectRepository;
     private final AnnotationPropertyMappers propertyMappers;
 
-    public AnnotatedObjectRepository(ReadOnlyObjectRepository objectRepository, AnnotationPropertyMappers propertyMappers) {
+    public FailAnnotatedObjectRepository(ReadOnlyObjectRepository objectRepository, AnnotationPropertyMappers propertyMappers) {
         Objects.requireNonNull(objectRepository);
         Objects.requireNonNull(propertyMappers);
         this.objectRepository = objectRepository;
@@ -47,6 +47,16 @@ public class AnnotatedObjectRepository {
     // 2차 생각.
     // AnnotationPropertyExtractor 를 생성할 필요가 없다.
     // 이미 property 로 annotation 의 값을 가져오는 역할의 AnnotationPropertyMapper 을 이용해서 조합으로 풀어내자.
+    // 3차 생각.
+    // 조합으로 풀게 된다면 annotation 맥락을 main 에 노출되게 된다.
+    // 해당 맥락을 노출 시키지 않으려면 2개의 역할을 합친 개념이 나와야한다.
+    // ObjectRepository 의 역할을 살펴보자.
+    //  class 와 annotation 을 기반으로 object, annotation 을 찾는다.
+    // 위 역할을 보듯이, 애초에 objectRepository 네이밍이 잘못되었다.
+    // 왜냐하면, 기능에 연관된 핵심 키워드가 class, object, annotation 이기 때문이다.
+    // 역할에 어울리는 네이밍인 annotatedObjectRepository 라고 명명하자.
+    // 자연스럽게 annotation 의 property 값을 찾는 역할도 녹일 수 있다.
+    // 그래서. 이 클래스틑 폐기하고 기존의 objectRepository 의 네이밍을 변경하고 역할을 추가한다.
     public List<AnnotatedObjectAndProperties> findObjectAndAnnotationPropertiesByClassAndAnnotatedClass(Class<?> findClazz, Class<?> findAnnotation, List<String> properties) {
         List<AnnotatedObject> annotatedObjects = findObjectByClassAndAnnotatedClass(findClazz, findAnnotation);
 

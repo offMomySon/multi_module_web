@@ -5,6 +5,7 @@ import annotation.Domain;
 import annotation.Repository;
 import annotation.Service;
 import com.main.util.ClassFinder;
+import instance.ObjectGraph.ReadOnlyObjectGraph;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -23,7 +24,7 @@ public class AnnotatedClassObjectRepositoryCreator {
         this.annotatedClassInstantiator = new AnnotatedClassInstantiator(instantiateAnnotations);
     }
 
-    public static AnnotatedClassObjectRepositoryCreator registCustomAnnotations(Annotations customAnnotations) {
+    public static AnnotatedClassObjectRepositoryCreator appendAnnotations(Annotations customAnnotations) {
         if (Objects.isNull(customAnnotations)) {
             return new AnnotatedClassObjectRepositoryCreator(DEFAULT_ANNOTATIONS);
         }
@@ -39,15 +40,18 @@ public class AnnotatedClassObjectRepositoryCreator {
         List<Class<?>> clazzes = ClassFinder.from(rootClazz, classPackage).findClazzes();
         log.info("clazzes : {}", clazzes);
 
-        List<Class<?>> annotatedClazzes = clazzes.stream()
+        List<Class<?>> annotatedClasses = clazzes.stream()
             .filter(Objects::nonNull)
             .filter(instantiateAnnotations::anyAnnotatedFrom)
             .collect(Collectors.toUnmodifiableList());
 
-        ReadOnlyObjectRepository repository = ReadOnlyObjectRepository.empty();
-        for (Class<?> clazz : annotatedClazzes) {
-            repository = annotatedClassInstantiator.load(clazz, repository);
+        ReadOnlyObjectGraph objectGraph = ReadOnlyObjectGraph.empty();
+        for (Class<?> clazz : annotatedClasses) {
+            objectGraph = annotatedClassInstantiator.load(clazz, objectGraph);
         }
-        return repository;
+
+
+
+        return null;
     }
 }

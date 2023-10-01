@@ -102,7 +102,7 @@ public class App {
         // 만약 같은 모듈이면 괜찮은가?
         // List<Class<?>> clazzes = ClassFinder.from(rootClazz, classPackage).findClazzes();
         Annotations customAnnotations = new Annotations(List.of(WebFilter.class, Controller.class));
-        AnnotatedClassObjectRepositoryCreator objectRepositoryCreator = AnnotatedClassObjectRepositoryCreator.registCustomAnnotations(customAnnotations);
+        AnnotatedClassObjectRepositoryCreator objectRepositoryCreator = AnnotatedClassObjectRepositoryCreator.appendAnnotations(customAnnotations);
         ReadOnlyObjectRepository objectRepository = objectRepositoryCreator.createFromPackage(App.class, "com.main");
 
         // 2. webfilter 생성.

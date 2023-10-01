@@ -1,6 +1,7 @@
 package annotation;
 
 import java.lang.annotation.Annotation;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -16,6 +17,10 @@ public class AnnotationPropertyMappers {
             .filter(entry -> Objects.nonNull(entry.getKey()))
             .filter(entry -> Objects.nonNull(entry.getValue()))
             .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
+    }
+
+    public static AnnotationPropertyMappers empty() {
+        return new AnnotationPropertyMappers(Collections.emptyMap());
     }
 
     public AnnotationProperties getPropertyValues(Annotation annotation, List<String> properties) {

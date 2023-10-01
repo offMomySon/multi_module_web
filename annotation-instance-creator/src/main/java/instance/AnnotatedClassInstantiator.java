@@ -1,5 +1,6 @@
 package instance;
 
+import instance.ObjectGraph.ReadOnlyObjectGraph;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
@@ -18,29 +19,30 @@ public class AnnotatedClassInstantiator {
         this.instantiateAnnotations = instantiateAnnotations;
     }
 
-    public ReadOnlyObjectRepository load(Class<?> clazz, ReadOnlyObjectRepository prevObjectRepository) {
+    public ReadOnlyObjectGraph load(Class<?> clazz, ReadOnlyObjectGraph prevObjectGraph) {
         if (Objects.isNull(clazz)) {
             throw new RuntimeException("does not exist load clazz.");
         }
-        if (Objects.isNull(prevObjectRepository)) {
-            prevObjectRepository = ReadOnlyObjectRepository.empty();
+        if (Objects.isNull(prevObjectGraph)) {
+            prevObjectGraph = ReadOnlyObjectGraph.empty();
         }
 
         boolean doesNotExistMatchTargetAnnotation = instantiateAnnotations.noneAnnotatedFrom(clazz);
         if (doesNotExistMatchTargetAnnotation) {
-            return prevObjectRepository;
+            return prevObjectGraph;
         }
 
-        ObjectRepository objectRepository = ObjectRepository.empty();
+        ObjectGraph objectGraph = ObjectGraph.empty();
         Set<Class<?>> alreadyVisitedClasses = new LinkedHashSet<>();
-        Object instantiate = instantiate(clazz, objectRepository, prevObjectRepository, alreadyVisitedClasses);
-        objectRepository.put(clazz, instantiate);
+        Object instantiate = instantiate(clazz, objectGraph, prevObjectGraph, alreadyVisitedClasses);
 
-        ReadOnlyObjectRepository newReadOnlyRepository = objectRepository.lock();
-        return prevObjectRepository.merge(newReadOnlyRepository);
+        objectGraph.put(clazz, instantiate);
+
+        ReadOnlyObjectGraph newReadOnlyObjectGraph = objectGraph.lock();
+        return prevObjectGraph.merge(newReadOnlyObjectGraph);
     }
 
-    private Object instantiate(Class<?> clazz, ObjectRepository newObjectRepository, ReadOnlyObjectRepository prevObjectRepository, Set<Class<?>> alreadyVisitedClasses) {
+    private Object instantiate(Class<?> clazz, ObjectGraph newObjectGraph, ReadOnlyObjectGraph prevObjectGraph, Set<Class<?>> alreadyVisitedClasses) {
         if (alreadyVisitedClasses.contains(clazz)) {
             String alreadyVisitedClassesName = alreadyVisitedClasses.stream()
                 .map(Class::getSimpleName)
@@ -50,13 +52,13 @@ public class AnnotatedClassInstantiator {
         }
         alreadyVisitedClasses.add(clazz);
 
-        if (newObjectRepository.containsKey(clazz) || prevObjectRepository.containsKey(clazz)) {
+        if (newObjectGraph.containsKey(clazz) || prevObjectGraph.containsKey(clazz)) {
             alreadyVisitedClasses.remove(clazz);
-            return newObjectRepository.containsKey(clazz) ? newObjectRepository.get(clazz) : prevObjectRepository.get(clazz);
+            return newObjectGraph.containsKey(clazz) ? newObjectGraph.get(clazz) : prevObjectGraph.get(clazz);
         }
 
-        Object instance = doInstantiate(clazz, newObjectRepository, prevObjectRepository, alreadyVisitedClasses);
-        newObjectRepository.put(clazz, instance);
+        Object instance = doInstantiate(clazz, newObjectGraph, prevObjectGraph, alreadyVisitedClasses);
+        newObjectGraph.put(clazz, instance);
 
         // need remove. ex) s1, s2 ref r1
         // s1, r1 already has instance.
@@ -66,26 +68,26 @@ public class AnnotatedClassInstantiator {
         return instance;
     }
 
-    private Object doInstantiate(Class<?> clazz, ObjectRepository newObjectRepository, ReadOnlyObjectRepository prevObjectRepository, Set<Class<?>> alreadyVisitedClasses) {
-        Set<Class<?>> memberClazzes = instantiateAnnotations.peekAnnotatedFieldsFrom(clazz);
-        Constructor<?> foundConstructor = findConstructorByAllContainClazzes(clazz, memberClazzes);
+    private Object doInstantiate(Class<?> clazz, ObjectGraph newObjectGraph, ReadOnlyObjectGraph prevObjectGraph, Set<Class<?>> alreadyVisitedClasses) {
+        Set<Class<?>> annotatedFields = instantiateAnnotations.peekAnnotatedFieldsFrom(clazz);
+        Constructor<?> foundConstructor = findConstructorByContainAllFields(clazz, annotatedFields);
 
         Object[] memberObjects = Arrays.stream(foundConstructor.getParameters())
             .map(Parameter::getType)
-            .map(constructorParam -> this.instantiate(constructorParam, newObjectRepository, prevObjectRepository, alreadyVisitedClasses))
+            .map(constructorParam -> this.instantiate(constructorParam, newObjectGraph, prevObjectGraph, alreadyVisitedClasses))
             .toArray(Object[]::new);
 
         return newObject(foundConstructor, memberObjects);
     }
 
-    private static Constructor<?> findConstructorByAllContainClazzes(Class<?> clazz, Set<Class<?>> memberClazzes) {
+    private static Constructor<?> findConstructorByContainAllFields(Class<?> clazz, Set<Class<?>> fields) {
         return Arrays.stream(clazz.getConstructors())
-            .filter(constructor -> isAllContainClazzesAsParams(constructor, memberClazzes))
+            .filter(constructor -> isContainAllFields(constructor, fields))
             .findFirst()
             .orElseThrow(() -> new RuntimeException("Does not exist match constructor."));
     }
 
-    private static boolean isAllContainClazzesAsParams(Constructor<?> constructor, Set<Class<?>> memberClazzes) {
+    private static boolean isContainAllFields(Constructor<?> constructor, Set<Class<?>> memberClazzes) {
         return Arrays.stream(constructor.getParameters())
             .map(Parameter::getType)
             .allMatch(memberClazzes::contains);

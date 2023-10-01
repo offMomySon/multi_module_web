@@ -16,10 +16,10 @@ import com.main.task.response.HttpResponseSender;
 import com.main.util.AnnotationUtils;
 import executor.SocketHttpTaskExecutor;
 import instance.AnnotatedClassObjectRepositoryCreator;
-import instance.AnnotatedObjectRepository;
 import instance.Annotations;
 import instance.ReadOnlyObjectRepository;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -62,7 +62,6 @@ import task.HttpEndPointTask;
 import vo.ContentType;
 import vo.QueryParameters;
 import static annotation.AnnotationPropertyMapper.AnnotationProperties;
-import static instance.AnnotatedObjectRepository.AnnotatedObjectAndProperties;
 import static instance.ReadOnlyObjectRepository.AnnotatedObject;
 
 @Slf4j
@@ -104,19 +103,18 @@ public class App {
         // List<Class<?>> clazzes = ClassFinder.from(rootClazz, classPackage).findClazzes();
         Annotations customAnnotations = new Annotations(List.of(WebFilter.class, Controller.class));
         AnnotatedClassObjectRepositoryCreator objectRepositoryCreator = AnnotatedClassObjectRepositoryCreator.registCustomAnnotations(customAnnotations);
-        ReadOnlyObjectRepository readOnlyObjectRepository = objectRepositoryCreator.createFromPackage(App.class, "com.main");
-        AnnotatedObjectRepository objectRepository = new AnnotatedObjectRepository(readOnlyObjectRepository, ANNOTATION_PROPERTY_MAPPERS);
+        ReadOnlyObjectRepository objectRepository = objectRepositoryCreator.createFromPackage(App.class, "com.main");
 
         // 2. webfilter 생성.
-        List<AnnotatedObjectAndProperties> webFilterAnnotatedPreTaskWorkersProperties = objectRepository.findObjectAndAnnotationPropertiesByClassAndAnnotatedClass(PreTaskWorker.class, WebFilter.class,
-                                                                                                                                                                   List.of("patterns", "filterName"));
-        ReadOnlyPreTasks preTasks = webFilterAnnotatedPreTaskWorkersProperties.stream()
-            .map(objectAndProperties -> {
-                PreTaskWorker preTaskWorker = (PreTaskWorker) objectAndProperties.getObject();
+        List<AnnotatedObject> webFilterAnnotatedPreTaskWorkers = objectRepository.findObjectByClassAndAnnotatedClass(PreTaskWorker.class, WebFilter.class);
+        ReadOnlyPreTasks preTasks = webFilterAnnotatedPreTaskWorkers.stream()
+            .map(webFilterAnnotatedPreTaskWorker -> {
+                PreTaskWorker preTaskWorker = (PreTaskWorker) webFilterAnnotatedPreTaskWorker.getObject();
+                Annotation webFilterAnnotation = webFilterAnnotatedPreTaskWorker.getAnnotation();
 
-                AnnotationProperties annotationProperties = objectAndProperties.getAnnotationProperties();
-                String filterName = ((String) annotationProperties.getValue("filterName")).isBlank() ? preTaskWorker.getClass().getSimpleName() : (String) annotationProperties.getValue("filterName");
-                String[] patterns = (String[]) annotationProperties.getValue("patterns");
+                AnnotationProperties properties = ANNOTATION_PROPERTY_MAPPERS.getPropertyValues(webFilterAnnotation, List.of("filterName", "patterns"));
+                String filterName = ((String) properties.getValue("filterName")).isBlank() ? preTaskWorker.getClass().getSimpleName() : (String) properties.getValue("filterName");
+                String[] patterns = (String[]) properties.getValue("patterns");
 
                 return Arrays.stream(patterns)
                     .map(pattern -> new PreTaskInfo(filterName, pattern, preTaskWorker))

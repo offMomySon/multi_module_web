@@ -18,7 +18,7 @@ public class AnnotationPropertyMappers {
             .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
     }
 
-    public AnnotationProperties getPropertyValue(Annotation annotation, List<String> properties) {
+    public AnnotationProperties getPropertyValues(Annotation annotation, List<String> properties) {
         if (Objects.isNull(annotation) || Objects.isNull(properties)) {
             return AnnotationProperties.empty();
         }

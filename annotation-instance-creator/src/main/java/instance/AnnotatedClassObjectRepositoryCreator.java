@@ -1,6 +1,5 @@
 package instance;
 
-import annotation.AnnotationPropertyMapper;
 import annotation.AnnotationPropertyMappers;
 import annotation.Component;
 import annotation.Domain;
@@ -55,8 +54,8 @@ public class AnnotatedClassObjectRepositoryCreator {
     }
 
     public static class Builder {
-        private Annotations annotations = Annotations.empty();
-        private AnnotationPropertyMappers annotationPropertyMappers = AnnotationPropertyMappers.empty();
+        private Annotations annotations;
+        private AnnotationPropertyMappers annotationPropertyMappers;
 
         private Builder(Annotations annotations) {
             Objects.requireNonNull(annotations);
@@ -67,14 +66,20 @@ public class AnnotatedClassObjectRepositoryCreator {
             return new Builder(DEFAULT_ANNOTATIONS);
         }
 
-        public Builder annotationPropertyMappers(AnnotationPropertyMappers annotationPropertyMappers){
+        public Builder appendAnnotationPropertyMappers(AnnotationPropertyMappers annotationPropertyMappers) {
             Objects.requireNonNull(annotationPropertyMappers);
+            if (Objects.isNull(this.annotationPropertyMappers)) {
+                this.annotationPropertyMappers = AnnotationPropertyMappers.empty();
+            }
             this.annotationPropertyMappers = this.annotationPropertyMappers.merge(annotationPropertyMappers);
             return this;
         }
 
-        public Builder annotations(Annotations annotations) {
+        public Builder appendAnnotations(Annotations annotations) {
             Objects.requireNonNull(annotations);
+            if(Objects.isNull(this.annotations)){
+                this.annotations = Annotations.empty();
+            }
             this.annotations = this.annotations.merge(annotations);
             return this;
         }

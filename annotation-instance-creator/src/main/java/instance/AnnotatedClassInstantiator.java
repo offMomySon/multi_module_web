@@ -5,6 +5,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -69,9 +70,8 @@ public class AnnotatedClassInstantiator {
     }
 
     private Object doInstantiate(Class<?> clazz, ObjectGraph newObjectGraph, ReadOnlyObjectGraph prevObjectGraph, Set<Class<?>> alreadyVisitedClasses) {
-        Set<Class<?>> annotatedFields = instantiateAnnotations.peekAnnotatedFieldsFrom(clazz);
+        List<Class<?>> annotatedFields = instantiateAnnotations.peekAnnotatedFieldsFrom(clazz);
         Constructor<?> foundConstructor = findConstructorByContainAllFields(clazz, annotatedFields);
-
         Object[] memberObjects = Arrays.stream(foundConstructor.getParameters())
             .map(Parameter::getType)
             .map(constructorParam -> this.instantiate(constructorParam, newObjectGraph, prevObjectGraph, alreadyVisitedClasses))
@@ -80,17 +80,17 @@ public class AnnotatedClassInstantiator {
         return newObject(foundConstructor, memberObjects);
     }
 
-    private static Constructor<?> findConstructorByContainAllFields(Class<?> clazz, Set<Class<?>> fields) {
+    private static Constructor<?> findConstructorByContainAllFields(Class<?> clazz, List<Class<?>> fieldClasses) {
         return Arrays.stream(clazz.getConstructors())
-            .filter(constructor -> isContainAllFields(constructor, fields))
+            .filter(constructor -> isContainAllFields(constructor, fieldClasses))
             .findFirst()
             .orElseThrow(() -> new RuntimeException("Does not exist match constructor."));
     }
 
-    private static boolean isContainAllFields(Constructor<?> constructor, Set<Class<?>> memberClazzes) {
+    private static boolean isContainAllFields(Constructor<?> constructor, List<Class<?>> fieldClasses) {
         return Arrays.stream(constructor.getParameters())
             .map(Parameter::getType)
-            .allMatch(memberClazzes::contains);
+            .allMatch(fieldClasses::contains);
     }
 
     private static Object newObject(Constructor<?> constructor, Object[] memberObjects) {

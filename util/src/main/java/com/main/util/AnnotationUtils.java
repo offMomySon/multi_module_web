@@ -38,21 +38,30 @@ public class AnnotationUtils {
             .collect(Collectors.toUnmodifiableList());
     }
 
-    public static boolean existAll(Class<?> clazz, Class<?>... _annotationClazzes) {
-        if (Objects.isNull(clazz) || Objects.isNull(_annotationClazzes) || _annotationClazzes.length == 0) {
+    public static boolean existAll(Class<?> clazz, Class<?>... annotationClasses) {
+        if (Objects.isNull(clazz) || Objects.isNull(annotationClasses) || annotationClasses.length == 0) {
             throw new RuntimeException("param is invalid.");
         }
-
-        List<Class<?>> annotationClazzes = Arrays.stream(_annotationClazzes)
-            .filter(annotationClazz -> !Objects.isNull(annotationClazz))
-            .collect(Collectors.toUnmodifiableList());
-
-        if (annotationClazzes.isEmpty()) {
+        annotationClasses = (Class<?>[]) excludeEmptyElement(annotationClasses);
+        if (annotationClasses.length == 0) {
             throw new RuntimeException("annoataionClazzes is empty.");
         }
 
-        return annotationClazzes.stream()
+        return Arrays.stream(annotationClasses)
             .allMatch(annotationClazz -> exist(clazz, annotationClazz));
+    }
+
+    public static boolean hasAny(Class<?> clazz, List<Class<?>> annotationClasses) {
+        if (Objects.isNull(clazz) || Objects.isNull(annotationClasses) || annotationClasses.isEmpty()) {
+            throw new RuntimeException("Invalid param.");
+        }
+        List<Class<?>> newAnnotationClasses = excludeEmptyElement(annotationClasses);
+        if (newAnnotationClasses.isEmpty()) {
+            throw new RuntimeException("annoataionClazzes is empty.");
+        }
+
+        return newAnnotationClasses.stream()
+            .anyMatch(annotationClasse -> exist(clazz, annotationClasse));
     }
 
     public static List<Class<?>> peekFieldsType(Class<?> clazz, Class<?> annotationClass) {
@@ -62,24 +71,19 @@ public class AnnotationUtils {
             .collect(Collectors.toUnmodifiableList());
     }
 
-    public static List<Method> peekMethods(Class<?> clazz, Class<?>... _annotatedClazz) {
-        if (Objects.isNull(clazz) || Objects.isNull(_annotatedClazz) || _annotatedClazz.length == 0) {
+    public static List<Method> peekMethods(Class<?> clazz, Class<?>... annotationClasses) {
+        if (Objects.isNull(clazz) || Objects.isNull(annotationClasses) || annotationClasses.length == 0) {
             throw new RuntimeException("parma is invalid.");
         }
-
-        List<Class<?>> annotationClazzes = Arrays.stream(_annotatedClazz)
-            .filter(annotationClazz -> !Objects.isNull(annotationClazz))
-            .collect(Collectors.toUnmodifiableList());
-
-        if (annotationClazzes.isEmpty()) {
+        Class<?>[] newAnnotationClasses = excludeEmptyElement(annotationClasses);
+        if (newAnnotationClasses.length == 0) {
             throw new RuntimeException("annoataionClazzes is empty.");
         }
 
         Method[] declaredMethods = clazz.getDeclaredMethods();
 
         return Arrays.stream(declaredMethods)
-            .filter(method -> annotationClazzes.stream()
-                .allMatch(annotationClazz -> exist(method, annotationClazz)))
+            .filter(method -> Arrays.stream(newAnnotationClasses).allMatch(annotationClazz -> exist(method, annotationClazz)))
             .collect(Collectors.toUnmodifiableList());
     }
 
@@ -92,6 +96,10 @@ public class AnnotationUtils {
         return !exist(parameter, annotationClazz);
     }
 
+    public static boolean exist(Field field, Class<?> annotationClazz) {
+        return find(field, annotationClazz).isPresent();
+    }
+
     public static boolean exist(Parameter param, Class<?> annotationClazz) {
         return find(param, annotationClazz).isPresent();
     }
@@ -102,6 +110,10 @@ public class AnnotationUtils {
 
     public static boolean exist(Method method, Class<?> annotationClazz) {
         return find(method, annotationClazz).isPresent();
+    }
+
+    public static <T> Optional<T> find(Field field, Class<T> annotationClazz) {
+        return find(field.getDeclaredAnnotations(), annotationClazz);
     }
 
     public static <T> Optional<T> find(Class<?> clazz, Class<T> annotationClazz) {
@@ -153,5 +165,17 @@ public class AnnotationUtils {
             return false;
         }
         return annotation.annotationType() == annotationClass;
+    }
+
+    private static Class<?>[] excludeEmptyElement(Class<?>[] elements) {
+        return Arrays.stream(elements)
+            .filter(Objects::nonNull)
+            .toArray(Class<?>[]::new);
+    }
+
+    private static <T> List<T> excludeEmptyElement(List<T> elements) {
+        return elements.stream()
+            .filter(Objects::nonNull)
+            .collect(Collectors.toUnmodifiableList());
     }
 }

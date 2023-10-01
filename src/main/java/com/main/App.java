@@ -97,12 +97,12 @@ public class App {
 
     public static void main(String[] args) {
         // 1. annotating 된 class 의 instance 를 생성한다.
-        AnnotatedClassObjectRepositoryCreator repositoryCreator = AnnotatedClassObjectRepositoryCreator
+        AnnotatedClassObjectRepositoryCreator objectRepositoryCreator = AnnotatedClassObjectRepositoryCreator
             .builderWithDefaultAnnotations()
-            .annotations(new Annotations(List.of(WebFilter.class, Controller.class)))
-            .annotationPropertyMappers(ANNOTATION_PROPERTY_MAPPERS)
+            .appendAnnotations(new Annotations(List.of(WebFilter.class, Controller.class)))
+            .appendAnnotationPropertyMappers(ANNOTATION_PROPERTY_MAPPERS)
             .build();
-        AnnotatedClassObjectRepository objectRepository = repositoryCreator.createFromPackage(App.class, "com.main");
+        AnnotatedClassObjectRepository objectRepository = objectRepositoryCreator.createFromPackage(App.class, "com.main");
 
         // 2. webfilter 생성.
         List<AnnotatedObjectAndProperties> webFilerAnnotatedPreTaskWorkersWithProperties = objectRepository.findObjectAndAnnotationPropertiesByClassAndAnnotatedClass(

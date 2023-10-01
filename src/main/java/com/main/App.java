@@ -61,6 +61,8 @@ import task.HttpEndPointTask;
 import vo.ContentType;
 import vo.QueryParameters;
 import static annotation.AnnotationPropertyMapper.AnnotationProperties;
+import static instance.AnnotatedClassObjectRepository.AnnotatedMethodAndProperties;
+import static instance.AnnotatedClassObjectRepository.AnnotatedObjectAndMethodProperties;
 import static instance.AnnotatedClassObjectRepository.AnnotatedObjectAndProperties;
 
 @Slf4j
@@ -83,7 +85,7 @@ public class App {
 
         AnnotationPropertyMapper requestMappingPropertyMapper = new AnnotationPropertyMapper(RequestMapping.class,
                                                                                              Map.of("url", (a) -> ((RequestMapping) a).url(),
-                                                                                                    "method", (a) -> ((RequestMapping) a).method()));
+                                                                                                    "httpMethod", (a) -> ((RequestMapping) a).method()));
         AnnotationPropertyMapper requestParamPropertyMapper = new AnnotationPropertyMapper(RequestParam.class,
                                                                                            Map.of("name", (a) -> ((RequestParam) a).name(),
                                                                                                   "defaultValue", (a) -> ((RequestParam) a).defaultValue(),
@@ -125,12 +127,37 @@ public class App {
             .lock();
 
         // 3. class 로 httpPathMatcher 를 생성.
-        List<Object> controllerObjects = objectRepository.findObjectByAnnotatedClass(Controller.class).stream()
-            .map(AnnotatedClassObjectRepository.AnnotatedObject::getObject)
+        List<Class<?>> controllerAnnotatedClasses = objectRepository.findClassByAnnotatedClass(Controller.class);
+        List<AnnotatedObjectAndMethodProperties> requestMappedProperties = controllerAnnotatedClasses.stream()
+            .map(controllerAnnotatedClazz -> objectRepository.findAnnotatedObjectAndMethodPropertiesByClassAndAnnotatdClassAtMethodBase(
+                controllerAnnotatedClazz, RequestMapping.class, List.of("url", "httpMethod")))
+            .flatMap(Collection::stream)
             .collect(Collectors.toUnmodifiableList());
-        List<RequestMappedMethod> requestMappedMethods = controllerObjects.stream()
-            .map(RequestMappedMethodExtractor::new)
-            .map(RequestMappedMethodExtractor::extract)
+
+        List<RequestMappedMethod> requestMappedMethods = requestMappedProperties.stream()
+            .map(requestMappedProperty -> {
+                AnnotatedObjectAndProperties annotatedObjectAndProperties = requestMappedProperty.getAnnotatedObjectAndProperties();
+                Object object = annotatedObjectAndProperties.getObject();
+                AnnotationProperties objectProperties = annotatedObjectAndProperties.getAnnotationProperties();
+
+                AnnotatedMethodAndProperties annotatedMethodAndProperties = requestMappedProperty.getAnnotatedMethodAndProperties();
+                Method javaMethod = annotatedMethodAndProperties.getJavaMethod();
+                AnnotationProperties methodProperties = annotatedMethodAndProperties.getAnnotationProperties();
+
+                List<RequestMethod> requestMethods = Arrays.stream((RequestMethod[]) methodProperties.getValueOrDefault("httpMethod", new RequestMethod[]{})).collect(Collectors.toUnmodifiableList());
+
+                List<String> clazzUrls = Arrays.stream((String[]) objectProperties.getValueOrDefault("url", Collections.emptyList())).collect(Collectors.toUnmodifiableList());
+                List<String> methodUrls = Arrays.stream((String[]) methodProperties.getValueOrDefault("url", Collections.emptyList())).collect(Collectors.toUnmodifiableList());
+                List<String> fullMethodUrls = clazzUrls.stream()
+                    .flatMap(clazzUrl -> methodUrls.stream()
+                        .map(methodUrl -> clazzUrl + methodUrl))
+                    .collect(Collectors.toUnmodifiableList());
+
+                return requestMethods.stream()
+                    .flatMap(httpMethod -> fullMethodUrls.stream()
+                        .map(methodUrl -> new RequestMappedMethod(httpMethod, methodUrl, object, javaMethod)))
+                    .collect(Collectors.toUnmodifiableList());
+            })
             .flatMap(Collection::stream)
             .collect(Collectors.toUnmodifiableList());
 
@@ -232,7 +259,7 @@ public class App {
                 throw new RuntimeException("requestMapped method is emtpy.");
             }
 
-            Method[] methods = AnnotationUtils.peekMethods(objectClass, REQUEST_MAPPING_CLASS).toArray(Method[]::new);
+            Method[] methods = AnnotationUtils.peekAllAnnotatedMethods(objectClass, REQUEST_MAPPING_CLASS).toArray(Method[]::new);
             if (methods.length == 0) {
                 throw new RuntimeException("requestMapped method is emtpy.");
             }

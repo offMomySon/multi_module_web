@@ -36,7 +36,7 @@ public class JavaMethodPathMatcherCreator {
     }
 
     public List<JavaMethodEndpointTaskMatcher> create() {
-        List<Method> peekedMethods = AnnotationUtils.peekMethods(this.clazz, REQUEST_MAPPING_CLASS).stream()
+        List<Method> peekedMethods = AnnotationUtils.peekAllAnnotatedMethods(this.clazz, REQUEST_MAPPING_CLASS).stream()
             .collect(Collectors.toUnmodifiableList());
 
         List<RequestMappedMethod> requestMappedMethods = peekedMethods.stream()

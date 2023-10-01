@@ -55,7 +55,6 @@ public class AnnotationPropertyMapper {
         Map<String, Object> propertyValues = new HashMap<>();
         for (String property : properties) {
             if (!propertyFunctions.containsKey(property)) {
-                propertyValues.put(property, "");
                 continue;
             }
             Function<Annotation, ?> annotationFunction = this.propertyFunctions.get(property);
@@ -82,10 +81,28 @@ public class AnnotationPropertyMapper {
 
         public Object getValue(String property) {
             Objects.requireNonNull(property);
+
             if (!values.containsKey(property)) {
                 throw new RuntimeException("does not contain property");
             }
             return values.get(property);
+        }
+
+        public Object getValueOrDefault(String property, Object defaultValue) {
+            Objects.requireNonNull(property);
+            Objects.requireNonNull(defaultValue);
+
+            if (!values.containsKey(property)) {
+                return defaultValue;
+            }
+            return values.get(property);
+        }
+
+        public boolean contain(String property) {
+            if (Objects.isNull(property)) {
+                return false;
+            }
+            return values.containsKey(property);
         }
     }
 }

@@ -21,7 +21,7 @@ public class RequestMappingValueExtractor {
 
     public RequestMappingValueExtractor(@NonNull Class<?> clazz) {
         this.clazz = clazz;
-        this.methods = AnnotationUtils.peekMethods(this.clazz, REQUEST_MAPPING_CLASS).stream()
+        this.methods = AnnotationUtils.peekAllAnnotatedMethods(this.clazz, REQUEST_MAPPING_CLASS).stream()
             .collect(Collectors.toUnmodifiableSet());
     }
 

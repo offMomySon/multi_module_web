@@ -65,7 +65,7 @@ class AnnotationUtilsTest {
     void test3(Class<AnnotatedClass> clazz, Class<?>[] annotationClazzes) throws Exception {
         //given
         //when
-        Throwable actual = Assertions.catchThrowable(() -> AnnotationUtils.peekMethods(clazz, annotationClazzes));
+        Throwable actual = Assertions.catchThrowable(() -> AnnotationUtils.peekAllAnnotatedMethods(clazz, annotationClazzes));
 
         //then
         Assertions.assertThat(actual).isNotNull();
@@ -79,7 +79,7 @@ class AnnotationUtilsTest {
         Class<?>[] methodAnnotations = AnnotatedClass.getMethodAnnotations();
 
         //when
-        List<Method> actual = AnnotationUtils.peekMethods(clazz, methodAnnotations);
+        List<Method> actual = AnnotationUtils.peekAllAnnotatedMethods(clazz, methodAnnotations);
 
         System.out.println(actual);
         System.out.println(AnnotatedClass.getAnnotatedMethod());
@@ -97,7 +97,7 @@ class AnnotationUtilsTest {
         Class<?>[] methodAnnotations = AnnotatedClass.getOverBoardMethodAnnotations();
 
         //when
-        List<Method> actual = AnnotationUtils.peekMethods(clazz, methodAnnotations);
+        List<Method> actual = AnnotationUtils.peekAllAnnotatedMethods(clazz, methodAnnotations);
 
         //then
         Assertions.assertThat(actual)

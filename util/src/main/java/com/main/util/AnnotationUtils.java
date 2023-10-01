@@ -14,6 +14,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.Getter;
 
 public class AnnotationUtils {
     private static final Set<Class<?>> selfReferenceAnnotations = Set.of(Retention.class, Target.class, Documented.class);
@@ -71,9 +72,9 @@ public class AnnotationUtils {
             .collect(Collectors.toUnmodifiableList());
     }
 
-    public static List<Method> peekMethods(Class<?> clazz, Class<?>... annotationClasses) {
+    public static List<Method> peekAllAnnotatedMethods(Class<?> clazz, Class<?>... annotationClasses) {
         if (Objects.isNull(clazz) || Objects.isNull(annotationClasses) || annotationClasses.length == 0) {
-            throw new RuntimeException("parma is invalid.");
+            throw new RuntimeException("Empty param.");
         }
         Class<?>[] newAnnotationClasses = excludeEmptyElement(annotationClasses);
         if (newAnnotationClasses.length == 0) {
@@ -84,6 +85,20 @@ public class AnnotationUtils {
 
         return Arrays.stream(declaredMethods)
             .filter(method -> Arrays.stream(newAnnotationClasses).allMatch(annotationClazz -> exist(method, annotationClazz)))
+            .collect(Collectors.toUnmodifiableList());
+    }
+
+    public static List<AnnotatedMethod> peekAnnotatedMethods(Class<?> clazz, Class<?> annotationClazz) {
+        if (Objects.isNull(clazz) || Objects.isNull(annotationClazz)) {
+            throw new RuntimeException("Empty param");
+        }
+
+        return Arrays.stream(clazz.getDeclaredMethods())
+            .filter(method -> exist(method, annotationClazz))
+            .map(method -> {
+                Annotation foundAnnotation = (Annotation) find(method, annotationClazz).get();
+                return new AnnotatedMethod(method, foundAnnotation);
+            })
             .collect(Collectors.toUnmodifiableList());
     }
 
@@ -177,5 +192,18 @@ public class AnnotationUtils {
         return elements.stream()
             .filter(Objects::nonNull)
             .collect(Collectors.toUnmodifiableList());
+    }
+
+    @Getter
+    public static class AnnotatedMethod {
+        private final Method method;
+        private final Annotation annotation;
+
+        public AnnotatedMethod(Method method, Annotation annotation) {
+            Objects.requireNonNull(method);
+            Objects.requireNonNull(annotation);
+            this.method = method;
+            this.annotation = annotation;
+        }
     }
 }

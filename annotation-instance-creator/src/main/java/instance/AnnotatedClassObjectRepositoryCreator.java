@@ -1,5 +1,7 @@
 package instance;
 
+import annotation.AnnotationPropertyMapper;
+import annotation.AnnotationPropertyMappers;
 import annotation.Component;
 import annotation.Domain;
 import annotation.Repository;
@@ -16,25 +18,20 @@ public class AnnotatedClassObjectRepositoryCreator {
     private static final Annotations DEFAULT_ANNOTATIONS = new Annotations(List.of(Component.class, Domain.class, Repository.class, Service.class));
 
     private final Annotations instantiateAnnotations;
+    private final AnnotationPropertyMappers annotationPropertyMappers;
     private final AnnotatedClassInstantiator annotatedClassInstantiator;
 
-    private AnnotatedClassObjectRepositoryCreator(Annotations instantiateAnnotations) {
+    private AnnotatedClassObjectRepositoryCreator(Annotations instantiateAnnotations, AnnotationPropertyMappers annotationPropertyMappers) {
         Objects.requireNonNull(instantiateAnnotations);
+        Objects.requireNonNull(annotationPropertyMappers);
         this.instantiateAnnotations = instantiateAnnotations;
+        this.annotationPropertyMappers = annotationPropertyMappers;
         this.annotatedClassInstantiator = new AnnotatedClassInstantiator(instantiateAnnotations);
     }
 
-    public static AnnotatedClassObjectRepositoryCreator appendAnnotations(Annotations customAnnotations) {
-        if (Objects.isNull(customAnnotations)) {
-            return new AnnotatedClassObjectRepositoryCreator(DEFAULT_ANNOTATIONS);
-        }
-        Annotations annotations = DEFAULT_ANNOTATIONS.merge(customAnnotations);
-        return new AnnotatedClassObjectRepositoryCreator(annotations);
-    }
-
-    public ReadOnlyObjectRepository createFromPackage(Class<?> rootClazz, String classPackage) {
+    public AnnotatedClassObjectRepository createFromPackage(Class<?> rootClazz, String classPackage) {
         if (Objects.isNull(rootClazz) || Objects.isNull(classPackage) || classPackage.isBlank()) {
-            return ReadOnlyObjectRepository.empty();
+            return AnnotatedClassObjectRepository.emtpy();
         }
 
         List<Class<?>> clazzes = ClassFinder.from(rootClazz, classPackage).findClazzes();
@@ -50,8 +47,40 @@ public class AnnotatedClassObjectRepositoryCreator {
             objectGraph = annotatedClassInstantiator.load(clazz, objectGraph);
         }
 
+        return AnnotatedClassObjectRepository.from(this.annotationPropertyMappers, objectGraph);
+    }
 
+    public static Builder builderWithDefaultAnnotations() {
+        return Builder.builderWithDefaultAnnotations();
+    }
 
-        return null;
+    public static class Builder {
+        private Annotations annotations = Annotations.empty();
+        private AnnotationPropertyMappers annotationPropertyMappers = AnnotationPropertyMappers.empty();
+
+        private Builder(Annotations annotations) {
+            Objects.requireNonNull(annotations);
+            this.annotations = annotations;
+        }
+
+        public static Builder builderWithDefaultAnnotations() {
+            return new Builder(DEFAULT_ANNOTATIONS);
+        }
+
+        public Builder annotationPropertyMappers(AnnotationPropertyMappers annotationPropertyMappers){
+            Objects.requireNonNull(annotationPropertyMappers);
+            this.annotationPropertyMappers = this.annotationPropertyMappers.merge(annotationPropertyMappers);
+            return this;
+        }
+
+        public Builder annotations(Annotations annotations) {
+            Objects.requireNonNull(annotations);
+            this.annotations = this.annotations.merge(annotations);
+            return this;
+        }
+
+        public AnnotatedClassObjectRepositoryCreator build() {
+            return new AnnotatedClassObjectRepositoryCreator(this.annotations, this.annotationPropertyMappers);
+        }
     }
 }

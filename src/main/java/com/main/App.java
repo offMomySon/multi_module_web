@@ -15,11 +15,10 @@ import com.main.task.matcher.HttpBodyAnnotationAnnotatedParameterValueMatcher;
 import com.main.task.response.HttpResponseSender;
 import com.main.util.AnnotationUtils;
 import executor.SocketHttpTaskExecutor;
+import instance.AnnotatedClassObjectRepository;
 import instance.AnnotatedClassObjectRepositoryCreator;
 import instance.Annotations;
-import instance.ReadOnlyObjectRepository;
 import java.io.InputStream;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -62,7 +61,7 @@ import task.HttpEndPointTask;
 import vo.ContentType;
 import vo.QueryParameters;
 import static annotation.AnnotationPropertyMapper.AnnotationProperties;
-import static instance.ReadOnlyObjectRepository.AnnotatedObject;
+import static instance.AnnotatedClassObjectRepository.AnnotatedObjectAndProperties;
 
 @Slf4j
 public class App {
@@ -97,22 +96,22 @@ public class App {
     }
 
     public static void main(String[] args) {
-        // 1. 등록된 annotation 이 마킹된 class 들에 대해 instance 를 생성한다.
-        // todo
-        // 만약 같은 모듈이면 괜찮은가?
-        // List<Class<?>> clazzes = ClassFinder.from(rootClazz, classPackage).findClazzes();
-        Annotations customAnnotations = new Annotations(List.of(WebFilter.class, Controller.class));
-        AnnotatedClassObjectRepositoryCreator objectRepositoryCreator = AnnotatedClassObjectRepositoryCreator.appendAnnotations(customAnnotations);
-        ReadOnlyObjectRepository objectRepository = objectRepositoryCreator.createFromPackage(App.class, "com.main");
+        // 1. annotating 된 class 의 instance 를 생성한다.
+        AnnotatedClassObjectRepositoryCreator repositoryCreator = AnnotatedClassObjectRepositoryCreator
+            .builderWithDefaultAnnotations()
+            .annotations(new Annotations(List.of(WebFilter.class, Controller.class)))
+            .annotationPropertyMappers(ANNOTATION_PROPERTY_MAPPERS)
+            .build();
+        AnnotatedClassObjectRepository objectRepository = repositoryCreator.createFromPackage(App.class, "com.main");
 
         // 2. webfilter 생성.
-        List<AnnotatedObject> webFilterAnnotatedPreTaskWorkers = objectRepository.findObjectByClassAndAnnotatedClass(PreTaskWorker.class, WebFilter.class);
-        ReadOnlyPreTasks preTasks = webFilterAnnotatedPreTaskWorkers.stream()
-            .map(webFilterAnnotatedPreTaskWorker -> {
-                PreTaskWorker preTaskWorker = (PreTaskWorker) webFilterAnnotatedPreTaskWorker.getObject();
-                Annotation webFilterAnnotation = webFilterAnnotatedPreTaskWorker.getAnnotation();
+        List<AnnotatedObjectAndProperties> webFilerAnnotatedPreTaskWorkersWithProperties = objectRepository.findObjectAndAnnotationPropertiesByClassAndAnnotatedClass(
+            PreTaskWorker.class, WebFilter.class, List.of("filterName", "patterns"));
+        ReadOnlyPreTasks preTasks = webFilerAnnotatedPreTaskWorkersWithProperties.stream()
+            .map(webFilerAnnotatedPreTaskWorkerWithProperties -> {
+                PreTaskWorker preTaskWorker = (PreTaskWorker) webFilerAnnotatedPreTaskWorkerWithProperties.getObject();
+                AnnotationProperties properties = webFilerAnnotatedPreTaskWorkerWithProperties.getAnnotationProperties();
 
-                AnnotationProperties properties = ANNOTATION_PROPERTY_MAPPERS.getPropertyValues(webFilterAnnotation, List.of("filterName", "patterns"));
                 String filterName = ((String) properties.getValue("filterName")).isBlank() ? preTaskWorker.getClass().getSimpleName() : (String) properties.getValue("filterName");
                 String[] patterns = (String[]) properties.getValue("patterns");
 
@@ -127,7 +126,7 @@ public class App {
 
         // 3. class 로 httpPathMatcher 를 생성.
         List<Object> controllerObjects = objectRepository.findObjectByAnnotatedClass(Controller.class).stream()
-            .map(AnnotatedObject::getObject)
+            .map(AnnotatedClassObjectRepository.AnnotatedObject::getObject)
             .collect(Collectors.toUnmodifiableList());
         List<RequestMappedMethod> requestMappedMethods = controllerObjects.stream()
             .map(RequestMappedMethodExtractor::new)
@@ -150,6 +149,7 @@ public class App {
                                                                                       HttpConfig.INSTANCE.getMaxConnection(),
                                                                                       HttpConfig.INSTANCE.getWaitConnection(),
                                                                                       HttpConfig.INSTANCE.getKeepAliveTime());
+        log.info("server start.");
         // 구조화 필요.
         socketHttpTaskExecutor.execute(((request, response) -> {
             List<PreTaskWorker> preTaskWorkers = preTasks.findFilterWorkers(request.getHttpRequestPath().getValue().toString());

@@ -32,6 +32,10 @@ public class AnnotatedClassObjectRepository {
             .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
     }
 
+    public static AnnotatedClassObjectRepository emtpy() {
+        return new AnnotatedClassObjectRepository(AnnotationPropertyMappers.empty(), Collections.emptyMap());
+    }
+
     public static AnnotatedClassObjectRepository from(AnnotationPropertyMappers propertyMappers, ReadOnlyObjectGraph objectGraph) {
         if (Objects.isNull(propertyMappers)) {
             propertyMappers = AnnotationPropertyMappers.empty();

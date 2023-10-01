@@ -16,12 +16,24 @@ public class AnnotationPropertyMapper {
     public AnnotationPropertyMapper(Class<?> targetAnnotation, Map<String, Function<Annotation, ?>> propertyFunctions) {
         Objects.requireNonNull(targetAnnotation);
         Objects.requireNonNull(propertyFunctions);
+
+        if (!targetAnnotation.isAnnotation()) {
+            throw new RuntimeException("Does not annotation clazz.");
+        }
+
         this.targetAnnotation = targetAnnotation;
         this.propertyFunctions = propertyFunctions;
     }
 
     public boolean isSupportAnnotation(Class<?> annotationClazz) {
+        if (Objects.isNull(annotationClazz)) {
+            return false;
+        }
         return annotationClazz == this.targetAnnotation;
+    }
+
+    public boolean doesNotSupportAnnotation(Class<?> annotationClazz) {
+        return !isSupportAnnotation(annotationClazz);
     }
 
     public List<String> getProperties() {

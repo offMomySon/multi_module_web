@@ -27,6 +27,10 @@ public class Annotations {
             .collect(Collectors.toUnmodifiableList());
     }
 
+    public static Annotations empty() {
+        return new Annotations(Collections.emptyList());
+    }
+
     public Annotations merge(Annotations another) {
         if (Objects.isNull(another)) {
             return this;

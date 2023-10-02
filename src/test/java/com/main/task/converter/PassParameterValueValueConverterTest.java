@@ -8,7 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import parameter.PassParameterValueClazzConverter;
 
-class PassParameterValueConverterTest {
+class PassParameterValueValueConverterTest {
 
     @DisplayName("빈값을 입력 받으면 빈값을 반환한다.")
     @Test
@@ -18,7 +18,7 @@ class PassParameterValueConverterTest {
         PassParameterValueClazzConverter converter = new PassParameterValueClazzConverter(int.class);
 
         //when
-        Optional<?> optionalActual = converter.convertToParameterClazz(empty);
+        Optional<?> optionalActual = converter.convertToParameterTypeValue(empty);
 
         //then
         Assertions.assertThat(optionalActual).isEmpty();
@@ -32,7 +32,7 @@ class PassParameterValueConverterTest {
         PassParameterValueClazzConverter converter = new PassParameterValueClazzConverter(int.class);
 
         //when
-        Throwable actual = Assertions.catchThrowable(() -> converter.convertToParameterClazz(diffType));
+        Throwable actual = Assertions.catchThrowable(() -> converter.convertToParameterTypeValue(diffType));
 
         //then
         Assertions.assertThat(actual).isNotNull();
@@ -47,7 +47,7 @@ class PassParameterValueConverterTest {
         PassParameterValueClazzConverter passParameterValueClazzConverter = new PassParameterValueClazzConverter(InputStream.class);
 
         //when
-        Optional<?> optionalActual = passParameterValueClazzConverter.convertToParameterClazz(parameterValue);
+        Optional<?> optionalActual = passParameterValueClazzConverter.convertToParameterTypeValue(parameterValue);
 
         //then
         Assertions.assertThat(optionalActual).isPresent();

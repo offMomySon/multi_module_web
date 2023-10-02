@@ -1,6 +1,6 @@
 package task;
 
-import converter.Converter;
+import converter.ValueConverter;
 import java.io.InputStream;
 import java.lang.reflect.Parameter;
 import java.util.Objects;
@@ -10,15 +10,15 @@ import vo.ContentType;
 
 public class HttpConvertEndPointTask implements HttpEndPointTask{
     private final ContentType contentType;
-    private final Converter converter;
+    private final ValueConverter valueConverter;
     private final EndPointTask endPointTask;
 
-    public HttpConvertEndPointTask(ContentType contentType, Converter converter, EndPointTask endPointTask) {
+    public HttpConvertEndPointTask(ContentType contentType, ValueConverter valueConverter, EndPointTask endPointTask) {
         Objects.requireNonNull(contentType);
-        Objects.requireNonNull(converter);
+        Objects.requireNonNull(valueConverter);
         Objects.requireNonNull(endPointTask);
         this.contentType = contentType;
-        this.converter = converter;
+        this.valueConverter = valueConverter;
         this.endPointTask = endPointTask;
     }
 
@@ -37,7 +37,7 @@ public class HttpConvertEndPointTask implements HttpEndPointTask{
         }
 
         Object o = optionalExecuteResult.get();
-        InputStream inputStream = converter.convertToInputStream(o);
+        InputStream inputStream = valueConverter.convertToInputStream(o);
         HttpTaskResult httpTaskResult = new HttpTaskResult(contentType, inputStream);
         return Optional.of(httpTaskResult);
     }

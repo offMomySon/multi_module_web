@@ -7,11 +7,17 @@ import java.io.InputStream;
 import java.util.Objects;
 import static com.main.util.IoUtils.createBufferedInputStream;
 
-public class FileConverter implements Converter<File> {
+public class FileValueConverter implements ValueConverter {
     @Override
-    public InputStream convertToInputStream(File file) {
+    public InputStream convertToInputStream(Object file) {
         Objects.requireNonNull(file);
-        return doConvertToInputStream(file);
+        return doConvertToInputStream((File) file);
+    }
+
+    @Override
+    public Object convertToClazz(String value) {
+        Objects.requireNonNull(value);
+        return new File(value);
     }
 
     private InputStream doConvertToInputStream(File fIle) {

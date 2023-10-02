@@ -19,7 +19,7 @@ public class BaseParameterValueConverter implements ParameterValueConverter {
     }
 
     @Override
-    public Optional<?> convertToParameterClazz(Optional<?> parameterValue) {
+    public Optional<?> convertToParameterTypeValue(Optional<?> parameterValue) {
         if (parameterValue.isEmpty()) {
             return parameterValue;
         }

@@ -1,13 +1,9 @@
 package matcher.creator;
 
-import annotation.RequestMapping;
-import com.main.util.AnnotationUtils;
-import converter.Converter;
-import converter.ObjectConverter;
+import converter.ValueConverter;
+import converter.ObjectValueConverter;
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import matcher.JavaMethodEndpointTaskMatcher;
 import matcher.PathUrlMatcher;
 import matcher.RequestMethod;
@@ -22,52 +18,32 @@ import task.endpoint.JavaMethodInvokeTask;
 import vo.ContentType;
 
 public class JavaMethodPathMatcherCreator {
-    private final static Class<RequestMapping> REQUEST_MAPPING_CLASS = RequestMapping.class;
+    public static JavaMethodEndpointTaskMatcher create(RequestMappedMethod requestMappedMethod){
+        if(Objects.isNull(requestMappedMethod)){
+            throw new RuntimeException("requestMappedMethod is empty.");
+        }
 
-    private final Class<?> clazz;
-    private final Object clazzObject;
-    private final RequestMappingValueExtractor valueExtractor;
+        RequestMethod requestMethod = requestMappedMethod.getRequestMethod();
 
-    public JavaMethodPathMatcherCreator(Object clazzObject) {
-        Objects.requireNonNull(clazzObject);
-        this.clazz = clazzObject.getClass();
-        this.clazzObject = clazzObject;
-        this.valueExtractor = new RequestMappingValueExtractor(clazz);
-    }
+        PathUrl baseUrl = PathUrl.from(requestMappedMethod.getUrl());
+        SegmentChunkFactory segmentChunkFactory = new SegmentChunkFactory(baseUrl);
+        PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(segmentChunkFactory);
 
-    public List<JavaMethodEndpointTaskMatcher> create() {
-        List<Method> peekedMethods = AnnotationUtils.peekAllAnnotatedMethods(this.clazz, REQUEST_MAPPING_CLASS).stream()
-            .collect(Collectors.toUnmodifiableList());
+        Object object = requestMappedMethod.getObject();
+        Method javaMethod = requestMappedMethod.getJavaMethod();
+        EndPointTask endPointTask = new JavaMethodInvokeTask(object, javaMethod);
 
-        List<RequestMappedMethod> requestMappedMethods = peekedMethods.stream()
-            .map(valueExtractor::extractRequestMappedMethods)
-            .flatMap(List::stream)
-            .collect(Collectors.toUnmodifiableList());
+        Class<?> returnType = javaMethod.getReturnType();
+        HttpEndPointTask httpEndPointTask;
+        if(returnType == Void.TYPE){
+            httpEndPointTask = new HttpEmptyEndPointTask(endPointTask);
+        } else if(returnType == String.class) {
+            httpEndPointTask = new HttpTextEndPointTask(endPointTask);
+        } else {
+            ValueConverter valueConverter = new ObjectValueConverter(returnType);
+            httpEndPointTask = new HttpConvertEndPointTask(ContentType.APPLICATION_JSON, valueConverter, endPointTask);
+        }
 
-        return requestMappedMethods.stream()
-            .map(requestMappedMethod -> {
-                RequestMethod requestMethod = requestMappedMethod.getRequestMethod();
-
-                PathUrl baseUrl = PathUrl.from(requestMappedMethod.getUrl());
-                SegmentChunkFactory segmentChunkFactory = new SegmentChunkFactory(baseUrl);
-                PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(segmentChunkFactory);
-
-                Method javaMethod = requestMappedMethod.getJavaMethod();
-                EndPointTask endPointTask = new JavaMethodInvokeTask(clazzObject, javaMethod);
-
-                Class<?> returnType = javaMethod.getReturnType();
-                HttpEndPointTask httpEndPointTask;
-                if (returnType == Void.TYPE) {
-                    httpEndPointTask = new HttpEmptyEndPointTask(endPointTask);
-                } else if (returnType == String.class) {
-                    httpEndPointTask = new HttpTextEndPointTask(endPointTask);
-                } else {
-                    Converter converter = new ObjectConverter();
-                    httpEndPointTask = new HttpConvertEndPointTask(ContentType.APPLICATION_JSON, converter, endPointTask);
-                }
-
-                return new JavaMethodEndpointTaskMatcher(requestMethod, pathUrlMatcher, httpEndPointTask);
-            })
-            .collect(Collectors.toUnmodifiableList());
+        return new JavaMethodEndpointTaskMatcher(requestMethod, pathUrlMatcher, httpEndPointTask);
     }
 }

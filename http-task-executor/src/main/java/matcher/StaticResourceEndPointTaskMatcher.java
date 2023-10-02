@@ -1,8 +1,7 @@
 package matcher;
 
-import converter.Converter;
-import converter.ObjectConverter;
-import converter.PathConverter;
+import converter.ValueConverter;
+import converter.PathValueConverter;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
@@ -10,11 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import matcher.segment.PathUrl;
 import matcher.segment.PathVariableValue;
 import task.HttpConvertEndPointTask;
-import task.HttpEmptyEndPointTask;
 import task.HttpEndPointTask;
-import task.HttpTextEndPointTask;
-import task.endpoint.EndPointTask;
-import task.endpoint.JavaMethodInvokeTask;
 import task.endpoint.ResourceFindTask;
 import vo.ContentType;
 
@@ -46,8 +41,8 @@ public class StaticResourceEndPointTaskMatcher implements EndpointTaskMatcher {
 
         log.info("Matched. requestUrl : `{}`, endPointUrl : `{}`, resourcePath : `{}`", requestUrl, endPointUrl, resourcePath);
         ResourceFindTask resourceFindTask = new ResourceFindTask(resourcePath);
-        Converter converter = new PathConverter();
-        HttpEndPointTask httpEndPointTask = new HttpConvertEndPointTask(ContentType.APPLICATION_JSON, converter, resourceFindTask);
+        ValueConverter valueConverter = new PathValueConverter();
+        HttpEndPointTask httpEndPointTask = new HttpConvertEndPointTask(ContentType.APPLICATION_JSON, valueConverter, resourceFindTask);
         MatchedEndPoint matchedEndPoint = new MatchedEndPoint(httpEndPointTask, PathVariableValue.empty());
         return Optional.of(matchedEndPoint);
     }

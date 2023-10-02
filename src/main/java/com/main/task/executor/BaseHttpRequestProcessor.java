@@ -79,7 +79,7 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
                    RequestParam.class, new HttpUrlAnnotationAnnotatedParameterValueMatcher<>(RequestParam.class, queryParamValues))
         );
 
-        ParameterValueGetter parameterValueGetter = new ParameterValueGetter(methodParameterValueMatcher, new ParameterValueClazzConverterFactory(new ObjectMapper()));
+        ParameterValueGetter parameterValueGetter = new ParameterValueGetter(methodParameterValueMatcher);
         Object[] parameterValues = Arrays.stream(httpEndPointTask.getExecuteParameters())
             .map(parameterValueGetter::get)
             .map(v -> v.orElse(null))

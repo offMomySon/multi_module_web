@@ -32,7 +32,7 @@ import matcher.CompositedEndpointTaskMatcher;
 import matcher.EndpointTaskMatcher;
 import matcher.RequestMethod;
 import matcher.StaticResourceEndPointTaskMatcher;
-import matcher.creator.JavaMethodPathMatcherCreator2;
+import matcher.creator.JavaMethodPathMatcherCreator;
 import matcher.creator.RequestMappedMethod;
 import matcher.creator.StaticResourceEndPointCreator;
 import pretask.PreTaskCreator;
@@ -132,7 +132,7 @@ public class App {
             .collect(Collectors.toUnmodifiableList());
 
         List<EndpointTaskMatcher> javaMethodEndpointTaskMatchers = requestMappedMethods.stream()
-            .map(JavaMethodPathMatcherCreator2::create)
+            .map(JavaMethodPathMatcherCreator::create)
             .collect(Collectors.toUnmodifiableList());
 
         // 4. resource http endpoint task 생성.

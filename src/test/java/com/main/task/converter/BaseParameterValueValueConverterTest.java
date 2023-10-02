@@ -14,7 +14,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import parameter.BaseParameterValueConverter;
 
-class BaseParameterValueConverterTest {
+class BaseParameterValueValueConverterTest {
 
     @DisplayName("ParameterValue 는 string 이 아니면 exception 이 발생합니다.")
     @Test
@@ -24,7 +24,7 @@ class BaseParameterValueConverterTest {
         BaseParameterValueConverter converter = new BaseParameterValueConverter(new ObjectMapper(), int.class);
 
         //when
-        Throwable actual = Assertions.catchThrowable(() -> converter.convertToParameterClazz(byteArrayInputStream));
+        Throwable actual = Assertions.catchThrowable(() -> converter.convertToParameterTypeValue(byteArrayInputStream));
 
         //then
         Assertions.assertThat(actual).isNotNull();
@@ -38,7 +38,7 @@ class BaseParameterValueConverterTest {
         BaseParameterValueConverter converter = new BaseParameterValueConverter(new ObjectMapper(), int.class);
 
         //when
-        Optional<?> optionalActual = converter.convertToParameterClazz(empty);
+        Optional<?> optionalActual = converter.convertToParameterTypeValue(empty);
 
         //then
         Assertions.assertThat(optionalActual).isEmpty();
@@ -53,7 +53,7 @@ class BaseParameterValueConverterTest {
         BaseParameterValueConverter converter = new BaseParameterValueConverter(new ObjectMapper(), clazz);
 
         //when
-        Optional<?> optionalActual = converter.convertToParameterClazz(parameterValue);
+        Optional<?> optionalActual = converter.convertToParameterTypeValue(parameterValue);
 
         //then
         Assertions.assertThat(optionalActual).isPresent();

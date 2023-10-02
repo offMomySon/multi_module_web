@@ -3,14 +3,13 @@ package com.main.task.response;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import converter.CompositeConverter;
+import converter.CompositeValueTypeConverter;
 import response.HttpResponseHeader;
 import vo.HttpResponse;
 import vo.HttpResponseWriter;
 
 public class HttpResponseSender {
-    private static final CompositeConverter converter = new CompositeConverter();
+    private static final CompositeValueTypeConverter converter = new CompositeValueTypeConverter();
 
     private final HttpResponse httpResponse;
 

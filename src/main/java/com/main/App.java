@@ -144,26 +144,18 @@ public class App {
                 Method javaMethod = annotatedMethodAndProperties.getJavaMethod();
                 AnnotationProperties methodProperties = annotatedMethodAndProperties.getAnnotationProperties();
 
-                List<RequestMethod> requestMethods = Arrays.stream((RequestMethod[]) methodProperties.getValueOrDefault("httpMethod", new RequestMethod[]{})).collect(Collectors.toUnmodifiableList());
+                RequestMethod[] httpMethods = (RequestMethod[]) methodProperties.getValueOrDefault("httpMethod", new RequestMethod[]{});
+                String[] classUrls = (String[]) objectProperties.getValueOrDefault("url", Collections.emptyList());
+                String[] _methodUrls = (String[]) methodProperties.getValueOrDefault("url", Collections.emptyList());
 
-                List<String> clazzUrls = Arrays.stream((String[]) objectProperties.getValueOrDefault("url", Collections.emptyList())).collect(Collectors.toUnmodifiableList());
-                List<String> methodUrls = Arrays.stream((String[]) methodProperties.getValueOrDefault("url", Collections.emptyList())).collect(Collectors.toUnmodifiableList());
-                List<String> fullMethodUrls = clazzUrls.stream()
-                    .flatMap(clazzUrl -> methodUrls.stream()
-                        .map(methodUrl -> clazzUrl + methodUrl))
-                    .collect(Collectors.toUnmodifiableList());
-
-                return requestMethods.stream()
-                    .flatMap(httpMethod -> fullMethodUrls.stream()
-                        .map(methodUrl -> new RequestMappedMethod(httpMethod, methodUrl, object, javaMethod)))
-                    .collect(Collectors.toUnmodifiableList());
+                return createRequestMappedMethods(httpMethods, classUrls, _methodUrls, object, javaMethod);
             })
             .flatMap(Collection::stream)
             .collect(Collectors.toUnmodifiableList());
-
         List<EndpointTaskMatcher> javaMethodEndpointTaskMatchers = requestMappedMethods.stream()
             .map(JavaMethodPathMatcherCreator2::create)
             .collect(Collectors.toUnmodifiableList());
+
         StaticResourceEndPointCreator staticResourceEndPointCreator = StaticResourceEndPointCreator.from(App.class, "../../resources/main", "static");
         List<StaticResourceEndPointTaskMatcher> staticResourceEndPointTaskMatchers = staticResourceEndPointCreator.create();
 
@@ -233,6 +225,20 @@ public class App {
 //                preTaskWorker.postExecute(request, response);
 //            }
         }));
+    }
+
+    private static List<RequestMappedMethod> createRequestMappedMethods(RequestMethod[] requestMethods, String[] classUrls, String[] _methodUrls, Object object, Method javaMethod) {
+        List<String> clazzUrls = Arrays.stream(classUrls).collect(Collectors.toUnmodifiableList());
+        List<String> methodUrls = Arrays.stream(_methodUrls).collect(Collectors.toUnmodifiableList());
+        List<String> fullMethodUrls = clazzUrls.stream()
+            .flatMap(clazzUrl -> methodUrls.stream()
+                .map(methodUrl -> clazzUrl + methodUrl))
+            .collect(Collectors.toUnmodifiableList());
+
+        return Arrays.stream(requestMethods)
+            .flatMap(httpMethod -> fullMethodUrls.stream()
+                .map(methodUrl -> new RequestMappedMethod(httpMethod, methodUrl, object, javaMethod)))
+            .collect(Collectors.toUnmodifiableList());
     }
 
     // 2. todo [annotation]

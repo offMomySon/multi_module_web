@@ -3,12 +3,14 @@ package instance;
 import annotation.AnnotationPropertyMappers;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.Getter;
 import static annotation.AnnotationPropertyMapper.AnnotationProperties;
 import static com.main.util.AnnotationUtils.AnnotatedMethod;
@@ -102,6 +104,13 @@ public class AnnotatedClassObjectRepository {
             .collect(Collectors.toUnmodifiableList());
     }
 
+
+    public List<AnnotatedObjectAndMethodProperties> findAnnotatedObjectAndMethodPropertiesByClassAndAnnotatdClassAtMethodBase(List<Class<?>> findClasses, Class<?> findAnnotation, List<String> _properties) {
+        return findClasses.stream()
+            .map(findClazz -> findAnnotatedObjectAndMethodPropertiesByClassAndAnnotatdClassAtMethodBase(findClazz, findAnnotation, _properties))
+            .flatMap(Collection::stream)
+            .collect(Collectors.toUnmodifiableList());
+    }
     // todo [review]
     // 이름이 너무 이상한데.
     public List<AnnotatedObjectAndMethodProperties> findAnnotatedObjectAndMethodPropertiesByClassAndAnnotatdClassAtMethodBase(Class<?> findClazz, Class<?> findAnnotation, List<String> _properties) {

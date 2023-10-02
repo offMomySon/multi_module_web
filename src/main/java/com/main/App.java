@@ -128,11 +128,7 @@ public class App {
 
         // 3. class 로 httpPathMatcher 를 생성.
         List<Class<?>> controllerAnnotatedClasses = objectRepository.findClassByAnnotatedClass(Controller.class);
-        List<AnnotatedObjectAndMethodProperties> requestMappedProperties = controllerAnnotatedClasses.stream()
-            .map(controllerAnnotatedClazz -> objectRepository.findAnnotatedObjectAndMethodPropertiesByClassAndAnnotatdClassAtMethodBase(
-                controllerAnnotatedClazz, RequestMapping.class, List.of("url", "httpMethod")))
-            .flatMap(Collection::stream)
-            .collect(Collectors.toUnmodifiableList());
+        List<AnnotatedObjectAndMethodProperties> requestMappedProperties = objectRepository.findAnnotatedObjectAndMethodPropertiesByClassAndAnnotatdClassAtMethodBase(controllerAnnotatedClasses, RequestMapping.class, List.of("url", "httpMethod"));
 
         List<RequestMappedMethod> requestMappedMethods = requestMappedProperties.stream()
             .map(requestMappedProperty -> {
@@ -152,6 +148,7 @@ public class App {
             })
             .flatMap(Collection::stream)
             .collect(Collectors.toUnmodifiableList());
+
         List<EndpointTaskMatcher> javaMethodEndpointTaskMatchers = requestMappedMethods.stream()
             .map(JavaMethodPathMatcherCreator2::create)
             .collect(Collectors.toUnmodifiableList());
@@ -159,8 +156,7 @@ public class App {
         StaticResourceEndPointCreator staticResourceEndPointCreator = StaticResourceEndPointCreator.from(App.class, "../../resources/main", "static");
         List<StaticResourceEndPointTaskMatcher> staticResourceEndPointTaskMatchers = staticResourceEndPointCreator.create();
 
-        List<EndpointTaskMatcher> endpointTaskMatchers = Stream.concat(javaMethodEndpointTaskMatchers.stream(), staticResourceEndPointTaskMatchers.stream())
-            .collect(Collectors.toUnmodifiableList());
+        List<EndpointTaskMatcher> endpointTaskMatchers = Stream.concat(javaMethodEndpointTaskMatchers.stream(), staticResourceEndPointTaskMatchers.stream()).collect(Collectors.toUnmodifiableList());
         EndpointTaskMatcher endpointTaskMatcher = new CompositedEndpointTaskMatcher(endpointTaskMatchers);
 
         // 4. http service start.
@@ -239,73 +235,6 @@ public class App {
             .flatMap(httpMethod -> fullMethodUrls.stream()
                 .map(methodUrl -> new RequestMappedMethod(httpMethod, methodUrl, object, javaMethod)))
             .collect(Collectors.toUnmodifiableList());
-    }
-
-    // 2. todo [annotation]
-    // RequestMapping, Controller 어노테이션을 참조하고 있다.
-    // 해당 어노테이션의 사용법을 알고 있다.
-    // 시나리오 중심의 개념이다.
-    // 정책적인 부분으로 변환해 보자.
-    private static class RequestMappedMethodExtractor {
-        private static final Class<RequestMapping> REQUEST_MAPPING_CLASS = RequestMapping.class;
-        private static final Class<Controller> CONTROLLER_CLASS = Controller.class;
-
-        private final Object object;
-        private final Class<?> clazz;
-        private final Method[] methods;
-
-        public RequestMappedMethodExtractor(Object object) {
-            if (Objects.isNull(object)) {
-                throw new RuntimeException("object is emtpy.");
-            }
-
-            Class<?> objectClass = object.getClass();
-            boolean doesNotAnnotatedControllerAnnotation = AnnotationUtils.doesNotExist(objectClass, CONTROLLER_CLASS);
-            if (doesNotAnnotatedControllerAnnotation) {
-                throw new RuntimeException("requestMapped method is emtpy.");
-            }
-
-            Method[] methods = AnnotationUtils.peekAllAnnotatedMethods(objectClass, REQUEST_MAPPING_CLASS).toArray(Method[]::new);
-            if (methods.length == 0) {
-                throw new RuntimeException("requestMapped method is emtpy.");
-            }
-
-            this.object = object;
-            this.clazz = objectClass;
-            this.methods = methods;
-        }
-
-        public List<RequestMappedMethod> extract() {
-            return Arrays.stream(methods)
-                .map(method -> doExtract(this.object, this.clazz, method))
-                .flatMap(Collection::stream)
-                .collect(Collectors.toUnmodifiableList());
-        }
-
-        // [input] annotation, [output] (1:N class:Methods  reuestMapping, RequestMapping) => N개
-        // class - method ->
-        private static List<RequestMappedMethod> doExtract(Object object, Class<?> clazz, Method javaMethod) {
-            Optional<RequestMapping> clazzRequestMapping = AnnotationUtils.find(clazz, REQUEST_MAPPING_CLASS);
-            RequestMapping methodRequestMapping = AnnotationUtils.find(javaMethod, REQUEST_MAPPING_CLASS)
-                .orElseThrow(() -> new RuntimeException("method does not have RequestMapping."));
-
-            List<RequestMethod> requestMethods = Arrays.stream(methodRequestMapping.method()).collect(Collectors.toUnmodifiableList());
-            List<String> clazzUrls = clazzRequestMapping
-                .map(c -> Arrays.asList(c.url()))
-                .orElseGet(Collections::emptyList);
-            List<String> methodUrls = Arrays.stream(methodRequestMapping.url())
-                .collect(Collectors.toUnmodifiableList());
-
-            List<String> fullMethodUrls = clazzUrls.stream()
-                .flatMap(clazzUrl -> methodUrls.stream()
-                    .map(methodUrl -> clazzUrl + methodUrl))
-                .collect(Collectors.toUnmodifiableList());
-
-            return requestMethods.stream()
-                .flatMap(httpMethod -> fullMethodUrls.stream()
-                    .map(methodUrl -> new RequestMappedMethod(httpMethod, methodUrl, object, javaMethod)))
-                .collect(Collectors.toUnmodifiableList());
-        }
     }
 
     private static String getHostAddress() {

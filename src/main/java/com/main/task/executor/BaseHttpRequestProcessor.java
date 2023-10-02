@@ -65,13 +65,13 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
         RequestParameters pathVariableValue = new RequestParameters(matchedEndPoint.getPathVariableValue().getValues());
         RequestParameters queryParamValues = new RequestParameters(queryParameters.getParameterMap());
 
-        // todo [needImpl]
-        // 1. request body
-        // 2. inputStream
-
-        // 3. todo [annotation]
-        // parameter 의 타입, 어노테이팅된 어노테이션 RequestBody, PathVariable, RequestParam 을 기준으로 request 의 값을 variable 에 매칭하고 있다.
-        // 판단을 annotation 모듈의 역할로 변형하자.
+        // todo [review]
+        // 받은 피드백 - annotation 모듈을 이용해서 동적으로 처리해라
+        // 나의 구현 - 피드백대로 수행하지 않았다.
+        // parameter 에 어노테이팅된 정보들을 여기서 해석하지 않고 생성시 미리 해석하는 방식으로 진행한다.
+        // 해석된 정보를 이용하여 로직을 수행하기 때문에 annotation 과 연관관계를 끊을 수 있다.
+        // 하지만 코드 적으로는 끊어졌지만, 개념적으로는 연결이 되어있다. 이것을 연관관계를 끊어다고 볼 수 있을까?
+        // 임시저장 브랜치 - origin/split_annotation_module_role_at_MethodParameterValueMatcher
         MethodParameterValueMatcher methodParameterValueMatcher = new CompositeMethodParameterValueMatcher(
             Map.of(InputStream.class, new BaseParameterValueMatcher<>(request.getBodyInputStream()),
                    RequestBody.class, new HttpBodyAnnotationAnnotatedParameterValueMatcher(request.getBodyInputStream()),

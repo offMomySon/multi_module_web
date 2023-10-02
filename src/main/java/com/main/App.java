@@ -98,7 +98,6 @@ public class App {
 
                 String filterName = ((String) properties.getValue("filterName")).isBlank() ? preTaskWorker.getClass().getSimpleName() : (String) properties.getValue("filterName");
                 String[] patterns = (String[]) properties.getValue("patterns");
-
                 return createPreTaskInfos(preTaskWorker, filterName, patterns);
             })
             .flatMap(Collection::stream)
@@ -125,7 +124,6 @@ public class App {
                 RequestMethod[] httpMethods = (RequestMethod[]) methodProperties.getValueOrDefault("httpMethod", new RequestMethod[]{});
                 String[] classUrls = (String[]) objectProperties.getValueOrDefault("url", Collections.emptyList());
                 String[] _methodUrls = (String[]) methodProperties.getValueOrDefault("url", Collections.emptyList());
-
                 return createRequestMappedMethods(httpMethods, classUrls, _methodUrls, object, javaMethod);
             })
             .flatMap(Collection::stream)

@@ -9,16 +9,12 @@ import annotation.RequestBody;
 import annotation.RequestMapping;
 import annotation.RequestParam;
 import annotation.WebFilter;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.main.config.HttpConfig;
-import com.main.task.matcher.HttpBodyAnnotationAnnotatedParameterValueMatcher;
-import com.main.task.response.HttpResponseSender;
-import com.main.util.AnnotationUtils;
+import com.main.task.executor.BaseHttpRequestProcessor;
 import executor.SocketHttpTaskExecutor;
 import instance.AnnotatedClassObjectRepository;
 import instance.AnnotatedClassObjectRepositoryCreator;
 import instance.Annotations;
-import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -28,38 +24,22 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import matcher.CompositedEndpointTaskMatcher;
 import matcher.EndpointTaskMatcher;
-import matcher.MatchedEndPoint;
 import matcher.RequestMethod;
 import matcher.StaticResourceEndPointTaskMatcher;
 import matcher.creator.JavaMethodPathMatcherCreator2;
 import matcher.creator.RequestMappedMethod;
 import matcher.creator.StaticResourceEndPointCreator;
-import matcher.segment.PathUrl;
-import parameter.BaseParameterValueMatcher;
-import parameter.CompositeMethodParameterValueMatcher;
-import parameter.HttpUrlAnnotationAnnotatedParameterValueMatcher;
-import parameter.MethodParameterValueMatcher;
-import parameter.ParameterValueClazzConverterFactory;
-import parameter.ParameterValueGetter;
-import parameter.RequestParameters;
 import pretask.PreTaskCreator;
 import pretask.PreTaskInfo;
 import pretask.PreTaskWorker;
 import pretask.PreTasks;
 import pretask.PreTasks.ReadOnlyPreTasks;
-import response.HttpResponseHeader;
-import response.HttpResponseHeaderCreator;
-import task.HttpEndPointTask;
-import vo.ContentType;
-import vo.QueryParameters;
 import static annotation.AnnotationPropertyMapper.AnnotationProperties;
 import static instance.AnnotatedClassObjectRepository.AnnotatedMethodAndProperties;
 import static instance.AnnotatedClassObjectRepository.AnnotatedObjectAndMethodProperties;
@@ -107,7 +87,10 @@ public class App {
         AnnotatedClassObjectRepository objectRepository = objectRepositoryCreator.createFromPackage(App.class, "com.main");
 
         // 2. webfilter 생성.
-        List<AnnotatedObjectAndProperties> webFilerAnnotatedPreTaskWorkersWithProperties = objectRepository.findObjectAndAnnotationPropertiesByClassAndAnnotatedClass(PreTaskWorker.class, WebFilter.class, List.of("filterName", "patterns"));
+        List<AnnotatedObjectAndProperties> webFilerAnnotatedPreTaskWorkersWithProperties = objectRepository.findObjectAndAnnotationPropertiesByClassAndAnnotatedClass(PreTaskWorker.class,
+                                                                                                                                                                      WebFilter.class,
+                                                                                                                                                                      List.of("filterName",
+                                                                                                                                                                              "patterns"));
         ReadOnlyPreTasks preTasks = webFilerAnnotatedPreTaskWorkersWithProperties.stream()
             .map(webFilerAnnotatedPreTaskWorkerWithProperties -> {
                 PreTaskWorker preTaskWorker = (PreTaskWorker) webFilerAnnotatedPreTaskWorkerWithProperties.getObject();
@@ -125,7 +108,9 @@ public class App {
 
         // 3. java http endpoint task 생성.
         List<Class<?>> controllerAnnotatedClasses = objectRepository.findClassByAnnotatedClass(Controller.class);
-        List<AnnotatedObjectAndMethodProperties> requestMappedProperties = objectRepository.findAnnotatedObjectAndMethodPropertiesByClassAndAnnotatdClassAtMethodBase(controllerAnnotatedClasses, RequestMapping.class, List.of("url", "httpMethod"));
+        List<AnnotatedObjectAndMethodProperties> requestMappedProperties = objectRepository.findAnnotatedObjectAndMethodPropertiesByClassAndAnnotatdClassAtMethodBase(controllerAnnotatedClasses,
+                                                                                                                                                                      RequestMapping.class,
+                                                                                                                                                                      List.of("url", "httpMethod"));
 
         List<RequestMappedMethod> requestMappedMethods = requestMappedProperties.stream()
             .map(requestMappedProperty -> {
@@ -162,6 +147,7 @@ public class App {
                                                                                       HttpConfig.INSTANCE.getMaxConnection(),
                                                                                       HttpConfig.INSTANCE.getWaitConnection(),
                                                                                       HttpConfig.INSTANCE.getKeepAliveTime());
+        BaseHttpRequestProcessor baseHttpRequestProcessor = new BaseHttpRequestProcessor(endpointTaskMatcher, SIMPLE_DATE_FORMAT, HOST_ADDRESS);
         log.info("server start.");
         // 구조화 필요.
         socketHttpTaskExecutor.execute(((request, response) -> {
@@ -170,47 +156,7 @@ public class App {
                 preTaskWorker.prevExecute(request, response);
             }
 
-            RequestMethod method = RequestMethod.find(request.getHttpMethod().name());
-            PathUrl requestUrl = PathUrl.from(request.getHttpRequestPath().getValue().toString());
-            QueryParameters queryParameters = request.getQueryParameters();
-
-            MatchedEndPoint matchedEndPoint = endpointTaskMatcher.match(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
-            HttpEndPointTask httpEndPointTask = matchedEndPoint.getHttpEndPointTask();
-
-            RequestParameters pathVariableValue = new RequestParameters(matchedEndPoint.getPathVariableValue().getValues());
-            RequestParameters queryParamValues = new RequestParameters(queryParameters.getParameterMap());
-
-            // 3. todo [annotation]
-            // parameter 의 타입, 어노테이팅된 어노테이션 RequestBody, PathVariable, RequestParam 을 기준으로 request 의 값을 variable 에 매칭하고 있다.
-            // 판단을 annotation 모듈의 역할로 변형하자.
-            MethodParameterValueMatcher methodParameterValueMatcher = new CompositeMethodParameterValueMatcher(
-                Map.of(InputStream.class, new BaseParameterValueMatcher<>(request.getBodyInputStream()),
-                       RequestBody.class, new HttpBodyAnnotationAnnotatedParameterValueMatcher(request.getBodyInputStream()),
-                       PathVariable.class, new HttpUrlAnnotationAnnotatedParameterValueMatcher<>(PathVariable.class, pathVariableValue),
-                       RequestParam.class, new HttpUrlAnnotationAnnotatedParameterValueMatcher<>(RequestParam.class, queryParamValues))
-            );
-
-            ParameterValueGetter parameterValueGetter = new ParameterValueGetter(methodParameterValueMatcher, new ParameterValueClazzConverterFactory(new ObjectMapper()));
-            Object[] parameterValues = Arrays.stream(httpEndPointTask.getExecuteParameters())
-                .map(parameterValueGetter::get)
-                .map(v -> v.orElse(null))
-                .toArray();
-            Optional<HttpEndPointTask.HttpTaskResult> optionalResult = httpEndPointTask.execute(parameterValues);
-
-            log.info("methodResult : `{}`, clazz : `{}`", optionalResult.orElse(null), optionalResult.map(Object::getClass).orElse(null));
-
-            // todo
-            // 빈값 처리.
-
-            HttpEndPointTask.HttpTaskResult httpTaskResult = optionalResult.get();
-            ContentType contentType = httpTaskResult.getContentType();
-            InputStream content = httpTaskResult.getContent();
-
-            HttpResponseHeaderCreator headerCreator = new HttpResponseHeaderCreator(SIMPLE_DATE_FORMAT, HOST_ADDRESS, contentType);
-            HttpResponseHeader httpResponseHeader = headerCreator.create();
-
-            HttpResponseSender httpResponseSender = new HttpResponseSender(response);
-            httpResponseSender.send(httpResponseHeader, content);
+            baseHttpRequestProcessor.execute(request, response);
 
             // todo
             // post task.

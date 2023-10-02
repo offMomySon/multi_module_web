@@ -64,6 +64,14 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
 
         RequestParameters pathVariableValue = new RequestParameters(matchedEndPoint.getPathVariableValue().getValues());
         RequestParameters queryParamValues = new RequestParameters(queryParameters.getParameterMap());
+
+        // todo [needImpl]
+        // 1. request body
+        // 2. inputStream
+
+        // 3. todo [annotation]
+        // parameter 의 타입, 어노테이팅된 어노테이션 RequestBody, PathVariable, RequestParam 을 기준으로 request 의 값을 variable 에 매칭하고 있다.
+        // 판단을 annotation 모듈의 역할로 변형하자.
         MethodParameterValueMatcher methodParameterValueMatcher = new CompositeMethodParameterValueMatcher(
             Map.of(InputStream.class, new BaseParameterValueMatcher<>(request.getBodyInputStream()),
                    RequestBody.class, new HttpBodyAnnotationAnnotatedParameterValueMatcher(request.getBodyInputStream()),

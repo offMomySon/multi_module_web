@@ -107,8 +107,7 @@ public class App {
         AnnotatedClassObjectRepository objectRepository = objectRepositoryCreator.createFromPackage(App.class, "com.main");
 
         // 2. webfilter 생성.
-        List<AnnotatedObjectAndProperties> webFilerAnnotatedPreTaskWorkersWithProperties = objectRepository.findObjectAndAnnotationPropertiesByClassAndAnnotatedClass(
-            PreTaskWorker.class, WebFilter.class, List.of("filterName", "patterns"));
+        List<AnnotatedObjectAndProperties> webFilerAnnotatedPreTaskWorkersWithProperties = objectRepository.findObjectAndAnnotationPropertiesByClassAndAnnotatedClass(PreTaskWorker.class, WebFilter.class, List.of("filterName", "patterns"));
         ReadOnlyPreTasks preTasks = webFilerAnnotatedPreTaskWorkersWithProperties.stream()
             .map(webFilerAnnotatedPreTaskWorkerWithProperties -> {
                 PreTaskWorker preTaskWorker = (PreTaskWorker) webFilerAnnotatedPreTaskWorkerWithProperties.getObject();
@@ -117,16 +116,14 @@ public class App {
                 String filterName = ((String) properties.getValue("filterName")).isBlank() ? preTaskWorker.getClass().getSimpleName() : (String) properties.getValue("filterName");
                 String[] patterns = (String[]) properties.getValue("patterns");
 
-                return Arrays.stream(patterns)
-                    .map(pattern -> new PreTaskInfo(filterName, pattern, preTaskWorker))
-                    .collect(Collectors.toUnmodifiableList());
+                return createPreTaskInfos(preTaskWorker, filterName, patterns);
             })
             .flatMap(Collection::stream)
             .map(PreTaskCreator::create)
             .reduce(PreTasks.empty(), PreTasks::add, PreTasks::merge)
             .lock();
 
-        // 3. class 로 httpPathMatcher 를 생성.
+        // 3. java http endpoint task 생성.
         List<Class<?>> controllerAnnotatedClasses = objectRepository.findClassByAnnotatedClass(Controller.class);
         List<AnnotatedObjectAndMethodProperties> requestMappedProperties = objectRepository.findAnnotatedObjectAndMethodPropertiesByClassAndAnnotatdClassAtMethodBase(controllerAnnotatedClasses, RequestMapping.class, List.of("url", "httpMethod"));
 
@@ -153,13 +150,14 @@ public class App {
             .map(JavaMethodPathMatcherCreator2::create)
             .collect(Collectors.toUnmodifiableList());
 
+        // 4. resource http endpoint task 생성.
         StaticResourceEndPointCreator staticResourceEndPointCreator = StaticResourceEndPointCreator.from(App.class, "../../resources/main", "static");
         List<StaticResourceEndPointTaskMatcher> staticResourceEndPointTaskMatchers = staticResourceEndPointCreator.create();
 
         List<EndpointTaskMatcher> endpointTaskMatchers = Stream.concat(javaMethodEndpointTaskMatchers.stream(), staticResourceEndPointTaskMatchers.stream()).collect(Collectors.toUnmodifiableList());
         EndpointTaskMatcher endpointTaskMatcher = new CompositedEndpointTaskMatcher(endpointTaskMatchers);
 
-        // 4. http service start.
+        // 5. http service start.
         SocketHttpTaskExecutor socketHttpTaskExecutor = SocketHttpTaskExecutor.create(HttpConfig.INSTANCE.getPort(),
                                                                                       HttpConfig.INSTANCE.getMaxConnection(),
                                                                                       HttpConfig.INSTANCE.getWaitConnection(),
@@ -201,10 +199,8 @@ public class App {
 
             log.info("methodResult : `{}`, clazz : `{}`", optionalResult.orElse(null), optionalResult.map(Object::getClass).orElse(null));
 
-            // 빈값 처리 핗요함
-//            if (optionalResult.isEmpty()) {
-//                return true;
-//            }
+            // todo
+            // 빈값 처리.
 
             HttpEndPointTask.HttpTaskResult httpTaskResult = optionalResult.get();
             ContentType contentType = httpTaskResult.getContentType();
@@ -216,11 +212,15 @@ public class App {
             HttpResponseSender httpResponseSender = new HttpResponseSender(response);
             httpResponseSender.send(httpResponseHeader, content);
 
-            // post task 들어갈 자리
-//            for (PreTaskWorker preTaskWorker : preTaskWorkers) {
-//                preTaskWorker.postExecute(request, response);
-//            }
+            // todo
+            // post task.
         }));
+    }
+
+    private static List<PreTaskInfo> createPreTaskInfos(PreTaskWorker preTaskWorker, String filterName, String[] patterns) {
+        return Arrays.stream(patterns)
+            .map(pattern -> new PreTaskInfo(filterName, pattern, preTaskWorker))
+            .collect(Collectors.toUnmodifiableList());
     }
 
     private static List<RequestMappedMethod> createRequestMappedMethods(RequestMethod[] requestMethods, String[] classUrls, String[] _methodUrls, Object object, Method javaMethod) {

@@ -255,7 +255,7 @@ public class App {
 
             // 2. annotation hint type.
             if (AnnotationUtils.exist(parameter, PathVariable.class)) {
-                return ParameterType.HTTP_URL_PATH;
+                return ParameterType.HTTP_URL;
             }
             if (AnnotationUtils.exist(parameter, RequestParam.class)) {
                 return ParameterType.HTTP_QUERY_PARAM;

@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public enum ParameterType {
-    HTTP_URL_PATH,
+    HTTP_URL,
     HTTP_QUERY_PARAM,
     HTTP_BODY,
     HTTP_INPUT_STREAM,

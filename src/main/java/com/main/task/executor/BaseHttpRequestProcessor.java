@@ -16,7 +16,7 @@ import matcher.MatchedEndPoint;
 import matcher.RequestMethod;
 import matcher.segment.PathUrl;
 import parameter.ParameterValueGetter;
-import parameter.RequestParameters;
+import parameter.UrlParameters;
 import parameter.matcher.SingleValueParameterValueMatcher;
 import parameter.matcher.CompositeMethodParameterValueMatcher;
 import parameter.matcher.HttpBodyAnnotationAnnotatedParameterValueMatcher;
@@ -34,7 +34,7 @@ import static parameter.matcher.ParameterType.HTTP_BODY;
 import static parameter.matcher.ParameterType.HTTP_INPUT_STREAM;
 import static parameter.matcher.ParameterType.HTTP_OUTPUT_STREAM;
 import static parameter.matcher.ParameterType.HTTP_QUERY_PARAM;
-import static parameter.matcher.ParameterType.HTTP_URL_PATH;
+import static parameter.matcher.ParameterType.HTTP_URL;
 
 @Slf4j
 public class BaseHttpRequestProcessor implements HttpRequestProcessor {
@@ -64,8 +64,8 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
         MatchedEndPoint matchedEndPoint = endpointTaskMatcher.match(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
         HttpEndPointTask httpEndPointTask = matchedEndPoint.getHttpEndPointTask();
 
-        RequestParameters pathVariableValue = new RequestParameters(matchedEndPoint.getPathVariableValue().getValues());
-        RequestParameters queryParamValues = new RequestParameters(queryParameters.getParameterMap());
+        UrlParameters pathVariableValue = new UrlParameters(matchedEndPoint.getPathVariableValue().getValues());
+        UrlParameters queryParamValues = new UrlParameters(queryParameters.getParameterMap());
 
         // todo [review]
         // 받은 피드백 - annotation 모듈을 이용해서 동적으로 처리해라
@@ -79,7 +79,7 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
                 HTTP_INPUT_STREAM, new SingleValueParameterValueMatcher<>(request.getBodyInputStream()),
                 HTTP_OUTPUT_STREAM, new SingleValueParameterValueMatcher<>(response.getOutputStream()),
                 HTTP_BODY, new HttpBodyAnnotationAnnotatedParameterValueMatcher(request.getBodyInputStream()),
-                HTTP_URL_PATH, new HttpUrlAnnotationAnnotatedParameterValueMatcher<>(PathVariable.class, pathVariableValue),
+                HTTP_URL, new HttpUrlAnnotationAnnotatedParameterValueMatcher<>(PathVariable.class, pathVariableValue),
                 HTTP_QUERY_PARAM, new HttpUrlAnnotationAnnotatedParameterValueMatcher<>(RequestParam.class, queryParamValues))
         );
 

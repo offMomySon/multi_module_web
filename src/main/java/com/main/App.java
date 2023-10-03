@@ -11,11 +11,14 @@ import annotation.RequestParam;
 import annotation.WebFilter;
 import com.main.config.HttpConfig;
 import com.main.task.executor.BaseHttpRequestProcessor;
+import com.main.util.AnnotationUtils;
 import executor.SocketHttpTaskExecutor;
 import instance.AnnotatedClassObjectRepository;
 import instance.AnnotatedClassObjectRepository.AnnotatedParameterProperties;
 import instance.AnnotatedClassObjectRepositoryCreator;
 import instance.Annotations;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.net.InetAddress;
@@ -40,6 +43,7 @@ import matcher.creator.JavaMethodPathMatcherCreator;
 import matcher.creator.RequestMappedMethod;
 import matcher.creator.StaticResourceEndPointCreator;
 import parameter.extractor.HttpBodyParameterInfoExtractor.HttpBodyParameterInfo;
+import parameter.matcher.ParameterType;
 import pretask.PreTaskCreator;
 import pretask.PreTaskInfo;
 import pretask.PreTaskWorker;
@@ -235,4 +239,45 @@ public class App {
             return new HttpBodyParameterInfo(required);
         };
     }
+
+    // annotation util 이 흘러나온다.
+    private static Function<Parameter, ParameterType> customParameterParameterTypeFunction() {
+        return parameter -> {
+            Class<?> parameterType = parameter.getType();
+
+            // 1. pure parameter type.
+            if (InputStream.class.isAssignableFrom(parameterType)) {
+                return ParameterType.HTTP_INPUT_STREAM;
+            }
+            if (OutputStream.class.isAssignableFrom(parameterType)) {
+                return ParameterType.HTTP_OUTPUT_STREAM;
+            }
+
+            // 2. annotation hint type.
+            if (AnnotationUtils.exist(parameter, PathVariable.class)) {
+                return ParameterType.HTTP_URL_PATH;
+            }
+            if (AnnotationUtils.exist(parameter, RequestParam.class)) {
+                return ParameterType.HTTP_QUERY_PARAM;
+            }
+            if (AnnotationUtils.exist(parameter, RequestBody.class)) {
+                return ParameterType.HTTP_BODY;
+            }
+
+            throw new RuntimeException("Does not exist possible match ParameterType.");
+        };
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

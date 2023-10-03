@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TimeZone;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -38,6 +39,7 @@ import matcher.StaticResourceEndPointTaskMatcher;
 import matcher.creator.JavaMethodPathMatcherCreator;
 import matcher.creator.RequestMappedMethod;
 import matcher.creator.StaticResourceEndPointCreator;
+import parameter.extractor.HttpBodyParameterInfoExtractor.HttpBodyParameterInfo;
 import pretask.PreTaskCreator;
 import pretask.PreTaskInfo;
 import pretask.PreTaskWorker;
@@ -195,6 +197,7 @@ public class App {
     }
 
     private static Function<Parameter, HttpUrlParameterInfo> requestParameterHttpUrlParameterInfoFunction(AnnotatedClassObjectRepository objectRepository) {
+        Objects.requireNonNull(objectRepository);
         return parameter -> {
             AnnotatedParameterProperties annotatedParameterProperties = objectRepository.extractProperties(parameter, RequestParam.class, List.of("name", "defaultValue", "required"));
             AnnotationProperties annotationProperties = annotatedParameterProperties.getAnnotationProperties();
@@ -208,6 +211,7 @@ public class App {
     }
 
     private static Function<Parameter, HttpUrlParameterInfo> pathVariableHttpUrlParameterInfoFunction(AnnotatedClassObjectRepository objectRepository) {
+        Objects.requireNonNull(objectRepository);
         return parameter -> {
             AnnotatedParameterProperties annotatedParameterProperties = objectRepository.extractProperties(parameter, PathVariable.class, List.of("name", "required"));
             AnnotationProperties annotationProperties = annotatedParameterProperties.getAnnotationProperties();
@@ -217,6 +221,18 @@ public class App {
             String defaultValue = null;
 
             return new HttpUrlParameterInfo(parameterName, defaultValue, required);
+        };
+    }
+
+    private static Function<Parameter, HttpBodyParameterInfo> requestBodyHttpUrlParameterInfoFunction(AnnotatedClassObjectRepository objectRepository) {
+        Objects.requireNonNull(objectRepository);
+        return parameter -> {
+            AnnotatedParameterProperties annotatedParameterProperties = objectRepository.extractProperties(parameter, RequestBody.class, List.of("required"));
+            AnnotationProperties annotationProperties = annotatedParameterProperties.getAnnotationProperties();
+
+            boolean required = (boolean) annotationProperties.getValue("required");
+
+            return new HttpBodyParameterInfo(required);
         };
     }
 }

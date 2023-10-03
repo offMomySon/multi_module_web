@@ -14,10 +14,12 @@ import com.main.task.executor.BaseHttpRequestProcessor;
 import com.main.util.AnnotationUtils;
 import executor.SocketHttpTaskExecutor;
 import instance.AnnotatedClassObjectRepository;
-import instance.AnnotatedClassObjectRepository.AnnotatedParameterProperties;
 import instance.AnnotatedClassObjectRepositoryCreator;
 import instance.AnnotatedMethodAndProperties;
 import instance.AnnotatedObjectAndMethodProperties;
+import instance.AnnotatedObjectAndProperties;
+import instance.AnnotatedParameterProperties;
+import instance.AnnotatedParameterInterpreter;
 import instance.AnnotationProperties;
 import instance.Annotations;
 import java.io.InputStream;
@@ -58,7 +60,6 @@ import pretask.PreTaskInfo;
 import pretask.PreTaskWorker;
 import pretask.PreTasks;
 import pretask.PreTasks.ReadOnlyPreTasks;
-import static instance.AnnotatedClassObjectRepository.AnnotatedObjectAndProperties;
 import static parameter.extractor.HttpUrlParameterInfoExtractor.HttpUrlParameterInfo;
 
 @Slf4j
@@ -101,6 +102,7 @@ public class App {
             .appendAnnotationPropertyMappers(ANNOTATION_PROPERTY_MAPPERS)
             .build();
         AnnotatedClassObjectRepository objectRepository = objectRepositoryCreator.createFromPackage(App.class, "com.main");
+        AnnotatedParameterInterpreter annotatedParameterInterpreter = new AnnotatedParameterInterpreter(ANNOTATION_PROPERTY_MAPPERS);
 
         // 2. webfilter 생성.
         List<AnnotatedObjectAndProperties> webFilerAnnotatedPreTaskWorkersWithProperties = objectRepository.findObjectAndAnnotationPropertiesByClassAndAnnotatedClass(PreTaskWorker.class,
@@ -157,22 +159,27 @@ public class App {
         EndpointTaskMatcher endpointTaskMatcher = new CompositedEndpointTaskMatcher(endpointTaskMatchers);
 
         // 5. parameter info 해석기 생성.
-        HttpBodyParameterInfoExtractor httpBodyParameterInfoExtractor = new FunctionBodyParameterInfoExtractor(requestBodyHttpUrlParameterInfoFunction(objectRepository));
-        HttpUrlParameterInfoExtractor requestParamHttpUrlParameterInfoExtractor = new FunctionHttpUrlParameterInfoExtractor(requestParameterHttpUrlParameterInfoFunction(objectRepository));
-        HttpUrlParameterInfoExtractor pathVariableHttpUrlParameterInfoExtractor = new FunctionHttpUrlParameterInfoExtractor(pathVariableHttpUrlParameterInfoFunction(objectRepository));
+        HttpBodyParameterInfoExtractor httpBodyParameterInfoExtractor = new FunctionBodyParameterInfoExtractor(requestBodyHttpUrlParameterInfoFunction(annotatedParameterInterpreter));
+        HttpUrlParameterInfoExtractor requestParamHttpUrlParameterInfoExtractor = new FunctionHttpUrlParameterInfoExtractor(requestParameterHttpUrlParameterInfoFunction(
+            annotatedParameterInterpreter));
+        HttpUrlParameterInfoExtractor pathVariableHttpUrlParameterInfoExtractor = new FunctionHttpUrlParameterInfoExtractor(pathVariableHttpUrlParameterInfoFunction(annotatedParameterInterpreter));
         ParameterTypeFinder parameterTypeFinder = new FunctionParameterTypeFinder(customParameterParameterTypeFunction());
 
         // 6. http service start.
+        BaseHttpRequestProcessor baseHttpRequestProcessor = new BaseHttpRequestProcessor(httpBodyParameterInfoExtractor,
+                                                                                         requestParamHttpUrlParameterInfoExtractor,
+                                                                                         pathVariableHttpUrlParameterInfoExtractor,
+                                                                                         parameterTypeFinder,
+                                                                                         endpointTaskMatcher,
+                                                                                         SIMPLE_DATE_FORMAT,
+                                                                                         HOST_ADDRESS);
+
+        // 7. execute service.
         SocketHttpTaskExecutor socketHttpTaskExecutor = SocketHttpTaskExecutor.create(HttpConfig.INSTANCE.getPort(),
                                                                                       HttpConfig.INSTANCE.getMaxConnection(),
                                                                                       HttpConfig.INSTANCE.getWaitConnection(),
                                                                                       HttpConfig.INSTANCE.getKeepAliveTime());
-        BaseHttpRequestProcessor baseHttpRequestProcessor = new BaseHttpRequestProcessor(httpBodyParameterInfoExtractor, requestParamHttpUrlParameterInfoExtractor,
-                                                                                         pathVariableHttpUrlParameterInfoExtractor, parameterTypeFinder, endpointTaskMatcher, SIMPLE_DATE_FORMAT,
-                                                                                         HOST_ADDRESS);
         log.info("server start.");
-
-        // 7. execute service.
         socketHttpTaskExecutor.execute(((request, response) -> {
             List<PreTaskWorker> preTaskWorkers = preTasks.findFilterWorkers(request.getHttpRequestPath().getValue().toString());
             for (PreTaskWorker preTaskWorker : preTaskWorkers) {
@@ -215,10 +222,10 @@ public class App {
         }
     }
 
-    private static Function<Parameter, HttpUrlParameterInfo> requestParameterHttpUrlParameterInfoFunction(AnnotatedClassObjectRepository objectRepository) {
-        Objects.requireNonNull(objectRepository);
+    private static Function<Parameter, HttpUrlParameterInfo> requestParameterHttpUrlParameterInfoFunction(AnnotatedParameterInterpreter annotatedParameterInterpreter) {
+        Objects.requireNonNull(annotatedParameterInterpreter);
         return parameter -> {
-            AnnotatedParameterProperties annotatedParameterProperties = objectRepository.extractProperties(parameter, RequestParam.class, List.of("name", "defaultValue", "required"));
+            AnnotatedParameterProperties annotatedParameterProperties = annotatedParameterInterpreter.interpretProperties(parameter, RequestParam.class, List.of("name", "defaultValue", "required"));
             AnnotationProperties annotationProperties = annotatedParameterProperties.getAnnotationProperties();
 
             String parameterName = (String) annotationProperties.getValueOrDefault("name", parameter.getName());
@@ -229,12 +236,12 @@ public class App {
         };
     }
 
-    private static Function<Parameter, HttpUrlParameterInfo> pathVariableHttpUrlParameterInfoFunction(AnnotatedClassObjectRepository objectRepository) {
-        Objects.requireNonNull(objectRepository);
+    private static Function<Parameter, HttpUrlParameterInfo> pathVariableHttpUrlParameterInfoFunction(AnnotatedParameterInterpreter annotatedParameterInterpreter) {
+        Objects.requireNonNull(annotatedParameterInterpreter);
         return parameter -> {
             // todo
             // parameter property 가져오는 용도의 class 생성이 필요함.
-            AnnotatedParameterProperties annotatedParameterProperties = objectRepository.extractProperties(parameter, PathVariable.class, List.of("name", "required"));
+            AnnotatedParameterProperties annotatedParameterProperties = annotatedParameterInterpreter.interpretProperties(parameter, PathVariable.class, List.of("name", "required"));
             AnnotationProperties annotationProperties = annotatedParameterProperties.getAnnotationProperties();
 
             String parameterName = (String) annotationProperties.getValueOrDefault("name", parameter.getName());
@@ -245,10 +252,10 @@ public class App {
         };
     }
 
-    private static Function<Parameter, HttpBodyParameterInfo> requestBodyHttpUrlParameterInfoFunction(AnnotatedClassObjectRepository objectRepository) {
-        Objects.requireNonNull(objectRepository);
+    private static Function<Parameter, HttpBodyParameterInfo> requestBodyHttpUrlParameterInfoFunction(AnnotatedParameterInterpreter annotatedParameterInterpreter) {
+        Objects.requireNonNull(annotatedParameterInterpreter);
         return parameter -> {
-            AnnotatedParameterProperties annotatedParameterProperties = objectRepository.extractProperties(parameter, RequestBody.class, List.of("required"));
+            AnnotatedParameterProperties annotatedParameterProperties = annotatedParameterInterpreter.interpretProperties(parameter, RequestBody.class, List.of("required"));
             AnnotationProperties annotationProperties = annotatedParameterProperties.getAnnotationProperties();
 
             boolean required = (boolean) annotationProperties.getValue("required");

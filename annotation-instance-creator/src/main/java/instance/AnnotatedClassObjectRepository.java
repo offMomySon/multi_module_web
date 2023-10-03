@@ -3,7 +3,6 @@ package instance;
 import annotation.AnnotationPropertyMappers;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -11,7 +10,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import lombok.Getter;
 import static com.main.util.AnnotationUtils.AnnotatedMethod;
 import static com.main.util.AnnotationUtils.exist;
 import static com.main.util.AnnotationUtils.find;
@@ -221,56 +219,8 @@ public class AnnotatedClassObjectRepository {
             .collect(Collectors.toUnmodifiableList());
     }
 
-    public AnnotatedParameterProperties extractProperties(Parameter parameter, Class<?> findAnnotation, List<String> _findProperties) {
-        if (Objects.isNull(parameter) || Objects.isNull(findAnnotation) || Objects.isNull(_findProperties)) {
-            throw new RuntimeException("Empty parameter.");
-        }
-        if (!findAnnotation.isAnnotation()) {
-            throw new RuntimeException("Does not annotation clazz.");
-        }
-        List<String> findProperties = _findProperties.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableList());
-        if (findProperties.isEmpty()) {
-            throw new RuntimeException("Empty parameter.");
-        }
-
-        Annotation annotation = (Annotation) find(parameter, findAnnotation).orElseThrow(() -> new RuntimeException("Does not exist find annotation."));
-        AnnotationProperties propertyValues = propertyMappers.getPropertyValues(annotation, _findProperties);
-        return new AnnotatedParameterProperties(parameter, propertyValues);
-    }
-
     private static AnnotatedObject createAnnotatedObject(Class<?> clazz, Object object, Class<?> findAnnotation) {
         Annotation annotation = (Annotation) find(clazz, findAnnotation).orElseThrow(() -> new RuntimeException("Does not exist annotation."));
         return new AnnotatedObject(object, annotation);
-    }
-
-    @Getter
-    public static class AnnotatedObjectAndProperties {
-        private final Object object;
-        private final AnnotationProperties annotationProperties;
-
-        public AnnotatedObjectAndProperties(Object object, AnnotationProperties annotationProperties) {
-            Objects.requireNonNull(object);
-            Objects.requireNonNull(annotationProperties);
-            this.object = object;
-            this.annotationProperties = annotationProperties;
-        }
-
-        public static AnnotatedObjectAndProperties emptyProperty(Object object) {
-            return new AnnotatedObjectAndProperties(object, AnnotationProperties.empty());
-        }
-    }
-
-
-    @Getter
-    public class AnnotatedParameterProperties {
-        private final Parameter parameter;
-        private final AnnotationProperties annotationProperties;
-
-        public AnnotatedParameterProperties(Parameter parameter, AnnotationProperties annotationProperties) {
-            Objects.requireNonNull(parameter);
-            Objects.requireNonNull(annotationProperties);
-            this.parameter = parameter;
-            this.annotationProperties = annotationProperties;
-        }
     }
 }

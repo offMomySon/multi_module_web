@@ -7,9 +7,9 @@ import java.lang.reflect.Parameter;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import parameter.matcher.BaseParameterValueMatcher;
+import parameter.matcher.SingleValueParameterValueMatcher;
 
-class BaseParameterValueMatcherTest {
+class SingleValueParameterValueMatcherTest {
 
     @DisplayName("parameter class 에 value 를 할당할 수 있으면 값을 반환합니다.")
     @Test
@@ -17,7 +17,7 @@ class BaseParameterValueMatcherTest {
         //given
         Parameter inputStreamParameter = TestClass.getInputStreamParameter();
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(new byte[1]);
-        BaseParameterValueMatcher<InputStream> baseParameterValueMatcher = new BaseParameterValueMatcher<>(byteArrayInputStream);
+        SingleValueParameterValueMatcher<InputStream> baseParameterValueMatcher = new SingleValueParameterValueMatcher<>(byteArrayInputStream);
 
         //when
         Throwable actual = Assertions.catchThrowable(() -> baseParameterValueMatcher.match(inputStreamParameter));
@@ -31,7 +31,7 @@ class BaseParameterValueMatcherTest {
     void ttest() throws Exception {
         //given
         Parameter inputStreamParameter = TestClass.getInputStreamParameter();
-        BaseParameterValueMatcher<Integer> baseParameterValueMatcher = new BaseParameterValueMatcher<>(1);
+        SingleValueParameterValueMatcher<Integer> baseParameterValueMatcher = new SingleValueParameterValueMatcher<>(1);
 
         //when
         Throwable actual = Assertions.catchThrowable(() -> baseParameterValueMatcher.match(inputStreamParameter));

@@ -1,9 +1,7 @@
 package com.main.task.executor;
 
 import annotation.PathVariable;
-import annotation.RequestBody;
 import annotation.RequestParam;
-import parameter.matcher.HttpBodyAnnotationAnnotatedParameterValueMatcher;
 import com.main.task.response.HttpResponseSender;
 import executor.HttpRequestProcessor;
 import java.io.InputStream;
@@ -17,12 +15,13 @@ import matcher.EndpointTaskMatcher;
 import matcher.MatchedEndPoint;
 import matcher.RequestMethod;
 import matcher.segment.PathUrl;
-import parameter.matcher.BaseParameterValueMatcher;
-import parameter.matcher.CompositeMethodParameterValueMatcher;
-import parameter.matcher.HttpUrlAnnotationAnnotatedParameterValueMatcher;
-import parameter.matcher.MethodParameterValueMatcher;
 import parameter.ParameterValueGetter;
 import parameter.RequestParameters;
+import parameter.matcher.SingleValueParameterValueMatcher;
+import parameter.matcher.CompositeMethodParameterValueMatcher;
+import parameter.matcher.HttpBodyAnnotationAnnotatedParameterValueMatcher;
+import parameter.matcher.HttpUrlAnnotationAnnotatedParameterValueMatcher;
+import parameter.matcher.MethodParameterValueMatcher;
 import response.HttpResponseHeader;
 import response.HttpResponseHeaderCreator;
 import task.HttpEndPointTask;
@@ -31,6 +30,11 @@ import vo.ContentType;
 import vo.HttpRequest;
 import vo.HttpResponse;
 import vo.QueryParameters;
+import static parameter.matcher.ParameterType.HTTP_BODY;
+import static parameter.matcher.ParameterType.HTTP_INPUT_STREAM;
+import static parameter.matcher.ParameterType.HTTP_OUTPUT_STREAM;
+import static parameter.matcher.ParameterType.HTTP_QUERY_PARAM;
+import static parameter.matcher.ParameterType.HTTP_URL_PATH;
 
 @Slf4j
 public class BaseHttpRequestProcessor implements HttpRequestProcessor {
@@ -71,10 +75,12 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
         // 하지만 코드 적으로는 끊어졌지만, 개념적으로는 연결이 되어있다. 이것을 연관관계를 끊어다고 볼 수 있을까?
         // 임시저장 브랜치 - origin/split_annotation_module_role_at_MethodParameterValueMatcher
         MethodParameterValueMatcher methodParameterValueMatcher = new CompositeMethodParameterValueMatcher(
-            Map.of(InputStream.class, new BaseParameterValueMatcher<>(request.getBodyInputStream()),
-                   RequestBody.class, new HttpBodyAnnotationAnnotatedParameterValueMatcher(request.getBodyInputStream()),
-                   PathVariable.class, new HttpUrlAnnotationAnnotatedParameterValueMatcher<>(PathVariable.class, pathVariableValue),
-                   RequestParam.class, new HttpUrlAnnotationAnnotatedParameterValueMatcher<>(RequestParam.class, queryParamValues))
+            Map.of(
+                HTTP_INPUT_STREAM, new SingleValueParameterValueMatcher<>(request.getBodyInputStream()),
+                HTTP_OUTPUT_STREAM, new SingleValueParameterValueMatcher<>(response.getOutputStream()),
+                HTTP_BODY, new HttpBodyAnnotationAnnotatedParameterValueMatcher(request.getBodyInputStream()),
+                HTTP_URL_PATH, new HttpUrlAnnotationAnnotatedParameterValueMatcher<>(PathVariable.class, pathVariableValue),
+                HTTP_QUERY_PARAM, new HttpUrlAnnotationAnnotatedParameterValueMatcher<>(RequestParam.class, queryParamValues))
         );
 
         ParameterValueGetter parameterValueGetter = new ParameterValueGetter(methodParameterValueMatcher);

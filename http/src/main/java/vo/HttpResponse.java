@@ -39,6 +39,10 @@ public class HttpResponse implements Closeable {
         this.startLine = startLine;
     }
 
+    public OutputStream getOutputStream() {
+        return outputStream;
+    }
+
     public void appendHeader(String key, String value) {
         this.header.put(key, value);
     }

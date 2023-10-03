@@ -9,9 +9,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class CompositeMethodParameterValueMatcher implements MethodParameterValueMatcher {
-    private final Map<Class<?>, MethodParameterValueMatcher> matchers;
+    private final Map<ParameterType, MethodParameterValueMatcher> matchers;
 
-    public CompositeMethodParameterValueMatcher(Map<Class<?>, MethodParameterValueMatcher> matchers) {
+    public CompositeMethodParameterValueMatcher(Map<ParameterType, MethodParameterValueMatcher> matchers) {
         Objects.requireNonNull(matchers);
 
         matchers = matchers.entrySet().stream()

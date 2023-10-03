@@ -4,12 +4,11 @@ import java.lang.reflect.Parameter;
 import java.text.MessageFormat;
 import java.util.Objects;
 import java.util.Optional;
-import parameter.matcher.MethodParameterValueMatcher;
 
-public class BaseParameterValueMatcher<T> implements MethodParameterValueMatcher {
+public class SingleValueParameterValueMatcher<T> implements MethodParameterValueMatcher {
     private final T value;
 
-    public BaseParameterValueMatcher(T value) {
+    public SingleValueParameterValueMatcher(T value) {
         Objects.requireNonNull(value);
         this.value = value;
     }

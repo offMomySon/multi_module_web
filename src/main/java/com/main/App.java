@@ -13,9 +13,11 @@ import com.main.config.HttpConfig;
 import com.main.task.executor.BaseHttpRequestProcessor;
 import executor.SocketHttpTaskExecutor;
 import instance.AnnotatedClassObjectRepository;
+import instance.AnnotatedClassObjectRepository.AnnotatedParameterProperties;
 import instance.AnnotatedClassObjectRepositoryCreator;
 import instance.Annotations;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
@@ -25,6 +27,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +47,7 @@ import static annotation.AnnotationPropertyMapper.AnnotationProperties;
 import static instance.AnnotatedClassObjectRepository.AnnotatedMethodAndProperties;
 import static instance.AnnotatedClassObjectRepository.AnnotatedObjectAndMethodProperties;
 import static instance.AnnotatedClassObjectRepository.AnnotatedObjectAndProperties;
+import static parameter.HttpUrlParameterInfoExtractor.HttpUrlParameterInfo;
 
 @Slf4j
 public class App {
@@ -188,5 +192,31 @@ public class App {
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static Function<Parameter, HttpUrlParameterInfo> requestParameterHttpUrlParameterInfoFunction(AnnotatedClassObjectRepository objectRepository) {
+        return parameter -> {
+            AnnotatedParameterProperties annotatedParameterProperties = objectRepository.extractProperties(parameter, RequestParam.class, List.of("name", "defaultValue", "required"));
+            AnnotationProperties annotationProperties = annotatedParameterProperties.getAnnotationProperties();
+
+            String parameterName = (String) annotationProperties.getValueOrDefault("name", parameter.getName());
+            String defaultValue = (String) annotationProperties.getValue("defaultValue");
+            boolean required = (boolean) annotationProperties.getValue("required");
+
+            return new HttpUrlParameterInfo(parameterName, defaultValue, required);
+        };
+    }
+
+    private static Function<Parameter, HttpUrlParameterInfo> pathVariableHttpUrlParameterInfoFunction(AnnotatedClassObjectRepository objectRepository) {
+        return parameter -> {
+            AnnotatedParameterProperties annotatedParameterProperties = objectRepository.extractProperties(parameter, PathVariable.class, List.of("name", "required"));
+            AnnotationProperties annotationProperties = annotatedParameterProperties.getAnnotationProperties();
+
+            String parameterName = (String) annotationProperties.getValueOrDefault("name", parameter.getName());
+            boolean required = (boolean) annotationProperties.getValue("required");
+            String defaultValue = null;
+
+            return new HttpUrlParameterInfo(parameterName, defaultValue, required);
+        };
     }
 }

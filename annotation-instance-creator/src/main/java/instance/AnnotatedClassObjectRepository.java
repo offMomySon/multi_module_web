@@ -3,6 +3,7 @@ package instance;
 import annotation.AnnotationPropertyMappers;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -10,7 +11,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.Getter;
 import static annotation.AnnotationPropertyMapper.AnnotationProperties;
 import static com.main.util.AnnotationUtils.AnnotatedMethod;
@@ -105,12 +105,14 @@ public class AnnotatedClassObjectRepository {
     }
 
 
-    public List<AnnotatedObjectAndMethodProperties> findAnnotatedObjectAndMethodPropertiesByClassAndAnnotatdClassAtMethodBase(List<Class<?>> findClasses, Class<?> findAnnotation, List<String> _properties) {
+    public List<AnnotatedObjectAndMethodProperties> findAnnotatedObjectAndMethodPropertiesByClassAndAnnotatdClassAtMethodBase(List<Class<?>> findClasses, Class<?> findAnnotation,
+                                                                                                                              List<String> _properties) {
         return findClasses.stream()
             .map(findClazz -> findAnnotatedObjectAndMethodPropertiesByClassAndAnnotatdClassAtMethodBase(findClazz, findAnnotation, _properties))
             .flatMap(Collection::stream)
             .collect(Collectors.toUnmodifiableList());
     }
+
     // todo [review]
     // 이름이 너무 이상한데.
     public List<AnnotatedObjectAndMethodProperties> findAnnotatedObjectAndMethodPropertiesByClassAndAnnotatdClassAtMethodBase(Class<?> findClazz, Class<?> findAnnotation, List<String> _properties) {
@@ -197,6 +199,50 @@ public class AnnotatedClassObjectRepository {
             .collect(Collectors.toUnmodifiableList());
     }
 
+    public AnnotatedParameterProperties extractProperties(Parameter parameter, Class<?> findAnnotation, List<String> _findProperties){
+        if (Objects.isNull(parameter) || Objects.isNull(findAnnotation) || Objects.isNull(_findProperties)) {
+            throw new RuntimeException("Empty parameter.");
+        }
+        if (!findAnnotation.isAnnotation()) {
+            throw new RuntimeException("Does not annotation clazz.");
+        }
+        List<String> findProperties = _findProperties.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableList());
+        if (findProperties.isEmpty()) {
+            throw new RuntimeException("Empty parameter.");
+        }
+
+        Annotation annotation = (Annotation) find(parameter, findAnnotation).orElseThrow(() -> new RuntimeException("Does not exist find annotation."));
+        AnnotationProperties propertyValues = propertyMappers.getPropertyValues(annotation, _findProperties);
+        return new AnnotatedParameterProperties(parameter, propertyValues);
+    }
+
+//    public AnnotatedParameterProperties findParameterProperties(Class<?> findClazz, Method findMethod, Parameter findParameter, Class<?> findAnnotation, List<String> _findProperties) {
+//        if (Objects.isNull(findClazz) || Objects.isNull(findMethod) || Objects.isNull(findParameter) || Objects.isNull(_findProperties)) {
+//            throw new RuntimeException("Empty parameter.");
+//        }
+//        if (!findAnnotation.isAnnotation()) {
+//            throw new RuntimeException("Does not annotation clazz.");
+//        }
+//        List<String> findProperties = _findProperties.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableList());
+//        if (findProperties.isEmpty()) {
+//            throw new RuntimeException("Empty parameter.");
+//        }
+//        if (!values.containsKey(findClazz)) {
+//            throw new RuntimeException("Does not exist clazz.");
+//        }
+//
+//        Method matchedMethod = Arrays.stream(findClazz.getMethods())
+//            .filter(method -> method == findMethod)
+//            .findFirst()
+//            .orElseThrow(() -> new RuntimeException("Does not exist method."));
+//
+//        Arrays.stream(matchedMethod.getParameters())
+//
+//
+//
+//        return null;
+//    }
+
     private static AnnotatedObject createAnnotatedObject(Class<?> clazz, Object object, Class<?> findAnnotation) {
         Annotation annotation = (Annotation) find(clazz, findAnnotation).orElseThrow(() -> new RuntimeException("Does not exist annotation."));
         return new AnnotatedObject(object, annotation);
@@ -254,6 +300,19 @@ public class AnnotatedClassObjectRepository {
             Objects.requireNonNull(javaMethod);
             Objects.requireNonNull(annotationProperties);
             this.javaMethod = javaMethod;
+            this.annotationProperties = annotationProperties;
+        }
+    }
+
+    @Getter
+    public class AnnotatedParameterProperties {
+        private final Parameter parameter;
+        private final AnnotationProperties annotationProperties;
+
+        public AnnotatedParameterProperties(Parameter parameter, AnnotationProperties annotationProperties) {
+            Objects.requireNonNull(parameter);
+            Objects.requireNonNull(annotationProperties);
+            this.parameter = parameter;
             this.annotationProperties = annotationProperties;
         }
     }

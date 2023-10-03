@@ -14,8 +14,8 @@ import parameter.RequestParameters;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import parameter.HttpUrlAnnotationAnnotatedParameterValueMatcher;
-import static parameter.HttpUrlAnnotationAnnotatedParameterValueMatcher.HttpUrlAnnotation;
+import parameter.matcher.HttpUrlAnnotationAnnotatedParameterValueMatcher;
+import static parameter.matcher.HttpUrlAnnotationAnnotatedParameterValueMatcher.HttpUrlAnnotation;
 
 class HttpUrlParameterInfoAnnotatedAssignParameterValueMatcherTest {
 

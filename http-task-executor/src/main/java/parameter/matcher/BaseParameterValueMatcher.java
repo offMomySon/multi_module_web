@@ -1,10 +1,10 @@
-package parameter;
+package parameter.matcher;
 
 import java.lang.reflect.Parameter;
 import java.text.MessageFormat;
 import java.util.Objects;
 import java.util.Optional;
-import parameter.MethodParameterValueMatcher;
+import parameter.matcher.MethodParameterValueMatcher;
 
 public class BaseParameterValueMatcher<T> implements MethodParameterValueMatcher {
     private final T value;

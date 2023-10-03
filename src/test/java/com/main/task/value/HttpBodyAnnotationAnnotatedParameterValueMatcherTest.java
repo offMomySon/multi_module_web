@@ -9,7 +9,7 @@ import annotation.RequestBody;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import com.main.task.matcher.HttpBodyAnnotationAnnotatedParameterValueMatcher;
+import parameter.matcher.HttpBodyAnnotationAnnotatedParameterValueMatcher;
 
 class HttpBodyAnnotationAnnotatedParameterValueMatcherTest {
 

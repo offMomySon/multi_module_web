@@ -123,9 +123,9 @@ public class App {
 
         // 3. java http endpoint task 생성.
         List<Class<?>> controllerAnnotatedClasses = objectRepository.findClassByAnnotatedClass(Controller.class);
-        List<AnnotatedObjectAndMethodProperties> requestMappedProperties = objectRepository.findAnnotatedObjectAndMethodPropertiesByClassAndAnnotatdClassAtMethodBase(controllerAnnotatedClasses,
-                                                                                                                                                                      RequestMapping.class,
-                                                                                                                                                                      List.of("url", "httpMethod"));
+        List<AnnotatedObjectAndMethodProperties> requestMappedProperties = objectRepository.findAnnotatedObjectAndMethodPropertiesByClassAndAnnotatedClassFocusOnMethod(controllerAnnotatedClasses,
+                                                                                                                                                                        RequestMapping.class,
+                                                                                                                                                                        List.of("url", "httpMethod"));
 
         List<RequestMappedMethod> requestMappedMethods = requestMappedProperties.stream()
             .map(requestMappedProperty -> {

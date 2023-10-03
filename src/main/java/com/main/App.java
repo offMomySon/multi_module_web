@@ -47,7 +47,7 @@ import static annotation.AnnotationPropertyMapper.AnnotationProperties;
 import static instance.AnnotatedClassObjectRepository.AnnotatedMethodAndProperties;
 import static instance.AnnotatedClassObjectRepository.AnnotatedObjectAndMethodProperties;
 import static instance.AnnotatedClassObjectRepository.AnnotatedObjectAndProperties;
-import static parameter.HttpUrlParameterInfoExtractor.HttpUrlParameterInfo;
+import static parameter.extractor.HttpUrlParameterInfoExtractor.HttpUrlParameterInfo;
 
 @Slf4j
 public class App {

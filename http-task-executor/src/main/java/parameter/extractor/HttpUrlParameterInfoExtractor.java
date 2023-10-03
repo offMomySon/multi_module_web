@@ -1,4 +1,4 @@
-package parameter;
+package parameter.extractor;
 
 import java.lang.reflect.Parameter;
 import java.util.Objects;

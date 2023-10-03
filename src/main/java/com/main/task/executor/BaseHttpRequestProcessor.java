@@ -1,7 +1,5 @@
 package com.main.task.executor;
 
-import annotation.PathVariable;
-import annotation.RequestParam;
 import com.main.task.response.HttpResponseSender;
 import executor.HttpRequestProcessor;
 import java.io.InputStream;
@@ -17,11 +15,14 @@ import matcher.RequestMethod;
 import matcher.segment.PathUrl;
 import parameter.ParameterValueGetter;
 import parameter.UrlParameters;
-import parameter.matcher.SingleValueParameterValueMatcher;
+import parameter.extractor.HttpBodyParameterInfoExtractor;
+import parameter.extractor.HttpUrlParameterInfoExtractor;
 import parameter.matcher.CompositeMethodParameterValueMatcher;
-import parameter.matcher.HttpBodyAnnotationAnnotatedParameterValueMatcher;
-import parameter.matcher.HttpUrlAnnotationAnnotatedParameterValueMatcher;
+import parameter.matcher.HttpBodyParameterValueMatcher;
+import parameter.matcher.HttpUrlParameterValueMatcher;
 import parameter.matcher.MethodParameterValueMatcher;
+import parameter.matcher.ParameterTypeFinder;
+import parameter.matcher.SingleValueParameterValueMatcher;
 import response.HttpResponseHeader;
 import response.HttpResponseHeaderCreator;
 import task.HttpEndPointTask;
@@ -38,15 +39,31 @@ import static parameter.matcher.ParameterType.HTTP_URL;
 
 @Slf4j
 public class BaseHttpRequestProcessor implements HttpRequestProcessor {
-
+    private final HttpBodyParameterInfoExtractor httpBodyParameterInfoExtractor;
+    private final HttpUrlParameterInfoExtractor requestParamHttpUrlParameterInfoExtractor;
+    private final HttpUrlParameterInfoExtractor pathVariableParameterInfoExtractor;
+    private final ParameterTypeFinder parameterTypeFinder;
     private final EndpointTaskMatcher endpointTaskMatcher;
     private final SimpleDateFormat simpleDateFormat;
     private final String hostAddress;
 
-    public BaseHttpRequestProcessor(EndpointTaskMatcher endpointTaskMatcher, SimpleDateFormat simpleDateFormat, String hostAddress) {
+    public BaseHttpRequestProcessor(HttpBodyParameterInfoExtractor httpBodyParameterInfoExtractor,
+                                    HttpUrlParameterInfoExtractor requestParamHttpUrlParameterInfoExtractor,
+                                    HttpUrlParameterInfoExtractor pathVariableParameterInfoExtractor,
+                                    ParameterTypeFinder parameterTypeFinder,
+                                    EndpointTaskMatcher endpointTaskMatcher,
+                                    SimpleDateFormat simpleDateFormat,
+                                    String hostAddress) {
+        Objects.requireNonNull(parameterTypeFinder);
+        Objects.requireNonNull(httpBodyParameterInfoExtractor);
+        Objects.requireNonNull(pathVariableParameterInfoExtractor);
         Objects.requireNonNull(endpointTaskMatcher);
         Objects.requireNonNull(simpleDateFormat);
         Objects.requireNonNull(hostAddress);
+        this.httpBodyParameterInfoExtractor = httpBodyParameterInfoExtractor;
+        this.requestParamHttpUrlParameterInfoExtractor = requestParamHttpUrlParameterInfoExtractor;
+        this.pathVariableParameterInfoExtractor = pathVariableParameterInfoExtractor;
+        this.parameterTypeFinder = parameterTypeFinder;
         this.endpointTaskMatcher = endpointTaskMatcher;
         this.simpleDateFormat = simpleDateFormat;
         this.hostAddress = hostAddress;
@@ -75,13 +92,12 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
         // 하지만 코드 적으로는 끊어졌지만, 개념적으로는 연결이 되어있다. 이것을 연관관계를 끊어다고 볼 수 있을까?
         // 임시저장 브랜치 - origin/split_annotation_module_role_at_MethodParameterValueMatcher
         MethodParameterValueMatcher methodParameterValueMatcher = new CompositeMethodParameterValueMatcher(
-            Map.of(
-                HTTP_INPUT_STREAM, new SingleValueParameterValueMatcher<>(request.getBodyInputStream()),
-                HTTP_OUTPUT_STREAM, new SingleValueParameterValueMatcher<>(response.getOutputStream()),
-                HTTP_BODY, new HttpBodyAnnotationAnnotatedParameterValueMatcher(request.getBodyInputStream()),
-                HTTP_URL, new HttpUrlAnnotationAnnotatedParameterValueMatcher<>(PathVariable.class, pathVariableValue),
-                HTTP_QUERY_PARAM, new HttpUrlAnnotationAnnotatedParameterValueMatcher<>(RequestParam.class, queryParamValues))
-        );
+            parameterTypeFinder,
+            Map.of(HTTP_INPUT_STREAM, new SingleValueParameterValueMatcher<>(request.getBodyInputStream()),
+                   HTTP_OUTPUT_STREAM, new SingleValueParameterValueMatcher<>(response.getOutputStream()),
+                   HTTP_BODY, new HttpBodyParameterValueMatcher(httpBodyParameterInfoExtractor, request.getBodyInputStream()),
+                   HTTP_URL, new HttpUrlParameterValueMatcher(pathVariableParameterInfoExtractor, pathVariableValue),
+                   HTTP_QUERY_PARAM, new HttpUrlParameterValueMatcher(requestParamHttpUrlParameterInfoExtractor, queryParamValues)));
 
         ParameterValueGetter parameterValueGetter = new ParameterValueGetter(methodParameterValueMatcher);
         Object[] parameterValues = Arrays.stream(httpEndPointTask.getExecuteParameters())

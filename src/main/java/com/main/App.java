@@ -42,8 +42,14 @@ import matcher.StaticResourceEndPointTaskMatcher;
 import matcher.creator.JavaMethodPathMatcherCreator;
 import matcher.creator.RequestMappedMethod;
 import matcher.creator.StaticResourceEndPointCreator;
+import parameter.extractor.FunctionBodyParameterInfoExtractor;
+import parameter.extractor.FunctionHttpUrlParameterInfoExtractor;
+import parameter.extractor.HttpBodyParameterInfoExtractor;
 import parameter.extractor.HttpBodyParameterInfoExtractor.HttpBodyParameterInfo;
+import parameter.extractor.HttpUrlParameterInfoExtractor;
+import parameter.matcher.FunctionParameterTypeFinder;
 import parameter.matcher.ParameterType;
+import parameter.matcher.ParameterTypeFinder;
 import pretask.PreTaskCreator;
 import pretask.PreTaskInfo;
 import pretask.PreTaskWorker;
@@ -150,14 +156,21 @@ public class App {
         List<EndpointTaskMatcher> endpointTaskMatchers = Stream.concat(javaMethodEndpointTaskMatchers.stream(), staticResourceEndPointTaskMatchers.stream()).collect(Collectors.toUnmodifiableList());
         EndpointTaskMatcher endpointTaskMatcher = new CompositedEndpointTaskMatcher(endpointTaskMatchers);
 
-        // 5. http service start.
+        // 5. parameter info 해석기 생성.
+        HttpBodyParameterInfoExtractor httpBodyParameterInfoExtractor = new FunctionBodyParameterInfoExtractor(requestBodyHttpUrlParameterInfoFunction(objectRepository));
+        HttpUrlParameterInfoExtractor requestParamHttpUrlParameterInfoExtractor = new FunctionHttpUrlParameterInfoExtractor(requestParameterHttpUrlParameterInfoFunction(objectRepository));
+        HttpUrlParameterInfoExtractor pathVariableHttpUrlParameterInfoExtractor = new FunctionHttpUrlParameterInfoExtractor(pathVariableHttpUrlParameterInfoFunction(objectRepository));
+        ParameterTypeFinder parameterTypeFinder = new FunctionParameterTypeFinder(customParameterParameterTypeFunction());
+
+        // 6. http service start.
         SocketHttpTaskExecutor socketHttpTaskExecutor = SocketHttpTaskExecutor.create(HttpConfig.INSTANCE.getPort(),
                                                                                       HttpConfig.INSTANCE.getMaxConnection(),
                                                                                       HttpConfig.INSTANCE.getWaitConnection(),
                                                                                       HttpConfig.INSTANCE.getKeepAliveTime());
-        BaseHttpRequestProcessor baseHttpRequestProcessor = new BaseHttpRequestProcessor(endpointTaskMatcher, SIMPLE_DATE_FORMAT, HOST_ADDRESS);
+        BaseHttpRequestProcessor baseHttpRequestProcessor = new BaseHttpRequestProcessor(httpBodyParameterInfoExtractor, requestParamHttpUrlParameterInfoExtractor, pathVariableHttpUrlParameterInfoExtractor , parameterTypeFinder, endpointTaskMatcher, SIMPLE_DATE_FORMAT, HOST_ADDRESS);
         log.info("server start.");
-        // 구조화 필요.
+
+        // 7. execute service.
         socketHttpTaskExecutor.execute(((request, response) -> {
             List<PreTaskWorker> preTaskWorkers = preTasks.findFilterWorkers(request.getHttpRequestPath().getValue().toString());
             for (PreTaskWorker preTaskWorker : preTaskWorkers) {
@@ -217,6 +230,8 @@ public class App {
     private static Function<Parameter, HttpUrlParameterInfo> pathVariableHttpUrlParameterInfoFunction(AnnotatedClassObjectRepository objectRepository) {
         Objects.requireNonNull(objectRepository);
         return parameter -> {
+            // todo
+            // parameter property 가져오는 용도의 class 생성이 필요함.
             AnnotatedParameterProperties annotatedParameterProperties = objectRepository.extractProperties(parameter, PathVariable.class, List.of("name", "required"));
             AnnotationProperties annotationProperties = annotatedParameterProperties.getAnnotationProperties();
 

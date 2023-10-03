@@ -16,6 +16,9 @@ import executor.SocketHttpTaskExecutor;
 import instance.AnnotatedClassObjectRepository;
 import instance.AnnotatedClassObjectRepository.AnnotatedParameterProperties;
 import instance.AnnotatedClassObjectRepositoryCreator;
+import instance.AnnotatedMethodAndProperties;
+import instance.AnnotatedObjectAndMethodProperties;
+import instance.AnnotationProperties;
 import instance.Annotations;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -55,9 +58,6 @@ import pretask.PreTaskInfo;
 import pretask.PreTaskWorker;
 import pretask.PreTasks;
 import pretask.PreTasks.ReadOnlyPreTasks;
-import static annotation.AnnotationPropertyMapper.AnnotationProperties;
-import static instance.AnnotatedClassObjectRepository.AnnotatedMethodAndProperties;
-import static instance.AnnotatedClassObjectRepository.AnnotatedObjectAndMethodProperties;
 import static instance.AnnotatedClassObjectRepository.AnnotatedObjectAndProperties;
 import static parameter.extractor.HttpUrlParameterInfoExtractor.HttpUrlParameterInfo;
 
@@ -167,7 +167,9 @@ public class App {
                                                                                       HttpConfig.INSTANCE.getMaxConnection(),
                                                                                       HttpConfig.INSTANCE.getWaitConnection(),
                                                                                       HttpConfig.INSTANCE.getKeepAliveTime());
-        BaseHttpRequestProcessor baseHttpRequestProcessor = new BaseHttpRequestProcessor(httpBodyParameterInfoExtractor, requestParamHttpUrlParameterInfoExtractor, pathVariableHttpUrlParameterInfoExtractor , parameterTypeFinder, endpointTaskMatcher, SIMPLE_DATE_FORMAT, HOST_ADDRESS);
+        BaseHttpRequestProcessor baseHttpRequestProcessor = new BaseHttpRequestProcessor(httpBodyParameterInfoExtractor, requestParamHttpUrlParameterInfoExtractor,
+                                                                                         pathVariableHttpUrlParameterInfoExtractor, parameterTypeFinder, endpointTaskMatcher, SIMPLE_DATE_FORMAT,
+                                                                                         HOST_ADDRESS);
         log.info("server start.");
 
         // 7. execute service.

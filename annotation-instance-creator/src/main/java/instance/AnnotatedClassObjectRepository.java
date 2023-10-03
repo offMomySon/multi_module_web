@@ -12,7 +12,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.Getter;
-import static annotation.AnnotationPropertyMapper.AnnotationProperties;
 import static com.main.util.AnnotationUtils.AnnotatedMethod;
 import static com.main.util.AnnotationUtils.exist;
 import static com.main.util.AnnotationUtils.find;
@@ -222,7 +221,7 @@ public class AnnotatedClassObjectRepository {
             .collect(Collectors.toUnmodifiableList());
     }
 
-    public AnnotatedParameterProperties extractProperties(Parameter parameter, Class<?> findAnnotation, List<String> _findProperties){
+    public AnnotatedParameterProperties extractProperties(Parameter parameter, Class<?> findAnnotation, List<String> _findProperties) {
         if (Objects.isNull(parameter) || Objects.isNull(findAnnotation) || Objects.isNull(_findProperties)) {
             throw new RuntimeException("Empty parameter.");
         }
@@ -238,36 +237,10 @@ public class AnnotatedClassObjectRepository {
         AnnotationProperties propertyValues = propertyMappers.getPropertyValues(annotation, _findProperties);
         return new AnnotatedParameterProperties(parameter, propertyValues);
     }
-    
+
     private static AnnotatedObject createAnnotatedObject(Class<?> clazz, Object object, Class<?> findAnnotation) {
         Annotation annotation = (Annotation) find(clazz, findAnnotation).orElseThrow(() -> new RuntimeException("Does not exist annotation."));
         return new AnnotatedObject(object, annotation);
-    }
-
-    @Getter
-    public static class AnnotatedObjectAndMethodProperties {
-        private final AnnotatedObjectAndProperties annotatedObjectAndProperties;
-        private final AnnotatedMethodAndProperties annotatedMethodAndProperties;
-
-        public AnnotatedObjectAndMethodProperties(AnnotatedObjectAndProperties annotatedObjectAndProperties, AnnotatedMethodAndProperties annotatedMethodAndProperties) {
-            Objects.requireNonNull(annotatedObjectAndProperties);
-            Objects.requireNonNull(annotatedMethodAndProperties);
-            this.annotatedObjectAndProperties = annotatedObjectAndProperties;
-            this.annotatedMethodAndProperties = annotatedMethodAndProperties;
-        }
-    }
-
-    @Getter
-    public static class AnnotatedObject {
-        private final Object object;
-        private final Annotation annotation;
-
-        public AnnotatedObject(Object object, Annotation annotation) {
-            Objects.requireNonNull(object);
-            Objects.requireNonNull(annotation);
-            this.object = object;
-            this.annotation = annotation;
-        }
     }
 
     @Getter
@@ -287,18 +260,6 @@ public class AnnotatedClassObjectRepository {
         }
     }
 
-    @Getter
-    public static class AnnotatedMethodAndProperties {
-        private final Method javaMethod;
-        private final AnnotationProperties annotationProperties;
-
-        public AnnotatedMethodAndProperties(Method javaMethod, AnnotationProperties annotationProperties) {
-            Objects.requireNonNull(javaMethod);
-            Objects.requireNonNull(annotationProperties);
-            this.javaMethod = javaMethod;
-            this.annotationProperties = annotationProperties;
-        }
-    }
 
     @Getter
     public class AnnotatedParameterProperties {

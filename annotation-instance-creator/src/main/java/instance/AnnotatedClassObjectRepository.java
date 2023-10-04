@@ -2,33 +2,25 @@ package instance;
 
 import annotation.AnnotationPropertyMappers;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
-import static com.main.util.AnnotationUtils.AnnotatedMethod;
 import static com.main.util.AnnotationUtils.exist;
 import static com.main.util.AnnotationUtils.find;
-import static com.main.util.AnnotationUtils.peekAnnotatedMethods;
 import static instance.ObjectGraph.ReadOnlyObjectGraph;
 
 public class AnnotatedClassObjectRepository {
-    private final AnnotationPropertyMappers propertyMappers;
+    private final AnnotationPropertyGetter annotationPropertyGetter;
     private final Map<Class<?>, Object> values;
 
-    public AnnotatedClassObjectRepository(AnnotationPropertyMappers propertyMappers, Map<Class<?>, Object> values) {
-        if (Objects.isNull(propertyMappers)) {
-            propertyMappers = AnnotationPropertyMappers.empty();
-        }
+    public AnnotatedClassObjectRepository(AnnotationPropertyGetter annotationPropertyGetter, Map<Class<?>, Object> values) {
         if (Objects.isNull(values)) {
-            values = Collections.emptyMap();
+            throw new RuntimeException("Invalid parameter. Empty param.");
         }
-
-        this.propertyMappers = propertyMappers;
+        this.annotationPropertyGetter = annotationPropertyGetter;
         this.values = values.entrySet().stream()
             .filter(entry -> !Objects.isNull(entry.getKey()))
             .filter(entry -> !Objects.isNull(entry.getValue()))
@@ -40,40 +32,20 @@ public class AnnotatedClassObjectRepository {
         return clazz.getDeclaredAnnotations().length != 0;
     }
 
-    public static AnnotatedClassObjectRepository emtpy() {
-        return new AnnotatedClassObjectRepository(AnnotationPropertyMappers.empty(), Collections.emptyMap());
-    }
-
-    public static AnnotatedClassObjectRepository from(AnnotationPropertyMappers propertyMappers, ReadOnlyObjectGraph objectGraph) {
-        if (Objects.isNull(propertyMappers)) {
-            propertyMappers = AnnotationPropertyMappers.empty();
-        }
-        if (Objects.isNull(objectGraph)) {
-            objectGraph = ReadOnlyObjectGraph.empty();
+    public static AnnotatedClassObjectRepository from(AnnotationPropertyGetter annotationPropertyGetter, ReadOnlyObjectGraph objectGraph) {
+        if (Objects.isNull(objectGraph) || Objects.isNull(annotationPropertyGetter)) {
+            throw new RuntimeException("Invalid param. Param is empty.");
         }
 
-        Map<Class<?>, Object> rawObjectGraph = objectGraph.copyValues();
-        return new AnnotatedClassObjectRepository(propertyMappers, rawObjectGraph);
-    }
-
-    public <T> List<T> findObjectByClazz(Class<T> findClazz) {
-        if (Objects.isNull(findClazz)) {
-            return Collections.emptyList();
-        }
-
-        return values.entrySet().stream()
-            .filter(entry -> findClazz.isAssignableFrom(entry.getKey()))
-            .map(entry -> (T) entry.getValue())
-            .collect(Collectors.toUnmodifiableList());
+        Map<Class<?>, Object> objectGraphValues = objectGraph.copyValues();
+        return new AnnotatedClassObjectRepository(annotationPropertyGetter, objectGraphValues);
     }
 
     private List<Map.Entry<Class<?>, Object>> findEntryByAnnotatedClass(Class<?> findAnnotation) {
         if (Objects.isNull(findAnnotation)) {
             throw new RuntimeException("Empty parameter.");
         }
-        if (!findAnnotation.isAnnotation()) {
-            throw new RuntimeException("Does not annotation clazz.");
-        }
+        checkAnnotationClazz(findAnnotation);
 
         return values.entrySet().stream()
             .filter(entry -> exist(entry.getKey(), findAnnotation))
@@ -87,23 +59,7 @@ public class AnnotatedClassObjectRepository {
             .collect(Collectors.toUnmodifiableList());
     }
 
-    public List<Object> findObjectByAnnotatedClass(Class<?> findAnnotation) {
-        List<Map.Entry<Class<?>, Object>> foundEntry = findEntryByAnnotatedClass(findAnnotation);
-        return foundEntry.stream()
-            .map(Map.Entry::getValue)
-            .collect(Collectors.toUnmodifiableList());
-    }
-
-    public List<AnnotatedObject> findAnnotatedObjectByAnnotatedClass(Class<?> findAnnotation) {
-        List<Map.Entry<Class<?>, Object>> foundEntry = findEntryByAnnotatedClass(findAnnotation);
-        return foundEntry.stream()
-            .map(entry -> createAnnotatedObject(entry.getKey(), entry.getValue(), findAnnotation))
-            .collect(Collectors.toUnmodifiableList());
-    }
-
-
-    public List<AnnotatedObjectAndMethodProperties> findAnnotatedObjectAndMethodPropertiesByClassAndAnnotatedClassFocusOnMethod(List<Class<?>> findClasses, Class<?> findAnnotation,
-                                                                                                                                List<String> _properties) {
+    public List<AnnotatedObjectAndMethodProperties> findAnnotatedObjectAndMethodPropertiesByClassAndAnnotatedClassFocusOnMethod(List<Class<?>> findClasses, Class<?> findAnnotation, List<String> _properties) {
         return findClasses.stream()
             .map(findClazz -> findAnnotatedObjectAndMethodPropertiesByClassAndAnnotatedClassFocusOnMethod(findClazz, findAnnotation, _properties))
             .flatMap(Collection::stream)
@@ -139,54 +95,30 @@ public class AnnotatedClassObjectRepository {
         if (Objects.isNull(findClazz) || Objects.isNull(findAnnotation) || Objects.isNull(_properties)) {
             throw new RuntimeException("Empty parameter.");
         }
-        if (!findAnnotation.isAnnotation()) {
-            throw new RuntimeException("Does not annotation clazz.");
-        }
-        List<String> properties = _properties.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableList());
-        if (properties.isEmpty()) {
-            throw new RuntimeException("Empty parameter.");
-        }
+        checkAnnotationClazz(findAnnotation);
+        List<String> properties = excludeNull(_properties);
+        checkEmpty(properties);
 
         if (!values.containsKey(findClazz)) {
             return Collections.emptyList();
         }
 
         Object foundObject = values.get(findClazz);
-        Optional<Annotation> optionalAnnotation = (Optional<Annotation>) find(findClazz, findAnnotation);
-        List<AnnotatedMethod> annotatedMethods = peekAnnotatedMethods(findClazz, findAnnotation);
 
-        AnnotatedObjectAndProperties objectAndProperties = createAnnotatedObjectAndProperties(foundObject, optionalAnnotation, properties);
-        List<AnnotatedMethodAndProperties> annotatedMethodAndProperties = annotatedMethods.stream()
-            .map(annotatedMethod -> {
-                Annotation annotation = annotatedMethod.getAnnotation();
-                Method method = annotatedMethod.getMethod();
-                AnnotationProperties propertyValues = propertyMappers.getPropertyValues(annotation, properties);
-                return new AnnotatedMethodAndProperties(method, propertyValues);
-            })
-            .collect(Collectors.toUnmodifiableList());
+        AnnotationProperties annotatedProperties = annotationPropertyGetter.getAnnotationProperties(findClazz, findAnnotation, properties);
+        AnnotatedObjectProperties objectAndProperties = new AnnotatedObjectProperties(foundObject, annotatedProperties);
 
-        return annotatedMethodAndProperties.stream()
+        List<AnnotatedMethodProperties> annotationPropertiesMethodOfClazz = annotationPropertyGetter.getAnnotationPropertiesMethodOfClazz(findClazz, findAnnotation, properties);
+        return annotationPropertiesMethodOfClazz.stream()
             .map(annotatedMethodAndProperty -> new AnnotatedObjectAndMethodProperties(objectAndProperties, annotatedMethodAndProperty))
             .collect(Collectors.toUnmodifiableList());
-    }
-
-    private AnnotatedObjectAndProperties createAnnotatedObjectAndProperties(Object foundObject, Optional<Annotation> optionalAnnotation, List<String> properties) {
-        if (optionalAnnotation.isEmpty()) {
-            return AnnotatedObjectAndProperties.emptyProperty(foundObject);
-        }
-
-        Annotation annotation = optionalAnnotation.get();
-        AnnotationProperties propertyValues = propertyMappers.getPropertyValues(annotation, properties);
-        return new AnnotatedObjectAndProperties(foundObject, propertyValues);
     }
 
     public List<AnnotatedObject> findAnnotatedObjectByClassAndAnnotatedClass(Class<?> findClazz, Class<?> findAnnotation) {
         if (Objects.isNull(findClazz) || Objects.isNull(findAnnotation)) {
             throw new RuntimeException("Empty parameter.");
         }
-        if (!findAnnotation.isAnnotation()) {
-            throw new RuntimeException("Does not annotation clazz.");
-        }
+        checkAnnotationClazz(findAnnotation);
 
         return values.entrySet().stream()
             .filter(entry -> findClazz.isAssignableFrom(entry.getKey()))
@@ -195,26 +127,20 @@ public class AnnotatedClassObjectRepository {
             .collect(Collectors.toUnmodifiableList());
     }
 
-    public List<AnnotatedObjectAndProperties> findObjectAndAnnotationPropertiesByClassAndAnnotatedClass(Class<?> findClazz, Class<?> findAnnotation, List<String> _properties) {
+    public List<AnnotatedObjectProperties> findObjectAndAnnotationPropertiesByClassAndAnnotatedClass(Class<?> findClazz, Class<?> findAnnotation, List<String> _properties) {
         if (Objects.isNull(findClazz) || Objects.isNull(findAnnotation) || Objects.isNull(_properties)) {
             throw new RuntimeException("Empty parameter.");
         }
-        if (!findAnnotation.isAnnotation()) {
-            throw new RuntimeException("Does not annotation clazz.");
-        }
-        List<String> properties = _properties.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableList());
-        if (properties.isEmpty()) {
-            throw new RuntimeException("Empty parameter.");
-        }
+        checkAnnotationClazz(findAnnotation);
+        List<String> properties = excludeNull(_properties);
+        checkEmpty(properties);
 
         List<AnnotatedObject> foundAnnotatedObject = findAnnotatedObjectByClassAndAnnotatedClass(findClazz, findAnnotation);
         return foundAnnotatedObject.stream()
             .map(annotatedObject -> {
                 Object object = annotatedObject.getObject();
-                Annotation annotation = annotatedObject.getAnnotation();
-
-                AnnotationProperties annotationProperties = propertyMappers.getPropertyValues(annotation, _properties);
-                return new AnnotatedObjectAndProperties(object, annotationProperties);
+                AnnotationProperties annotationProperties = annotationPropertyGetter.getAnnotationProperties(object, findAnnotation, properties);
+                return new AnnotatedObjectProperties(object, annotationProperties);
             })
             .collect(Collectors.toUnmodifiableList());
     }
@@ -222,5 +148,23 @@ public class AnnotatedClassObjectRepository {
     private static AnnotatedObject createAnnotatedObject(Class<?> clazz, Object object, Class<?> findAnnotation) {
         Annotation annotation = (Annotation) find(clazz, findAnnotation).orElseThrow(() -> new RuntimeException("Does not exist annotation."));
         return new AnnotatedObject(object, annotation);
+    }
+
+    private static List<String> excludeNull(List<String> properties) {
+        return properties.stream()
+            .filter(Objects::nonNull)
+            .collect(Collectors.toUnmodifiableList());
+    }
+
+    private static void checkAnnotationClazz(Class<?> findAnnotation) {
+        if (!findAnnotation.isAnnotation()) {
+            throw new RuntimeException("Does not annotation clazz.");
+        }
+    }
+
+    private static void checkEmpty(List<String> properties) {
+        if (properties.isEmpty()) {
+            throw new RuntimeException("Empty parameter.");
+        }
     }
 }

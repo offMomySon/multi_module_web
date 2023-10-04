@@ -15,7 +15,7 @@ import parameter.UrlParameters;
 // parameter 에 RequestParam, PathVariable 어노테이션이 존재하는지 검증한다.
 // 해당 어노테이팅이 필요한지 체크하고
 // 필요하다면 annotation 모듈의 역할로 처리가 가능하게 수정하자.
-public class HttpUrlAnnotationAnnotatedParameterValueMatcher<T> implements MethodParameterValueMatcher {
+public class HttpUrlAnnotationAnnotatedParameterValueMatcher<T> implements ParameterValueMatcher {
     private static final String EMPTY_VALUE = null;
     private static final Set<Class<?>> HTTP_URL_ANNOTATION_CLASSES = Set.of(RequestParam.class, PathVariable.class);
 

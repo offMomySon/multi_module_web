@@ -7,7 +7,7 @@ import parameter.UrlParameters;
 import parameter.extractor.HttpUrlParameterInfoExtractor;
 import static parameter.extractor.HttpUrlParameterInfoExtractor.HttpUrlParameterInfo;
 
-public class HttpUrlParameterValueMatcher implements MethodParameterValueMatcher {
+public class HttpUrlParameterValueMatcher implements ParameterValueMatcher {
     private final HttpUrlParameterInfoExtractor parameterInfoExtractor;
     private final UrlParameters urlParameters;
 

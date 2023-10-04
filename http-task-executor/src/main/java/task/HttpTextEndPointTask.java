@@ -3,9 +3,9 @@ package task;
 import com.main.util.IoUtils;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
-import java.lang.reflect.Parameter;
 import java.util.Objects;
 import java.util.Optional;
+import parameter.matcher.ParameterAndValueMatcherType;
 import task.endpoint.EndPointTask;
 import vo.ContentType;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -21,8 +21,8 @@ public class HttpTextEndPointTask implements HttpEndPointTask{
     }
 
     @Override
-    public Parameter[] getExecuteParameters() {
-        return endPointTask.getExecuteParameters();
+    public ParameterAndValueMatcherType[] getParameterTypeInfos() {
+        return endPointTask.getParameterTypeInfos();
     }
 
     @Override

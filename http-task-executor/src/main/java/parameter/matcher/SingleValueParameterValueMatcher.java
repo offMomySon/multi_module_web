@@ -5,7 +5,7 @@ import java.text.MessageFormat;
 import java.util.Objects;
 import java.util.Optional;
 
-public class SingleValueParameterValueMatcher<T> implements MethodParameterValueMatcher {
+public class SingleValueParameterValueMatcher<T> implements ParameterValueMatcher {
     private final T value;
 
     public SingleValueParameterValueMatcher(T value) {

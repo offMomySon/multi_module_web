@@ -15,12 +15,11 @@ import com.main.util.AnnotationUtils;
 import executor.SocketHttpTaskExecutor;
 import instance.AnnotatedClassObjectRepository;
 import instance.AnnotatedClassObjectRepositoryCreator;
-import instance.AnnotatedMethodAndProperties;
+import instance.AnnotatedMethodProperties;
 import instance.AnnotatedObjectAndMethodProperties;
-import instance.AnnotatedObjectAndProperties;
-import instance.AnnotatedParameterProperties;
-import instance.AnnotatedParameterInterpreter;
+import instance.AnnotatedObjectProperties;
 import instance.AnnotationProperties;
+import instance.AnnotationPropertyGetter;
 import instance.Annotations;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -52,15 +51,18 @@ import parameter.extractor.FunctionHttpUrlParameterInfoExtractor;
 import parameter.extractor.HttpBodyParameterInfoExtractor;
 import parameter.extractor.HttpBodyParameterInfoExtractor.HttpBodyParameterInfo;
 import parameter.extractor.HttpUrlParameterInfoExtractor;
-import parameter.matcher.FunctionParameterTypeFinder;
-import parameter.matcher.ParameterType;
-import parameter.matcher.ParameterTypeFinder;
+import parameter.matcher.ParameterAndValueMatcherType;
 import pretask.PreTaskCreator;
 import pretask.PreTaskInfo;
 import pretask.PreTaskWorker;
 import pretask.PreTasks;
 import pretask.PreTasks.ReadOnlyPreTasks;
 import static parameter.extractor.HttpUrlParameterInfoExtractor.HttpUrlParameterInfo;
+import static parameter.matcher.ValueMatcherType.HTTP_BODY;
+import static parameter.matcher.ValueMatcherType.HTTP_INPUT_STREAM;
+import static parameter.matcher.ValueMatcherType.HTTP_OUTPUT_STREAM;
+import static parameter.matcher.ValueMatcherType.HTTP_QUERY_PARAM;
+import static parameter.matcher.ValueMatcherType.HTTP_URL;
 
 @Slf4j
 public class App {
@@ -71,6 +73,7 @@ public class App {
     static {
         SIMPLE_DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
         HOST_ADDRESS = getHostAddress();
+
         AnnotationPropertyMapper webFilterPropertyMapper = new AnnotationPropertyMapper(WebFilter.class,
                                                                                         Map.of("patterns", (a) -> ((WebFilter) a).patterns(),
                                                                                                "filterName", (a) -> ((WebFilter) a).filterName()));
@@ -96,19 +99,18 @@ public class App {
 
     public static void main(String[] args) {
         // 1. annotating 된 class 의 instance 를 생성한다.
+        AnnotationPropertyGetter annotationPropertyGetter = new AnnotationPropertyGetter(ANNOTATION_PROPERTY_MAPPERS);
         AnnotatedClassObjectRepositoryCreator objectRepositoryCreator = AnnotatedClassObjectRepositoryCreator
             .builderWithDefaultAnnotations()
-            .appendAnnotations(new Annotations(List.of(WebFilter.class, Controller.class)))
-            .appendAnnotationPropertyMappers(ANNOTATION_PROPERTY_MAPPERS)
+            .annotations(new Annotations(List.of(WebFilter.class, Controller.class)))
+            .annotationPropertyGetter(annotationPropertyGetter)
             .build();
         AnnotatedClassObjectRepository objectRepository = objectRepositoryCreator.createFromPackage(App.class, "com.main");
-        AnnotatedParameterInterpreter annotatedParameterInterpreter = new AnnotatedParameterInterpreter(ANNOTATION_PROPERTY_MAPPERS);
 
         // 2. webfilter 생성.
-        List<AnnotatedObjectAndProperties> webFilerAnnotatedPreTaskWorkersWithProperties = objectRepository.findObjectAndAnnotationPropertiesByClassAndAnnotatedClass(PreTaskWorker.class,
-                                                                                                                                                                      WebFilter.class,
-                                                                                                                                                                      List.of("filterName",
-                                                                                                                                                                              "patterns"));
+        List<AnnotatedObjectProperties> webFilerAnnotatedPreTaskWorkersWithProperties = objectRepository.findObjectAndAnnotationPropertiesByClassAndAnnotatedClass(PreTaskWorker.class,
+                                                                                                                                                                   WebFilter.class,
+                                                                                                                                                                   List.of("filterName", "patterns"));
         ReadOnlyPreTasks preTasks = webFilerAnnotatedPreTaskWorkersWithProperties.stream()
             .map(webFilerAnnotatedPreTaskWorkerWithProperties -> {
                 PreTaskWorker preTaskWorker = (PreTaskWorker) webFilerAnnotatedPreTaskWorkerWithProperties.getObject();
@@ -131,24 +133,25 @@ public class App {
 
         List<RequestMappedMethod> requestMappedMethods = requestMappedProperties.stream()
             .map(requestMappedProperty -> {
-                AnnotatedObjectAndProperties annotatedObjectAndProperties = requestMappedProperty.getAnnotatedObjectAndProperties();
-                Object object = annotatedObjectAndProperties.getObject();
-                AnnotationProperties objectProperties = annotatedObjectAndProperties.getAnnotationProperties();
+                AnnotatedObjectProperties annotatedObjectProperties = requestMappedProperty.getAnnotatedObjectProperties();
+                Object object = annotatedObjectProperties.getObject();
+                AnnotationProperties objectProperties = annotatedObjectProperties.getAnnotationProperties();
 
-                AnnotatedMethodAndProperties annotatedMethodAndProperties = requestMappedProperty.getAnnotatedMethodAndProperties();
-                Method javaMethod = annotatedMethodAndProperties.getJavaMethod();
-                AnnotationProperties methodProperties = annotatedMethodAndProperties.getAnnotationProperties();
+                AnnotatedMethodProperties annotatedMethodProperties = requestMappedProperty.getAnnotatedMethodProperties();
+                Method javaMethod = annotatedMethodProperties.getJavaMethod();
+                AnnotationProperties methodProperties = annotatedMethodProperties.getAnnotationProperties();
 
                 RequestMethod[] httpMethods = (RequestMethod[]) methodProperties.getValueOrDefault("httpMethod", new RequestMethod[]{});
                 String[] classUrls = (String[]) objectProperties.getValueOrDefault("url", Collections.emptyList());
-                String[] _methodUrls = (String[]) methodProperties.getValueOrDefault("url", Collections.emptyList());
-                return createRequestMappedMethods(httpMethods, classUrls, _methodUrls, object, javaMethod);
+                String[] methodUrls = (String[]) methodProperties.getValueOrDefault("url", Collections.emptyList());
+                return createRequestMappedMethods(httpMethods, classUrls, methodUrls, object, javaMethod);
             })
             .flatMap(Collection::stream)
             .collect(Collectors.toUnmodifiableList());
 
+        JavaMethodPathMatcherCreator javaMethodPathMatcherCreator = new JavaMethodPathMatcherCreator(customParameterParameterTypeInfoFunction());
         List<EndpointTaskMatcher> javaMethodEndpointTaskMatchers = requestMappedMethods.stream()
-            .map(JavaMethodPathMatcherCreator::create)
+            .map(javaMethodPathMatcherCreator::create)
             .collect(Collectors.toUnmodifiableList());
 
         // 4. resource http endpoint task 생성.
@@ -159,17 +162,15 @@ public class App {
         EndpointTaskMatcher endpointTaskMatcher = new CompositedEndpointTaskMatcher(endpointTaskMatchers);
 
         // 5. parameter info 해석기 생성.
-        HttpBodyParameterInfoExtractor httpBodyParameterInfoExtractor = new FunctionBodyParameterInfoExtractor(requestBodyHttpUrlParameterInfoFunction(annotatedParameterInterpreter));
-        HttpUrlParameterInfoExtractor requestParamHttpUrlParameterInfoExtractor = new FunctionHttpUrlParameterInfoExtractor(requestParameterHttpUrlParameterInfoFunction(
-            annotatedParameterInterpreter));
-        HttpUrlParameterInfoExtractor pathVariableHttpUrlParameterInfoExtractor = new FunctionHttpUrlParameterInfoExtractor(pathVariableHttpUrlParameterInfoFunction(annotatedParameterInterpreter));
-        ParameterTypeFinder parameterTypeFinder = new FunctionParameterTypeFinder(customParameterParameterTypeFunction());
+        HttpBodyParameterInfoExtractor httpBodyParameterInfoExtractor = new FunctionBodyParameterInfoExtractor(requestBodyHttpUrlParameterInfoFunction(annotationPropertyGetter));
+        HttpUrlParameterInfoExtractor requestParamHttpUrlParameterInfoExtractor = new FunctionHttpUrlParameterInfoExtractor(requestParameterHttpUrlParameterInfoFunction(annotationPropertyGetter));
+        HttpUrlParameterInfoExtractor pathVariableHttpUrlParameterInfoExtractor = new FunctionHttpUrlParameterInfoExtractor(pathVariableHttpUrlParameterInfoFunction(annotationPropertyGetter));
+//        ParameterTypeFinder parameterTypeFinder = new FunctionParameterTypeFinder(customParameterParameterTypeInfoFunction());
 
         // 6. http service start.
         BaseHttpRequestProcessor baseHttpRequestProcessor = new BaseHttpRequestProcessor(httpBodyParameterInfoExtractor,
                                                                                          requestParamHttpUrlParameterInfoExtractor,
                                                                                          pathVariableHttpUrlParameterInfoExtractor,
-                                                                                         parameterTypeFinder,
                                                                                          endpointTaskMatcher,
                                                                                          SIMPLE_DATE_FORMAT,
                                                                                          HOST_ADDRESS);
@@ -222,11 +223,10 @@ public class App {
         }
     }
 
-    private static Function<Parameter, HttpUrlParameterInfo> requestParameterHttpUrlParameterInfoFunction(AnnotatedParameterInterpreter annotatedParameterInterpreter) {
-        Objects.requireNonNull(annotatedParameterInterpreter);
+    private static Function<Parameter, HttpUrlParameterInfo> requestParameterHttpUrlParameterInfoFunction(AnnotationPropertyGetter annotationPropertyGetter) {
+        Objects.requireNonNull(annotationPropertyGetter);
         return parameter -> {
-            AnnotatedParameterProperties annotatedParameterProperties = annotatedParameterInterpreter.interpretProperties(parameter, RequestParam.class, List.of("name", "defaultValue", "required"));
-            AnnotationProperties annotationProperties = annotatedParameterProperties.getAnnotationProperties();
+            AnnotationProperties annotationProperties = annotationPropertyGetter.getAnnotationProperties(parameter, RequestParam.class, List.of("name", "defaultValue", "required"));
 
             String parameterName = (String) annotationProperties.getValueOrDefault("name", parameter.getName());
             String defaultValue = (String) annotationProperties.getValue("defaultValue");
@@ -236,13 +236,10 @@ public class App {
         };
     }
 
-    private static Function<Parameter, HttpUrlParameterInfo> pathVariableHttpUrlParameterInfoFunction(AnnotatedParameterInterpreter annotatedParameterInterpreter) {
-        Objects.requireNonNull(annotatedParameterInterpreter);
+    private static Function<Parameter, HttpUrlParameterInfo> pathVariableHttpUrlParameterInfoFunction(AnnotationPropertyGetter annotationPropertyGetter) {
+        Objects.requireNonNull(annotationPropertyGetter);
         return parameter -> {
-            // todo
-            // parameter property 가져오는 용도의 class 생성이 필요함.
-            AnnotatedParameterProperties annotatedParameterProperties = annotatedParameterInterpreter.interpretProperties(parameter, PathVariable.class, List.of("name", "required"));
-            AnnotationProperties annotationProperties = annotatedParameterProperties.getAnnotationProperties();
+            AnnotationProperties annotationProperties = annotationPropertyGetter.getAnnotationProperties(parameter, PathVariable.class, List.of("name", "required"));
 
             String parameterName = (String) annotationProperties.getValueOrDefault("name", parameter.getName());
             boolean required = (boolean) annotationProperties.getValue("required");
@@ -252,11 +249,10 @@ public class App {
         };
     }
 
-    private static Function<Parameter, HttpBodyParameterInfo> requestBodyHttpUrlParameterInfoFunction(AnnotatedParameterInterpreter annotatedParameterInterpreter) {
-        Objects.requireNonNull(annotatedParameterInterpreter);
+    private static Function<Parameter, HttpBodyParameterInfo> requestBodyHttpUrlParameterInfoFunction(AnnotationPropertyGetter annotationPropertyGetter) {
+        Objects.requireNonNull(annotationPropertyGetter);
         return parameter -> {
-            AnnotatedParameterProperties annotatedParameterProperties = annotatedParameterInterpreter.interpretProperties(parameter, RequestBody.class, List.of("required"));
-            AnnotationProperties annotationProperties = annotatedParameterProperties.getAnnotationProperties();
+            AnnotationProperties annotationProperties = annotationPropertyGetter.getAnnotationProperties(parameter, RequestBody.class, List.of("required"));
 
             boolean required = (boolean) annotationProperties.getValue("required");
 
@@ -265,43 +261,32 @@ public class App {
     }
 
     // annotation util 이 흘러나온다.
-    private static Function<Parameter, ParameterType> customParameterParameterTypeFunction() {
+    private static Function<Parameter, ParameterAndValueMatcherType> customParameterParameterTypeInfoFunction() {
         return parameter -> {
             Class<?> parameterType = parameter.getType();
 
             // 1. pure parameter type.
             if (InputStream.class.isAssignableFrom(parameterType)) {
-                return ParameterType.HTTP_INPUT_STREAM;
+                return new ParameterAndValueMatcherType(parameter, HTTP_INPUT_STREAM);
             }
             if (OutputStream.class.isAssignableFrom(parameterType)) {
-                return ParameterType.HTTP_OUTPUT_STREAM;
+                return new ParameterAndValueMatcherType(parameter, HTTP_OUTPUT_STREAM);
             }
 
             // 2. annotation hint type.
             if (AnnotationUtils.exist(parameter, PathVariable.class)) {
-                return ParameterType.HTTP_URL;
+                return new ParameterAndValueMatcherType(parameter, HTTP_URL);
             }
             if (AnnotationUtils.exist(parameter, RequestParam.class)) {
-                return ParameterType.HTTP_QUERY_PARAM;
+                return new ParameterAndValueMatcherType(parameter, HTTP_QUERY_PARAM);
             }
             if (AnnotationUtils.exist(parameter, RequestBody.class)) {
-                return ParameterType.HTTP_BODY;
+                return new ParameterAndValueMatcherType(parameter, HTTP_BODY);
             }
 
             throw new RuntimeException("Does not exist possible match ParameterType.");
         };
     }
 }
-
-
-
-
-
-
-
-
-
-
-
 
 

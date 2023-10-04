@@ -10,7 +10,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class Annotations {
     // 중복 제거를 할 것 이냐?, 순회를 빠르게 할 것이냐?
     // 중복 제거에 중점을 두자!

@@ -1,7 +1,7 @@
 package task.endpoint;
 
-import java.lang.reflect.Parameter;
 import java.util.Optional;
+import parameter.matcher.ParameterAndValueMatcherType;
 
 // object json
 // object file
@@ -12,6 +12,6 @@ import java.util.Optional;
 // 3. plain text - string
 
 public interface EndPointTask {
-    Parameter[] getExecuteParameters();
+    ParameterAndValueMatcherType[] getParameterTypeInfos();
     Optional<Object> execute(Object[] params);
 }

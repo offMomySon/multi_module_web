@@ -10,7 +10,7 @@ import parameter.extractor.HttpBodyParameterInfoExtractor;
 import parameter.extractor.HttpBodyParameterInfoExtractor.HttpBodyParameterInfo;
 import static com.main.util.IoUtils.createBufferedInputStream;
 
-public class HttpBodyParameterValueMatcher implements MethodParameterValueMatcher {
+public class HttpBodyParameterValueMatcher implements ParameterValueMatcher {
     private final HttpBodyParameterInfoExtractor parameterInfoExtractor;
     private final InputStream inputStream;
 

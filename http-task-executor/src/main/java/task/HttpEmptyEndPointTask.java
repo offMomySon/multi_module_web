@@ -1,8 +1,8 @@
 package task;
 
-import java.lang.reflect.Parameter;
 import java.util.Objects;
 import java.util.Optional;
+import parameter.matcher.ParameterAndValueMatcherType;
 import task.endpoint.EndPointTask;
 
 public class HttpEmptyEndPointTask implements HttpEndPointTask{
@@ -14,8 +14,8 @@ public class HttpEmptyEndPointTask implements HttpEndPointTask{
     }
 
     @Override
-    public Parameter[] getExecuteParameters() {
-        return endPointTask.getExecuteParameters();
+    public ParameterAndValueMatcherType[] getParameterTypeInfos() {
+        return endPointTask.getParameterTypeInfos();
     }
 
     @Override

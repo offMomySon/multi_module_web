@@ -5,18 +5,18 @@ import lombok.Getter;
 
 
 @Getter
-public class AnnotatedObjectAndProperties {
+public class AnnotatedObjectProperties {
     private final Object object;
     private final AnnotationProperties annotationProperties;
 
-    public AnnotatedObjectAndProperties(Object object, AnnotationProperties annotationProperties) {
+    public AnnotatedObjectProperties(Object object, AnnotationProperties annotationProperties) {
         Objects.requireNonNull(object);
         Objects.requireNonNull(annotationProperties);
         this.object = object;
         this.annotationProperties = annotationProperties;
     }
 
-    public static AnnotatedObjectAndProperties emptyProperty(Object object) {
-        return new AnnotatedObjectAndProperties(object, AnnotationProperties.empty());
+    public static AnnotatedObjectProperties emptyProperty(Object object) {
+        return new AnnotatedObjectProperties(object, AnnotationProperties.empty());
     }
 }

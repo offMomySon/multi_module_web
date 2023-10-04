@@ -5,14 +5,14 @@ import lombok.Getter;
 
 @Getter
 public class AnnotatedObjectAndMethodProperties {
-    private final AnnotatedObjectAndProperties annotatedObjectAndProperties;
-    private final AnnotatedMethodAndProperties annotatedMethodAndProperties;
+    private final AnnotatedObjectProperties annotatedObjectProperties;
+    private final AnnotatedMethodProperties annotatedMethodProperties;
 
-    public AnnotatedObjectAndMethodProperties(AnnotatedObjectAndProperties annotatedObjectAndProperties,
-                                              AnnotatedMethodAndProperties annotatedMethodAndProperties) {
-        Objects.requireNonNull(annotatedObjectAndProperties);
-        Objects.requireNonNull(annotatedMethodAndProperties);
-        this.annotatedObjectAndProperties = annotatedObjectAndProperties;
-        this.annotatedMethodAndProperties = annotatedMethodAndProperties;
+    public AnnotatedObjectAndMethodProperties(AnnotatedObjectProperties annotatedObjectProperties,
+                                              AnnotatedMethodProperties annotatedMethodProperties) {
+        Objects.requireNonNull(annotatedObjectProperties);
+        Objects.requireNonNull(annotatedMethodProperties);
+        this.annotatedObjectProperties = annotatedObjectProperties;
+        this.annotatedMethodProperties = annotatedMethodProperties;
     }
 }

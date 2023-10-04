@@ -6,29 +6,37 @@ import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import parameter.matcher.ParameterAndValueMatcherType;
 
 @Slf4j
 public class JavaMethodInvokeTask implements EndPointTask {
     private final Object declaringClazzObject;
     private final Method javaMethod;
-    private final Parameter[] parameters;
+    private final ParameterAndValueMatcherType[] parameterAndValueMatcherTypes;
 
-    public JavaMethodInvokeTask(Object declaringClazzObject, Method javaMethod) {
+    public JavaMethodInvokeTask(Object declaringClazzObject, Method javaMethod, ParameterAndValueMatcherType[] _parameterAndValueMatcherTypes) {
         Objects.requireNonNull(declaringClazzObject);
         Objects.requireNonNull(javaMethod);
+        Objects.requireNonNull(_parameterAndValueMatcherTypes);
+
+        Set<Parameter> methodParameters = Arrays.stream(javaMethod.getParameters()).collect(Collectors.toUnmodifiableSet());
+        Set<Parameter> otherParameters = Arrays.stream(_parameterAndValueMatcherTypes).map(ParameterAndValueMatcherType::getParameter).collect(Collectors.toUnmodifiableSet());
+        boolean doesNotMethodParameters = !methodParameters.containsAll(otherParameters);
+        if(doesNotMethodParameters){
+            throw new RuntimeException("does not method parameters.");
+        }
+
         this.declaringClazzObject = declaringClazzObject;
         this.javaMethod = javaMethod;
-        this.parameters = javaMethod.getParameters();
-    }
-
-    public Method getJavaMethod() {
-        return javaMethod;
+        this.parameterAndValueMatcherTypes = _parameterAndValueMatcherTypes;
     }
 
     @Override
-    public Parameter[] getExecuteParameters() {
-        return Arrays.copyOf(parameters, parameters.length);
+    public ParameterAndValueMatcherType[] getParameterTypeInfos() {
+        return Arrays.copyOf(parameterAndValueMatcherTypes, parameterAndValueMatcherTypes.length);
     }
 
     @Override

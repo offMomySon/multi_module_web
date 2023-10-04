@@ -1,12 +1,12 @@
 package task.endpoint;
 
-import java.lang.reflect.Parameter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
+import parameter.matcher.ParameterAndValueMatcherType;
 
 @Slf4j
 public class ResourceFindTask implements EndPointTask {
@@ -18,8 +18,8 @@ public class ResourceFindTask implements EndPointTask {
     }
 
     @Override
-    public Parameter[] getExecuteParameters() {
-        return new Parameter[0];
+    public ParameterAndValueMatcherType[] getParameterTypeInfos() {
+        return new ParameterAndValueMatcherType[0];
     }
 
     @Override

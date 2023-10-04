@@ -3,12 +3,16 @@ package matcher.creator;
 import converter.ValueConverter;
 import converter.ObjectValueConverter;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.function.Function;
 import matcher.JavaMethodEndpointTaskMatcher;
 import matcher.PathUrlMatcher;
 import matcher.RequestMethod;
 import matcher.segment.PathUrl;
 import matcher.segment.creator.SegmentChunkFactory;
+import parameter.matcher.ParameterAndValueMatcherType;
 import task.HttpConvertEndPointTask;
 import task.HttpEmptyEndPointTask;
 import task.HttpEndPointTask;
@@ -18,7 +22,14 @@ import task.endpoint.JavaMethodInvokeTask;
 import vo.ContentType;
 
 public class JavaMethodPathMatcherCreator {
-    public static JavaMethodEndpointTaskMatcher create(RequestMappedMethod requestMappedMethod){
+    private final Function<Parameter, ParameterAndValueMatcherType> parameterParameterTypeInfoFunction;
+
+    public JavaMethodPathMatcherCreator(Function<Parameter, ParameterAndValueMatcherType> parameterParameterTypeInfoFunction) {
+        Objects.requireNonNull(parameterParameterTypeInfoFunction);
+        this.parameterParameterTypeInfoFunction = parameterParameterTypeInfoFunction;
+    }
+
+    public JavaMethodEndpointTaskMatcher create(RequestMappedMethod requestMappedMethod){
         if(Objects.isNull(requestMappedMethod)){
             throw new RuntimeException("requestMappedMethod is empty.");
         }
@@ -31,7 +42,10 @@ public class JavaMethodPathMatcherCreator {
 
         Object object = requestMappedMethod.getObject();
         Method javaMethod = requestMappedMethod.getJavaMethod();
-        EndPointTask endPointTask = new JavaMethodInvokeTask(object, javaMethod);
+        ParameterAndValueMatcherType[] parameterAndValueMatcherTypes = Arrays.stream(javaMethod.getParameters())
+            .map(parameterParameterTypeInfoFunction)
+            .toArray(ParameterAndValueMatcherType[]::new);
+        EndPointTask endPointTask = new JavaMethodInvokeTask(object, javaMethod, parameterAndValueMatcherTypes);
 
         Class<?> returnType = javaMethod.getReturnType();
         HttpEndPointTask httpEndPointTask;

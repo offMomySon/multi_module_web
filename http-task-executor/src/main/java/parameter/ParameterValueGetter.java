@@ -5,34 +5,36 @@ import java.lang.reflect.Parameter;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import parameter.matcher.MethodParameterValueMatcher;
-import parameter.matcher.ParameterTypeFinder;
+import parameter.matcher.ValueMatcherType;
+import parameter.matcher.ParameterAndValueMatcherType;
+import parameter.matcher.ParameterValueMatchers;
 
 @Slf4j
 public class ParameterValueGetter {
     private static final CompositeValueTypeConverter converter = new CompositeValueTypeConverter();
 
-    private final MethodParameterValueMatcher valueMatcher;
+    private final ParameterValueMatchers valueMatchers;
 
-    public ParameterValueGetter(MethodParameterValueMatcher valueMatcher) {
-        Objects.requireNonNull(valueMatcher);
-        this.valueMatcher = valueMatcher;
+    public ParameterValueGetter(ParameterValueMatchers valueMatchers) {
+        Objects.requireNonNull(valueMatchers);
+        this.valueMatchers = valueMatchers;
     }
 
-    public Optional<?> get(Parameter parameter) {
-        Objects.requireNonNull(parameter);
-        Class<?> parameterType = parameter.getType();
-        log.info("parameter : `{}`, type : `{}`", parameter, parameterType);
+    public Optional<?> get(ParameterAndValueMatcherType parameterAndValueMatcherType) {
+        Objects.requireNonNull(parameterAndValueMatcherType);
 
-        Optional optionalMatchValue = valueMatcher.match(parameter);
+        Parameter parameter = parameterAndValueMatcherType.getParameter();
+        Class<?> paramType = parameter.getType();
+        ValueMatcherType valueMatcherType = parameterAndValueMatcherType.getValueMatcherType();
+        log.info("parameterAndValueMatcherType : `{}`, parameterType : `{}`", parameterAndValueMatcherType, valueMatcherType);
+
+        Optional optionalMatchValue = valueMatchers.match(parameterAndValueMatcherType);
         if (optionalMatchValue.isEmpty()) {
             return Optional.empty();
         }
 
-        String _matchedValue = (String) optionalMatchValue.get();
-        Object value = converter.convertToClazz(_matchedValue, parameterType);
-        log.info("ParameterValue. value : {}, class : {}", value, value.getClass());
-
+        String matchedValue = (String) optionalMatchValue.get();
+        Object value = converter.convertToClazz(matchedValue, paramType);
         return Optional.of(value);
     }
 }

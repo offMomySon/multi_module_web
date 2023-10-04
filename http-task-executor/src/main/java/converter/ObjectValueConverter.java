@@ -32,17 +32,20 @@ public class ObjectValueConverter implements ValueConverter {
     public Object convertToClazz(String value) {
         Objects.requireNonNull(value);
 
-        if(String.class == convertClazz){
-            return value;
+        Object convertedValue = value;
+        if(String.class != convertClazz){
+            convertedValue = readValue(value, convertClazz);
         }
 
+        log.info("convertedValue : `{}`, convertClazz : {}", convertedValue, convertClazz);
+        return convertedValue;
+    }
+
+    private static Object readValue(String value, Class<?> convertClazz){
         try {
-            log.info("value : {}", value);
-            log.info("convertClazz : {}", convertClazz);
             return objectMapper.readValue(value, convertClazz);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-
     }
 }

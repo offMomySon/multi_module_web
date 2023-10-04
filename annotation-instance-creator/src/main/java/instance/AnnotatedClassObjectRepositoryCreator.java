@@ -1,6 +1,5 @@
 package instance;
 
-import annotation.AnnotationPropertyMappers;
 import annotation.Component;
 import annotation.Domain;
 import annotation.Repository;
@@ -17,20 +16,20 @@ public class AnnotatedClassObjectRepositoryCreator {
     private static final Annotations DEFAULT_ANNOTATIONS = new Annotations(List.of(Component.class, Domain.class, Repository.class, Service.class));
 
     private final Annotations instantiateAnnotations;
-    private final AnnotationPropertyMappers annotationPropertyMappers;
     private final AnnotatedClassInstantiator annotatedClassInstantiator;
+    private final AnnotationPropertyGetter annotationPropertyGetter;
 
-    private AnnotatedClassObjectRepositoryCreator(Annotations instantiateAnnotations, AnnotationPropertyMappers annotationPropertyMappers) {
+    private AnnotatedClassObjectRepositoryCreator(Annotations instantiateAnnotations, AnnotationPropertyGetter annotationPropertyGetter) {
         Objects.requireNonNull(instantiateAnnotations);
-        Objects.requireNonNull(annotationPropertyMappers);
+        Objects.requireNonNull(annotationPropertyGetter);
         this.instantiateAnnotations = instantiateAnnotations;
-        this.annotationPropertyMappers = annotationPropertyMappers;
         this.annotatedClassInstantiator = new AnnotatedClassInstantiator(instantiateAnnotations);
+        this.annotationPropertyGetter = annotationPropertyGetter;
     }
 
     public AnnotatedClassObjectRepository createFromPackage(Class<?> rootClazz, String classPackage) {
         if (Objects.isNull(rootClazz) || Objects.isNull(classPackage) || classPackage.isBlank()) {
-            return AnnotatedClassObjectRepository.emtpy();
+            throw new RuntimeException("Invalid param. Param is empty.");
         }
 
         List<Class<?>> clazzes = ClassFinder.from(rootClazz, classPackage).findClazzes();
@@ -46,46 +45,46 @@ public class AnnotatedClassObjectRepositoryCreator {
             objectGraph = annotatedClassInstantiator.load(clazz, objectGraph);
         }
 
-        return AnnotatedClassObjectRepository.from(this.annotationPropertyMappers, objectGraph);
+        return AnnotatedClassObjectRepository.from(this.annotationPropertyGetter, objectGraph);
     }
 
     public static Builder builderWithDefaultAnnotations() {
-        return Builder.builderWithDefaultAnnotations();
+        return new Builder(DEFAULT_ANNOTATIONS);
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     public static class Builder {
         private Annotations annotations;
-        private AnnotationPropertyMappers annotationPropertyMappers;
+        private AnnotationPropertyGetter annotationPropertyGetter;
+
+        public Builder() {
+        }
 
         private Builder(Annotations annotations) {
             Objects.requireNonNull(annotations);
             this.annotations = annotations;
         }
 
-        public static Builder builderWithDefaultAnnotations() {
-            return new Builder(DEFAULT_ANNOTATIONS);
-        }
-
-        public Builder appendAnnotationPropertyMappers(AnnotationPropertyMappers annotationPropertyMappers) {
-            Objects.requireNonNull(annotationPropertyMappers);
-            if (Objects.isNull(this.annotationPropertyMappers)) {
-                this.annotationPropertyMappers = AnnotationPropertyMappers.empty();
-            }
-            this.annotationPropertyMappers = this.annotationPropertyMappers.merge(annotationPropertyMappers);
+        public Builder annotationPropertyGetter(AnnotationPropertyGetter annotationPropertyGetter) {
+            Objects.requireNonNull(annotationPropertyGetter);
+            this.annotationPropertyGetter = annotationPropertyGetter;
             return this;
         }
 
-        public Builder appendAnnotations(Annotations annotations) {
+        public Builder annotations(Annotations annotations) {
             Objects.requireNonNull(annotations);
-            if(Objects.isNull(this.annotations)){
-                this.annotations = Annotations.empty();
+            if (Objects.isNull(this.annotations)) {
+                this.annotations = annotations;
             }
             this.annotations = this.annotations.merge(annotations);
             return this;
         }
 
         public AnnotatedClassObjectRepositoryCreator build() {
-            return new AnnotatedClassObjectRepositoryCreator(this.annotations, this.annotationPropertyMappers);
+            return new AnnotatedClassObjectRepositoryCreator(this.annotations, this.annotationPropertyGetter);
         }
     }
 }

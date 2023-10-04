@@ -9,14 +9,13 @@ import java.text.MessageFormat;
 import java.util.Objects;
 import java.util.Optional;
 import annotation.RequestBody;
-import parameter.matcher.MethodParameterValueMatcher;
 import static com.main.util.IoUtils.createBufferedInputStream;
 
 // 4. todo [annotation]
 // input stream 에 RequestBody 어노테이션이 존재하는지 검증한다.
 // 해당 어노테이팅이 필요한지 체크하고
 // 필요하다면 annotation 모듈의 역할로 처리가 가능하게 수정하자.
-public class HttpBodyAnnotationAnnotatedParameterValueMatcher implements MethodParameterValueMatcher {
+public class HttpBodyAnnotationAnnotatedParameterValueMatcher implements ParameterValueMatcher {
     private static final Class<RequestBody> REQUEST_BODY_CLASS = RequestBody.class;
 
     private final InputStream bodyInputStream;

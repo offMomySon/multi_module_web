@@ -2,9 +2,9 @@ package task;
 
 import converter.ValueConverter;
 import java.io.InputStream;
-import java.lang.reflect.Parameter;
 import java.util.Objects;
 import java.util.Optional;
+import parameter.matcher.ParameterAndValueMatcherType;
 import task.endpoint.EndPointTask;
 import vo.ContentType;
 
@@ -23,8 +23,8 @@ public class HttpConvertEndPointTask implements HttpEndPointTask{
     }
 
     @Override
-    public Parameter[] getExecuteParameters() {
-        return this.endPointTask.getExecuteParameters();
+    public ParameterAndValueMatcherType[] getParameterTypeInfos() {
+        return this.endPointTask.getParameterTypeInfos();
     }
 
     @Override

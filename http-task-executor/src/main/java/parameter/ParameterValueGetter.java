@@ -24,15 +24,15 @@ public class ParameterValueGetter {
         Objects.requireNonNull(parameterAndValueMatcherType);
 
         Parameter parameter = parameterAndValueMatcherType.getParameter();
-        Class<?> paramType = parameter.getType();
         ValueMatcherType valueMatcherType = parameterAndValueMatcherType.getValueMatcherType();
-        log.info("parameterAndValueMatcherType : `{}`, parameterType : `{}`", parameterAndValueMatcherType, valueMatcherType);
+        log.info("parameter : `{}`, valueMatcherType : `{}`", parameter, valueMatcherType);
 
         Optional optionalMatchValue = valueMatchers.match(parameterAndValueMatcherType);
         if (optionalMatchValue.isEmpty()) {
             return Optional.empty();
         }
 
+        Class<?> paramType = parameter.getType();
         String matchedValue = (String) optionalMatchValue.get();
         Object value = converter.convertToClazz(matchedValue, paramType);
         return Optional.of(value);

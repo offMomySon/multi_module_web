@@ -34,6 +34,11 @@ public class HttpBodyParameterValueMatcher implements ParameterValueMatcher {
         }
 
         String content = readBody(this.inputStream);
+        doesNotPossibleValueMatch = required && content.isBlank();
+        if (doesNotPossibleValueMatch) {
+            throw new RuntimeException("Does not possible value match. InputStream is empty.");
+        }
+
         return Optional.of(content);
     }
 

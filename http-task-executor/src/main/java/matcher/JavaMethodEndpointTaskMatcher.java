@@ -47,5 +47,4 @@ public class JavaMethodEndpointTaskMatcher implements EndpointTaskMatcher {
         MatchedEndPoint matchedEndPoint = new MatchedEndPoint(httpEndPointTask, pathVariableValue);
         return Optional.of(matchedEndPoint);
     }
-
 }

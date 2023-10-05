@@ -7,7 +7,7 @@ import java.util.Objects;
 public enum ContentType {
     IMAGE_JPEG("image/jpeg"),
     IMAGE_GIF("image/gif"),
-    IMAGE_PLAIN("text/plain"),
+    TEXT_PLAIN("text/plain"),
     APPLICATION_JSON("application/json"),
     TEXT_HTML("text/html");
 

@@ -4,7 +4,7 @@ import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.Objects;
 import java.util.Optional;
-import parameter.matcher.ParameterAndValueMatcherType;
+import parameter.matcher.ParameterAndValueAssigneeType;
 import task.SystemResourceFinder;
 
 public class SystemResourceFileFindTaskWorker2 implements EndPointTaskWorker2 {
@@ -21,8 +21,8 @@ public class SystemResourceFileFindTaskWorker2 implements EndPointTaskWorker2 {
     }
 
     @Override
-    public ParameterAndValueMatcherType[] getParameterTypeInfos() {
-        return new ParameterAndValueMatcherType[0];
+    public ParameterAndValueAssigneeType[] getParameterTypeInfos() {
+        return new ParameterAndValueAssigneeType[0];
     }
 
     @Override

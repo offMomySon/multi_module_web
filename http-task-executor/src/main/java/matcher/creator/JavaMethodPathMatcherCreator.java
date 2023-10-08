@@ -12,7 +12,7 @@ import matcher.PathUrlMatcher;
 import matcher.RequestMethod;
 import matcher.segment.PathUrl;
 import matcher.segment.creator.SegmentChunkFactory;
-import parameter.matcher.ParameterAndValueMatcherType;
+import parameter.matcher.ParameterAndValueAssigneeType;
 import task.HttpConvertEndPointTask;
 import task.HttpEmptyEndPointTask;
 import task.HttpEndPointTask;
@@ -22,9 +22,9 @@ import task.worker.JavaMethodInvokeTaskWorker;
 import task.worker.WorkerResultType;
 
 public class JavaMethodPathMatcherCreator {
-    private final Function<Parameter, ParameterAndValueMatcherType> parameterParameterTypeInfoFunction;
+    private final Function<Parameter, ParameterAndValueAssigneeType> parameterParameterTypeInfoFunction;
 
-    public JavaMethodPathMatcherCreator(Function<Parameter, ParameterAndValueMatcherType> parameterParameterTypeInfoFunction) {
+    public JavaMethodPathMatcherCreator(Function<Parameter, ParameterAndValueAssigneeType> parameterParameterTypeInfoFunction) {
         Objects.requireNonNull(parameterParameterTypeInfoFunction);
         this.parameterParameterTypeInfoFunction = parameterParameterTypeInfoFunction;
     }
@@ -42,13 +42,13 @@ public class JavaMethodPathMatcherCreator {
 
         Object object = requestMappedMethod.getObject();
         Method javaMethod = requestMappedMethod.getJavaMethod();
-        ParameterAndValueMatcherType[] parameterAndValueMatcherTypes = Arrays.stream(javaMethod.getParameters())
+        ParameterAndValueAssigneeType[] parameterAndValueAssigneeTypes = Arrays.stream(javaMethod.getParameters())
             .map(parameterParameterTypeInfoFunction)
-            .toArray(ParameterAndValueMatcherType[]::new);
+            .toArray(ParameterAndValueAssigneeType[]::new);
 
         Class<?> returnType = javaMethod.getReturnType();
         WorkerResultType workerResultType = WorkerResultType.findByClazz(returnType);
-        EndPointTaskWorker endPointTaskWorker = new JavaMethodInvokeTaskWorker(workerResultType, object, javaMethod, parameterAndValueMatcherTypes);
+        EndPointTaskWorker endPointTaskWorker = new JavaMethodInvokeTaskWorker(workerResultType, object, javaMethod, parameterAndValueAssigneeTypes);
 
         HttpEndPointTask httpEndPointTask;
         if (returnType == Void.TYPE) {

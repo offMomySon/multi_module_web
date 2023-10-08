@@ -6,7 +6,7 @@ import java.text.MessageFormat;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import parameter.matcher.ParameterAndValueMatcherType;
+import parameter.matcher.ParameterAndValueAssigneeType;
 
 @Slf4j
 public class ResourceFindTaskWorker implements EndPointTaskWorker {
@@ -21,8 +21,8 @@ public class ResourceFindTaskWorker implements EndPointTaskWorker {
     }
 
     @Override
-    public ParameterAndValueMatcherType[] getParameterTypeInfos() {
-        return new ParameterAndValueMatcherType[0];
+    public ParameterAndValueAssigneeType[] getParameterTypeInfos() {
+        return new ParameterAndValueAssigneeType[0];
     }
 
     @Override

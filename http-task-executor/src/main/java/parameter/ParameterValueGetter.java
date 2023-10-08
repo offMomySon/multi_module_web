@@ -5,8 +5,8 @@ import java.lang.reflect.Parameter;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import parameter.matcher.ValueMatcherType;
-import parameter.matcher.ParameterAndValueMatcherType;
+import parameter.matcher.ParameterValueAssigneType;
+import parameter.matcher.ParameterAndValueAssigneeType;
 import parameter.matcher.ParameterValueMatchers;
 
 @Slf4j
@@ -20,14 +20,14 @@ public class ParameterValueGetter {
         this.valueMatchers = valueMatchers;
     }
 
-    public Optional<?> get(ParameterAndValueMatcherType parameterAndValueMatcherType) {
-        Objects.requireNonNull(parameterAndValueMatcherType);
+    public Optional<?> get(ParameterAndValueAssigneeType parameterAndValueAssigneeType) {
+        Objects.requireNonNull(parameterAndValueAssigneeType);
 
-        Parameter parameter = parameterAndValueMatcherType.getParameter();
-        ValueMatcherType valueMatcherType = parameterAndValueMatcherType.getValueMatcherType();
-        log.info("parameter : `{}`, valueMatcherType : `{}`", parameter, valueMatcherType);
+        Parameter parameter = parameterAndValueAssigneeType.getParameter();
+        ParameterValueAssigneType parameterValueAssigneType = parameterAndValueAssigneeType.getParameterValueAssigneType();
+        log.info("parameter : `{}`, valueMatcherType : `{}`", parameter, parameterValueAssigneType);
 
-        Optional optionalMatchValue = valueMatchers.match(parameterAndValueMatcherType);
+        Optional optionalMatchValue = valueMatchers.match(parameterAndValueAssigneeType);
         if (optionalMatchValue.isEmpty()) {
             return Optional.empty();
         }

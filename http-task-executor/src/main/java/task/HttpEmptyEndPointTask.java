@@ -2,7 +2,7 @@ package task;
 
 import java.util.Objects;
 import java.util.Optional;
-import parameter.matcher.ParameterAndValueMatcherType;
+import parameter.matcher.ParameterAndValueAssigneeType;
 import task.worker.EndPointTaskWorker;
 
 public class HttpEmptyEndPointTask implements HttpEndPointTask{
@@ -14,7 +14,7 @@ public class HttpEmptyEndPointTask implements HttpEndPointTask{
     }
 
     @Override
-    public ParameterAndValueMatcherType[] getParameterTypeInfos() {
+    public ParameterAndValueAssigneeType[] getParameterTypeInfos() {
         return endPointTaskWorker.getParameterTypeInfos();
     }
 

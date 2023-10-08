@@ -3,11 +3,11 @@ package task;
 import java.io.InputStream;
 import java.util.Objects;
 import java.util.Optional;
-import parameter.matcher.ParameterAndValueMatcherType;
+import parameter.matcher.ParameterAndValueAssigneeType;
 import vo.ContentType;
 
 public interface HttpEndPointTask {
-    ParameterAndValueMatcherType[] getParameterTypeInfos();
+    ParameterAndValueAssigneeType[] getParameterTypeInfos();
 
     Optional<HttpTaskResult> execute(Object[] params);
 

@@ -4,7 +4,7 @@ import converter.ValueConverter;
 import java.io.InputStream;
 import java.util.Objects;
 import java.util.Optional;
-import parameter.matcher.ParameterAndValueMatcherType;
+import parameter.matcher.ParameterAndValueAssigneeType;
 import task.worker.EndPointTaskWorker;
 import vo.ContentType;
 
@@ -23,7 +23,7 @@ public class HttpConvertEndPointTask implements HttpEndPointTask{
     }
 
     @Override
-    public ParameterAndValueMatcherType[] getParameterTypeInfos() {
+    public ParameterAndValueAssigneeType[] getParameterTypeInfos() {
         return this.endPointTaskWorker.getParameterTypeInfos();
     }
 

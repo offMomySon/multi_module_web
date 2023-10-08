@@ -10,7 +10,7 @@ import annotation.RequestMapping;
 import annotation.RequestParam;
 import annotation.WebFilter;
 import com.main.config.HttpConfig;
-import com.main.task.executor.BaseHttpRequestProcessor;
+import com.main.task.executor.BaseHttpRequestProcessor2;
 import com.main.util.AnnotationUtils;
 import executor.SocketHttpTaskExecutor;
 import instance.AnnotatedClassObjectRepository;
@@ -39,13 +39,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
-import matcher.CompositedEndpointTaskMatcher;
-import matcher.EndpointTaskMatcher;
 import matcher.RequestMethod;
-import matcher.StaticResourceEndPointTaskMatcher;
-import matcher.creator.JavaMethodPathMatcherCreator;
+import matcher.creator.JavaMethodInvokeTaskWorkerCreator2;
 import matcher.creator.RequestMappedMethod;
-import matcher.creator.StaticResourceEndPointCreator;
 import parameter.extractor.FunctionBodyParameterInfoExtractor;
 import parameter.extractor.FunctionHttpUrlParameterInfoExtractor;
 import parameter.extractor.HttpBodyParameterInfoExtractor;
@@ -57,6 +53,12 @@ import pretask.PreTaskInfo;
 import pretask.PreTaskWorker;
 import pretask.PreTasks;
 import pretask.PreTasks.ReadOnlyPreTasks;
+import task.BaseEndPointTask2;
+import task.CompositedEndpointTasks;
+import task.EndPointTask2;
+import task.ResourceEndPointFindTask2;
+import task.SystemResourceFinder;
+import task.worker.JavaMethodInvokeTaskWorker2;
 import static parameter.extractor.HttpUrlParameterInfoExtractor.HttpUrlParameterInfo;
 import static parameter.matcher.ParameterValueAssigneType.HTTP_BODY;
 import static parameter.matcher.ParameterValueAssigneType.HTTP_INPUT_STREAM;
@@ -65,7 +67,7 @@ import static parameter.matcher.ParameterValueAssigneType.HTTP_QUERY_PARAM;
 import static parameter.matcher.ParameterValueAssigneType.HTTP_URL;
 
 @Slf4j
-public class App {
+public class App2 {
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
     private static final String HOST_ADDRESS;
     private static final AnnotationPropertyMappers ANNOTATION_PROPERTY_MAPPERS;
@@ -105,7 +107,7 @@ public class App {
             .annotations(new Annotations(List.of(WebFilter.class, Controller.class)))
             .annotationPropertyGetter(annotationPropertyGetter)
             .build();
-        AnnotatedClassObjectRepository objectRepository = objectRepositoryCreator.createFromPackage(App.class, "com.main");
+        AnnotatedClassObjectRepository objectRepository = objectRepositoryCreator.createFromPackage(App2.class, "com.main");
 
         // 2. webfilter 생성.
         List<AnnotatedObjectProperties> webFilerAnnotatedPreTaskWorkersWithProperties = objectRepository.findObjectAndAnnotationPropertiesByClassAndAnnotatedClass(PreTaskWorker.class,
@@ -130,7 +132,6 @@ public class App {
         List<AnnotatedObjectAndMethodProperties> requestMappedProperties = objectRepository.findAnnotatedObjectAndMethodPropertiesByClassAndAnnotatedClassFocusOnMethod(controllerAnnotatedClasses,
                                                                                                                                                                         RequestMapping.class,
                                                                                                                                                                         List.of("url", "httpMethod"));
-
         List<RequestMappedMethod> requestMappedMethods = requestMappedProperties.stream()
             .map(requestMappedProperty -> {
                 AnnotatedObjectProperties annotatedObjectProperties = requestMappedProperty.getAnnotatedObjectProperties();
@@ -149,31 +150,39 @@ public class App {
             .flatMap(Collection::stream)
             .collect(Collectors.toUnmodifiableList());
 
-        JavaMethodPathMatcherCreator javaMethodPathMatcherCreator = new JavaMethodPathMatcherCreator(customParameterParameterTypeInfoFunction());
-        List<EndpointTaskMatcher> javaMethodEndpointTaskMatchers = requestMappedMethods.stream()
-            .map(javaMethodPathMatcherCreator::create)
+        // 4. endPointTask create.
+        JavaMethodInvokeTaskWorkerCreator2 javaMethodInvokeTaskWorkerCreator2 = new JavaMethodInvokeTaskWorkerCreator2(parameterParameterAndValueAssigneeTypeFunction());
+        List<EndPointTask2> endPointTasks = requestMappedMethods.stream()
+            .map(requestMappedMethod -> {
+                RequestMethod requestMethod = requestMappedMethod.getRequestMethod();
+                String url = requestMappedMethod.getUrl();
+
+                Object object = requestMappedMethod.getObject();
+                Method javaMethod = requestMappedMethod.getJavaMethod();
+                JavaMethodInvokeTaskWorker2 taskWorker = javaMethodInvokeTaskWorkerCreator2.create(object, javaMethod);
+
+                return BaseEndPointTask2.from(requestMethod, url, taskWorker);
+            })
             .collect(Collectors.toUnmodifiableList());
+        // 5. static resource find task.
+        SystemResourceFinder systemResourceFinder = SystemResourceFinder.from(App.class, "../../resources/main");
+        ResourceEndPointFindTask2 resourceEndPointFindTask2 = new ResourceEndPointFindTask2(systemResourceFinder, "static");
 
-        // 4. resource http endpoint task 생성.
-        StaticResourceEndPointCreator staticResourceEndPointCreator = StaticResourceEndPointCreator.from(App.class, "../../resources/main", "static");
-        List<StaticResourceEndPointTaskMatcher> staticResourceEndPointTaskMatchers = staticResourceEndPointCreator.create();
-
-        List<EndpointTaskMatcher> endpointTaskMatchers = Stream.concat(javaMethodEndpointTaskMatchers.stream(), staticResourceEndPointTaskMatchers.stream()).collect(Collectors.toUnmodifiableList());
-        EndpointTaskMatcher endpointTaskMatcher = new CompositedEndpointTaskMatcher(endpointTaskMatchers);
+        endPointTasks = Stream.concat(endPointTasks.stream(), Stream.of(resourceEndPointFindTask2)).collect(Collectors.toUnmodifiableList());
+        CompositedEndpointTasks compositedEndpointTasks = new CompositedEndpointTasks(endPointTasks);
 
         // 5. parameter info 해석기 생성.
         HttpBodyParameterInfoExtractor httpBodyParameterInfoExtractor = new FunctionBodyParameterInfoExtractor(requestBodyHttpUrlParameterInfoFunction(annotationPropertyGetter));
         HttpUrlParameterInfoExtractor requestParamHttpUrlParameterInfoExtractor = new FunctionHttpUrlParameterInfoExtractor(requestParameterHttpUrlParameterInfoFunction(annotationPropertyGetter));
         HttpUrlParameterInfoExtractor pathVariableHttpUrlParameterInfoExtractor = new FunctionHttpUrlParameterInfoExtractor(pathVariableHttpUrlParameterInfoFunction(annotationPropertyGetter));
-//        ParameterTypeFinder parameterTypeFinder = new FunctionParameterTypeFinder(customParameterParameterTypeInfoFunction());
 
         // 6. http service start.
-        BaseHttpRequestProcessor baseHttpRequestProcessor = new BaseHttpRequestProcessor(httpBodyParameterInfoExtractor,
-                                                                                         requestParamHttpUrlParameterInfoExtractor,
-                                                                                         pathVariableHttpUrlParameterInfoExtractor,
-                                                                                         endpointTaskMatcher,
-                                                                                         SIMPLE_DATE_FORMAT,
-                                                                                         HOST_ADDRESS);
+        BaseHttpRequestProcessor2 baseHttpRequestProcessor = new BaseHttpRequestProcessor2(compositedEndpointTasks,
+                                                                                           httpBodyParameterInfoExtractor,
+                                                                                           requestParamHttpUrlParameterInfoExtractor,
+                                                                                           pathVariableHttpUrlParameterInfoExtractor,
+                                                                                           SIMPLE_DATE_FORMAT,
+                                                                                           HOST_ADDRESS);
 
         // 7. execute service.
         SocketHttpTaskExecutor socketHttpTaskExecutor = SocketHttpTaskExecutor.create(HttpConfig.INSTANCE.getPort(),
@@ -261,7 +270,7 @@ public class App {
     }
 
     // annotation util 이 흘러나온다.
-    private static Function<Parameter, ParameterAndValueAssigneeType> customParameterParameterTypeInfoFunction() {
+    public static Function<Parameter, ParameterAndValueAssigneeType> parameterParameterAndValueAssigneeTypeFunction() {
         return parameter -> {
             Class<?> parameterType = parameter.getType();
 

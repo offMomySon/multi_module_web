@@ -20,28 +20,29 @@ import vo.QueryParameters;
 
 @Slf4j
 public class BaseHttpRequestProcessor2 implements HttpRequestProcessor {
+    private final EndPointTask2 endPointTask;
     private final HttpBodyParameterInfoExtractor httpBodyParameterInfoExtractor;
     private final HttpUrlParameterInfoExtractor requestParamHttpUrlParameterInfoExtractor;
     private final HttpUrlParameterInfoExtractor pathVariableParameterInfoExtractor;
-    private final EndPointTask2 endPointTask;
     private final SimpleDateFormat simpleDateFormat;
     private final String hostAddress;
 
-    public BaseHttpRequestProcessor2(HttpBodyParameterInfoExtractor httpBodyParameterInfoExtractor,
+    public BaseHttpRequestProcessor2(EndPointTask2 endPointTask,
+                                     HttpBodyParameterInfoExtractor httpBodyParameterInfoExtractor,
                                      HttpUrlParameterInfoExtractor requestParamHttpUrlParameterInfoExtractor,
                                      HttpUrlParameterInfoExtractor pathVariableParameterInfoExtractor,
-                                     EndPointTask2 endPointTask,
                                      SimpleDateFormat simpleDateFormat,
                                      String hostAddress) {
-        Objects.requireNonNull(httpBodyParameterInfoExtractor);
-        Objects.requireNonNull(pathVariableParameterInfoExtractor);
         Objects.requireNonNull(endPointTask);
+        Objects.requireNonNull(httpBodyParameterInfoExtractor);
+        Objects.requireNonNull(requestParamHttpUrlParameterInfoExtractor);
+        Objects.requireNonNull(pathVariableParameterInfoExtractor);
         Objects.requireNonNull(simpleDateFormat);
         Objects.requireNonNull(hostAddress);
+        this.endPointTask = endPointTask;
         this.httpBodyParameterInfoExtractor = httpBodyParameterInfoExtractor;
         this.requestParamHttpUrlParameterInfoExtractor = requestParamHttpUrlParameterInfoExtractor;
         this.pathVariableParameterInfoExtractor = pathVariableParameterInfoExtractor;
-        this.endPointTask = endPointTask;
         this.simpleDateFormat = simpleDateFormat;
         this.hostAddress = hostAddress;
     }

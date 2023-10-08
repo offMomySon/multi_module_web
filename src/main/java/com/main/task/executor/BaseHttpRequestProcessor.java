@@ -29,11 +29,11 @@ import vo.ContentType;
 import vo.HttpRequest;
 import vo.HttpResponse;
 import vo.QueryParameters;
-import static parameter.matcher.ValueMatcherType.HTTP_BODY;
-import static parameter.matcher.ValueMatcherType.HTTP_INPUT_STREAM;
-import static parameter.matcher.ValueMatcherType.HTTP_OUTPUT_STREAM;
-import static parameter.matcher.ValueMatcherType.HTTP_QUERY_PARAM;
-import static parameter.matcher.ValueMatcherType.HTTP_URL;
+import static parameter.matcher.ParameterValueAssigneType.HTTP_BODY;
+import static parameter.matcher.ParameterValueAssigneType.HTTP_INPUT_STREAM;
+import static parameter.matcher.ParameterValueAssigneType.HTTP_OUTPUT_STREAM;
+import static parameter.matcher.ParameterValueAssigneType.HTTP_QUERY_PARAM;
+import static parameter.matcher.ParameterValueAssigneType.HTTP_URL;
 
 @Slf4j
 public class BaseHttpRequestProcessor implements HttpRequestProcessor {

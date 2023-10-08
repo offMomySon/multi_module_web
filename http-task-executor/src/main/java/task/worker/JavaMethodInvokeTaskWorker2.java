@@ -9,23 +9,23 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import parameter.matcher.ParameterAndValueMatcherType;
+import parameter.matcher.ParameterAndValueAssigneeType;
 
 @Slf4j
 public class JavaMethodInvokeTaskWorker2 implements EndPointTaskWorker2 {
     private final WorkerResultType workerResultType;
     private final Object declaringClazzObject;
     private final Method javaMethod;
-    private final ParameterAndValueMatcherType[] parameterAndValueMatcherTypes;
+    private final ParameterAndValueAssigneeType[] parameterAndValueAssigneeTypes;
 
-    public JavaMethodInvokeTaskWorker2(WorkerResultType workerResultType, Object declaringClazzObject, Method javaMethod, ParameterAndValueMatcherType[] _parameterAndValueMatcherTypes) {
+    public JavaMethodInvokeTaskWorker2(WorkerResultType workerResultType, Object declaringClazzObject, Method javaMethod, ParameterAndValueAssigneeType[] _Parameter_parameterValueAssigneTypes) {
         Objects.requireNonNull(workerResultType);
         Objects.requireNonNull(declaringClazzObject);
         Objects.requireNonNull(javaMethod);
-        Objects.requireNonNull(_parameterAndValueMatcherTypes);
+        Objects.requireNonNull(_Parameter_parameterValueAssigneTypes);
 
         Set<Parameter> methodParameters = Arrays.stream(javaMethod.getParameters()).collect(Collectors.toUnmodifiableSet());
-        Set<Parameter> otherParameters = Arrays.stream(_parameterAndValueMatcherTypes).map(ParameterAndValueMatcherType::getParameter).collect(Collectors.toUnmodifiableSet());
+        Set<Parameter> otherParameters = Arrays.stream(_Parameter_parameterValueAssigneTypes).map(ParameterAndValueAssigneeType::getParameter).collect(Collectors.toUnmodifiableSet());
         boolean doesNotMethodParameters = !methodParameters.containsAll(otherParameters) && methodParameters.size() == otherParameters.size();
         if (doesNotMethodParameters) {
             String errorMessage = MessageFormat.format("Does not method parameters. \nmethodParameters: `{}`\notherParameters: `{}`", methodParameters, otherParameters);
@@ -35,12 +35,12 @@ public class JavaMethodInvokeTaskWorker2 implements EndPointTaskWorker2 {
         this.workerResultType = workerResultType;
         this.declaringClazzObject = declaringClazzObject;
         this.javaMethod = javaMethod;
-        this.parameterAndValueMatcherTypes = _parameterAndValueMatcherTypes;
+        this.parameterAndValueAssigneeTypes = _Parameter_parameterValueAssigneTypes;
     }
 
     @Override
-    public ParameterAndValueMatcherType[] getParameterTypeInfos() {
-        return Arrays.copyOf(parameterAndValueMatcherTypes, parameterAndValueMatcherTypes.length);
+    public ParameterAndValueAssigneeType[] getParameterTypeInfos() {
+        return Arrays.copyOf(parameterAndValueAssigneeTypes, parameterAndValueAssigneeTypes.length);
     }
 
     @Override

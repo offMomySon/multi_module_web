@@ -15,16 +15,9 @@ public class CompositedEndpointTasks implements EndPointTask2 {
         if (Objects.isNull(endPointTasks)) {
             throw new RuntimeException("Invalid parameter. endPointTasks is null.");
         }
-
-        List<EndPointTask2> newEndPointTasks = endPointTasks.stream()
-            .filter(o -> !Objects.isNull(o))
+        this.endPointTasks = endPointTasks.stream()
+            .filter(Objects::nonNull)
             .collect(Collectors.toUnmodifiableList());
-
-        if (newEndPointTasks.isEmpty()) {
-            throw new RuntimeException("newMethodResovler is empty.");
-        }
-
-        this.endPointTasks = newEndPointTasks;
     }
 
     public Optional<MatchedEndPointTaskWorker2> match(RequestMethod requestMethod, PathUrl requestUrl) {
@@ -34,4 +27,5 @@ public class CompositedEndpointTasks implements EndPointTask2 {
             .map(Optional::get)
             .findFirst();
     }
+
 }

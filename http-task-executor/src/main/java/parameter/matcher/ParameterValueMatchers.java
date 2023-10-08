@@ -9,9 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ParameterValueMatchers {
-    private final Map<ValueMatcherType, ParameterValueMatcher> matchers;
+    private final Map<ParameterValueAssigneType, ParameterValueMatcher> matchers;
 
-    public ParameterValueMatchers(Map<ValueMatcherType, ParameterValueMatcher> matchers) {
+    public ParameterValueMatchers(Map<ParameterValueAssigneType, ParameterValueMatcher> matchers) {
         Objects.requireNonNull(matchers);
         this.matchers = matchers.entrySet().stream()
             .filter(entry -> Objects.nonNull(entry.getKey()))
@@ -19,16 +19,16 @@ public class ParameterValueMatchers {
             .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));;
     }
 
-    public Optional<?> match(ParameterAndValueMatcherType parameterAndValueMatcherType) {
-        Objects.requireNonNull(parameterAndValueMatcherType);
+    public Optional<?> match(ParameterAndValueAssigneeType parameterAndValueAssigneeType) {
+        Objects.requireNonNull(parameterAndValueAssigneeType);
 
-        ValueMatcherType valueMatcherType = parameterAndValueMatcherType.getValueMatcherType();
-        if(!matchers.containsKey(valueMatcherType)){
+        ParameterValueAssigneType parameterValueAssigneType = parameterAndValueAssigneeType.getParameterValueAssigneType();
+        if(!matchers.containsKey(parameterValueAssigneType)){
             throw new RuntimeException("Does not exist match type.");
         }
-        ParameterValueMatcher parameterValueMatcher = matchers.get(valueMatcherType);
+        ParameterValueMatcher parameterValueMatcher = matchers.get(parameterValueAssigneType);
 
-        Parameter parameter = parameterAndValueMatcherType.getParameter();
+        Parameter parameter = parameterAndValueAssigneeType.getParameter();
         Optional optionalMatched = parameterValueMatcher.match(parameter);
         log.info("matched value : `{}`", optionalMatched);
 

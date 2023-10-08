@@ -3,7 +3,7 @@ package task.worker;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.Getter;
-import parameter.matcher.ParameterAndValueMatcherType;
+import parameter.matcher.ParameterAndValueAssigneeType;
 
 // object json
 // object file
@@ -14,7 +14,7 @@ import parameter.matcher.ParameterAndValueMatcherType;
 // 3. plain text - string
 
 public interface EndPointTaskWorker {
-    ParameterAndValueMatcherType[] getParameterTypeInfos();
+    ParameterAndValueAssigneeType[] getParameterTypeInfos();
 
     Optional<Object> execute(Object[] params);
 

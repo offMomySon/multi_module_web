@@ -7,6 +7,7 @@ import matcher.PathUrlMatcher;
 import matcher.RequestMethod;
 import matcher.segment.PathUrl;
 import matcher.segment.PathVariableValue;
+import matcher.segment.creator.SegmentChunkFactory;
 import task.worker.EndPointTaskWorker2;
 
 public class BaseEndPointTask2 implements EndPointTask2 {
@@ -21,6 +22,20 @@ public class BaseEndPointTask2 implements EndPointTask2 {
         this.requestMethod = requestMethod;
         this.pathUrlMatcher = pathUrlMatcher;
         this.endPointTaskWorker = endPointTaskWorker;
+    }
+
+    public static BaseEndPointTask2 from(RequestMethod requestMethod, String url, EndPointTaskWorker2 endPointTaskWorker){
+        Objects.requireNonNull(requestMethod);
+        Objects.requireNonNull(endPointTaskWorker);
+        if(Objects.isNull(url) || url.isBlank()){
+            throw new RuntimeException("Invalid parameter. url is empty.");
+        }
+
+        PathUrl pathUrl = PathUrl.from(url);
+        SegmentChunkFactory segmentChunkFactory = new SegmentChunkFactory(pathUrl);
+        PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(segmentChunkFactory);
+
+        return new BaseEndPointTask2(requestMethod, pathUrlMatcher, endPointTaskWorker);
     }
 
     @Override

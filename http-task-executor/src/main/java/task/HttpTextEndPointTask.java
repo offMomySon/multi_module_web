@@ -5,7 +5,7 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.util.Objects;
 import java.util.Optional;
-import parameter.matcher.ParameterAndValueMatcherType;
+import parameter.matcher.ParameterAndValueAssigneeType;
 import task.worker.EndPointTaskWorker;
 import vo.ContentType;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -21,7 +21,7 @@ public class HttpTextEndPointTask implements HttpEndPointTask{
     }
 
     @Override
-    public ParameterAndValueMatcherType[] getParameterTypeInfos() {
+    public ParameterAndValueAssigneeType[] getParameterTypeInfos() {
         return endPointTaskWorker.getParameterTypeInfos();
     }
 

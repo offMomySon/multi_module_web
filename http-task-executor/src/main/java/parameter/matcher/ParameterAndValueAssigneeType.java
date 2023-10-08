@@ -9,12 +9,12 @@ import lombok.ToString;
 @Getter
 public class ParameterAndValueAssigneeType {
     private final Parameter parameter;
-    private final ParameterValueAssigneType parameterValueAssigneType;
+    private final ParameterValueAssigneeType parameterValueAssigneeType;
 
-    public ParameterAndValueAssigneeType(Parameter parameter, ParameterValueAssigneType parameterValueAssigneType) {
+    public ParameterAndValueAssigneeType(Parameter parameter, ParameterValueAssigneeType parameterValueAssigneeType) {
         Objects.requireNonNull(parameter);
-        Objects.requireNonNull(parameterValueAssigneType);
+        Objects.requireNonNull(parameterValueAssigneeType);
         this.parameter = parameter;
-        this.parameterValueAssigneType = parameterValueAssigneType;
+        this.parameterValueAssigneeType = parameterValueAssigneeType;
     }
 }

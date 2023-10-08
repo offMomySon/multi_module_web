@@ -5,29 +5,29 @@ import java.lang.reflect.Parameter;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import parameter.matcher.ParameterValueAssigneType;
+import parameter.matcher.ParameterValueAssigneeType;
 import parameter.matcher.ParameterAndValueAssigneeType;
-import parameter.matcher.ParameterValueMatchers;
+import parameter.matcher.ParameterValueAssignees;
 
 @Slf4j
 public class ParameterValueGetter {
     private static final CompositeValueTypeConverter converter = new CompositeValueTypeConverter();
 
-    private final ParameterValueMatchers valueMatchers;
+    private final ParameterValueAssignees parameterValueAssignee;
 
-    public ParameterValueGetter(ParameterValueMatchers valueMatchers) {
-        Objects.requireNonNull(valueMatchers);
-        this.valueMatchers = valueMatchers;
+    public ParameterValueGetter(ParameterValueAssignees parameterValueAssignees) {
+        Objects.requireNonNull(parameterValueAssignees);
+        this.parameterValueAssignee = parameterValueAssignees;
     }
 
     public Optional<?> get(ParameterAndValueAssigneeType parameterAndValueAssigneeType) {
         Objects.requireNonNull(parameterAndValueAssigneeType);
 
         Parameter parameter = parameterAndValueAssigneeType.getParameter();
-        ParameterValueAssigneType parameterValueAssigneType = parameterAndValueAssigneeType.getParameterValueAssigneType();
-        log.info("parameter : `{}`, valueMatcherType : `{}`", parameter, parameterValueAssigneType);
+        ParameterValueAssigneeType parameterValueAssigneeType = parameterAndValueAssigneeType.getParameterValueAssigneeType();
+        log.info("parameter : `{}`, parameterValueAssigneeType : `{}`", parameter, parameterValueAssigneeType);
 
-        Optional optionalMatchValue = valueMatchers.match(parameterAndValueAssigneeType);
+        Optional optionalMatchValue = parameterValueAssignee.assign(parameterAndValueAssigneeType);
         if (optionalMatchValue.isEmpty()) {
             return Optional.empty();
         }

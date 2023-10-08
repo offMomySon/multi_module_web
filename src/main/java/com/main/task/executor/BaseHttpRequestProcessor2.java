@@ -2,21 +2,27 @@ package com.main.task.executor;
 
 import executor.HttpRequestProcessor;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
-import matcher.MatchedEndPointTaskWorker;
 import matcher.MatchedEndPointTaskWorker2;
 import matcher.RequestMethod;
 import matcher.segment.PathUrl;
 import parameter.UrlParameters;
 import parameter.extractor.HttpBodyParameterInfoExtractor;
 import parameter.extractor.HttpUrlParameterInfoExtractor;
+import parameter.matcher.HttpBodyParameterValueAssignee;
+import parameter.matcher.HttpUrlParameterValueAssignee;
+import parameter.matcher.ParameterValueAssignees2;
 import task.EndPointTask2;
-import task.worker.EndPointTaskWorker;
 import task.worker.EndPointTaskWorker2;
 import vo.HttpRequest;
 import vo.HttpResponse;
 import vo.QueryParameters;
+import static parameter.matcher.ParameterValueAssigneeType.HTTP_BODY;
+import static parameter.matcher.ParameterValueAssigneeType.HTTP_QUERY_PARAM;
+import static parameter.matcher.ParameterValueAssigneeType.HTTP_URL;
 
 @Slf4j
 public class BaseHttpRequestProcessor2 implements HttpRequestProcessor {
@@ -69,19 +75,15 @@ public class BaseHttpRequestProcessor2 implements HttpRequestProcessor {
         // 해석된 정보를 이용하여 로직을 수행하기 때문에 annotation 과 연관관계를 끊을 수 있다.
         // 하지만 코드 적으로는 끊어졌지만, 개념적으로는 연결이 되어있다. 이것을 연관관계를 끊어다고 볼 수 있을까?
         // 임시저장 브랜치 - origin/split_annotation_module_role_at_MethodParameterValueMatcher
-//        ParameterValueMatchers parameterValueMatchers = new ParameterValueMatchers(
-//            Map.of(HTTP_INPUT_STREAM, new SingleValueParameterValueMatcher<>(request.getBodyInputStream()),
-//                   HTTP_OUTPUT_STREAM, new SingleValueParameterValueMatcher<>(response.getOutputStream()),
-//                   HTTP_BODY, new HttpBodyParameterValueMatcher(httpBodyParameterInfoExtractor, request.getBodyInputStream()),
-//                   HTTP_URL, new HttpUrlParameterValueMatcher(pathVariableParameterInfoExtractor, pathVariableValue),
-//                   HTTP_QUERY_PARAM, new HttpUrlParameterValueMatcher(requestParamHttpUrlParameterInfoExtractor, queryParamValues)));
-//        ParameterValueGetter parameterValueGetter = new ParameterValueGetter(parameterValueMatchers);
-//
-//        Object[] parameterValues = Arrays.stream(httpEndPointTask.getParameterTypeInfos())
-//            .map(parameterValueGetter::get)
-//            .map(v -> v.orElse(null))
-//            .toArray();
-//        Optional<HttpEndPointTask.HttpTaskResult> optionalResult = httpEndPointTask.execute(parameterValues);
+        ParameterValueAssignees2 parameterValueAssignees = new ParameterValueAssignees2(
+            Map.of(HTTP_BODY, new HttpBodyParameterValueAssignee(httpBodyParameterInfoExtractor, request.getBodyInputStream()),
+                   HTTP_URL, new HttpUrlParameterValueAssignee(pathVariableParameterInfoExtractor, pathVariableValue),
+                   HTTP_QUERY_PARAM, new HttpUrlParameterValueAssignee(requestParamHttpUrlParameterInfoExtractor, queryParamValues)));
+
+        Object[] parameterValues = Arrays.stream(endPointTaskWorker.getParameterTypeInfos())
+            .map(parameterValueAssignees::assign)
+            .map(v -> v.orElse(null))
+            .toArray();
 //
 //        log.info("methodResult : `{}`, clazz : `{}`", optionalResult.orElse(null), optionalResult.map(Object::getClass).orElse(null));
 //

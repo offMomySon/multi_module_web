@@ -17,10 +17,10 @@ import parameter.ParameterValueGetter;
 import parameter.UrlParameters;
 import parameter.extractor.HttpBodyParameterInfoExtractor;
 import parameter.extractor.HttpUrlParameterInfoExtractor;
-import parameter.matcher.HttpBodyParameterValueMatcher;
-import parameter.matcher.HttpUrlParameterValueMatcher;
-import parameter.matcher.ParameterValueMatchers;
-import parameter.matcher.SingleValueParameterValueMatcher;
+import parameter.matcher.HttpBodyParameterValueAssignee;
+import parameter.matcher.HttpUrlParameterValueAssignee;
+import parameter.matcher.ParameterValueAssignees;
+import parameter.matcher.SingleValueParameterValueAssignee;
 import response.HttpResponseHeader;
 import response.HttpResponseHeaderCreator;
 import task.HttpEndPointTask;
@@ -29,11 +29,11 @@ import vo.ContentType;
 import vo.HttpRequest;
 import vo.HttpResponse;
 import vo.QueryParameters;
-import static parameter.matcher.ParameterValueAssigneType.HTTP_BODY;
-import static parameter.matcher.ParameterValueAssigneType.HTTP_INPUT_STREAM;
-import static parameter.matcher.ParameterValueAssigneType.HTTP_OUTPUT_STREAM;
-import static parameter.matcher.ParameterValueAssigneType.HTTP_QUERY_PARAM;
-import static parameter.matcher.ParameterValueAssigneType.HTTP_URL;
+import static parameter.matcher.ParameterValueAssigneeType.HTTP_BODY;
+import static parameter.matcher.ParameterValueAssigneeType.HTTP_INPUT_STREAM;
+import static parameter.matcher.ParameterValueAssigneeType.HTTP_OUTPUT_STREAM;
+import static parameter.matcher.ParameterValueAssigneeType.HTTP_QUERY_PARAM;
+import static parameter.matcher.ParameterValueAssigneeType.HTTP_URL;
 
 @Slf4j
 public class BaseHttpRequestProcessor implements HttpRequestProcessor {
@@ -85,13 +85,13 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
         // 해석된 정보를 이용하여 로직을 수행하기 때문에 annotation 과 연관관계를 끊을 수 있다.
         // 하지만 코드 적으로는 끊어졌지만, 개념적으로는 연결이 되어있다. 이것을 연관관계를 끊어다고 볼 수 있을까?
         // 임시저장 브랜치 - origin/split_annotation_module_role_at_MethodParameterValueMatcher
-        ParameterValueMatchers parameterValueMatchers = new ParameterValueMatchers(
-            Map.of(HTTP_INPUT_STREAM, new SingleValueParameterValueMatcher<>(request.getBodyInputStream()),
-                   HTTP_OUTPUT_STREAM, new SingleValueParameterValueMatcher<>(response.getOutputStream()),
-                   HTTP_BODY, new HttpBodyParameterValueMatcher(httpBodyParameterInfoExtractor, request.getBodyInputStream()),
-                   HTTP_URL, new HttpUrlParameterValueMatcher(pathVariableParameterInfoExtractor, pathVariableValue),
-                   HTTP_QUERY_PARAM, new HttpUrlParameterValueMatcher(requestParamHttpUrlParameterInfoExtractor, queryParamValues)));
-        ParameterValueGetter parameterValueGetter = new ParameterValueGetter(parameterValueMatchers);
+        ParameterValueAssignees parameterValueAssignees = new ParameterValueAssignees(
+            Map.of(HTTP_INPUT_STREAM, new SingleValueParameterValueAssignee<>(request.getBodyInputStream()),
+                   HTTP_OUTPUT_STREAM, new SingleValueParameterValueAssignee<>(response.getOutputStream()),
+                   HTTP_BODY, new HttpBodyParameterValueAssignee(httpBodyParameterInfoExtractor, request.getBodyInputStream()),
+                   HTTP_URL, new HttpUrlParameterValueAssignee(pathVariableParameterInfoExtractor, pathVariableValue),
+                   HTTP_QUERY_PARAM, new HttpUrlParameterValueAssignee(requestParamHttpUrlParameterInfoExtractor, queryParamValues)));
+        ParameterValueGetter parameterValueGetter = new ParameterValueGetter(parameterValueAssignees);
 
         Object[] parameterValues = Arrays.stream(httpEndPointTask.getParameterTypeInfos())
             .map(parameterValueGetter::get)

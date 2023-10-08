@@ -14,10 +14,10 @@ import parameter.UrlParameters;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import parameter.matcher.HttpUrlAnnotationAnnotatedParameterValueMatcher;
-import static parameter.matcher.HttpUrlAnnotationAnnotatedParameterValueMatcher.HttpUrlAnnotation;
+import parameter.matcher.HttpUrlAnnotationAnnotatedParameterValueAssignee;
+import static parameter.matcher.HttpUrlAnnotationAnnotatedParameterValueAssignee.HttpUrlAnnotation;
 
-class HttpUrlParameterInfoAnnotatedAssignParameterValueMatcherTest {
+class HttpUrlParameterInfoAnnotatedAssignParameterValueAssigneeTest {
 
     @DisplayName("parameter 로 부터 target annotation 을 찾지 못하면 exception 이 발생합니다.")
     @Test
@@ -26,9 +26,9 @@ class HttpUrlParameterInfoAnnotatedAssignParameterValueMatcherTest {
         Parameter doesNotAnnotatedParameter = ParamAnnotatedClass.getDoesNotAnnotatedParameter(RequestParam.class);
         UrlParameters allParamHasUrlParameters = ParamAnnotatedClass.getAllParamHasRequestParameters();
 
-        HttpUrlAnnotationAnnotatedParameterValueMatcher parameterValueMatcher = new HttpUrlAnnotationAnnotatedParameterValueMatcher(RequestParam.class, allParamHasUrlParameters);
+        HttpUrlAnnotationAnnotatedParameterValueAssignee parameterValueMatcher = new HttpUrlAnnotationAnnotatedParameterValueAssignee(RequestParam.class, allParamHasUrlParameters);
         //when
-        Throwable actual = Assertions.catchThrowable(() -> parameterValueMatcher.match(doesNotAnnotatedParameter));
+        Throwable actual = Assertions.catchThrowable(() -> parameterValueMatcher.assign(doesNotAnnotatedParameter));
 
         //then
         Assertions.assertThat(actual).isNotNull();
@@ -42,10 +42,10 @@ class HttpUrlParameterInfoAnnotatedAssignParameterValueMatcherTest {
         Parameter annotatedParameter = ParamAnnotatedClass.getAnnotatedParameter(annotationClazz, true);
         UrlParameters allParamHasUrlParameters = ParamAnnotatedClass.getAllParamHasRequestParameters();
 
-        HttpUrlAnnotationAnnotatedParameterValueMatcher parameterValueMatcher = new HttpUrlAnnotationAnnotatedParameterValueMatcher(annotationClazz, allParamHasUrlParameters);
+        HttpUrlAnnotationAnnotatedParameterValueAssignee parameterValueMatcher = new HttpUrlAnnotationAnnotatedParameterValueAssignee(annotationClazz, allParamHasUrlParameters);
 
         //when
-        Optional actual = parameterValueMatcher.match(annotatedParameter);
+        Optional actual = parameterValueMatcher.assign(annotatedParameter);
 
         //then
         Assertions.assertThat(actual).isPresent();
@@ -59,9 +59,9 @@ class HttpUrlParameterInfoAnnotatedAssignParameterValueMatcherTest {
         Parameter mustMatchParameter = ParamAnnotatedClass.getAnnotatedParameter(annotationClazz, true);
         UrlParameters emptyUrlParameters = ParamAnnotatedClass.getEmptyRequestParameters();
 
-        HttpUrlAnnotationAnnotatedParameterValueMatcher parameterValueMatcher = new HttpUrlAnnotationAnnotatedParameterValueMatcher(annotationClazz, emptyUrlParameters);
+        HttpUrlAnnotationAnnotatedParameterValueAssignee parameterValueMatcher = new HttpUrlAnnotationAnnotatedParameterValueAssignee(annotationClazz, emptyUrlParameters);
         //when
-        Throwable actual = Assertions.catchThrowable(() -> parameterValueMatcher.match(mustMatchParameter));
+        Throwable actual = Assertions.catchThrowable(() -> parameterValueMatcher.assign(mustMatchParameter));
 
         //then
         Assertions.assertThat(actual).isNotNull();
@@ -75,10 +75,10 @@ class HttpUrlParameterInfoAnnotatedAssignParameterValueMatcherTest {
         Parameter doesNotMustMatchParameter = ParamAnnotatedClass.getAnnotatedParameter(annotationClazz, false);
         UrlParameters emptyUrlParameters = ParamAnnotatedClass.getEmptyRequestParameters();
 
-        HttpUrlAnnotationAnnotatedParameterValueMatcher parameterValueMatcher = new HttpUrlAnnotationAnnotatedParameterValueMatcher(annotationClazz, emptyUrlParameters);
+        HttpUrlAnnotationAnnotatedParameterValueAssignee parameterValueMatcher = new HttpUrlAnnotationAnnotatedParameterValueAssignee(annotationClazz, emptyUrlParameters);
 
         //when
-        Optional actual = parameterValueMatcher.match(doesNotMustMatchParameter);
+        Optional actual = parameterValueMatcher.assign(doesNotMustMatchParameter);
 
         //then
         Assertions.assertThat(actual).isEmpty();

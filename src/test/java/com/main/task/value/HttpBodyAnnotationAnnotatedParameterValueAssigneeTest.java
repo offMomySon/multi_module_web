@@ -9,21 +9,21 @@ import annotation.RequestBody;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import parameter.matcher.HttpBodyAnnotationAnnotatedParameterValueMatcher;
+import parameter.matcher.HttpBodyAnnotationAnnotatedParameterValueAssignee;
 
-class HttpBodyAnnotationAnnotatedParameterValueMatcherTest {
+class HttpBodyAnnotationAnnotatedParameterValueAssigneeTest {
 
     @DisplayName("RequestBody annotation 이 존재하지 않으면 exception 이 발생합니다.")
     @Test
     void test() throws Exception {
         //given
         InputStream inputStream = new ByteArrayInputStream(new byte[1]);
-        HttpBodyAnnotationAnnotatedParameterValueMatcher valueMatcher = new HttpBodyAnnotationAnnotatedParameterValueMatcher(inputStream);
+        HttpBodyAnnotationAnnotatedParameterValueAssignee valueMatcher = new HttpBodyAnnotationAnnotatedParameterValueAssignee(inputStream);
 
         Parameter doesNotRequestBodyAnnotatedParameter = TestClass.getDoesNotRequestBodyAnnotatedParameter();
 
         //when
-        Throwable actual = Assertions.catchThrowable(() -> valueMatcher.match(doesNotRequestBodyAnnotatedParameter));
+        Throwable actual = Assertions.catchThrowable(() -> valueMatcher.assign(doesNotRequestBodyAnnotatedParameter));
 
         //then
         Assertions.assertThat(actual).isNotNull();
@@ -34,12 +34,12 @@ class HttpBodyAnnotationAnnotatedParameterValueMatcherTest {
     void ttest() throws Exception {
         //given
         InputStream inputStream = new ByteArrayInputStream(new byte[1]);
-        HttpBodyAnnotationAnnotatedParameterValueMatcher valueMatcher = new HttpBodyAnnotationAnnotatedParameterValueMatcher(inputStream);
+        HttpBodyAnnotationAnnotatedParameterValueAssignee valueMatcher = new HttpBodyAnnotationAnnotatedParameterValueAssignee(inputStream);
 
         Parameter requestBodyAnnotatedParameter = TestClass.getRequestBodyAnnotatedParameter();
 
         //when
-        Optional<?> optionalActual = valueMatcher.match(requestBodyAnnotatedParameter);
+        Optional<?> optionalActual = valueMatcher.assign(requestBodyAnnotatedParameter);
 
         //then
         Assertions.assertThat(optionalActual).isPresent();

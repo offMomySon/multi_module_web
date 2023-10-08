@@ -15,19 +15,19 @@ import static com.main.util.IoUtils.createBufferedInputStream;
 // input stream 에 RequestBody 어노테이션이 존재하는지 검증한다.
 // 해당 어노테이팅이 필요한지 체크하고
 // 필요하다면 annotation 모듈의 역할로 처리가 가능하게 수정하자.
-public class HttpBodyAnnotationAnnotatedParameterValueMatcher implements ParameterValueMatcher {
+public class HttpBodyAnnotationAnnotatedParameterValueAssignee implements ParameterValueAssignee {
     private static final Class<RequestBody> REQUEST_BODY_CLASS = RequestBody.class;
 
     private final InputStream bodyInputStream;
     private String body;
 
-    public HttpBodyAnnotationAnnotatedParameterValueMatcher(InputStream bodyInputStream) {
+    public HttpBodyAnnotationAnnotatedParameterValueAssignee(InputStream bodyInputStream) {
         Objects.requireNonNull(bodyInputStream);
         this.bodyInputStream = bodyInputStream;
     }
 
     @Override
-    public Optional<?> match(Parameter parameter) {
+    public Optional<?> assign(Parameter parameter) {
         Objects.requireNonNull(parameter);
 
         Optional<RequestBody> optionalRequestBody = AnnotationUtils.find(parameter, REQUEST_BODY_CLASS);

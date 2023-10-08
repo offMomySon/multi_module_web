@@ -5,16 +5,16 @@ import java.text.MessageFormat;
 import java.util.Objects;
 import java.util.Optional;
 
-public class SingleValueParameterValueMatcher<T> implements ParameterValueMatcher {
+public class SingleValueParameterValueAssignee<T> implements ParameterValueAssignee {
     private final T value;
 
-    public SingleValueParameterValueMatcher(T value) {
+    public SingleValueParameterValueAssignee(T value) {
         Objects.requireNonNull(value);
         this.value = value;
     }
 
     @Override
-    public Optional<T> match(Parameter parameter) {
+    public Optional<T> assign(Parameter parameter) {
         Objects.requireNonNull(parameter);
 
         Class<?> parameterClazz = parameter.getType();

@@ -60,11 +60,11 @@ import task.ResourceEndPointFindTask2;
 import task.SystemResourceFinder;
 import task.worker.JavaMethodInvokeTaskWorker2;
 import static parameter.extractor.HttpUrlParameterInfoExtractor.HttpUrlParameterInfo;
-import static parameter.matcher.ParameterValueAssigneType.HTTP_BODY;
-import static parameter.matcher.ParameterValueAssigneType.HTTP_INPUT_STREAM;
-import static parameter.matcher.ParameterValueAssigneType.HTTP_OUTPUT_STREAM;
-import static parameter.matcher.ParameterValueAssigneType.HTTP_QUERY_PARAM;
-import static parameter.matcher.ParameterValueAssigneType.HTTP_URL;
+import static parameter.matcher.ParameterValueAssigneeType.HTTP_BODY;
+import static parameter.matcher.ParameterValueAssigneeType.HTTP_INPUT_STREAM;
+import static parameter.matcher.ParameterValueAssigneeType.HTTP_OUTPUT_STREAM;
+import static parameter.matcher.ParameterValueAssigneeType.HTTP_QUERY_PARAM;
+import static parameter.matcher.ParameterValueAssigneeType.HTTP_URL;
 
 @Slf4j
 public class App2 {

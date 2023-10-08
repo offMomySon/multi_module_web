@@ -10,11 +10,11 @@ import parameter.extractor.HttpBodyParameterInfoExtractor;
 import parameter.extractor.HttpBodyParameterInfoExtractor.HttpBodyParameterInfo;
 import static com.main.util.IoUtils.createBufferedInputStream;
 
-public class HttpBodyParameterValueMatcher implements ParameterValueMatcher {
+public class HttpBodyParameterValueAssignee implements ParameterValueAssignee {
     private final HttpBodyParameterInfoExtractor parameterInfoExtractor;
     private final InputStream inputStream;
 
-    public HttpBodyParameterValueMatcher(HttpBodyParameterInfoExtractor parameterInfoExtractor, InputStream inputStream) {
+    public HttpBodyParameterValueAssignee(HttpBodyParameterInfoExtractor parameterInfoExtractor, InputStream inputStream) {
         Objects.requireNonNull(parameterInfoExtractor);
         Objects.requireNonNull(inputStream);
         this.parameterInfoExtractor = parameterInfoExtractor;
@@ -22,7 +22,7 @@ public class HttpBodyParameterValueMatcher implements ParameterValueMatcher {
     }
 
     @Override
-    public Optional<?> match(Parameter parameter) {
+    public Optional<?> assign(Parameter parameter) {
         Objects.requireNonNull(parameter);
 
         HttpBodyParameterInfo bodyParameterInfo = parameterInfoExtractor.extract(parameter);

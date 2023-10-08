@@ -7,11 +7,11 @@ import parameter.UrlParameters;
 import parameter.extractor.HttpUrlParameterInfoExtractor;
 import static parameter.extractor.HttpUrlParameterInfoExtractor.HttpUrlParameterInfo;
 
-public class HttpUrlParameterValueMatcher implements ParameterValueMatcher {
+public class HttpUrlParameterValueAssignee implements ParameterValueAssignee {
     private final HttpUrlParameterInfoExtractor parameterInfoExtractor;
     private final UrlParameters urlParameters;
 
-    public HttpUrlParameterValueMatcher(HttpUrlParameterInfoExtractor parameterInfoExtractor, UrlParameters urlParameters) {
+    public HttpUrlParameterValueAssignee(HttpUrlParameterInfoExtractor parameterInfoExtractor, UrlParameters urlParameters) {
         Objects.requireNonNull(parameterInfoExtractor);
         Objects.requireNonNull(urlParameters);
         this.parameterInfoExtractor = parameterInfoExtractor;
@@ -19,7 +19,7 @@ public class HttpUrlParameterValueMatcher implements ParameterValueMatcher {
     }
 
     @Override
-    public Optional<?> match(Parameter parameter) {
+    public Optional<?> assign(Parameter parameter) {
         Objects.requireNonNull(parameter);
 
         HttpUrlParameterInfo urlParameterInfo = parameterInfoExtractor.extract(parameter);

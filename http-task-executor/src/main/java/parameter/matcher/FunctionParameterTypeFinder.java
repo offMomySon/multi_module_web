@@ -5,15 +5,15 @@ import java.util.Objects;
 import java.util.function.Function;
 
 public class FunctionParameterTypeFinder implements ParameterTypeFinder{
-    private final Function<Parameter, ParameterValueAssigneType> parameterParameterTypeFunction;
+    private final Function<Parameter, ParameterValueAssigneeType> parameterParameterTypeFunction;
 
-    public FunctionParameterTypeFinder(Function<Parameter, ParameterValueAssigneType> parameterParameterTypeFunction) {
+    public FunctionParameterTypeFinder(Function<Parameter, ParameterValueAssigneeType> parameterParameterTypeFunction) {
         Objects.requireNonNull(parameterParameterTypeFunction);
         this.parameterParameterTypeFunction = parameterParameterTypeFunction;
     }
 
     @Override
-    public ParameterValueAssigneType find(Parameter parameter) {
+    public ParameterValueAssigneeType find(Parameter parameter) {
         Objects.requireNonNull(parameter);
         return parameterParameterTypeFunction.apply(parameter);
     }

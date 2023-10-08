@@ -3,5 +3,5 @@ package parameter.matcher;
 import java.lang.reflect.Parameter;
 
 public interface ParameterTypeFinder {
-    ParameterValueAssigneType find(Parameter parameter);
+    ParameterValueAssigneeType find(Parameter parameter);
 }

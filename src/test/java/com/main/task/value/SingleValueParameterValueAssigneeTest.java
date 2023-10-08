@@ -7,9 +7,9 @@ import java.lang.reflect.Parameter;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import parameter.matcher.SingleValueParameterValueMatcher;
+import parameter.matcher.SingleValueParameterValueAssignee;
 
-class SingleValueParameterValueMatcherTest {
+class SingleValueParameterValueAssigneeTest {
 
     @DisplayName("parameter class 에 value 를 할당할 수 있으면 값을 반환합니다.")
     @Test
@@ -17,10 +17,10 @@ class SingleValueParameterValueMatcherTest {
         //given
         Parameter inputStreamParameter = TestClass.getInputStreamParameter();
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(new byte[1]);
-        SingleValueParameterValueMatcher<InputStream> baseParameterValueMatcher = new SingleValueParameterValueMatcher<>(byteArrayInputStream);
+        SingleValueParameterValueAssignee<InputStream> baseParameterValueMatcher = new SingleValueParameterValueAssignee<>(byteArrayInputStream);
 
         //when
-        Throwable actual = Assertions.catchThrowable(() -> baseParameterValueMatcher.match(inputStreamParameter));
+        Throwable actual = Assertions.catchThrowable(() -> baseParameterValueMatcher.assign(inputStreamParameter));
 
         //then
         Assertions.assertThat(actual).isNull();
@@ -31,10 +31,10 @@ class SingleValueParameterValueMatcherTest {
     void ttest() throws Exception {
         //given
         Parameter inputStreamParameter = TestClass.getInputStreamParameter();
-        SingleValueParameterValueMatcher<Integer> baseParameterValueMatcher = new SingleValueParameterValueMatcher<>(1);
+        SingleValueParameterValueAssignee<Integer> baseParameterValueMatcher = new SingleValueParameterValueAssignee<>(1);
 
         //when
-        Throwable actual = Assertions.catchThrowable(() -> baseParameterValueMatcher.match(inputStreamParameter));
+        Throwable actual = Assertions.catchThrowable(() -> baseParameterValueMatcher.assign(inputStreamParameter));
 
         //then
         Assertions.assertThat(actual).isNotNull();

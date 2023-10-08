@@ -6,13 +6,13 @@ import matcher.MatchedEndPointTaskWorker2;
 import matcher.RequestMethod;
 import matcher.segment.PathUrl;
 import matcher.segment.PathVariableValue;
-import task.worker.SystemResourceFileFindTaskWorker;
+import task.worker.SystemResourceFileFindTaskWorker2;
 
-public class ResourceEndPointTask implements EndPointTask {
+public class ResourceEndPointFindTask2 implements EndPointTask2 {
     private final SystemResourceFinder systemResourceFinder;
     private final String urlPrefix;
 
-    public ResourceEndPointTask(SystemResourceFinder systemResourceFinder, String urlPrefix) {
+    public ResourceEndPointFindTask2(SystemResourceFinder systemResourceFinder, String urlPrefix) {
         Objects.requireNonNull(systemResourceFinder);
         Objects.requireNonNull(urlPrefix);
         this.systemResourceFinder = systemResourceFinder;
@@ -33,7 +33,7 @@ public class ResourceEndPointTask implements EndPointTask {
             return Optional.empty();
         }
 
-        SystemResourceFileFindTaskWorker taskWorker = new SystemResourceFileFindTaskWorker(this.systemResourceFinder, resourcePath);
+        SystemResourceFileFindTaskWorker2 taskWorker = new SystemResourceFileFindTaskWorker2(this.systemResourceFinder, resourcePath);
         PathVariableValue emptyPathVariableValue = PathVariableValue.empty();
         MatchedEndPointTaskWorker2 matchedEndPoint = new MatchedEndPointTaskWorker2(taskWorker, emptyPathVariableValue);
         return Optional.of(matchedEndPoint);

@@ -1,55 +1,38 @@
 package com.main.task.executor;
 
-import com.main.task.response.HttpResponseSender;
 import executor.HttpRequestProcessor;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
+import matcher.MatchedEndPointTaskWorker;
 import matcher.MatchedEndPointTaskWorker2;
 import matcher.RequestMethod;
 import matcher.segment.PathUrl;
-import parameter.ParameterValueGetter;
 import parameter.UrlParameters;
 import parameter.extractor.HttpBodyParameterInfoExtractor;
 import parameter.extractor.HttpUrlParameterInfoExtractor;
-import parameter.matcher.HttpBodyParameterValueMatcher;
-import parameter.matcher.HttpUrlParameterValueMatcher;
-import parameter.matcher.ParameterValueMatchers;
-import parameter.matcher.SingleValueParameterValueMatcher;
-import response.HttpResponseHeader;
-import response.HttpResponseHeaderCreator;
-import task.EndPointTask;
-import task.HttpEndPointTask;
+import task.EndPointTask2;
 import task.worker.EndPointTaskWorker;
-import vo.ContentType;
+import task.worker.EndPointTaskWorker2;
 import vo.HttpRequest;
 import vo.HttpResponse;
 import vo.QueryParameters;
-import static parameter.matcher.ValueMatcherType.HTTP_BODY;
-import static parameter.matcher.ValueMatcherType.HTTP_INPUT_STREAM;
-import static parameter.matcher.ValueMatcherType.HTTP_OUTPUT_STREAM;
-import static parameter.matcher.ValueMatcherType.HTTP_QUERY_PARAM;
-import static parameter.matcher.ValueMatcherType.HTTP_URL;
 
 @Slf4j
 public class BaseHttpRequestProcessor2 implements HttpRequestProcessor {
     private final HttpBodyParameterInfoExtractor httpBodyParameterInfoExtractor;
     private final HttpUrlParameterInfoExtractor requestParamHttpUrlParameterInfoExtractor;
     private final HttpUrlParameterInfoExtractor pathVariableParameterInfoExtractor;
-    private final EndPointTask endPointTask;
+    private final EndPointTask2 endPointTask;
     private final SimpleDateFormat simpleDateFormat;
     private final String hostAddress;
 
     public BaseHttpRequestProcessor2(HttpBodyParameterInfoExtractor httpBodyParameterInfoExtractor,
-                                    HttpUrlParameterInfoExtractor requestParamHttpUrlParameterInfoExtractor,
-                                    HttpUrlParameterInfoExtractor pathVariableParameterInfoExtractor,
-                                     EndPointTask endPointTask,
-                                    SimpleDateFormat simpleDateFormat,
-                                    String hostAddress) {
+                                     HttpUrlParameterInfoExtractor requestParamHttpUrlParameterInfoExtractor,
+                                     HttpUrlParameterInfoExtractor pathVariableParameterInfoExtractor,
+                                     EndPointTask2 endPointTask,
+                                     SimpleDateFormat simpleDateFormat,
+                                     String hostAddress) {
         Objects.requireNonNull(httpBodyParameterInfoExtractor);
         Objects.requireNonNull(pathVariableParameterInfoExtractor);
         Objects.requireNonNull(endPointTask);
@@ -72,10 +55,10 @@ public class BaseHttpRequestProcessor2 implements HttpRequestProcessor {
         PathUrl requestUrl = PathUrl.from(request.getHttpRequestPath().getValue().toString());
         QueryParameters queryParameters = request.getQueryParameters();
 
-        MatchedEndPointTaskWorker2 matchedEndPoint = endPointTask.match(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
-        EndPointTaskWorker endPointTaskWorker = matchedEndPoint.getEndPointTaskWorker();
+        MatchedEndPointTaskWorker2 matchedEndPointTaskWorker = endPointTask.match(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
+        EndPointTaskWorker2 endPointTaskWorker = matchedEndPointTaskWorker.getEndPointTaskWorker();
 
-        UrlParameters pathVariableValue = new UrlParameters(matchedEndPoint.getPathVariableValue().getValues());
+        UrlParameters pathVariableValue = new UrlParameters(matchedEndPointTaskWorker.getPathVariableValue().getValues());
         UrlParameters queryParamValues = new UrlParameters(queryParameters.getParameterMap());
 
         // todo [review]

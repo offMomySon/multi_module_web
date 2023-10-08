@@ -2,7 +2,6 @@ package matcher;
 
 import converter.ValueConverter;
 import converter.PathValueConverter;
-import java.io.File;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
@@ -12,8 +11,7 @@ import matcher.segment.PathVariableValue;
 import task.HttpConvertEndPointTask;
 import task.HttpEndPointTask;
 import task.worker.ResourceFindTaskWorker;
-import task.worker.WorkerContentType;
-import vo.ContentType;
+import task.worker.ContentType;
 
 @Slf4j
 public class StaticResourceEndPointTaskMatcher implements EndpointTaskMatcher {
@@ -43,10 +41,10 @@ public class StaticResourceEndPointTaskMatcher implements EndpointTaskMatcher {
 
         log.info("Matched. requestUrl : `{}`, endPointUrl : `{}`, resourcePath : `{}`", requestUrl, endPointUrl, resourcePath);
         String name = resourcePath.toFile().getName();
-        WorkerContentType workerContentType = WorkerContentType.findByExtension(name);
-        ResourceFindTaskWorker resourceFindTask = new ResourceFindTaskWorker(workerContentType, resourcePath);
+        ContentType contentType = ContentType.findByFileName(name);
+        ResourceFindTaskWorker resourceFindTask = new ResourceFindTaskWorker(contentType, resourcePath);
         ValueConverter valueConverter = new PathValueConverter();
-        HttpEndPointTask httpEndPointTask = new HttpConvertEndPointTask(ContentType.APPLICATION_JSON, valueConverter, resourceFindTask);
+        HttpEndPointTask httpEndPointTask = new HttpConvertEndPointTask(vo.ContentType.APPLICATION_JSON, valueConverter, resourceFindTask);
         MatchedEndPoint matchedEndPoint = new MatchedEndPoint(httpEndPointTask, PathVariableValue.empty());
         return Optional.of(matchedEndPoint);
     }

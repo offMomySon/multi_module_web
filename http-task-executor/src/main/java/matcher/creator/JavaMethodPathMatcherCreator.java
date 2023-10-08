@@ -19,8 +19,7 @@ import task.HttpEndPointTask;
 import task.HttpTextEndPointTask;
 import task.worker.EndPointTaskWorker;
 import task.worker.JavaMethodInvokeTaskWorker;
-import task.worker.WorkerContentType;
-import vo.ContentType;
+import task.worker.ContentType;
 
 public class JavaMethodPathMatcherCreator {
     private final Function<Parameter, ParameterAndValueMatcherType> parameterParameterTypeInfoFunction;
@@ -48,8 +47,8 @@ public class JavaMethodPathMatcherCreator {
             .toArray(ParameterAndValueMatcherType[]::new);
 
         Class<?> returnType = javaMethod.getReturnType();
-        WorkerContentType workerContentType = WorkerContentType.findByClazz(returnType);
-        EndPointTaskWorker endPointTaskWorker = new JavaMethodInvokeTaskWorker(workerContentType, object, javaMethod, parameterAndValueMatcherTypes);
+        ContentType contentType = ContentType.findByClazz(returnType);
+        EndPointTaskWorker endPointTaskWorker = new JavaMethodInvokeTaskWorker(contentType, object, javaMethod, parameterAndValueMatcherTypes);
 
         HttpEndPointTask httpEndPointTask;
         if (returnType == Void.TYPE) {
@@ -58,7 +57,7 @@ public class JavaMethodPathMatcherCreator {
             httpEndPointTask = new HttpTextEndPointTask(endPointTaskWorker);
         } else {
             ValueConverter valueConverter = new ObjectValueConverter(returnType);
-            httpEndPointTask = new HttpConvertEndPointTask(ContentType.APPLICATION_JSON, valueConverter, endPointTaskWorker);
+            httpEndPointTask = new HttpConvertEndPointTask(vo.ContentType.APPLICATION_JSON, valueConverter, endPointTaskWorker);
         }
 
         return new JavaMethodEndpointTaskMatcher(requestMethod, pathUrlMatcher, httpEndPointTask);

@@ -1,16 +1,17 @@
 package task.worker;
 
 import java.nio.file.Path;
+import java.text.MessageFormat;
 import java.util.Objects;
 import java.util.Optional;
 import parameter.matcher.ParameterAndValueMatcherType;
 import task.SystemResourceFinder;
 
-public class SystemResourceFileFindTaskWorker implements EndPointTaskWorker {
+public class SystemResourceFileFindTaskWorker2 implements EndPointTaskWorker2 {
     private final SystemResourceFinder systemResourceFinder;
     private final String resourcePath;
 
-    public SystemResourceFileFindTaskWorker(SystemResourceFinder systemResourceFinder, String resourcePath) {
+    public SystemResourceFileFindTaskWorker2(SystemResourceFinder systemResourceFinder, String resourcePath) {
         Objects.requireNonNull(systemResourceFinder);
         if (Objects.isNull(resourcePath) || resourcePath.isBlank()) {
             throw new RuntimeException("does not exist resourcePath.");
@@ -25,14 +26,15 @@ public class SystemResourceFileFindTaskWorker implements EndPointTaskWorker {
     }
 
     @Override
-    public Optional<Object> execute(Object[] params) {
-        Optional<Path> optionalPath = systemResourceFinder.findFile(resourcePath);
+    public WorkerResult execute(Object[] params) {
+        Optional<Path> optionalFoundResource = systemResourceFinder.findFile(resourcePath);
 
-        if (optionalPath.isEmpty()) {
-            Optional.empty();
+        if (optionalFoundResource.isEmpty()) {
+            throw new RuntimeException(MessageFormat.format("Fail to find resource. ResourcePath : `{}`", resourcePath));
         }
 
-        Path path = optionalPath.get();
-        return Optional.of(path);
+        Path foundResource = optionalFoundResource.get();
+        ContentType contentType = ContentType.findByPath(foundResource);
+        return new WorkerResult(contentType, foundResource);
     }
 }

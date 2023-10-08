@@ -10,13 +10,13 @@ import parameter.matcher.ParameterAndValueMatcherType;
 
 @Slf4j
 public class ResourceFindTaskWorker implements EndPointTaskWorker {
-    private final WorkerContentType workerContentType;
+    private final ContentType contentType;
     private final Path resourcePath;
 
-    public ResourceFindTaskWorker(WorkerContentType workerContentType, Path resourcePath) {
-        Objects.requireNonNull(workerContentType);
+    public ResourceFindTaskWorker(ContentType contentType, Path resourcePath) {
+        Objects.requireNonNull(contentType);
         Objects.requireNonNull(resourcePath);
-        this.workerContentType = workerContentType;
+        this.contentType = contentType;
         this.resourcePath = resourcePath;
     }
 

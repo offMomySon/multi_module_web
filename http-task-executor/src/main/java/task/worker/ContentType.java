@@ -1,11 +1,12 @@
 package task.worker;
 
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.Objects;
 
 // 작은 도메인들은 영역이 작기 때문에 정책적인 것들보다, 기능 단위의 객체들을 이용할것이다.
 // 어디서 부터 정책적인 영역이 나올 수 있는지?
-public enum WorkerContentType {
+public enum ContentType {
     EMPTY,
     STRING,
     JSON,
@@ -18,7 +19,7 @@ public enum WorkerContentType {
     JAVASCRIPT,
     CLASS;
 
-    public static WorkerContentType findByClazz(Class<?> returnClazz) {
+    public static ContentType findByClazz(Class<?> returnClazz) {
         if (Objects.isNull(returnClazz)) {
             throw new RuntimeException("returnClazz is empty.");
         }
@@ -51,17 +52,23 @@ public enum WorkerContentType {
         return JSON;
     }
 
-    public static WorkerContentType findByExtension(String extension) {
-        if (Objects.isNull(extension)) {
-            throw new RuntimeException("contentType is empty.");
+    public static ContentType findByPath(Path resourcePath) {
+        if (Objects.isNull(resourcePath)) {
+            throw new RuntimeException("Invalid parameter. resourcePath is empty.");
         }
 
-        if (extension.startsWith(".")) {
-            extension = extension.substring(extension.indexOf(".") + 1);
-        }
-        extension = extension.toLowerCase();
+        String fileName = resourcePath.getFileName().toString();
+        return findByFileName(fileName);
+    }
 
-        switch (extension) {
+    public static ContentType findByFileName(String fileName) {
+        if (Objects.isNull(fileName) || fileName.isBlank()) {
+            throw new RuntimeException("Invalid parameter. fileName is empty.");
+        }
+
+        String fileExtension = getFileExtension(fileName);
+
+        switch (fileExtension) {
             case "json":
                 return JSON;
             case "jpeg":
@@ -83,6 +90,11 @@ public enum WorkerContentType {
                 return CLASS;
         }
 
-        throw new RuntimeException(MessageFormat.format("Does not exist match Type. extenstion : `{}`", extension));
+        throw new RuntimeException(MessageFormat.format("Does not exist match Type. fileName: `{}`, fileExtension: `{}`", fileName, fileExtension));
+    }
+
+    private static String getFileExtension(String fileName) {
+        int delimiterIndex = fileName.indexOf(".");
+        return fileName.substring(delimiterIndex+1);
     }
 }

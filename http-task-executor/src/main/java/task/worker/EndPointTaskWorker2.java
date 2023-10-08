@@ -1,7 +1,6 @@
 package task.worker;
 
 import java.util.Objects;
-import java.util.Optional;
 import lombok.Getter;
 import parameter.matcher.ParameterAndValueMatcherType;
 
@@ -13,10 +12,10 @@ import parameter.matcher.ParameterAndValueMatcherType;
 // 2. file string - path
 // 3. plain text - string
 
-public interface EndPointTaskWorker {
+public interface EndPointTaskWorker2 {
     ParameterAndValueMatcherType[] getParameterTypeInfos();
 
-    Optional<Object> execute(Object[] params);
+    WorkerResult execute(Object[] params);
 
     @Getter
     class WorkerResult {

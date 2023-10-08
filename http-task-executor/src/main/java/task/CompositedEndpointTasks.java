@@ -8,15 +8,15 @@ import matcher.MatchedEndPointTaskWorker2;
 import matcher.RequestMethod;
 import matcher.segment.PathUrl;
 
-public class CompositedEndpointTasks implements EndPointTask {
-    private final List<EndPointTask> endPointTasks;
+public class CompositedEndpointTasks implements EndPointTask2 {
+    private final List<EndPointTask2> endPointTasks;
 
-    public CompositedEndpointTasks(List<EndPointTask> endPointTasks) {
+    public CompositedEndpointTasks(List<EndPointTask2> endPointTasks) {
         if (Objects.isNull(endPointTasks)) {
             throw new RuntimeException("Invalid parameter. endPointTasks is null.");
         }
 
-        List<EndPointTask> newEndPointTasks = endPointTasks.stream()
+        List<EndPointTask2> newEndPointTasks = endPointTasks.stream()
             .filter(o -> !Objects.isNull(o))
             .collect(Collectors.toUnmodifiableList());
 

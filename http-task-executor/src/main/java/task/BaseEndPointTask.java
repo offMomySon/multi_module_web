@@ -3,7 +3,7 @@ package task;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.Getter;
-import matcher.MatchedEndPoint2;
+import matcher.MatchedEndPointTaskWorker2;
 import matcher.PathUrlMatcher;
 import matcher.RequestMethod;
 import matcher.segment.PathUrl;
@@ -26,7 +26,7 @@ public class BaseEndPointTask implements EndPointTask{
     }
 
     @Override
-    public Optional<MatchedEndPoint2> match(RequestMethod requestMethod, PathUrl requestUrl) {
+    public Optional<MatchedEndPointTaskWorker2> match(RequestMethod requestMethod, PathUrl requestUrl) {
         if (Objects.isNull(requestUrl)) {
             return Optional.empty();
         }
@@ -41,7 +41,7 @@ public class BaseEndPointTask implements EndPointTask{
         }
 
         PathVariableValue pathVariableValue = optionalPathVariableValue.get();
-        MatchedEndPoint2 matchedEndPoint = new MatchedEndPoint2(endPointTaskWorker, pathVariableValue);
+        MatchedEndPointTaskWorker2 matchedEndPoint = new MatchedEndPointTaskWorker2(endPointTaskWorker, pathVariableValue);
         return Optional.of(matchedEndPoint);
     }
 }

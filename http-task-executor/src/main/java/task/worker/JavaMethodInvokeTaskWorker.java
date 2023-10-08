@@ -13,11 +13,13 @@ import parameter.matcher.ParameterAndValueMatcherType;
 
 @Slf4j
 public class JavaMethodInvokeTaskWorker implements EndPointTaskWorker {
+    private final WorkerContentType workerContentType;
     private final Object declaringClazzObject;
     private final Method javaMethod;
     private final ParameterAndValueMatcherType[] parameterAndValueMatcherTypes;
 
-    public JavaMethodInvokeTaskWorker(Object declaringClazzObject, Method javaMethod, ParameterAndValueMatcherType[] _parameterAndValueMatcherTypes) {
+    public JavaMethodInvokeTaskWorker(WorkerContentType workerContentType, Object declaringClazzObject, Method javaMethod, ParameterAndValueMatcherType[] _parameterAndValueMatcherTypes) {
+        Objects.requireNonNull(workerContentType);
         Objects.requireNonNull(declaringClazzObject);
         Objects.requireNonNull(javaMethod);
         Objects.requireNonNull(_parameterAndValueMatcherTypes);
@@ -29,6 +31,7 @@ public class JavaMethodInvokeTaskWorker implements EndPointTaskWorker {
             throw new RuntimeException("does not method parameters.");
         }
 
+        this.workerContentType = workerContentType;
         this.declaringClazzObject = declaringClazzObject;
         this.javaMethod = javaMethod;
         this.parameterAndValueMatcherTypes = _parameterAndValueMatcherTypes;

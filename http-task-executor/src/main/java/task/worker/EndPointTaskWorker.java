@@ -1,6 +1,8 @@
 package task.worker;
 
+import java.util.Objects;
 import java.util.Optional;
+import lombok.Getter;
 import parameter.matcher.ParameterAndValueMatcherType;
 
 // object json
@@ -13,5 +15,18 @@ import parameter.matcher.ParameterAndValueMatcherType;
 
 public interface EndPointTaskWorker {
     ParameterAndValueMatcherType[] getParameterTypeInfos();
+
     Optional<Object> execute(Object[] params);
+
+    @Getter
+    class WorkerResult {
+        private final WorkerContentType type;
+        private final Object result;
+
+        public WorkerResult(WorkerContentType type, Object result) {
+            Objects.requireNonNull(type);
+            this.type = type;
+            this.result = result;
+        }
+    }
 }

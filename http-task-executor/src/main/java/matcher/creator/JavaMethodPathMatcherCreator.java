@@ -19,6 +19,7 @@ import task.HttpEndPointTask;
 import task.HttpTextEndPointTask;
 import task.worker.EndPointTaskWorker;
 import task.worker.JavaMethodInvokeTaskWorker;
+import task.worker.WorkerContentType;
 import vo.ContentType;
 
 public class JavaMethodPathMatcherCreator {
@@ -29,8 +30,8 @@ public class JavaMethodPathMatcherCreator {
         this.parameterParameterTypeInfoFunction = parameterParameterTypeInfoFunction;
     }
 
-    public JavaMethodEndpointTaskMatcher create(RequestMappedMethod requestMappedMethod){
-        if(Objects.isNull(requestMappedMethod)){
+    public JavaMethodEndpointTaskMatcher create(RequestMappedMethod requestMappedMethod) {
+        if (Objects.isNull(requestMappedMethod)) {
             throw new RuntimeException("requestMappedMethod is empty.");
         }
 
@@ -45,13 +46,15 @@ public class JavaMethodPathMatcherCreator {
         ParameterAndValueMatcherType[] parameterAndValueMatcherTypes = Arrays.stream(javaMethod.getParameters())
             .map(parameterParameterTypeInfoFunction)
             .toArray(ParameterAndValueMatcherType[]::new);
-        EndPointTaskWorker endPointTaskWorker = new JavaMethodInvokeTaskWorker(object, javaMethod, parameterAndValueMatcherTypes);
 
         Class<?> returnType = javaMethod.getReturnType();
+        WorkerContentType workerContentType = WorkerContentType.findByClazz(returnType);
+        EndPointTaskWorker endPointTaskWorker = new JavaMethodInvokeTaskWorker(workerContentType, object, javaMethod, parameterAndValueMatcherTypes);
+
         HttpEndPointTask httpEndPointTask;
-        if(returnType == Void.TYPE){
+        if (returnType == Void.TYPE) {
             httpEndPointTask = new HttpEmptyEndPointTask(endPointTaskWorker);
-        } else if(returnType == String.class) {
+        } else if (returnType == String.class) {
             httpEndPointTask = new HttpTextEndPointTask(endPointTaskWorker);
         } else {
             ValueConverter valueConverter = new ObjectValueConverter(returnType);

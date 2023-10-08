@@ -3,22 +3,22 @@ package task.worker;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import parameter.matcher.ParameterAndValueMatcherType;
 
 @Slf4j
-public class JavaMethodInvokeTaskWorker implements EndPointTaskWorker {
+public class JavaMethodInvokeTaskWorker2 implements EndPointTaskWorker2 {
     private final WorkerResultType workerResultType;
     private final Object declaringClazzObject;
     private final Method javaMethod;
     private final ParameterAndValueMatcherType[] parameterAndValueMatcherTypes;
 
-    public JavaMethodInvokeTaskWorker(WorkerResultType workerResultType, Object declaringClazzObject, Method javaMethod, ParameterAndValueMatcherType[] _parameterAndValueMatcherTypes) {
+    public JavaMethodInvokeTaskWorker2(WorkerResultType workerResultType, Object declaringClazzObject, Method javaMethod, ParameterAndValueMatcherType[] _parameterAndValueMatcherTypes) {
         Objects.requireNonNull(workerResultType);
         Objects.requireNonNull(declaringClazzObject);
         Objects.requireNonNull(javaMethod);
@@ -28,7 +28,8 @@ public class JavaMethodInvokeTaskWorker implements EndPointTaskWorker {
         Set<Parameter> otherParameters = Arrays.stream(_parameterAndValueMatcherTypes).map(ParameterAndValueMatcherType::getParameter).collect(Collectors.toUnmodifiableSet());
         boolean doesNotMethodParameters = !methodParameters.containsAll(otherParameters) && methodParameters.size() == otherParameters.size();
         if (doesNotMethodParameters) {
-            throw new RuntimeException("does not method parameters.");
+            String errorMessage = MessageFormat.format("Does not method parameters. \nmethodParameters: `{}`\notherParameters: `{}`", methodParameters, otherParameters);
+            throw new RuntimeException(errorMessage);
         }
 
         this.workerResultType = workerResultType;
@@ -43,13 +44,16 @@ public class JavaMethodInvokeTaskWorker implements EndPointTaskWorker {
     }
 
     @Override
-    public Optional<Object> execute(Object[] params) {
+    public WorkerResult execute(Object[] params) {
+        Objects.requireNonNull(params);
+        Object invoke = invokeMethod(this.declaringClazzObject, this.javaMethod, params);
+        return new WorkerResult(workerResultType, invoke);
+    }
+
+    private static Object invokeMethod(Object declaringClazzObject, Method javaMethod, Object[] params){
         try {
-            Object invoke = javaMethod.invoke(declaringClazzObject, params);
-            return Optional.ofNullable(invoke);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        } catch (InvocationTargetException e) {
+            return javaMethod.invoke(declaringClazzObject, params);
+        } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
     }

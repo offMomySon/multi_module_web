@@ -17,14 +17,14 @@ import task.HttpConvertEndPointTask;
 import task.HttpEmptyEndPointTask;
 import task.HttpEndPointTask;
 import task.HttpTextEndPointTask;
+import task.worker.WorkerResultType;
 import task.worker.EndPointTaskWorker;
 import task.worker.JavaMethodInvokeTaskWorker;
-import task.worker.WorkerResultType;
 
-public class JavaMethodPathMatcherCreator {
+public class JavaMethodPathMatcherCreator2 {
     private final Function<Parameter, ParameterAndValueMatcherType> parameterParameterTypeInfoFunction;
 
-    public JavaMethodPathMatcherCreator(Function<Parameter, ParameterAndValueMatcherType> parameterParameterTypeInfoFunction) {
+    public JavaMethodPathMatcherCreator2(Function<Parameter, ParameterAndValueMatcherType> parameterParameterTypeInfoFunction) {
         Objects.requireNonNull(parameterParameterTypeInfoFunction);
         this.parameterParameterTypeInfoFunction = parameterParameterTypeInfoFunction;
     }

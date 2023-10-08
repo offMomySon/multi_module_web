@@ -6,7 +6,7 @@ import java.util.Objects;
 
 // 작은 도메인들은 영역이 작기 때문에 정책적인 것들보다, 기능 단위의 객체들을 이용할것이다.
 // 어디서 부터 정책적인 영역이 나올 수 있는지?
-public enum ContentType {
+public enum WorkerResultType {
     EMPTY,
     STRING,
     JSON,
@@ -19,7 +19,7 @@ public enum ContentType {
     JAVASCRIPT,
     CLASS;
 
-    public static ContentType findByClazz(Class<?> returnClazz) {
+    public static WorkerResultType findByClazz(Class<?> returnClazz) {
         if (Objects.isNull(returnClazz)) {
             throw new RuntimeException("returnClazz is empty.");
         }
@@ -52,7 +52,7 @@ public enum ContentType {
         return JSON;
     }
 
-    public static ContentType findByPath(Path resourcePath) {
+    public static WorkerResultType findByPath(Path resourcePath) {
         if (Objects.isNull(resourcePath)) {
             throw new RuntimeException("Invalid parameter. resourcePath is empty.");
         }
@@ -61,7 +61,7 @@ public enum ContentType {
         return findByFileName(fileName);
     }
 
-    public static ContentType findByFileName(String fileName) {
+    public static WorkerResultType findByFileName(String fileName) {
         if (Objects.isNull(fileName) || fileName.isBlank()) {
             throw new RuntimeException("Invalid parameter. fileName is empty.");
         }

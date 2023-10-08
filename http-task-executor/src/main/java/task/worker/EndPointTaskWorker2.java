@@ -19,10 +19,10 @@ public interface EndPointTaskWorker2 {
 
     @Getter
     class WorkerResult {
-        private final ContentType type;
+        private final WorkerResultType type;
         private final Object result;
 
-        public WorkerResult(ContentType type, Object result) {
+        public WorkerResult(WorkerResultType type, Object result) {
             Objects.requireNonNull(type);
             this.type = type;
             this.result = result;

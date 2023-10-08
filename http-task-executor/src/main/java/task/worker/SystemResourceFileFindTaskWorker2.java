@@ -34,7 +34,7 @@ public class SystemResourceFileFindTaskWorker2 implements EndPointTaskWorker2 {
         }
 
         Path foundResource = optionalFoundResource.get();
-        ContentType contentType = ContentType.findByPath(foundResource);
-        return new WorkerResult(contentType, foundResource);
+        WorkerResultType workerResultType = WorkerResultType.findByPath(foundResource);
+        return new WorkerResult(workerResultType, foundResource);
     }
 }

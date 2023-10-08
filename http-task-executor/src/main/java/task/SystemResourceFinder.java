@@ -32,7 +32,15 @@ public class SystemResourceFinder {
         return new SystemResourceFinder(resourceDirectory);
     }
 
-    public Optional<Path> find(String url) {
+    public boolean isExistFile(String url) {
+        return findFile(url).isPresent();
+    }
+
+    public boolean doesNotExistFile(String url){
+        return !isExistFile(url);
+    }
+
+    public Optional<Path> findFile(String url) {
         if (Objects.isNull(url) || url.isBlank()) {
             return Optional.empty();
         }
@@ -44,7 +52,12 @@ public class SystemResourceFinder {
             return Optional.empty();
         }
 
-        if(Files.isRegularFile(resource, LinkOption.NOFOLLOW_LINKS)){
+        if (!Files.isRegularFile(resource, LinkOption.NOFOLLOW_LINKS)) {
+            log.info("Does not regularFile. file: `{}`", resource);
+            return Optional.empty();
+        }
+
+        if (Files.isDirectory(resource)) {
             log.info("Resource is directory. file: `{}`", resource);
             return Optional.empty();
         }

@@ -1,4 +1,4 @@
-package task.endpoint;
+package task.worker;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -12,20 +12,20 @@ import lombok.extern.slf4j.Slf4j;
 import parameter.matcher.ParameterAndValueMatcherType;
 
 @Slf4j
-public class JavaMethodInvokeTask implements EndPointTask {
+public class JavaMethodInvokeTaskWorker implements EndPointTaskWorker {
     private final Object declaringClazzObject;
     private final Method javaMethod;
     private final ParameterAndValueMatcherType[] parameterAndValueMatcherTypes;
 
-    public JavaMethodInvokeTask(Object declaringClazzObject, Method javaMethod, ParameterAndValueMatcherType[] _parameterAndValueMatcherTypes) {
+    public JavaMethodInvokeTaskWorker(Object declaringClazzObject, Method javaMethod, ParameterAndValueMatcherType[] _parameterAndValueMatcherTypes) {
         Objects.requireNonNull(declaringClazzObject);
         Objects.requireNonNull(javaMethod);
         Objects.requireNonNull(_parameterAndValueMatcherTypes);
 
         Set<Parameter> methodParameters = Arrays.stream(javaMethod.getParameters()).collect(Collectors.toUnmodifiableSet());
         Set<Parameter> otherParameters = Arrays.stream(_parameterAndValueMatcherTypes).map(ParameterAndValueMatcherType::getParameter).collect(Collectors.toUnmodifiableSet());
-        boolean doesNotMethodParameters = !methodParameters.containsAll(otherParameters);
-        if(doesNotMethodParameters){
+        boolean doesNotMethodParameters = !methodParameters.containsAll(otherParameters) && methodParameters.size() == otherParameters.size();
+        if (doesNotMethodParameters) {
             throw new RuntimeException("does not method parameters.");
         }
 

@@ -3,7 +3,6 @@ package matcher;
 import java.util.Objects;
 import matcher.segment.PathVariableValue;
 import task.HttpEndPointTask;
-import task.endpoint.EndPointTask;
 
 public class MatchedEndPoint {
     private final HttpEndPointTask httpEndPointTask;

@@ -1,7 +1,7 @@
 package matcher.creator;
 
-import converter.ValueConverter;
 import converter.ObjectValueConverter;
+import converter.ValueConverter;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
@@ -17,8 +17,8 @@ import task.HttpConvertEndPointTask;
 import task.HttpEmptyEndPointTask;
 import task.HttpEndPointTask;
 import task.HttpTextEndPointTask;
-import task.endpoint.EndPointTask;
-import task.endpoint.JavaMethodInvokeTask;
+import task.worker.EndPointTaskWorker;
+import task.worker.JavaMethodInvokeTaskWorker;
 import vo.ContentType;
 
 public class JavaMethodPathMatcherCreator {
@@ -45,17 +45,17 @@ public class JavaMethodPathMatcherCreator {
         ParameterAndValueMatcherType[] parameterAndValueMatcherTypes = Arrays.stream(javaMethod.getParameters())
             .map(parameterParameterTypeInfoFunction)
             .toArray(ParameterAndValueMatcherType[]::new);
-        EndPointTask endPointTask = new JavaMethodInvokeTask(object, javaMethod, parameterAndValueMatcherTypes);
+        EndPointTaskWorker endPointTaskWorker = new JavaMethodInvokeTaskWorker(object, javaMethod, parameterAndValueMatcherTypes);
 
         Class<?> returnType = javaMethod.getReturnType();
         HttpEndPointTask httpEndPointTask;
         if(returnType == Void.TYPE){
-            httpEndPointTask = new HttpEmptyEndPointTask(endPointTask);
+            httpEndPointTask = new HttpEmptyEndPointTask(endPointTaskWorker);
         } else if(returnType == String.class) {
-            httpEndPointTask = new HttpTextEndPointTask(endPointTask);
+            httpEndPointTask = new HttpTextEndPointTask(endPointTaskWorker);
         } else {
             ValueConverter valueConverter = new ObjectValueConverter(returnType);
-            httpEndPointTask = new HttpConvertEndPointTask(ContentType.APPLICATION_JSON, valueConverter, endPointTask);
+            httpEndPointTask = new HttpConvertEndPointTask(ContentType.APPLICATION_JSON, valueConverter, endPointTaskWorker);
         }
 
         return new JavaMethodEndpointTaskMatcher(requestMethod, pathUrlMatcher, httpEndPointTask);

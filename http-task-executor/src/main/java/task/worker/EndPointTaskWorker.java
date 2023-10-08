@@ -1,4 +1,4 @@
-package task.endpoint;
+package task.worker;
 
 import java.util.Optional;
 import parameter.matcher.ParameterAndValueMatcherType;
@@ -11,7 +11,7 @@ import parameter.matcher.ParameterAndValueMatcherType;
 // 2. file string - path
 // 3. plain text - string
 
-public interface EndPointTask {
+public interface EndPointTaskWorker {
     ParameterAndValueMatcherType[] getParameterTypeInfos();
     Optional<Object> execute(Object[] params);
 }

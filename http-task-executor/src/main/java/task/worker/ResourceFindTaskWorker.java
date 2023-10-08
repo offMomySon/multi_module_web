@@ -1,4 +1,4 @@
-package task.endpoint;
+package task.worker;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -9,10 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 import parameter.matcher.ParameterAndValueMatcherType;
 
 @Slf4j
-public class ResourceFindTask implements EndPointTask {
+public class ResourceFindTaskWorker implements EndPointTaskWorker {
     private final Path resourcePath;
 
-    public ResourceFindTask(Path resourcePath) {
+    public ResourceFindTaskWorker(Path resourcePath) {
         Objects.requireNonNull(resourcePath);
         this.resourcePath = resourcePath;
     }

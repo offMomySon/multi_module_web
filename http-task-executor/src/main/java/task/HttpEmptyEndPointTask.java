@@ -3,25 +3,25 @@ package task;
 import java.util.Objects;
 import java.util.Optional;
 import parameter.matcher.ParameterAndValueMatcherType;
-import task.endpoint.EndPointTask;
+import task.worker.EndPointTaskWorker;
 
 public class HttpEmptyEndPointTask implements HttpEndPointTask{
-    private final EndPointTask endPointTask;
+    private final EndPointTaskWorker endPointTaskWorker;
 
-    public HttpEmptyEndPointTask(EndPointTask endPointTask) {
-        Objects.requireNonNull(endPointTask);
-        this.endPointTask = endPointTask;
+    public HttpEmptyEndPointTask(EndPointTaskWorker endPointTaskWorker) {
+        Objects.requireNonNull(endPointTaskWorker);
+        this.endPointTaskWorker = endPointTaskWorker;
     }
 
     @Override
     public ParameterAndValueMatcherType[] getParameterTypeInfos() {
-        return endPointTask.getParameterTypeInfos();
+        return endPointTaskWorker.getParameterTypeInfos();
     }
 
     @Override
     public Optional<HttpTaskResult> execute(Object[] params) {
         Objects.requireNonNull(params);
-        endPointTask.execute(params);
+        endPointTaskWorker.execute(params);
         return Optional.empty();
     }
 }

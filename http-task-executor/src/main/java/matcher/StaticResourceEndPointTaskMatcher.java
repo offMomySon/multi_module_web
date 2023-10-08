@@ -10,7 +10,7 @@ import matcher.segment.PathUrl;
 import matcher.segment.PathVariableValue;
 import task.HttpConvertEndPointTask;
 import task.HttpEndPointTask;
-import task.endpoint.ResourceFindTask;
+import task.worker.ResourceFindTaskWorker;
 import vo.ContentType;
 
 @Slf4j
@@ -40,7 +40,7 @@ public class StaticResourceEndPointTaskMatcher implements EndpointTaskMatcher {
         }
 
         log.info("Matched. requestUrl : `{}`, endPointUrl : `{}`, resourcePath : `{}`", requestUrl, endPointUrl, resourcePath);
-        ResourceFindTask resourceFindTask = new ResourceFindTask(resourcePath);
+        ResourceFindTaskWorker resourceFindTask = new ResourceFindTaskWorker(resourcePath);
         ValueConverter valueConverter = new PathValueConverter();
         HttpEndPointTask httpEndPointTask = new HttpConvertEndPointTask(ContentType.APPLICATION_JSON, valueConverter, resourceFindTask);
         MatchedEndPoint matchedEndPoint = new MatchedEndPoint(httpEndPointTask, PathVariableValue.empty());

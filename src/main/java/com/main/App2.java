@@ -43,6 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 import matcher.RequestMethod;
 import matcher.creator.JavaMethodInvokeTaskWorkerCreator2;
 import matcher.creator.RequestMappedMethod;
+import matcher.segment.PathUrl;
 import parameter.UrlParameterValues;
 import parameter.extractor.FunctionBodyParameterInfoExtractor;
 import parameter.extractor.FunctionHttpUrlParameterInfoExtractor;
@@ -65,6 +66,7 @@ import task.EndPointTask2;
 import task.ResourceEndPointFindTask2;
 import task.SystemResourceFinder;
 import task.worker.JavaMethodInvokeTaskWorker2;
+import task.worker.WorkerResult;
 import static parameter.extractor.HttpUrlParameterInfoExtractor.HttpUrlParameterInfo;
 import static parameter.matcher.ParameterValueAssigneeType.BODY;
 import static parameter.matcher.ParameterValueAssigneeType.INPUT_STREAM;
@@ -196,7 +198,7 @@ public class App2 {
             UrlParameterValues.empty(), new ByteArrayInputStream(new byte[1]));
 
         // 6. http service start.
-        EndPointTaskExecutor baseHttpRequestProcessor = new EndPointTaskExecutor(urlParameterValuesParameterValueAssignees2Function,
+        EndPointTaskExecutor endPointTaskExecutor = new EndPointTaskExecutor(urlParameterValuesParameterValueAssignees2Function,
                                                                                  compositedEndpointTasks,
                                                                                  SIMPLE_DATE_FORMAT,
                                                                                  HOST_ADDRESS);
@@ -213,7 +215,9 @@ public class App2 {
                 preTaskWorker.prevExecute(request, response);
             }
 
-            baseHttpRequestProcessor.execute(request, response);
+            RequestMethod method = RequestMethod.find(request.getHttpMethod().name());
+            PathUrl requestUrl = PathUrl.from(request.getHttpRequestPath().getValue().toString());
+            WorkerResult workerResult = endPointTaskExecutor.execute(method, requestUrl);
 
             // todo
             // post task.

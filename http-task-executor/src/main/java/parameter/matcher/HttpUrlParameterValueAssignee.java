@@ -3,19 +3,19 @@ package parameter.matcher;
 import java.lang.reflect.Parameter;
 import java.util.Objects;
 import java.util.Optional;
-import parameter.UrlParameters;
+import parameter.UrlParameterValues;
 import parameter.extractor.HttpUrlParameterInfoExtractor;
 import static parameter.extractor.HttpUrlParameterInfoExtractor.HttpUrlParameterInfo;
 
 public class HttpUrlParameterValueAssignee implements ParameterValueAssignee {
     private final HttpUrlParameterInfoExtractor parameterInfoExtractor;
-    private final UrlParameters urlParameters;
+    private final UrlParameterValues urlParameterValues;
 
-    public HttpUrlParameterValueAssignee(HttpUrlParameterInfoExtractor parameterInfoExtractor, UrlParameters urlParameters) {
+    public HttpUrlParameterValueAssignee(HttpUrlParameterInfoExtractor parameterInfoExtractor, UrlParameterValues urlParameterValues) {
         Objects.requireNonNull(parameterInfoExtractor);
-        Objects.requireNonNull(urlParameters);
+        Objects.requireNonNull(urlParameterValues);
         this.parameterInfoExtractor = parameterInfoExtractor;
-        this.urlParameters = urlParameters;
+        this.urlParameterValues = urlParameterValues;
     }
 
     @Override
@@ -27,7 +27,7 @@ public class HttpUrlParameterValueAssignee implements ParameterValueAssignee {
         String defaultValue = urlParameterInfo.getDefaultValue();
         boolean required = urlParameterInfo.isRequired();
 
-        String matchValue = urlParameters.getOrDefault(parameterName, defaultValue);
+        String matchValue = urlParameterValues.getOrDefault(parameterName, defaultValue);
         Optional<String> optionalMatchValue = Optional.ofNullable(matchValue);
 
         boolean doesNotPossibleMatchValue = optionalMatchValue.isEmpty() && required;

@@ -5,10 +5,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class UrlParameters {
+public class UrlParameterValues {
     private final Map<String, String> values;
 
-    public UrlParameters(Map<String, String> values) {
+    public UrlParameterValues(Map<String, String> values) {
         if (Objects.isNull(values)) {
             throw new RuntimeException("values is null.");
         }
@@ -43,15 +43,15 @@ public class UrlParameters {
         return valueOrNull;
     }
 
-    public static UrlParameters empty() {
-        return new UrlParameters(Collections.emptyMap());
+    public static UrlParameterValues empty() {
+        return new UrlParameterValues(Collections.emptyMap());
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        UrlParameters that = (UrlParameters) o;
+        UrlParameterValues that = (UrlParameterValues) o;
         return Objects.equals(values, that.values);
     }
 

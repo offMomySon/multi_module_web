@@ -14,7 +14,7 @@ import matcher.MatchedEndPoint;
 import matcher.RequestMethod;
 import matcher.segment.PathUrl;
 import parameter.ParameterValueGetter;
-import parameter.UrlParameters;
+import parameter.UrlParameterValues;
 import parameter.extractor.HttpBodyParameterInfoExtractor;
 import parameter.extractor.HttpUrlParameterInfoExtractor;
 import parameter.matcher.HttpBodyParameterValueAssignee;
@@ -29,11 +29,11 @@ import vo.ContentType;
 import vo.HttpRequest;
 import vo.HttpResponse;
 import vo.QueryParameters;
-import static parameter.matcher.ParameterValueAssigneeType.HTTP_BODY;
-import static parameter.matcher.ParameterValueAssigneeType.HTTP_INPUT_STREAM;
-import static parameter.matcher.ParameterValueAssigneeType.HTTP_OUTPUT_STREAM;
-import static parameter.matcher.ParameterValueAssigneeType.HTTP_QUERY_PARAM;
-import static parameter.matcher.ParameterValueAssigneeType.HTTP_URL;
+import static parameter.matcher.ParameterValueAssigneeType.BODY;
+import static parameter.matcher.ParameterValueAssigneeType.INPUT_STREAM;
+import static parameter.matcher.ParameterValueAssigneeType.OUTPUT_STREAM;
+import static parameter.matcher.ParameterValueAssigneeType.QUERY_PARAM;
+import static parameter.matcher.ParameterValueAssigneeType.URL;
 
 @Slf4j
 public class BaseHttpRequestProcessor implements HttpRequestProcessor {
@@ -75,8 +75,8 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
         MatchedEndPoint matchedEndPoint = endpointTaskMatcher.match(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
         HttpEndPointTask httpEndPointTask = matchedEndPoint.getHttpEndPointTask();
 
-        UrlParameters pathVariableValue = new UrlParameters(matchedEndPoint.getPathVariableValue().getValues());
-        UrlParameters queryParamValues = new UrlParameters(queryParameters.getParameterMap());
+        UrlParameterValues pathVariableValue = new UrlParameterValues(matchedEndPoint.getPathVariableValue().getValues());
+        UrlParameterValues queryParamValues = new UrlParameterValues(queryParameters.getParameterMap());
 
         // todo [review]
         // 받은 피드백 - annotation 모듈을 이용해서 동적으로 처리해라
@@ -86,11 +86,11 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
         // 하지만 코드 적으로는 끊어졌지만, 개념적으로는 연결이 되어있다. 이것을 연관관계를 끊어다고 볼 수 있을까?
         // 임시저장 브랜치 - origin/split_annotation_module_role_at_MethodParameterValueMatcher
         ParameterValueAssignees parameterValueAssignees = new ParameterValueAssignees(
-            Map.of(HTTP_INPUT_STREAM, new SingleValueParameterValueAssignee<>(request.getBodyInputStream()),
-                   HTTP_OUTPUT_STREAM, new SingleValueParameterValueAssignee<>(response.getOutputStream()),
-                   HTTP_BODY, new HttpBodyParameterValueAssignee(httpBodyParameterInfoExtractor, request.getBodyInputStream()),
-                   HTTP_URL, new HttpUrlParameterValueAssignee(pathVariableParameterInfoExtractor, pathVariableValue),
-                   HTTP_QUERY_PARAM, new HttpUrlParameterValueAssignee(requestParamHttpUrlParameterInfoExtractor, queryParamValues)));
+            Map.of(INPUT_STREAM, new SingleValueParameterValueAssignee<>(request.getBodyInputStream()),
+                   OUTPUT_STREAM, new SingleValueParameterValueAssignee<>(response.getOutputStream()),
+                   BODY, new HttpBodyParameterValueAssignee(httpBodyParameterInfoExtractor, request.getBodyInputStream()),
+                   URL, new HttpUrlParameterValueAssignee(pathVariableParameterInfoExtractor, pathVariableValue),
+                   QUERY_PARAM, new HttpUrlParameterValueAssignee(requestParamHttpUrlParameterInfoExtractor, queryParamValues)));
         ParameterValueGetter parameterValueGetter = new ParameterValueGetter(parameterValueAssignees);
 
         Object[] parameterValues = Arrays.stream(httpEndPointTask.getParameterTypeInfos())

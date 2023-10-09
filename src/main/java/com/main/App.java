@@ -58,11 +58,11 @@ import pretask.PreTaskWorker;
 import pretask.PreTasks;
 import pretask.PreTasks.ReadOnlyPreTasks;
 import static parameter.extractor.HttpUrlParameterInfoExtractor.HttpUrlParameterInfo;
-import static parameter.matcher.ParameterValueAssigneeType.HTTP_BODY;
-import static parameter.matcher.ParameterValueAssigneeType.HTTP_INPUT_STREAM;
-import static parameter.matcher.ParameterValueAssigneeType.HTTP_OUTPUT_STREAM;
-import static parameter.matcher.ParameterValueAssigneeType.HTTP_QUERY_PARAM;
-import static parameter.matcher.ParameterValueAssigneeType.HTTP_URL;
+import static parameter.matcher.ParameterValueAssigneeType.BODY;
+import static parameter.matcher.ParameterValueAssigneeType.INPUT_STREAM;
+import static parameter.matcher.ParameterValueAssigneeType.OUTPUT_STREAM;
+import static parameter.matcher.ParameterValueAssigneeType.QUERY_PARAM;
+import static parameter.matcher.ParameterValueAssigneeType.URL;
 
 @Slf4j
 public class App {
@@ -267,21 +267,21 @@ public class App {
 
             // 1. pure parameter type.
             if (InputStream.class.isAssignableFrom(parameterType)) {
-                return new ParameterAndValueAssigneeType(parameter, HTTP_INPUT_STREAM);
+                return new ParameterAndValueAssigneeType(parameter, INPUT_STREAM);
             }
             if (OutputStream.class.isAssignableFrom(parameterType)) {
-                return new ParameterAndValueAssigneeType(parameter, HTTP_OUTPUT_STREAM);
+                return new ParameterAndValueAssigneeType(parameter, OUTPUT_STREAM);
             }
 
             // 2. annotation hint type.
             if (AnnotationUtils.exist(parameter, PathVariable.class)) {
-                return new ParameterAndValueAssigneeType(parameter, HTTP_URL);
+                return new ParameterAndValueAssigneeType(parameter, URL);
             }
             if (AnnotationUtils.exist(parameter, RequestParam.class)) {
-                return new ParameterAndValueAssigneeType(parameter, HTTP_QUERY_PARAM);
+                return new ParameterAndValueAssigneeType(parameter, QUERY_PARAM);
             }
             if (AnnotationUtils.exist(parameter, RequestBody.class)) {
-                return new ParameterAndValueAssigneeType(parameter, HTTP_BODY);
+                return new ParameterAndValueAssigneeType(parameter, BODY);
             }
 
             throw new RuntimeException("Does not exist possible match ParameterType.");

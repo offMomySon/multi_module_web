@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import annotation.RequestParam;
-import parameter.UrlParameters;
+import parameter.UrlParameterValues;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,9 +24,9 @@ class HttpUrlParameterInfoAnnotatedAssignParameterValueAssigneeTest {
     void test() throws Exception {
         //given
         Parameter doesNotAnnotatedParameter = ParamAnnotatedClass.getDoesNotAnnotatedParameter(RequestParam.class);
-        UrlParameters allParamHasUrlParameters = ParamAnnotatedClass.getAllParamHasRequestParameters();
+        UrlParameterValues allParamHasUrlParameterValues = ParamAnnotatedClass.getAllParamHasRequestParameters();
 
-        HttpUrlAnnotationAnnotatedParameterValueAssignee parameterValueMatcher = new HttpUrlAnnotationAnnotatedParameterValueAssignee(RequestParam.class, allParamHasUrlParameters);
+        HttpUrlAnnotationAnnotatedParameterValueAssignee parameterValueMatcher = new HttpUrlAnnotationAnnotatedParameterValueAssignee(RequestParam.class, allParamHasUrlParameterValues);
         //when
         Throwable actual = Assertions.catchThrowable(() -> parameterValueMatcher.assign(doesNotAnnotatedParameter));
 
@@ -40,9 +40,9 @@ class HttpUrlParameterInfoAnnotatedAssignParameterValueAssigneeTest {
         //given
         Class<RequestParam> annotationClazz = RequestParam.class;
         Parameter annotatedParameter = ParamAnnotatedClass.getAnnotatedParameter(annotationClazz, true);
-        UrlParameters allParamHasUrlParameters = ParamAnnotatedClass.getAllParamHasRequestParameters();
+        UrlParameterValues allParamHasUrlParameterValues = ParamAnnotatedClass.getAllParamHasRequestParameters();
 
-        HttpUrlAnnotationAnnotatedParameterValueAssignee parameterValueMatcher = new HttpUrlAnnotationAnnotatedParameterValueAssignee(annotationClazz, allParamHasUrlParameters);
+        HttpUrlAnnotationAnnotatedParameterValueAssignee parameterValueMatcher = new HttpUrlAnnotationAnnotatedParameterValueAssignee(annotationClazz, allParamHasUrlParameterValues);
 
         //when
         Optional actual = parameterValueMatcher.assign(annotatedParameter);
@@ -57,9 +57,9 @@ class HttpUrlParameterInfoAnnotatedAssignParameterValueAssigneeTest {
         //given
         Class<RequestParam> annotationClazz = RequestParam.class;
         Parameter mustMatchParameter = ParamAnnotatedClass.getAnnotatedParameter(annotationClazz, true);
-        UrlParameters emptyUrlParameters = ParamAnnotatedClass.getEmptyRequestParameters();
+        UrlParameterValues emptyUrlParameterValues = ParamAnnotatedClass.getEmptyRequestParameters();
 
-        HttpUrlAnnotationAnnotatedParameterValueAssignee parameterValueMatcher = new HttpUrlAnnotationAnnotatedParameterValueAssignee(annotationClazz, emptyUrlParameters);
+        HttpUrlAnnotationAnnotatedParameterValueAssignee parameterValueMatcher = new HttpUrlAnnotationAnnotatedParameterValueAssignee(annotationClazz, emptyUrlParameterValues);
         //when
         Throwable actual = Assertions.catchThrowable(() -> parameterValueMatcher.assign(mustMatchParameter));
 
@@ -73,9 +73,9 @@ class HttpUrlParameterInfoAnnotatedAssignParameterValueAssigneeTest {
         //given
         Class<RequestParam> annotationClazz = RequestParam.class;
         Parameter doesNotMustMatchParameter = ParamAnnotatedClass.getAnnotatedParameter(annotationClazz, false);
-        UrlParameters emptyUrlParameters = ParamAnnotatedClass.getEmptyRequestParameters();
+        UrlParameterValues emptyUrlParameterValues = ParamAnnotatedClass.getEmptyRequestParameters();
 
-        HttpUrlAnnotationAnnotatedParameterValueAssignee parameterValueMatcher = new HttpUrlAnnotationAnnotatedParameterValueAssignee(annotationClazz, emptyUrlParameters);
+        HttpUrlAnnotationAnnotatedParameterValueAssignee parameterValueMatcher = new HttpUrlAnnotationAnnotatedParameterValueAssignee(annotationClazz, emptyUrlParameterValues);
 
         //when
         Optional actual = parameterValueMatcher.assign(doesNotMustMatchParameter);
@@ -86,16 +86,16 @@ class HttpUrlParameterInfoAnnotatedAssignParameterValueAssigneeTest {
 
 
     public static class ParamAnnotatedClass {
-        public static UrlParameters getAllParamHasRequestParameters() {
-            return new UrlParameters(Map.of("param", "1",
-                                            "param1", "1",
-                                            "param2", "2",
-                                            "param3", "3"
+        public static UrlParameterValues getAllParamHasRequestParameters() {
+            return new UrlParameterValues(Map.of("param", "1",
+                                                 "param1", "1",
+                                                 "param2", "2",
+                                                 "param3", "3"
             ));
         }
 
-        public static UrlParameters getEmptyRequestParameters() {
-            return new UrlParameters(Collections.emptyMap());
+        public static UrlParameterValues getEmptyRequestParameters() {
+            return new UrlParameterValues(Collections.emptyMap());
         }
 
         public static Parameter getDoesNotAnnotatedParameter(Class<?> annotationClazz) {

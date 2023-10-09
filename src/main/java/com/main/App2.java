@@ -10,7 +10,7 @@ import annotation.RequestMapping;
 import annotation.RequestParam;
 import annotation.WebFilter;
 import com.main.config.HttpConfig;
-import com.main.task.executor.BaseHttpRequestProcessor2;
+import com.main.task.executor.EndPointTaskExecutor;
 import com.main.util.AnnotationUtils;
 import executor.SocketHttpTaskExecutor;
 import instance.AnnotatedClassObjectRepository;
@@ -21,6 +21,7 @@ import instance.AnnotatedObjectProperties;
 import instance.AnnotationProperties;
 import instance.AnnotationPropertyGetter;
 import instance.Annotations;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
@@ -42,12 +43,17 @@ import lombok.extern.slf4j.Slf4j;
 import matcher.RequestMethod;
 import matcher.creator.JavaMethodInvokeTaskWorkerCreator2;
 import matcher.creator.RequestMappedMethod;
+import parameter.UrlParameterValues;
 import parameter.extractor.FunctionBodyParameterInfoExtractor;
 import parameter.extractor.FunctionHttpUrlParameterInfoExtractor;
 import parameter.extractor.HttpBodyParameterInfoExtractor;
 import parameter.extractor.HttpBodyParameterInfoExtractor.HttpBodyParameterInfo;
 import parameter.extractor.HttpUrlParameterInfoExtractor;
+import parameter.matcher.HttpBodyParameterValueAssignee;
+import parameter.matcher.HttpUrlParameterValueAssignee;
 import parameter.matcher.ParameterAndValueAssigneeType;
+import parameter.matcher.ParameterValueAssignee;
+import parameter.matcher.ParameterValueAssignees2;
 import pretask.PreTaskCreator;
 import pretask.PreTaskInfo;
 import pretask.PreTaskWorker;
@@ -60,11 +66,11 @@ import task.ResourceEndPointFindTask2;
 import task.SystemResourceFinder;
 import task.worker.JavaMethodInvokeTaskWorker2;
 import static parameter.extractor.HttpUrlParameterInfoExtractor.HttpUrlParameterInfo;
-import static parameter.matcher.ParameterValueAssigneeType.HTTP_BODY;
-import static parameter.matcher.ParameterValueAssigneeType.HTTP_INPUT_STREAM;
-import static parameter.matcher.ParameterValueAssigneeType.HTTP_OUTPUT_STREAM;
-import static parameter.matcher.ParameterValueAssigneeType.HTTP_QUERY_PARAM;
-import static parameter.matcher.ParameterValueAssigneeType.HTTP_URL;
+import static parameter.matcher.ParameterValueAssigneeType.BODY;
+import static parameter.matcher.ParameterValueAssigneeType.INPUT_STREAM;
+import static parameter.matcher.ParameterValueAssigneeType.OUTPUT_STREAM;
+import static parameter.matcher.ParameterValueAssigneeType.QUERY_PARAM;
+import static parameter.matcher.ParameterValueAssigneeType.URL;
 
 @Slf4j
 public class App2 {
@@ -172,17 +178,28 @@ public class App2 {
         CompositedEndpointTasks compositedEndpointTasks = new CompositedEndpointTasks(endPointTasks);
 
         // 5. parameter info 해석기 생성.
-        HttpBodyParameterInfoExtractor httpBodyParameterInfoExtractor = new FunctionBodyParameterInfoExtractor(requestBodyHttpUrlParameterInfoFunction(annotationPropertyGetter));
-        HttpUrlParameterInfoExtractor requestParamHttpUrlParameterInfoExtractor = new FunctionHttpUrlParameterInfoExtractor(requestParameterHttpUrlParameterInfoFunction(annotationPropertyGetter));
         HttpUrlParameterInfoExtractor pathVariableHttpUrlParameterInfoExtractor = new FunctionHttpUrlParameterInfoExtractor(pathVariableHttpUrlParameterInfoFunction(annotationPropertyGetter));
+        HttpUrlParameterInfoExtractor requestParamHttpUrlParameterInfoExtractor = new FunctionHttpUrlParameterInfoExtractor(requestParamHttpUrlParameterInfoFunction(annotationPropertyGetter));
+        HttpBodyParameterInfoExtractor requestBodyParameterInfoExtractor = new FunctionBodyParameterInfoExtractor(requestBodyHttpUrlParameterInfoFunction(annotationPropertyGetter));
+
+        Function<UrlParameterValues, ParameterValueAssignee> urlParameterValuesPathParametersValueAssigneeFunction =
+            (pathParameters) -> new HttpUrlParameterValueAssignee(pathVariableHttpUrlParameterInfoExtractor, pathParameters);
+        Function<UrlParameterValues, ParameterValueAssignee> urlParameterValuesQueryParameterValueAssigneeFunction =
+            (pathParameters) -> new HttpUrlParameterValueAssignee(requestParamHttpUrlParameterInfoExtractor, pathParameters);
+        Function<InputStream, ParameterValueAssignee> inputStreamBodyParameterValueAssigneeFunction =
+            (inputStream) -> new HttpBodyParameterValueAssignee(requestBodyParameterInfoExtractor, inputStream);
+
+        Function<UrlParameterValues, ParameterValueAssignees2> urlParameterValuesParameterValueAssignees2Function = createUrlParameterValuesParameterValueAssignees2Function(
+            urlParameterValuesPathParametersValueAssigneeFunction,
+            urlParameterValuesQueryParameterValueAssigneeFunction,
+            inputStreamBodyParameterValueAssigneeFunction,
+            UrlParameterValues.empty(), new ByteArrayInputStream(new byte[1]));
 
         // 6. http service start.
-        BaseHttpRequestProcessor2 baseHttpRequestProcessor = new BaseHttpRequestProcessor2(compositedEndpointTasks,
-                                                                                           httpBodyParameterInfoExtractor,
-                                                                                           requestParamHttpUrlParameterInfoExtractor,
-                                                                                           pathVariableHttpUrlParameterInfoExtractor,
-                                                                                           SIMPLE_DATE_FORMAT,
-                                                                                           HOST_ADDRESS);
+        EndPointTaskExecutor baseHttpRequestProcessor = new EndPointTaskExecutor(urlParameterValuesParameterValueAssignees2Function,
+                                                                                 compositedEndpointTasks,
+                                                                                 SIMPLE_DATE_FORMAT,
+                                                                                 HOST_ADDRESS);
 
         // 7. execute service.
         SocketHttpTaskExecutor socketHttpTaskExecutor = SocketHttpTaskExecutor.create(HttpConfig.INSTANCE.getPort(),
@@ -201,6 +218,21 @@ public class App2 {
             // todo
             // post task.
         }));
+    }
+
+    private static Function<UrlParameterValues, ParameterValueAssignees2> createUrlParameterValuesParameterValueAssignees2Function(
+        Function<UrlParameterValues, ParameterValueAssignee> urlParameterValuesPathParametersValueAssigneeFunction,
+        Function<UrlParameterValues, ParameterValueAssignee> urlParameterValuesQueryParameterValueAssigneeFunction,
+        Function<InputStream, ParameterValueAssignee> inputStreamBodyParameterValueAssigneeFunction,
+        UrlParameterValues queryParamValues,
+        InputStream inputStream
+    ) {
+        return (pathVariableValue) -> new ParameterValueAssignees2(
+            Map.of(
+                URL, urlParameterValuesPathParametersValueAssigneeFunction.apply(pathVariableValue),
+                QUERY_PARAM, urlParameterValuesQueryParameterValueAssigneeFunction.apply(queryParamValues),
+                BODY, inputStreamBodyParameterValueAssigneeFunction.apply(inputStream)
+            ));
     }
 
     private static List<PreTaskInfo> createPreTaskInfos(PreTaskWorker preTaskWorker, String filterName, String[] patterns) {
@@ -232,7 +264,7 @@ public class App2 {
         }
     }
 
-    private static Function<Parameter, HttpUrlParameterInfo> requestParameterHttpUrlParameterInfoFunction(AnnotationPropertyGetter annotationPropertyGetter) {
+    private static Function<Parameter, HttpUrlParameterInfo> requestParamHttpUrlParameterInfoFunction(AnnotationPropertyGetter annotationPropertyGetter) {
         Objects.requireNonNull(annotationPropertyGetter);
         return parameter -> {
             AnnotationProperties annotationProperties = annotationPropertyGetter.getAnnotationProperties(parameter, RequestParam.class, List.of("name", "defaultValue", "required"));
@@ -276,21 +308,21 @@ public class App2 {
 
             // 1. pure parameter type.
             if (InputStream.class.isAssignableFrom(parameterType)) {
-                return new ParameterAndValueAssigneeType(parameter, HTTP_INPUT_STREAM);
+                return new ParameterAndValueAssigneeType(parameter, INPUT_STREAM);
             }
             if (OutputStream.class.isAssignableFrom(parameterType)) {
-                return new ParameterAndValueAssigneeType(parameter, HTTP_OUTPUT_STREAM);
+                return new ParameterAndValueAssigneeType(parameter, OUTPUT_STREAM);
             }
 
             // 2. annotation hint type.
             if (AnnotationUtils.exist(parameter, PathVariable.class)) {
-                return new ParameterAndValueAssigneeType(parameter, HTTP_URL);
+                return new ParameterAndValueAssigneeType(parameter, URL);
             }
             if (AnnotationUtils.exist(parameter, RequestParam.class)) {
-                return new ParameterAndValueAssigneeType(parameter, HTTP_QUERY_PARAM);
+                return new ParameterAndValueAssigneeType(parameter, QUERY_PARAM);
             }
             if (AnnotationUtils.exist(parameter, RequestBody.class)) {
-                return new ParameterAndValueAssigneeType(parameter, HTTP_BODY);
+                return new ParameterAndValueAssigneeType(parameter, BODY);
             }
 
             throw new RuntimeException("Does not exist possible match ParameterType.");

@@ -9,7 +9,7 @@ import java.text.MessageFormat;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import parameter.UrlParameters;
+import parameter.UrlParameterValues;
 
 // 5. todo [annotation]
 // parameter 에 RequestParam, PathVariable 어노테이션이 존재하는지 검증한다.
@@ -20,11 +20,11 @@ public class HttpUrlAnnotationAnnotatedParameterValueAssignee<T> implements Para
     private static final Set<Class<?>> HTTP_URL_ANNOTATION_CLASSES = Set.of(RequestParam.class, PathVariable.class);
 
     private final Class<T> paramAnnotationClazz;
-    private final UrlParameters urlParameters;
+    private final UrlParameterValues urlParameterValues;
 
-    public HttpUrlAnnotationAnnotatedParameterValueAssignee(Class<T> parameterAnnotationClazz, UrlParameters urlParameters) {
+    public HttpUrlAnnotationAnnotatedParameterValueAssignee(Class<T> parameterAnnotationClazz, UrlParameterValues urlParameterValues) {
         Objects.requireNonNull(parameterAnnotationClazz);
-        Objects.requireNonNull(urlParameters);
+        Objects.requireNonNull(urlParameterValues);
 
         boolean doesNotBaseParameterAnnotation = !HTTP_URL_ANNOTATION_CLASSES.contains(parameterAnnotationClazz);
         if (doesNotBaseParameterAnnotation) {
@@ -32,7 +32,7 @@ public class HttpUrlAnnotationAnnotatedParameterValueAssignee<T> implements Para
         }
 
         this.paramAnnotationClazz = parameterAnnotationClazz;
-        this.urlParameters = urlParameters;
+        this.urlParameterValues = urlParameterValues;
     }
 
     @Override
@@ -49,7 +49,7 @@ public class HttpUrlAnnotationAnnotatedParameterValueAssignee<T> implements Para
             httpUrlAnnotation.getParameterName() :
             parameter.getName();
 
-        String matchValue = urlParameters.getOrDefault(bindName, EMPTY_VALUE);
+        String matchValue = urlParameterValues.getOrDefault(bindName, EMPTY_VALUE);
         boolean doesNotPossibleMatchValue = Objects.isNull(matchValue) && httpUrlAnnotation.isRequired();
         if (doesNotPossibleMatchValue) {
             throw new RuntimeException("Does not Possible match value, value must be exist.");

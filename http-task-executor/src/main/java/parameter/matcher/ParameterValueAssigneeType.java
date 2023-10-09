@@ -4,11 +4,11 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public enum ParameterValueAssigneeType {
-    HTTP_URL,
-    HTTP_QUERY_PARAM,
-    HTTP_BODY,
-    HTTP_INPUT_STREAM,
-    HTTP_OUTPUT_STREAM;
+    URL,
+    QUERY_PARAM,
+    BODY,
+    INPUT_STREAM,
+    OUTPUT_STREAM;
 
     public static ParameterValueAssigneeType findByName(String findName){
         Objects.requireNonNull(findName);

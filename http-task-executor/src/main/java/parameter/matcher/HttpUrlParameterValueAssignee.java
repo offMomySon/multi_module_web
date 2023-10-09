@@ -3,18 +3,19 @@ package parameter.matcher;
 import java.lang.reflect.Parameter;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import parameter.UrlParameterValues;
 import parameter.extractor.HttpUrlParameterInfoExtractor;
 import static parameter.extractor.HttpUrlParameterInfoExtractor.HttpUrlParameterInfo;
 
 public class HttpUrlParameterValueAssignee implements ParameterValueAssignee {
-    private final HttpUrlParameterInfoExtractor parameterInfoExtractor;
+    private final Function<Parameter, HttpUrlParameterInfo> extractFunction;
     private final UrlParameterValues urlParameterValues;
 
-    public HttpUrlParameterValueAssignee(HttpUrlParameterInfoExtractor parameterInfoExtractor, UrlParameterValues urlParameterValues) {
-        Objects.requireNonNull(parameterInfoExtractor);
+    public HttpUrlParameterValueAssignee(Function<Parameter, HttpUrlParameterInfo> extractFunction, UrlParameterValues urlParameterValues) {
+        Objects.requireNonNull(extractFunction);
         Objects.requireNonNull(urlParameterValues);
-        this.parameterInfoExtractor = parameterInfoExtractor;
+        this.extractFunction = extractFunction;
         this.urlParameterValues = urlParameterValues;
     }
 
@@ -22,7 +23,7 @@ public class HttpUrlParameterValueAssignee implements ParameterValueAssignee {
     public Optional<?> assign(Parameter parameter) {
         Objects.requireNonNull(parameter);
 
-        HttpUrlParameterInfo urlParameterInfo = parameterInfoExtractor.extract(parameter);
+        HttpUrlParameterInfo urlParameterInfo = extractFunction.apply(parameter);
         String parameterName = urlParameterInfo.getParameterName();
         String defaultValue = urlParameterInfo.getDefaultValue();
         boolean required = urlParameterInfo.isRequired();

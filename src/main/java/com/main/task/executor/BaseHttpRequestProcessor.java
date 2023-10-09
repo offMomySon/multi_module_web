@@ -5,6 +5,7 @@ import executor.HttpRequestProcessor;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -86,11 +87,12 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
         // 하지만 코드 적으로는 끊어졌지만, 개념적으로는 연결이 되어있다. 이것을 연관관계를 끊어다고 볼 수 있을까?
         // 임시저장 브랜치 - origin/split_annotation_module_role_at_MethodParameterValueMatcher
         ParameterValueAssignees parameterValueAssignees = new ParameterValueAssignees(
-            Map.of(INPUT_STREAM, new SingleValueParameterValueAssignee<>(request.getBodyInputStream()),
-                   OUTPUT_STREAM, new SingleValueParameterValueAssignee<>(response.getOutputStream()),
-                   BODY, new HttpBodyParameterValueAssignee(httpBodyParameterInfoExtractor, request.getBodyInputStream()),
-                   URL, new HttpUrlParameterValueAssignee(pathVariableParameterInfoExtractor, pathVariableValue),
-                   QUERY_PARAM, new HttpUrlParameterValueAssignee(requestParamHttpUrlParameterInfoExtractor, queryParamValues)));
+            Collections.emptyMap());
+//            Map.of(INPUT_STREAM, new SingleValueParameterValueAssignee<>(request.getBodyInputStream()),
+//                   OUTPUT_STREAM, new SingleValueParameterValueAssignee<>(response.getOutputStream()),
+//                   BODY, new HttpBodyParameterValueAssignee(httpBodyParameterInfoExtractor, parameterInfoExtractorFunction, request.getBodyInputStream()),
+//                   URL, new HttpUrlParameterValueAssignee(pathVariableParameterInfoExtractor, pathVariableValue),
+//                   QUERY_PARAM, new HttpUrlParameterValueAssignee(requestParamHttpUrlParameterInfoExtractor, queryParamValues)));
         ParameterValueGetter parameterValueGetter = new ParameterValueGetter(parameterValueAssignees);
 
         Object[] parameterValues = Arrays.stream(httpEndPointTask.getParameterTypeInfos())

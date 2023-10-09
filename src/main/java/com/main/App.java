@@ -44,7 +44,7 @@ import matcher.EndpointTaskMatcher;
 import matcher.RequestMethod;
 import matcher.StaticResourceEndPointTaskMatcher;
 import matcher.creator.JavaMethodPathMatcherCreator;
-import matcher.creator.RequestMappedMethod;
+import matcher.creator.EndPointMethodInfo;
 import matcher.creator.StaticResourceEndPointCreator;
 import parameter.extractor.FunctionBodyParameterInfoExtractor;
 import parameter.extractor.FunctionHttpUrlParameterInfoExtractor;
@@ -105,7 +105,7 @@ public class App {
             .annotations(new Annotations(List.of(WebFilter.class, Controller.class)))
             .annotationPropertyGetter(annotationPropertyGetter)
             .build();
-        AnnotatedClassObjectRepository objectRepository = objectRepositoryCreator.createFromPackage(App.class, "com.main");
+        AnnotatedClassObjectRepository objectRepository = objectRepositoryCreator.fromPackage(App.class, "com.main");
 
         // 2. webfilter 생성.
         List<AnnotatedObjectProperties> webFilerAnnotatedPreTaskWorkersWithProperties = objectRepository.findObjectAndAnnotationPropertiesByClassAndAnnotatedClass(PreTaskWorker.class,
@@ -131,7 +131,7 @@ public class App {
                                                                                                                                                                         RequestMapping.class,
                                                                                                                                                                         List.of("url", "httpMethod"));
 
-        List<RequestMappedMethod> requestMappedMethods = requestMappedProperties.stream()
+        List<EndPointMethodInfo> endPointMethodInfos = requestMappedProperties.stream()
             .map(requestMappedProperty -> {
                 AnnotatedObjectProperties annotatedObjectProperties = requestMappedProperty.getAnnotatedObjectProperties();
                 Object object = annotatedObjectProperties.getObject();
@@ -150,7 +150,7 @@ public class App {
             .collect(Collectors.toUnmodifiableList());
 
         JavaMethodPathMatcherCreator javaMethodPathMatcherCreator = new JavaMethodPathMatcherCreator(customParameterParameterTypeInfoFunction());
-        List<EndpointTaskMatcher> javaMethodEndpointTaskMatchers = requestMappedMethods.stream()
+        List<EndpointTaskMatcher> javaMethodEndpointTaskMatchers = endPointMethodInfos.stream()
             .map(javaMethodPathMatcherCreator::create)
             .collect(Collectors.toUnmodifiableList());
 
@@ -200,7 +200,7 @@ public class App {
             .collect(Collectors.toUnmodifiableList());
     }
 
-    private static List<RequestMappedMethod> createRequestMappedMethods(RequestMethod[] requestMethods, String[] classUrls, String[] _methodUrls, Object object, Method javaMethod) {
+    private static List<EndPointMethodInfo> createRequestMappedMethods(RequestMethod[] requestMethods, String[] classUrls, String[] _methodUrls, Object object, Method javaMethod) {
         List<String> clazzUrls = Arrays.stream(classUrls).collect(Collectors.toUnmodifiableList());
         List<String> methodUrls = Arrays.stream(_methodUrls).collect(Collectors.toUnmodifiableList());
         List<String> fullMethodUrls = clazzUrls.stream()
@@ -210,7 +210,7 @@ public class App {
 
         return Arrays.stream(requestMethods)
             .flatMap(httpMethod -> fullMethodUrls.stream()
-                .map(methodUrl -> new RequestMappedMethod(httpMethod, methodUrl, object, javaMethod)))
+                .map(methodUrl -> new EndPointMethodInfo(httpMethod, methodUrl, object, javaMethod)))
             .collect(Collectors.toUnmodifiableList());
     }
 

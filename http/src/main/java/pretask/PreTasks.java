@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import vo.HttpRequest;
+import vo.HttpResponse;
 
 public class PreTasks {
     private List<PreTask> values;
@@ -122,6 +124,14 @@ public class PreTasks {
             return matchedPreTasks.stream()
                 .map(MatchedPreTask::getFilterWorker)
                 .collect(Collectors.toUnmodifiableList());
+        }
+
+        public void execute(HttpRequest request, HttpResponse response) {
+            List<PreTaskWorker> preTaskWorkers = findFilterWorkers(request.getHttpRequestPath().getValue().toString());
+            for (PreTaskWorker preTaskWorker : preTaskWorkers) {
+                preTaskWorker.prevExecute(request, response);
+            }
+
         }
     }
 }

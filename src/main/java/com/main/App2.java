@@ -44,14 +44,10 @@ import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import matcher.RequestMethod;
 import matcher.creator.JavaMethodInvokeTaskWorkerCreator2;
-import matcher.creator.RequestMappedMethod;
+import matcher.creator.EndPointMethodInfo;
 import matcher.segment.PathUrl;
 import parameter.UrlParameterValues;
-import parameter.extractor.FunctionBodyParameterInfoExtractor;
-import parameter.extractor.FunctionHttpUrlParameterInfoExtractor;
-import parameter.extractor.HttpBodyParameterInfoExtractor;
 import parameter.extractor.HttpBodyParameterInfoExtractor.HttpBodyParameterInfo;
-import parameter.extractor.HttpUrlParameterInfoExtractor;
 import parameter.matcher.HttpBodyParameterValueAssignee;
 import parameter.matcher.HttpUrlParameterValueAssignee;
 import parameter.matcher.ParameterAndValueAssigneeType;
@@ -132,7 +128,7 @@ public class App2 {
             .annotations(new Annotations(List.of(WebFilter.class, Controller.class)))
             .annotationPropertyGetter(annotationPropertyGetter)
             .build();
-        AnnotatedClassObjectRepository objectRepository = objectRepositoryCreator.createFromPackage(App2.class, "com.main");
+        AnnotatedClassObjectRepository objectRepository = objectRepositoryCreator.fromPackage(App2.class, "com.main");
 
         // 2. webfilter 생성.
         List<AnnotatedObjectProperties> webFilerAnnotatedPreTaskWorkersWithProperties = objectRepository.findObjectAndAnnotationPropertiesByClassAndAnnotatedClass(PreTaskWorker.class,
@@ -157,7 +153,7 @@ public class App2 {
         List<AnnotatedObjectAndMethodProperties> requestMappedProperties = objectRepository.findAnnotatedObjectAndMethodPropertiesByClassAndAnnotatedClassFocusOnMethod(controllerAnnotatedClasses,
                                                                                                                                                                         RequestMapping.class,
                                                                                                                                                                         List.of("url", "httpMethod"));
-        List<RequestMappedMethod> requestMappedMethods = requestMappedProperties.stream()
+        List<EndPointMethodInfo> endPointJavaMethodInfos = requestMappedProperties.stream()
             .map(requestMappedProperty -> {
                 AnnotatedObjectProperties annotatedObjectProperties = requestMappedProperty.getAnnotatedObjectProperties();
                 Object object = annotatedObjectProperties.getObject();
@@ -170,43 +166,32 @@ public class App2 {
                 RequestMethod[] httpMethods = (RequestMethod[]) methodProperties.getValueOrDefault("httpMethod", new RequestMethod[]{});
                 String[] classUrls = (String[]) objectProperties.getValueOrDefault("url", Collections.emptyList());
                 String[] methodUrls = (String[]) methodProperties.getValueOrDefault("url", Collections.emptyList());
-                return createRequestMappedMethods(httpMethods, classUrls, methodUrls, object, javaMethod);
+                return createEndPointMethodInfos(httpMethods, classUrls, methodUrls, object, javaMethod);
             })
             .flatMap(Collection::stream)
             .collect(Collectors.toUnmodifiableList());
 
         // 4. endPointTask create.
         JavaMethodInvokeTaskWorkerCreator2 javaMethodInvokeTaskWorkerCreator2 = new JavaMethodInvokeTaskWorkerCreator2(parameterParameterAndValueAssigneeTypeFunction());
-        List<EndPointTask2> endPointTasks = requestMappedMethods.stream()
-            .map(requestMappedMethod -> {
-                RequestMethod requestMethod = requestMappedMethod.getRequestMethod();
-                String url = requestMappedMethod.getUrl();
+        List<EndPointTask2> endPointTasks = endPointJavaMethodInfos.stream()
+            .map(endPointJavaMethodInfo -> {
+                RequestMethod requestMethod = endPointJavaMethodInfo.getRequestMethod();
+                String url = endPointJavaMethodInfo.getUrl();
+                Object object = endPointJavaMethodInfo.getObject();
+                Method javaMethod = endPointJavaMethodInfo.getJavaMethod();
 
-                Object object = requestMappedMethod.getObject();
-                Method javaMethod = requestMappedMethod.getJavaMethod();
                 JavaMethodInvokeTaskWorker2 taskWorker = javaMethodInvokeTaskWorkerCreator2.create(object, javaMethod);
 
                 return BaseEndPointTask2.from(requestMethod, url, taskWorker);
             })
             .collect(Collectors.toUnmodifiableList());
         // 5. static resource find task.
-        SystemResourceFinder systemResourceFinder = SystemResourceFinder.from(App.class, "../../resources/main");
+        SystemResourceFinder systemResourceFinder = SystemResourceFinder.fromPackage(App.class, "../../resources/main");
         ResourceEndPointFindTask2 resourceEndPointFindTask2 = new ResourceEndPointFindTask2(systemResourceFinder, "/static");
 
+        // 6. combine each endpointTask.
         endPointTasks = Stream.concat(endPointTasks.stream(), Stream.of(resourceEndPointFindTask2)).collect(Collectors.toUnmodifiableList());
         CompositedEndpointTasks compositedEndpointTasks = new CompositedEndpointTasks(endPointTasks);
-
-        // 5. parameter info 해석기 생성.
-        HttpUrlParameterInfoExtractor pathVariableHttpUrlParameterInfoExtractor = new FunctionHttpUrlParameterInfoExtractor(pathVariableHttpUrlParameterInfoFunction(annotationPropertyGetter));
-        HttpUrlParameterInfoExtractor requestParamHttpUrlParameterInfoExtractor = new FunctionHttpUrlParameterInfoExtractor(requestParamHttpUrlParameterInfoFunction(annotationPropertyGetter));
-        HttpBodyParameterInfoExtractor requestBodyParameterInfoExtractor = new FunctionBodyParameterInfoExtractor(requestBodyHttpUrlParameterInfoFunction(annotationPropertyGetter));
-
-        Function<UrlParameterValues, ParameterValueAssignee> urlParameterValuesPathParametersValueAssigneeFunction =
-            (pathParameters) -> new HttpUrlParameterValueAssignee(pathVariableHttpUrlParameterInfoExtractor, pathParameters);
-        Function<UrlParameterValues, ParameterValueAssignee> urlParameterValuesQueryParameterValueAssigneeFunction =
-            (pathParameters) -> new HttpUrlParameterValueAssignee(requestParamHttpUrlParameterInfoExtractor, pathParameters);
-        Function<InputStream, ParameterValueAssignee> inputStreamBodyParameterValueAssigneeFunction =
-            (inputStream) -> new HttpBodyParameterValueAssignee(requestBodyParameterInfoExtractor, inputStream);
 
         // 7. execute service.
         SocketHttpTaskExecutor socketHttpTaskExecutor = SocketHttpTaskExecutor.create(HttpConfig.INSTANCE.getPort(),
@@ -215,24 +200,16 @@ public class App2 {
                                                                                       HttpConfig.INSTANCE.getKeepAliveTime());
         log.info("server start.");
         socketHttpTaskExecutor.execute(((request, response) -> {
-            List<PreTaskWorker> preTaskWorkers = preTasks.findFilterWorkers(request.getHttpRequestPath().getValue().toString());
-            for (PreTaskWorker preTaskWorker : preTaskWorkers) {
-                preTaskWorker.prevExecute(request, response);
-            }
+            preTasks.execute(request, response);
 
             InputStream bodyInputStream = request.getBodyInputStream();
             UrlParameterValues queryParamValues = new UrlParameterValues(request.getQueryParameters().getParameterMap());
             Function<UrlParameterValues, ParameterValueAssignees2> urlParameterValuesParameterValueAssignees2Function = createUrlParameterValuesParameterValueAssignees2Function(
-                urlParameterValuesPathParametersValueAssigneeFunction,
-                urlParameterValuesQueryParameterValueAssigneeFunction,
-                inputStreamBodyParameterValueAssigneeFunction,
-                queryParamValues,
-                bodyInputStream);
-
-            EndPointTaskExecutor endPointTaskExecutor = new EndPointTaskExecutor(urlParameterValuesParameterValueAssignees2Function,
-                                                                                 compositedEndpointTasks,
-                                                                                 SIMPLE_DATE_FORMAT,
-                                                                                 HOST_ADDRESS);
+                (pathParameters) -> new HttpUrlParameterValueAssignee(pathVariableHttpUrlParameterInfoFunction(annotationPropertyGetter), pathParameters),
+                new HttpUrlParameterValueAssignee(requestParamHttpUrlParameterInfoFunction(annotationPropertyGetter), queryParamValues),
+                new HttpBodyParameterValueAssignee(requestBodyHttpUrlParameterInfoFunction(annotationPropertyGetter), bodyInputStream)
+            );
+            EndPointTaskExecutor endPointTaskExecutor = new EndPointTaskExecutor(urlParameterValuesParameterValueAssignees2Function, compositedEndpointTasks);
 
             RequestMethod method = RequestMethod.find(request.getHttpMethod().name());
             PathUrl requestUrl = PathUrl.from(request.getHttpRequestPath().getValue().toString());
@@ -240,33 +217,33 @@ public class App2 {
 
             WorkerResultType type = endPointWorkerResult.getType();
             Object result = endPointWorkerResult.getResult();
-
-            ContentType2 contentType = null;
             InputStream content = VALUE_TYPE_CONVERTER.convertToInputStream(result);
-            if (type != EMPTY) {
-                contentType = convert(type);
-            }
+            ContentType2 contentType = getContentType2(type);
 
             HttpResponseHeaderCreator2 headerCreator = new HttpResponseHeaderCreator2(SIMPLE_DATE_FORMAT, HOST_ADDRESS, contentType);
             HttpResponseHeader httpResponseHeader = headerCreator.create();
-
             HttpResponseSender httpResponseSender = new HttpResponseSender(response);
             httpResponseSender.send(httpResponseHeader, content);
         }));
     }
 
+    private static ContentType2 getContentType2(WorkerResultType type) {
+        if (type == EMPTY) {
+            return null;
+        }
+        return convertToContentType(type);
+    }
+
     private static Function<UrlParameterValues, ParameterValueAssignees2> createUrlParameterValuesParameterValueAssignees2Function(
         Function<UrlParameterValues, ParameterValueAssignee> urlParameterValuesPathParametersValueAssigneeFunction,
-        Function<UrlParameterValues, ParameterValueAssignee> urlParameterValuesQueryParameterValueAssigneeFunction,
-        Function<InputStream, ParameterValueAssignee> inputStreamBodyParameterValueAssigneeFunction,
-        UrlParameterValues queryParamValues,
-        InputStream inputStream
+        HttpUrlParameterValueAssignee requestParamValueAssignee,
+        HttpBodyParameterValueAssignee bodyParameterValueAssignee
     ) {
         return (pathVariableValue) -> new ParameterValueAssignees2(
             Map.of(
                 URL, urlParameterValuesPathParametersValueAssigneeFunction.apply(pathVariableValue),
-                QUERY_PARAM, urlParameterValuesQueryParameterValueAssigneeFunction.apply(queryParamValues),
-                BODY, inputStreamBodyParameterValueAssigneeFunction.apply(inputStream)
+                QUERY_PARAM, requestParamValueAssignee,
+                BODY, bodyParameterValueAssignee
             ));
     }
 
@@ -276,7 +253,7 @@ public class App2 {
             .collect(Collectors.toUnmodifiableList());
     }
 
-    private static List<RequestMappedMethod> createRequestMappedMethods(RequestMethod[] requestMethods, String[] classUrls, String[] _methodUrls, Object object, Method javaMethod) {
+    private static List<EndPointMethodInfo> createEndPointMethodInfos(RequestMethod[] requestMethods, String[] classUrls, String[] _methodUrls, Object object, Method javaMethod) {
         List<String> clazzUrls = Arrays.stream(classUrls).collect(Collectors.toUnmodifiableList());
         List<String> methodUrls = Arrays.stream(_methodUrls).collect(Collectors.toUnmodifiableList());
         List<String> fullMethodUrls = clazzUrls.stream()
@@ -286,7 +263,7 @@ public class App2 {
 
         return Arrays.stream(requestMethods)
             .flatMap(httpMethod -> fullMethodUrls.stream()
-                .map(methodUrl -> new RequestMappedMethod(httpMethod, methodUrl, object, javaMethod)))
+                .map(methodUrl -> new EndPointMethodInfo(httpMethod, methodUrl, object, javaMethod)))
             .collect(Collectors.toUnmodifiableList());
     }
 
@@ -364,7 +341,7 @@ public class App2 {
         };
     }
 
-    private static ContentType2 convert(WorkerResultType resultType) {
+    private static ContentType2 convertToContentType(WorkerResultType resultType) {
         switch (resultType) {
             case STRING:
             case TXT:

@@ -19,21 +19,13 @@ import task.worker.EndPointWorkerResult;
 public class EndPointTaskExecutor {
     private final Function<UrlParameterValues, ParameterValueAssignees2> urlParameterValuesParameterValueAssignees2Function;
     private final EndPointTask2 endPointTask;
-    private final SimpleDateFormat simpleDateFormat;
-    private final String hostAddress;
 
     public EndPointTaskExecutor(Function<UrlParameterValues, ParameterValueAssignees2> urlParameterValuesParameterValueAssignees2Function,
-                                EndPointTask2 endPointTask,
-                                SimpleDateFormat simpleDateFormat,
-                                String hostAddress) {
+                                EndPointTask2 endPointTask) {
         Objects.requireNonNull(urlParameterValuesParameterValueAssignees2Function);
         Objects.requireNonNull(endPointTask);
-        Objects.requireNonNull(simpleDateFormat);
-        Objects.requireNonNull(hostAddress);
         this.urlParameterValuesParameterValueAssignees2Function = urlParameterValuesParameterValueAssignees2Function;
         this.endPointTask = endPointTask;
-        this.simpleDateFormat = simpleDateFormat;
-        this.hostAddress = hostAddress;
     }
 
 

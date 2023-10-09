@@ -29,19 +29,19 @@ public class JavaMethodPathMatcherCreator {
         this.parameterParameterTypeInfoFunction = parameterParameterTypeInfoFunction;
     }
 
-    public JavaMethodEndpointTaskMatcher create(RequestMappedMethod requestMappedMethod) {
-        if (Objects.isNull(requestMappedMethod)) {
+    public JavaMethodEndpointTaskMatcher create(EndPointMethodInfo endPointMethodInfo) {
+        if (Objects.isNull(endPointMethodInfo)) {
             throw new RuntimeException("requestMappedMethod is empty.");
         }
 
-        RequestMethod requestMethod = requestMappedMethod.getRequestMethod();
+        RequestMethod requestMethod = endPointMethodInfo.getRequestMethod();
 
-        PathUrl baseUrl = PathUrl.from(requestMappedMethod.getUrl());
+        PathUrl baseUrl = PathUrl.from(endPointMethodInfo.getUrl());
         SegmentChunkFactory segmentChunkFactory = new SegmentChunkFactory(baseUrl);
         PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(segmentChunkFactory);
 
-        Object object = requestMappedMethod.getObject();
-        Method javaMethod = requestMappedMethod.getJavaMethod();
+        Object object = endPointMethodInfo.getObject();
+        Method javaMethod = endPointMethodInfo.getJavaMethod();
         ParameterAndValueAssigneeType[] parameterAndValueAssigneeTypes = Arrays.stream(javaMethod.getParameters())
             .map(parameterParameterTypeInfoFunction)
             .toArray(ParameterAndValueAssigneeType[]::new);

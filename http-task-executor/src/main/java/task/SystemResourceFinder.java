@@ -17,13 +17,13 @@ public class SystemResourceFinder {
         this.resourceDirectory = resourceDirectory;
     }
 
-    public static SystemResourceFinder from(Class<?> clazz, String resourcePackage) {
-        Objects.requireNonNull(clazz);
+    public static SystemResourceFinder fromPackage(Class<?> rootClazz, String resourcePackage) {
+        Objects.requireNonNull(rootClazz);
         if (Objects.isNull(resourcePackage) || resourcePackage.isBlank()) {
             throw new RuntimeException("requestPackage is empty.");
         }
 
-        Path clazzPath = FileSystemUtil.getClazzRootPath(clazz);
+        Path clazzPath = FileSystemUtil.getClazzRootPath(rootClazz);
         Path projectPackageDirectory = clazzPath.getParent();
         Path resourceDirectory = projectPackageDirectory.resolve(resourcePackage).normalize();
         log.info("clazzPath : {}", clazzPath);

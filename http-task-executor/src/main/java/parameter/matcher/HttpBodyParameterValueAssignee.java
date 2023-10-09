@@ -6,18 +6,19 @@ import java.io.InputStream;
 import java.lang.reflect.Parameter;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import parameter.extractor.HttpBodyParameterInfoExtractor;
 import parameter.extractor.HttpBodyParameterInfoExtractor.HttpBodyParameterInfo;
 import static com.main.util.IoUtils.createBufferedInputStream;
 
 public class HttpBodyParameterValueAssignee implements ParameterValueAssignee {
-    private final HttpBodyParameterInfoExtractor parameterInfoExtractor;
+    private final Function<Parameter, HttpBodyParameterInfo> parameterInfoExtractorFunction;
     private final InputStream inputStream;
 
-    public HttpBodyParameterValueAssignee(HttpBodyParameterInfoExtractor parameterInfoExtractor, InputStream inputStream) {
-        Objects.requireNonNull(parameterInfoExtractor);
+    public HttpBodyParameterValueAssignee(Function<Parameter, HttpBodyParameterInfo> parameterInfoExtractorFunction, InputStream inputStream) {
+        Objects.requireNonNull(parameterInfoExtractorFunction);
         Objects.requireNonNull(inputStream);
-        this.parameterInfoExtractor = parameterInfoExtractor;
+        this.parameterInfoExtractorFunction = parameterInfoExtractorFunction;
         this.inputStream = inputStream;
     }
 
@@ -25,7 +26,7 @@ public class HttpBodyParameterValueAssignee implements ParameterValueAssignee {
     public Optional<?> assign(Parameter parameter) {
         Objects.requireNonNull(parameter);
 
-        HttpBodyParameterInfo bodyParameterInfo = parameterInfoExtractor.extract(parameter);
+        HttpBodyParameterInfo bodyParameterInfo = parameterInfoExtractorFunction.apply(parameter);
         boolean required = bodyParameterInfo.isRequired();
 
         boolean doesNotPossibleValueMatch = required && isEmpty(inputStream);

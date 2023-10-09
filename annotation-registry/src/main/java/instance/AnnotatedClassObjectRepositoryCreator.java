@@ -27,7 +27,7 @@ public class AnnotatedClassObjectRepositoryCreator {
         this.annotationPropertyGetter = annotationPropertyGetter;
     }
 
-    public AnnotatedClassObjectRepository createFromPackage(Class<?> rootClazz, String classPackage) {
+    public AnnotatedClassObjectRepository fromPackage(Class<?> rootClazz, String classPackage) {
         if (Objects.isNull(rootClazz) || Objects.isNull(classPackage) || classPackage.isBlank()) {
             throw new RuntimeException("Invalid param. Param is empty.");
         }

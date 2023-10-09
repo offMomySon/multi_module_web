@@ -25,7 +25,7 @@ public class RequestMappingValueExtractor {
             .collect(Collectors.toUnmodifiableSet());
     }
 
-    public List<RequestMappedMethod> extractRequestMappedMethods(Method javaMethod) {
+    public List<EndPointMethodInfo> extractRequestMappedMethods(Method javaMethod) {
         if (Objects.isNull(javaMethod)) {
             return Collections.emptyList();
         }
@@ -51,7 +51,7 @@ public class RequestMappingValueExtractor {
 
         return requestMethods.stream()
             .flatMap(httpMethod -> fullMethodUrls.stream()
-                .map(methodUrl -> new RequestMappedMethod(httpMethod, methodUrl, null, javaMethod)))
+                .map(methodUrl -> new EndPointMethodInfo(httpMethod, methodUrl, null, javaMethod)))
             .collect(Collectors.toUnmodifiableList());
     }
 }

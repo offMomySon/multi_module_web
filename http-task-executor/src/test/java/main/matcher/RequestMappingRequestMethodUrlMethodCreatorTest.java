@@ -4,7 +4,7 @@ import annotation.RequestMapping;
 import java.lang.reflect.Method;
 import java.util.List;
 import matcher.RequestMethod;
-import matcher.creator.RequestMappedMethod;
+import matcher.creator.EndPointMethodInfo;
 import matcher.creator.RequestMappingValueExtractor;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -21,7 +21,7 @@ class RequestMappingRequestMethodUrlMethodCreatorTest {
         Method method = TestAnnotatedClass.getDoesNotAnnotatedMethod();
 
         //when
-        List<RequestMappedMethod> actual = valueExtractor.extractRequestMappedMethods(method);
+        List<EndPointMethodInfo> actual = valueExtractor.extractRequestMappedMethods(method);
 
         //then
         Assertions.assertThat(actual)
@@ -36,10 +36,10 @@ class RequestMappingRequestMethodUrlMethodCreatorTest {
         RequestMappingValueExtractor valueExtractor = new RequestMappingValueExtractor(clazz);
         Method method = TestAnnotatedClass.getAnnotatedMethod();
 
-        List<RequestMappedMethod> expect = TestAnnotatedClass.getCartesianProduct();
+        List<EndPointMethodInfo> expect = TestAnnotatedClass.getCartesianProduct();
 
         //when
-        List<RequestMappedMethod> actual = valueExtractor.extractRequestMappedMethods(method);
+        List<EndPointMethodInfo> actual = valueExtractor.extractRequestMappedMethods(method);
 
         //then
 
@@ -75,17 +75,17 @@ class RequestMappingRequestMethodUrlMethodCreatorTest {
             }
         }
 
-        public static List<RequestMappedMethod> getCartesianProduct() {
+        public static List<EndPointMethodInfo> getCartesianProduct() {
             Method annotatedMethod = getAnnotatedMethod();
             return List.of(
-                new RequestMappedMethod(RequestMethod.GET, "/testclass1" + "/testMethod1", null, annotatedMethod),
-                new RequestMappedMethod(RequestMethod.GET, "/testclass1" + "/testMethod2", null, annotatedMethod),
-                new RequestMappedMethod(RequestMethod.GET, "/testclass2" + "/testMethod1", null, annotatedMethod),
-                new RequestMappedMethod(RequestMethod.GET, "/testclass2" + "/testMethod2", null, annotatedMethod),
-                new RequestMappedMethod(RequestMethod.POST, "/testclass1" + "/testMethod1", null, annotatedMethod),
-                new RequestMappedMethod(RequestMethod.POST, "/testclass1" + "/testMethod2", null, annotatedMethod),
-                new RequestMappedMethod(RequestMethod.POST, "/testclass2" + "/testMethod1", null, annotatedMethod),
-                new RequestMappedMethod(RequestMethod.POST, "/testclass2" + "/testMethod2", null, annotatedMethod)
+                new EndPointMethodInfo(RequestMethod.GET, "/testclass1" + "/testMethod1", null, annotatedMethod),
+                new EndPointMethodInfo(RequestMethod.GET, "/testclass1" + "/testMethod2", null, annotatedMethod),
+                new EndPointMethodInfo(RequestMethod.GET, "/testclass2" + "/testMethod1", null, annotatedMethod),
+                new EndPointMethodInfo(RequestMethod.GET, "/testclass2" + "/testMethod2", null, annotatedMethod),
+                new EndPointMethodInfo(RequestMethod.POST, "/testclass1" + "/testMethod1", null, annotatedMethod),
+                new EndPointMethodInfo(RequestMethod.POST, "/testclass1" + "/testMethod2", null, annotatedMethod),
+                new EndPointMethodInfo(RequestMethod.POST, "/testclass2" + "/testMethod1", null, annotatedMethod),
+                new EndPointMethodInfo(RequestMethod.POST, "/testclass2" + "/testMethod2", null, annotatedMethod)
             );
         }
     }

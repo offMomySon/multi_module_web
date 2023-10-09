@@ -45,6 +45,10 @@ public class SystemResourceFinder {
             return Optional.empty();
         }
 
+        if(url.startsWith("/")){
+            url = url.substring(1);
+        }
+
         Path resource = resourceDirectory.resolve(url);
 
         if (Files.notExists(resource)) {
@@ -62,6 +66,7 @@ public class SystemResourceFinder {
             return Optional.empty();
         }
 
+        log.info("Resource is exist. resource: `{}`", resource);
         return Optional.of(resource);
     }
 }

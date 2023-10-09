@@ -26,7 +26,7 @@ public class SystemResourceFileFindTaskWorker2 implements EndPointTaskWorker2 {
     }
 
     @Override
-    public WorkerResult execute(Object[] params) {
+    public EndPointWorkerResult execute(Object[] params) {
         Optional<Path> optionalFoundResource = systemResourceFinder.findFile(resourcePath);
 
         if (optionalFoundResource.isEmpty()) {
@@ -35,6 +35,6 @@ public class SystemResourceFileFindTaskWorker2 implements EndPointTaskWorker2 {
 
         Path foundResource = optionalFoundResource.get();
         WorkerResultType workerResultType = WorkerResultType.findByPath(foundResource);
-        return new WorkerResult(workerResultType, foundResource);
+        return new EndPointWorkerResult(workerResultType, foundResource);
     }
 }

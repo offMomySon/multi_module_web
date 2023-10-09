@@ -8,16 +8,18 @@ import java.util.Objects;
 // 어디서 부터 정책적인 영역이 나올 수 있는지?
 public enum WorkerResultType {
     EMPTY,
-    STRING,
-    JSON,
-    JPEG,
-    GIF,
-    PNG,
-    HTML,
-    TXT,
-    CSS,
-    JAVASCRIPT,
-    CLASS;
+    STRING, // c
+    TXT, // c
+    HTML, // c
+    CSS, // c
+
+    JPEG, // c
+    GIF, // c
+    PNG, // c
+
+    JSON, // c
+    JAVASCRIPT, // c
+    CLASS; // c
 
     public static WorkerResultType findByClazz(Class<?> returnClazz) {
         if (Objects.isNull(returnClazz)) {

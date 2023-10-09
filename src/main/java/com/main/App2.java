@@ -11,7 +11,9 @@ import annotation.RequestParam;
 import annotation.WebFilter;
 import com.main.config.HttpConfig;
 import com.main.task.executor.EndPointTaskExecutor;
+import com.main.task.response.HttpResponseSender;
 import com.main.util.AnnotationUtils;
+import converter.CompositeValueTypeConverter;
 import executor.SocketHttpTaskExecutor;
 import instance.AnnotatedClassObjectRepository;
 import instance.AnnotatedClassObjectRepositoryCreator;
@@ -21,13 +23,13 @@ import instance.AnnotatedObjectProperties;
 import instance.AnnotationProperties;
 import instance.AnnotationPropertyGetter;
 import instance.Annotations;
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collection;
@@ -60,25 +62,40 @@ import pretask.PreTaskInfo;
 import pretask.PreTaskWorker;
 import pretask.PreTasks;
 import pretask.PreTasks.ReadOnlyPreTasks;
+import response.HttpResponseHeader;
+import response.HttpResponseHeaderCreator2;
 import task.BaseEndPointTask2;
 import task.CompositedEndpointTasks;
 import task.EndPointTask2;
 import task.ResourceEndPointFindTask2;
 import task.SystemResourceFinder;
+import task.worker.EndPointWorkerResult;
 import task.worker.JavaMethodInvokeTaskWorker2;
-import task.worker.WorkerResult;
+import task.worker.WorkerResultType;
+import vo.ContentType2;
 import static parameter.extractor.HttpUrlParameterInfoExtractor.HttpUrlParameterInfo;
 import static parameter.matcher.ParameterValueAssigneeType.BODY;
 import static parameter.matcher.ParameterValueAssigneeType.INPUT_STREAM;
 import static parameter.matcher.ParameterValueAssigneeType.OUTPUT_STREAM;
 import static parameter.matcher.ParameterValueAssigneeType.QUERY_PARAM;
 import static parameter.matcher.ParameterValueAssigneeType.URL;
+import static task.worker.WorkerResultType.EMPTY;
+import static vo.ContentType2.APPLICATION_JAVASCRIPT;
+import static vo.ContentType2.APPLICATION_JAVA_VM;
+import static vo.ContentType2.APPLICATION_JSON;
+import static vo.ContentType2.IMAGE_GIF;
+import static vo.ContentType2.IMAGE_JPEG;
+import static vo.ContentType2.IMAGE_PNG;
+import static vo.ContentType2.TEXT_CSS;
+import static vo.ContentType2.TEXT_HTML;
+import static vo.ContentType2.TEXT_PLAIN;
 
 @Slf4j
 public class App2 {
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
     private static final String HOST_ADDRESS;
     private static final AnnotationPropertyMappers ANNOTATION_PROPERTY_MAPPERS;
+    private static final CompositeValueTypeConverter VALUE_TYPE_CONVERTER = new CompositeValueTypeConverter();
 
     static {
         SIMPLE_DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -174,7 +191,7 @@ public class App2 {
             .collect(Collectors.toUnmodifiableList());
         // 5. static resource find task.
         SystemResourceFinder systemResourceFinder = SystemResourceFinder.from(App.class, "../../resources/main");
-        ResourceEndPointFindTask2 resourceEndPointFindTask2 = new ResourceEndPointFindTask2(systemResourceFinder, "static");
+        ResourceEndPointFindTask2 resourceEndPointFindTask2 = new ResourceEndPointFindTask2(systemResourceFinder, "/static");
 
         endPointTasks = Stream.concat(endPointTasks.stream(), Stream.of(resourceEndPointFindTask2)).collect(Collectors.toUnmodifiableList());
         CompositedEndpointTasks compositedEndpointTasks = new CompositedEndpointTasks(endPointTasks);
@@ -191,18 +208,6 @@ public class App2 {
         Function<InputStream, ParameterValueAssignee> inputStreamBodyParameterValueAssigneeFunction =
             (inputStream) -> new HttpBodyParameterValueAssignee(requestBodyParameterInfoExtractor, inputStream);
 
-        Function<UrlParameterValues, ParameterValueAssignees2> urlParameterValuesParameterValueAssignees2Function = createUrlParameterValuesParameterValueAssignees2Function(
-            urlParameterValuesPathParametersValueAssigneeFunction,
-            urlParameterValuesQueryParameterValueAssigneeFunction,
-            inputStreamBodyParameterValueAssigneeFunction,
-            UrlParameterValues.empty(), new ByteArrayInputStream(new byte[1]));
-
-        // 6. http service start.
-        EndPointTaskExecutor endPointTaskExecutor = new EndPointTaskExecutor(urlParameterValuesParameterValueAssignees2Function,
-                                                                                 compositedEndpointTasks,
-                                                                                 SIMPLE_DATE_FORMAT,
-                                                                                 HOST_ADDRESS);
-
         // 7. execute service.
         SocketHttpTaskExecutor socketHttpTaskExecutor = SocketHttpTaskExecutor.create(HttpConfig.INSTANCE.getPort(),
                                                                                       HttpConfig.INSTANCE.getMaxConnection(),
@@ -215,12 +220,38 @@ public class App2 {
                 preTaskWorker.prevExecute(request, response);
             }
 
+            InputStream bodyInputStream = request.getBodyInputStream();
+            UrlParameterValues queryParamValues = new UrlParameterValues(request.getQueryParameters().getParameterMap());
+            Function<UrlParameterValues, ParameterValueAssignees2> urlParameterValuesParameterValueAssignees2Function = createUrlParameterValuesParameterValueAssignees2Function(
+                urlParameterValuesPathParametersValueAssigneeFunction,
+                urlParameterValuesQueryParameterValueAssigneeFunction,
+                inputStreamBodyParameterValueAssigneeFunction,
+                queryParamValues,
+                bodyInputStream);
+
+            EndPointTaskExecutor endPointTaskExecutor = new EndPointTaskExecutor(urlParameterValuesParameterValueAssignees2Function,
+                                                                                 compositedEndpointTasks,
+                                                                                 SIMPLE_DATE_FORMAT,
+                                                                                 HOST_ADDRESS);
+
             RequestMethod method = RequestMethod.find(request.getHttpMethod().name());
             PathUrl requestUrl = PathUrl.from(request.getHttpRequestPath().getValue().toString());
-            WorkerResult workerResult = endPointTaskExecutor.execute(method, requestUrl);
+            EndPointWorkerResult endPointWorkerResult = endPointTaskExecutor.execute(method, requestUrl);
 
-            // todo
-            // post task.
+            WorkerResultType type = endPointWorkerResult.getType();
+            Object result = endPointWorkerResult.getResult();
+
+            ContentType2 contentType = null;
+            InputStream content = VALUE_TYPE_CONVERTER.convertToInputStream(result);
+            if (type != EMPTY) {
+                contentType = convert(type);
+            }
+
+            HttpResponseHeaderCreator2 headerCreator = new HttpResponseHeaderCreator2(SIMPLE_DATE_FORMAT, HOST_ADDRESS, contentType);
+            HttpResponseHeader httpResponseHeader = headerCreator.create();
+
+            HttpResponseSender httpResponseSender = new HttpResponseSender(response);
+            httpResponseSender.send(httpResponseHeader, content);
         }));
     }
 
@@ -331,6 +362,32 @@ public class App2 {
 
             throw new RuntimeException("Does not exist possible match ParameterType.");
         };
+    }
+
+    private static ContentType2 convert(WorkerResultType resultType) {
+        switch (resultType) {
+            case STRING:
+            case TXT:
+                return TEXT_PLAIN;
+            case HTML:
+                return TEXT_HTML;
+            case CSS:
+                return TEXT_CSS;
+            case JPEG:
+                return IMAGE_JPEG;
+            case GIF:
+                return IMAGE_GIF;
+            case PNG:
+                return IMAGE_PNG;
+            case JSON:
+                return APPLICATION_JSON;
+            case JAVASCRIPT:
+                return APPLICATION_JAVASCRIPT;
+            case CLASS:
+                return APPLICATION_JAVA_VM;
+        }
+
+        throw new RuntimeException(MessageFormat.format("Does not exit match type. WorkerResultType: `{}`", resultType));
     }
 }
 

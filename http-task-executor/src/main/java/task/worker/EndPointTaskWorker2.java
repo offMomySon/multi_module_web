@@ -1,7 +1,5 @@
 package task.worker;
 
-import java.util.Objects;
-import lombok.Getter;
 import parameter.matcher.ParameterAndValueAssigneeType;
 
 // object json
@@ -15,5 +13,5 @@ import parameter.matcher.ParameterAndValueAssigneeType;
 public interface EndPointTaskWorker2 {
     ParameterAndValueAssigneeType[] getParameterTypeInfos();
 
-    WorkerResult execute(Object[] params);
+    EndPointWorkerResult execute(Object[] params);
 }

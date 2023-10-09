@@ -13,7 +13,7 @@ import parameter.UrlParameterValues;
 import parameter.matcher.ParameterValueAssignees2;
 import task.EndPointTask2;
 import task.worker.EndPointTaskWorker2;
-import task.worker.WorkerResult;
+import task.worker.EndPointWorkerResult;
 
 @Slf4j
 public class EndPointTaskExecutor {
@@ -37,7 +37,7 @@ public class EndPointTaskExecutor {
     }
 
 
-    public WorkerResult execute(RequestMethod method, PathUrl requestUrl) {
+    public EndPointWorkerResult execute(RequestMethod method, PathUrl requestUrl) {
         Objects.requireNonNull(method);
         Objects.requireNonNull(requestUrl);
 
@@ -47,16 +47,18 @@ public class EndPointTaskExecutor {
         ParameterValueAssignees2 parameterValueAssignees = urlParameterValuesParameterValueAssignees2Function.apply(pathVariableValue);
 
         EndPointTaskWorker2 endPointTaskWorker = matchedEndPointTaskWorker.getEndPointTaskWorker();
+        log.info("ParameterTypeInfos: `{}`", Arrays.toString(endPointTaskWorker.getParameterTypeInfos()));
+
         Object[] parameterValues = Arrays.stream(endPointTaskWorker.getParameterTypeInfos())
             .map(parameterValueAssignees::assign)
             .map(v -> v.orElse(null))
             .toArray();
 
-        WorkerResult workerResult = endPointTaskWorker.execute(parameterValues);
+        EndPointWorkerResult endPointWorkerResult = endPointTaskWorker.execute(parameterValues);
         log.info("WorkerResultType: `{}`, result: `{}`, result clazz: `{}`",
-                 workerResult.getType(),
-                 workerResult.getResult(),
-                 Optional.ofNullable(workerResult.getResult()).map(Object::getClass).orElse(null));
-        return workerResult;
+                 endPointWorkerResult.getType(),
+                 endPointWorkerResult.getResult(),
+                 Optional.ofNullable(endPointWorkerResult.getResult()).map(Object::getClass).orElse(null));
+        return endPointWorkerResult;
     }
 }

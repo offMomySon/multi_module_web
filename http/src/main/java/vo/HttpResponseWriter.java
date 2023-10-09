@@ -47,7 +47,6 @@ public class HttpResponseWriter implements Closeable {
     }
 
     public void send(InputStream body) {
-        Objects.requireNonNull(body);
 
         httpResponse.send(body);
         httpResponse.flush();

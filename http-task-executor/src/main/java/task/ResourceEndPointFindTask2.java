@@ -2,12 +2,14 @@ package task;
 
 import java.util.Objects;
 import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 import matcher.MatchedEndPointTaskWorker2;
 import matcher.RequestMethod;
 import matcher.segment.PathUrl;
 import matcher.segment.PathVariableValue;
 import task.worker.SystemResourceFileFindTaskWorker2;
 
+@Slf4j
 public class ResourceEndPointFindTask2 implements EndPointTask2 {
     private final SystemResourceFinder systemResourceFinder;
     private final String urlPrefix;
@@ -28,7 +30,14 @@ public class ResourceEndPointFindTask2 implements EndPointTask2 {
             return Optional.empty();
         }
 
-        String resourcePath = urlPrefix + requestUrl.toAbsolutePath();
+        String newRequestUrl = requestUrl.toAbsolutePath();
+        if(!newRequestUrl.startsWith(urlPrefix)){
+            return Optional.empty();
+        }
+
+        int excludeUrlPrefixIndex = newRequestUrl.indexOf(urlPrefix) + urlPrefix.length();
+        String resourcePath = newRequestUrl.substring(excludeUrlPrefixIndex);
+
         if (systemResourceFinder.doesNotExistFile(resourcePath)) {
             return Optional.empty();
         }

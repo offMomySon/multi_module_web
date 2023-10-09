@@ -44,10 +44,10 @@ public class JavaMethodInvokeTaskWorker2 implements EndPointTaskWorker2 {
     }
 
     @Override
-    public WorkerResult execute(Object[] params) {
+    public EndPointWorkerResult execute(Object[] params) {
         Objects.requireNonNull(params);
         Object invoke = invokeMethod(this.declaringClazzObject, this.javaMethod, params);
-        return new WorkerResult(workerResultType, invoke);
+        return new EndPointWorkerResult(workerResultType, invoke);
     }
 
     private static Object invokeMethod(Object declaringClazzObject, Method javaMethod, Object[] params){

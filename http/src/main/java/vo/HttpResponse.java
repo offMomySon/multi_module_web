@@ -61,8 +61,6 @@ public class HttpResponse implements Closeable {
             throw new RuntimeException("socket is close.");
         }
 
-        Objects.requireNonNull(body);
-
         if (!hasHeaderSent) {
             hasHeaderSent = true;
 

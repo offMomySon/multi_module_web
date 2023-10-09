@@ -5,11 +5,11 @@ import lombok.Getter;
 
 @Getter
 public
-class WorkerResult {
+class EndPointWorkerResult {
     private final WorkerResultType type;
     private final Object result;
 
-    public WorkerResult(WorkerResultType type, Object result) {
+    public EndPointWorkerResult(WorkerResultType type, Object result) {
         Objects.requireNonNull(type);
         this.type = type;
         this.result = result;

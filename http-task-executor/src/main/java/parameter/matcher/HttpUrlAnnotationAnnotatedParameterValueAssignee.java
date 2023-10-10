@@ -11,10 +11,6 @@ import java.util.Optional;
 import java.util.Set;
 import parameter.UrlParameterValues;
 
-// 5. todo [annotation]
-// parameter 에 RequestParam, PathVariable 어노테이션이 존재하는지 검증한다.
-// 해당 어노테이팅이 필요한지 체크하고
-// 필요하다면 annotation 모듈의 역할로 처리가 가능하게 수정하자.
 public class HttpUrlAnnotationAnnotatedParameterValueAssignee<T> implements ParameterValueAssignee {
     private static final String EMPTY_VALUE = null;
     private static final Set<Class<?>> HTTP_URL_ANNOTATION_CLASSES = Set.of(RequestParam.class, PathVariable.class);
@@ -63,9 +59,6 @@ public class HttpUrlAnnotationAnnotatedParameterValueAssignee<T> implements Para
         return Optional.of(matchValue);
     }
 
-    // 5. todo [annotation]
-    // parameter 에 RequestParam, PathVariable 어노테이션의 값변환을 수행하고 있다.
-    // 해당 역할을 annotation 모듈에서 처리가 가능하도록 역할을 이전한다.
     public static class HttpUrlAnnotation {
         private static final String EMPTY_VALUE = null;
 

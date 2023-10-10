@@ -1,8 +1,9 @@
 package pretask;
 
-import pretask.pattern.PatternMatcher;
+import task.pattern.PatternMatcher;
 import pretask.pattern.PatternMatcherStrategy;
 import java.util.Objects;
+import task.PreTaskWorker;
 
 public class PreTaskCreator {
 

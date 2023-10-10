@@ -1,4 +1,4 @@
-package pretask;
+package task;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,28 +8,28 @@ import java.util.stream.Collectors;
 import vo.HttpRequest;
 import vo.HttpResponse;
 
-public class PreTasks {
-    private List<PreTask> values;
+public class PostTasks {
+    private List<PostTask> values;
 
-    public PreTasks(List<PreTask> values) {
+    public PostTasks(List<PostTask> values) {
         Objects.requireNonNull(values);
         this.values = values.stream().filter(Objects::nonNull).collect(Collectors.toList());
     }
 
-    public static PreTasks empty() {
-        return new PreTasks(Collections.emptyList());
+    public static PostTasks empty() {
+        return new PostTasks(Collections.emptyList());
     }
 
-    public PreTasks merge(PreTasks otherPreTasks) {
-        if (Objects.isNull(otherPreTasks)) {
+    public PostTasks merge(PostTasks otherPostTasks) {
+        if (Objects.isNull(otherPostTasks)) {
             return this;
         }
 
-        this.values.addAll(otherPreTasks.values);
+        this.values.addAll(otherPostTasks.values);
         return this;
     }
 
-    public PreTasks add(PreTask filter) {
+    public PostTasks add(PostTask filter) {
         if (Objects.isNull(filter)) {
             return this;
         }
@@ -38,46 +38,46 @@ public class PreTasks {
         return this;
     }
 
-    public List<PreTask> getValues() {
+    public List<PostTask> getValues() {
         return new ArrayList<>(values);
     }
 
-    public ReadOnlyPreTasks lock() {
-        return new ReadOnlyPreTasks(this.values);
+    public ReadOnlyPostTasks lock() {
+        return new ReadOnlyPostTasks(this.values);
     }
 
-    private static class MatchedPreTask {
+    private static class MatchedPostTask {
         private final String preTaskName;
-        private final PreTaskWorker preTaskWorker;
+        private final PostTaskWorker postTaskWorker;
 
-        public MatchedPreTask(String preTaskName, PreTaskWorker preTaskWorker) {
+        public MatchedPostTask(String preTaskName, PostTaskWorker postTaskWorker) {
             if (Objects.isNull(preTaskName) || preTaskName.isBlank()) {
                 throw new RuntimeException("filterName is empty.");
             }
-            Objects.requireNonNull(preTaskWorker);
+            Objects.requireNonNull(postTaskWorker);
 
             this.preTaskName = preTaskName;
-            this.preTaskWorker = preTaskWorker;
+            this.postTaskWorker = postTaskWorker;
         }
 
-        public static MatchedPreTask from(PreTask filter) {
+        public static MatchedPostTask from(PostTask filter) {
             Objects.requireNonNull(filter);
 
             String filterName = filter.getName();
-            PreTaskWorker preTaskWorker = filter.getFilterWorker();
+            PostTaskWorker preTaskWorker = filter.getFilterWorker();
 
-            return new MatchedPreTask(filterName, preTaskWorker);
+            return new MatchedPostTask(filterName, preTaskWorker);
         }
 
-        public PreTaskWorker getFilterWorker() {
-            return preTaskWorker;
+        public PostTaskWorker getFilterWorker() {
+            return postTaskWorker;
         }
 
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            MatchedPreTask that = (MatchedPreTask) o;
+            MatchedPostTask that = (MatchedPostTask) o;
             return Objects.equals(preTaskName, that.preTaskName);
         }
 
@@ -90,7 +90,7 @@ public class PreTasks {
         public String toString() {
             return "MatchedFilter{" +
                 "filterName='" + preTaskName + '\'' +
-                ", filterWorker=" + preTaskWorker +
+                ", filterWorker=" + postTaskWorker +
                 '}';
         }
     }
@@ -102,33 +102,33 @@ public class PreTasks {
             '}';
     }
 
-    public static class ReadOnlyPreTasks {
-        private final List<PreTask> values;
+    public static class ReadOnlyPostTasks {
+        private final List<PostTask> values;
 
-        public ReadOnlyPreTasks(List<PreTask> values) {
+        public ReadOnlyPostTasks(List<PostTask> values) {
             Objects.requireNonNull(values);
             this.values = values.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableList());
         }
 
-        public List<PreTaskWorker> findFilterWorkers(String requestUrl) {
+        public List<PostTaskWorker> findFilterWorkers(String requestUrl) {
             if (Objects.isNull(requestUrl) || requestUrl.isBlank()) {
                 return Collections.emptyList();
             }
 
-            List<MatchedPreTask> matchedPreTasks = values.stream()
+            List<MatchedPostTask> matchedPostTasks = values.stream()
                 .filter(value -> value.isMatchUrl(requestUrl))
-                .map(MatchedPreTask::from)
+                .map(MatchedPostTask::from)
                 .distinct()
                 .collect(Collectors.toUnmodifiableList());
 
-            return matchedPreTasks.stream()
-                .map(MatchedPreTask::getFilterWorker)
+            return matchedPostTasks.stream()
+                .map(MatchedPostTask::getFilterWorker)
                 .collect(Collectors.toUnmodifiableList());
         }
 
         public void execute(HttpRequest request, HttpResponse response) {
-            List<PreTaskWorker> preTaskWorkers = findFilterWorkers(request.getHttpRequestPath().getValue().toString());
-            for (PreTaskWorker preTaskWorker : preTaskWorkers) {
+            List<PostTaskWorker> preTaskWorkers = findFilterWorkers(request.getHttpRequestPath().getValue().toString());
+            for (PostTaskWorker preTaskWorker : preTaskWorkers) {
                 preTaskWorker.execute(request, response);
             }
 

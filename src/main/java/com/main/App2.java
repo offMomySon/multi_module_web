@@ -5,10 +5,11 @@ import annotation.AnnotationPropertyMapper;
 import annotation.AnnotationPropertyMappers;
 import annotation.Controller;
 import annotation.PathVariable;
+import annotation.PostWebFilter;
+import annotation.PreWebFilter;
 import annotation.RequestBody;
 import annotation.RequestMapping;
 import annotation.RequestParam;
-import annotation.PreWebFilter;
 import com.main.config.HttpConfig;
 import com.main.task.executor.EndPointTaskExecutor;
 import com.main.task.response.HttpResponseSender;
@@ -43,8 +44,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import matcher.RequestMethod;
-import matcher.creator.JavaMethodInvokeTaskWorkerCreator2;
 import matcher.creator.EndPointMethodInfo;
+import matcher.creator.JavaMethodInvokeTaskWorkerCreator2;
 import matcher.segment.PathUrl;
 import parameter.UrlParameterValues;
 import parameter.extractor.HttpBodyParameterInfoExtractor.HttpBodyParameterInfo;
@@ -53,16 +54,21 @@ import parameter.matcher.HttpUrlParameterValueAssignee;
 import parameter.matcher.ParameterAndValueAssigneeType;
 import parameter.matcher.ParameterValueAssignee;
 import parameter.matcher.ParameterValueAssignees2;
+import pretask.PostTaskCreator;
+import pretask.PostTaskInfo;
 import pretask.PreTaskCreator;
 import pretask.PreTaskInfo;
-import pretask.PreTaskWorker;
-import pretask.PreTasks;
-import pretask.PreTasks.ReadOnlyPreTasks;
 import response.HttpResponseHeader;
 import response.HttpResponseHeaderCreator2;
 import task.BaseEndPointTask2;
 import task.CompositedEndpointTasks;
 import task.EndPointTask2;
+import task.PostTaskWorker;
+import task.PostTasks;
+import task.PostTasks.ReadOnlyPostTasks;
+import task.PreTaskWorker;
+import task.PreTasks;
+import task.PreTasks.ReadOnlyPreTasks;
 import task.ResourceEndPointFindTask2;
 import task.SystemResourceFinder;
 import task.worker.EndPointWorkerResult;
@@ -70,21 +76,9 @@ import task.worker.JavaMethodInvokeTaskWorker2;
 import task.worker.WorkerResultType;
 import vo.ContentType2;
 import static parameter.extractor.HttpUrlParameterInfoExtractor.HttpUrlParameterInfo;
-import static parameter.matcher.ParameterValueAssigneeType.BODY;
-import static parameter.matcher.ParameterValueAssigneeType.INPUT_STREAM;
-import static parameter.matcher.ParameterValueAssigneeType.OUTPUT_STREAM;
-import static parameter.matcher.ParameterValueAssigneeType.QUERY_PARAM;
-import static parameter.matcher.ParameterValueAssigneeType.URL;
+import static parameter.matcher.ParameterValueAssigneeType.*;
 import static task.worker.WorkerResultType.EMPTY;
-import static vo.ContentType2.APPLICATION_JAVASCRIPT;
-import static vo.ContentType2.APPLICATION_JAVA_VM;
-import static vo.ContentType2.APPLICATION_JSON;
-import static vo.ContentType2.IMAGE_GIF;
-import static vo.ContentType2.IMAGE_JPEG;
-import static vo.ContentType2.IMAGE_PNG;
-import static vo.ContentType2.TEXT_CSS;
-import static vo.ContentType2.TEXT_HTML;
-import static vo.ContentType2.TEXT_PLAIN;
+import static vo.ContentType2.*;
 
 @Slf4j
 public class App2 {
@@ -97,15 +91,17 @@ public class App2 {
         SIMPLE_DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
         HOST_ADDRESS = getHostAddress();
 
-        AnnotationPropertyMapper webFilterPropertyMapper = new AnnotationPropertyMapper(PreWebFilter.class,
-                                                                                        Map.of("patterns", (a) -> ((PreWebFilter) a).patterns(),
-                                                                                               "filterName", (a) -> ((PreWebFilter) a).filterName()));
+        AnnotationPropertyMapper preWebFilterPropertyMapper = new AnnotationPropertyMapper(PreWebFilter.class,
+                                                                                           Map.of("patterns", (a) -> ((PreWebFilter) a).patterns(),
+                                                                                                  "filterName", (a) -> ((PreWebFilter) a).filterName()));
+        AnnotationPropertyMapper postWebFilterPropertyMapper = new AnnotationPropertyMapper(PostWebFilter.class,
+                                                                                            Map.of("patterns", (a) -> ((PostWebFilter) a).patterns(),
+                                                                                                   "filterName", (a) -> ((PostWebFilter) a).filterName()));
         AnnotationPropertyMapper pathVariablePropertyMapper = new AnnotationPropertyMapper(PathVariable.class,
                                                                                            Map.of("name", (a) -> ((PathVariable) a).name(),
                                                                                                   "required", (a) -> ((PathVariable) a).required()));
         AnnotationPropertyMapper requestBodyPropertyMapper = new AnnotationPropertyMapper(RequestBody.class,
                                                                                           Map.of("required", (a) -> ((RequestBody) a).required()));
-
         AnnotationPropertyMapper requestMappingPropertyMapper = new AnnotationPropertyMapper(RequestMapping.class,
                                                                                              Map.of("url", (a) -> ((RequestMapping) a).url(),
                                                                                                     "httpMethod", (a) -> ((RequestMapping) a).method()));
@@ -113,7 +109,8 @@ public class App2 {
                                                                                            Map.of("name", (a) -> ((RequestParam) a).name(),
                                                                                                   "defaultValue", (a) -> ((RequestParam) a).defaultValue(),
                                                                                                   "required", (a) -> ((RequestParam) a).required()));
-        ANNOTATION_PROPERTY_MAPPERS = new AnnotationPropertyMappers(Map.of(PreWebFilter.class, webFilterPropertyMapper,
+        ANNOTATION_PROPERTY_MAPPERS = new AnnotationPropertyMappers(Map.of(PreWebFilter.class, preWebFilterPropertyMapper,
+                                                                           PostWebFilter.class, postWebFilterPropertyMapper,
                                                                            PathVariable.class, pathVariablePropertyMapper,
                                                                            RequestBody.class, requestBodyPropertyMapper,
                                                                            RequestMapping.class, requestMappingPropertyMapper,
@@ -130,16 +127,16 @@ public class App2 {
             .build();
         AnnotatedClassObjectRepository objectRepository = objectRepositoryCreator.fromPackage(App2.class, "com.main");
 
-        // 2. webfilter 생성.
-        List<AnnotatedObjectProperties> webFilerAnnotatedPreTaskWorkersWithProperties = objectRepository.findObjectAndAnnotationPropertiesByClassAndAnnotatedClass(PreTaskWorker.class,
-                                                                                                                                                                   PreWebFilter.class,
-                                                                                                                                                                   List.of("filterName", "patterns"));
-        ReadOnlyPreTasks preTasks = webFilerAnnotatedPreTaskWorkersWithProperties.stream()
+        // 2. preWebfilter 생성.
+        List<AnnotatedObjectProperties> preWebFilerAnnotatedPreTaskWorkersWithProperties =
+            objectRepository.findObjectAndAnnotationPropertiesByClassAndAnnotatedClass(PreTaskWorker.class, PreWebFilter.class, List.of("filterName", "patterns"));
+        ReadOnlyPreTasks preTasks = preWebFilerAnnotatedPreTaskWorkersWithProperties.stream()
             .map(webFilerAnnotatedPreTaskWorkerWithProperties -> {
                 PreTaskWorker preTaskWorker = (PreTaskWorker) webFilerAnnotatedPreTaskWorkerWithProperties.getObject();
                 AnnotationProperties properties = webFilerAnnotatedPreTaskWorkerWithProperties.getAnnotationProperties();
 
-                String filterName = ((String) properties.getValue("filterName")).isBlank() ? preTaskWorker.getClass().getSimpleName() : (String) properties.getValue("filterName");
+                String filterName = ((String) properties.getValue("filterName")).isBlank() ?
+                    preTaskWorker.getClass().getSimpleName() : (String) properties.getValue("filterName");
                 String[] patterns = (String[]) properties.getValue("patterns");
                 return createPreTaskInfos(preTaskWorker, filterName, patterns);
             })
@@ -148,11 +145,27 @@ public class App2 {
             .reduce(PreTasks.empty(), PreTasks::add, PreTasks::merge)
             .lock();
 
-        // 3. java http endpoint task 생성.
+        // 3. postWebfilter 생성.
+        List<AnnotatedObjectProperties> postWebFilerAnnotatedPreTaskWorkersWithProperties =
+            objectRepository.findObjectAndAnnotationPropertiesByClassAndAnnotatedClass(PostTaskWorker.class, PostWebFilter.class, List.of("filterName", "patterns"));
+        ReadOnlyPostTasks postTasks = postWebFilerAnnotatedPreTaskWorkersWithProperties.stream()
+            .map(webFilerAnnotatedPreTaskWorkerWithProperties -> {
+                PostTaskWorker postTaskWorker = (PostTaskWorker) webFilerAnnotatedPreTaskWorkerWithProperties.getObject();
+                AnnotationProperties properties = webFilerAnnotatedPreTaskWorkerWithProperties.getAnnotationProperties();
+
+                String filterName = ((String) properties.getValue("filterName")).isBlank() ? postTaskWorker.getClass().getSimpleName() : (String) properties.getValue("filterName");
+                String[] patterns = (String[]) properties.getValue("patterns");
+                return createPostTaskInfos(postTaskWorker, filterName, patterns);
+            })
+            .flatMap(Collection::stream)
+            .map(PostTaskCreator::create)
+            .reduce(PostTasks.empty(), PostTasks::add, PostTasks::merge)
+            .lock();
+
+        // 4. java http endpoint task 생성.
         List<Class<?>> controllerAnnotatedClasses = objectRepository.findClassByAnnotatedClass(Controller.class);
-        List<AnnotatedObjectAndMethodProperties> requestMappedProperties = objectRepository.findAnnotatedObjectAndMethodPropertiesByClassAndAnnotatedClassFocusOnMethod(controllerAnnotatedClasses,
-                                                                                                                                                                        RequestMapping.class,
-                                                                                                                                                                        List.of("url", "httpMethod"));
+        List<AnnotatedObjectAndMethodProperties> requestMappedProperties =
+            objectRepository.findAnnotatedObjectAndMethodPropertiesByClassAndAnnotatedClassFocusOnMethod(controllerAnnotatedClasses, RequestMapping.class, List.of("url", "httpMethod"));
         List<EndPointMethodInfo> endPointJavaMethodInfos = requestMappedProperties.stream()
             .map(requestMappedProperty -> {
                 AnnotatedObjectProperties annotatedObjectProperties = requestMappedProperty.getAnnotatedObjectProperties();
@@ -171,7 +184,7 @@ public class App2 {
             .flatMap(Collection::stream)
             .collect(Collectors.toUnmodifiableList());
 
-        // 4. endPointTask create.
+        // 5. endPointTask create.
         JavaMethodInvokeTaskWorkerCreator2 javaMethodInvokeTaskWorkerCreator2 = new JavaMethodInvokeTaskWorkerCreator2(parameterParameterAndValueAssigneeTypeFunction());
         List<EndPointTask2> endPointTasks = endPointJavaMethodInfos.stream()
             .map(endPointJavaMethodInfo -> {
@@ -185,15 +198,15 @@ public class App2 {
                 return BaseEndPointTask2.from(requestMethod, url, taskWorker);
             })
             .collect(Collectors.toUnmodifiableList());
-        // 5. static resource find task.
+        // 6. static resource find task.
         SystemResourceFinder systemResourceFinder = SystemResourceFinder.fromPackage(App.class, "../../resources/main");
         ResourceEndPointFindTask2 resourceEndPointFindTask2 = new ResourceEndPointFindTask2(systemResourceFinder, "/static");
 
-        // 6. combine each endpointTask.
+        // 7. combine each endpointTask.
         endPointTasks = Stream.concat(endPointTasks.stream(), Stream.of(resourceEndPointFindTask2)).collect(Collectors.toUnmodifiableList());
         CompositedEndpointTasks compositedEndpointTasks = new CompositedEndpointTasks(endPointTasks);
 
-        // 7. execute service.
+        // 8. execute service.
         SocketHttpTaskExecutor socketHttpTaskExecutor = SocketHttpTaskExecutor.create(HttpConfig.INSTANCE.getPort(),
                                                                                       HttpConfig.INSTANCE.getMaxConnection(),
                                                                                       HttpConfig.INSTANCE.getWaitConnection(),
@@ -214,6 +227,8 @@ public class App2 {
             RequestMethod method = RequestMethod.find(request.getHttpMethod().name());
             PathUrl requestUrl = PathUrl.from(request.getHttpRequestPath().getValue().toString());
             EndPointWorkerResult endPointWorkerResult = endPointTaskExecutor.execute(method, requestUrl);
+
+            postTasks.execute(request, response);
 
             WorkerResultType type = endPointWorkerResult.getType();
             Object result = endPointWorkerResult.getResult();
@@ -250,6 +265,12 @@ public class App2 {
     private static List<PreTaskInfo> createPreTaskInfos(PreTaskWorker preTaskWorker, String filterName, String[] patterns) {
         return Arrays.stream(patterns)
             .map(pattern -> new PreTaskInfo(filterName, pattern, preTaskWorker))
+            .collect(Collectors.toUnmodifiableList());
+    }
+
+    private static List<PostTaskInfo> createPostTaskInfos(PostTaskWorker postTaskWorker, String filterName, String[] patterns) {
+        return Arrays.stream(patterns)
+            .map(pattern -> new PostTaskInfo(filterName, pattern, postTaskWorker))
             .collect(Collectors.toUnmodifiableList());
     }
 

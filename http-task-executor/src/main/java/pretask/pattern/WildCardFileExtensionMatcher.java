@@ -1,6 +1,7 @@
 package pretask.pattern;
 
 import java.util.Objects;
+import task.pattern.PatternMatcher;
 
 public class WildCardFileExtensionMatcher implements PatternMatcher {
     private static final String FILE_NAME_WILD_CARD = "*.";

@@ -1,4 +1,4 @@
-package pretask;
+package task;
 
 public interface PreTask {
     String getName();

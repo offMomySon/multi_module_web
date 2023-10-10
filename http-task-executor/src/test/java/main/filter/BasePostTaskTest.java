@@ -1,8 +1,8 @@
 package main.filter;
 
 import pretask.BasePreTask;
-import pretask.PreTaskWorker;
-import pretask.pattern.PatternMatcher;
+import task.PreTaskWorker;
+import task.pattern.PatternMatcher;
 import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -11,7 +11,7 @@ import pretask.pattern.BasePatternMatcher;
 import vo.HttpRequest;
 import vo.HttpResponse;
 
-class BasePreTaskTest {
+class BasePostTaskTest {
 
     @DisplayName("url 이 매칭되면 Worker 를 가져옵니다.")
     @Test

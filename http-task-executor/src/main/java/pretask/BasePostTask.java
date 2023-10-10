@@ -1,46 +1,48 @@
 package pretask;
 
-import task.pattern.PatternMatcher;
 import java.util.Objects;
 import java.util.Optional;
 import pretask.pattern.PatternMatcherStrategy;
+import task.PostTask;
+import task.PostTaskWorker;
 import task.PreTask;
 import task.PreTaskWorker;
+import task.pattern.PatternMatcher;
 
-public class BasePreTask implements PreTask {
+public class BasePostTask implements PostTask {
     private final String name;
     private final PatternMatcher patternMatcher;
-    private final PreTaskWorker preTaskWorker;
+    private final PostTaskWorker postTaskWorker;
 
-    public BasePreTask(String name, PatternMatcher patternMatcher, PreTaskWorker preTaskWorker) {
+    public BasePostTask(String name, PatternMatcher patternMatcher, PostTaskWorker postTaskWorker) {
         if (Objects.isNull(name) || name.isBlank()) {
             throw new RuntimeException("name is empty.");
         }
         Objects.requireNonNull(patternMatcher);
-        Objects.requireNonNull(preTaskWorker);
+        Objects.requireNonNull(postTaskWorker);
 
         this.name = name;
         this.patternMatcher = patternMatcher;
-        this.preTaskWorker = preTaskWorker;
+        this.postTaskWorker = postTaskWorker;
     }
 
-    public static BasePreTask from(String name, PatternMatcherStrategy patternMatcherStrategy, PreTaskWorker preTaskWorker) {
+    public static BasePostTask from(String name, PatternMatcherStrategy patternMatcherStrategy, PostTaskWorker postTaskWorker) {
         if (Objects.isNull(name) || name.isBlank()) {
             throw new RuntimeException("Does not exist name.");
         }
         Objects.requireNonNull(patternMatcherStrategy);
-        Objects.requireNonNull(preTaskWorker);
+        Objects.requireNonNull(postTaskWorker);
 
         PatternMatcher patternMatcher = patternMatcherStrategy.create();
-        return new BasePreTask(name, patternMatcher, preTaskWorker);
+        return new BasePostTask(name, patternMatcher, postTaskWorker);
     }
 
     public String getName() {
         return name;
     }
 
-    public PreTaskWorker getFilterWorker() {
-        return preTaskWorker;
+    public PostTaskWorker getFilterWorker() {
+        return postTaskWorker;
     }
 
     public PatternMatcher getPatternMatcher() {
@@ -51,13 +53,13 @@ public class BasePreTask implements PreTask {
         return matchUrl(requestUrl).isPresent();
     }
 
-    public Optional<PreTaskWorker> matchUrl(String requestUrl) {
+    public Optional<PostTaskWorker> matchUrl(String requestUrl) {
         if (Objects.isNull(requestUrl) || requestUrl.isBlank()) {
             throw new RuntimeException("requestUrl is empty.");
         }
 
         if (patternMatcher.isMatch(requestUrl)) {
-            return Optional.of(preTaskWorker);
+            return Optional.of(postTaskWorker);
         }
         return Optional.empty();
     }

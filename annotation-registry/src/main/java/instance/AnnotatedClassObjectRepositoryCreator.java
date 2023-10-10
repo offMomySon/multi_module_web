@@ -68,18 +68,18 @@ public class AnnotatedClassObjectRepositoryCreator {
             this.annotations = annotations;
         }
 
-        public Builder annotationPropertyGetter(AnnotationPropertyGetter annotationPropertyGetter) {
-            Objects.requireNonNull(annotationPropertyGetter);
-            this.annotationPropertyGetter = annotationPropertyGetter;
-            return this;
-        }
-
         public Builder annotations(Annotations annotations) {
             Objects.requireNonNull(annotations);
             if (Objects.isNull(this.annotations)) {
                 this.annotations = annotations;
             }
             this.annotations = this.annotations.merge(annotations);
+            return this;
+        }
+
+        public Builder annotationPropertyGetter(AnnotationPropertyGetter annotationPropertyGetter) {
+            Objects.requireNonNull(annotationPropertyGetter);
+            this.annotationPropertyGetter = annotationPropertyGetter;
             return this;
         }
 

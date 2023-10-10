@@ -1,9 +1,9 @@
 package main.filter;
 
-import pretask.PreTask;
+import task.PreTask;
 import pretask.BasePreTask;
-import pretask.PreTaskWorker;
-import pretask.PreTasks;
+import task.PreTaskWorker;
+import task.PreTasks;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -15,7 +15,7 @@ import pretask.pattern.BasePatternMatcher;
 import vo.HttpRequest;
 import vo.HttpResponse;
 
-class PreTasksTest {
+class PostTasksTest {
 
     @DisplayName("동일한 필터 이름을 가진 filter 가 존재하는 filters 를 merge 하면 exception 이 발생합니다.")
     @Test

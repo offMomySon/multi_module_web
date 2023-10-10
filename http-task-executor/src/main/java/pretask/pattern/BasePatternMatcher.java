@@ -1,6 +1,7 @@
 package pretask.pattern;
 
 import java.util.Objects;
+import task.pattern.PatternMatcher;
 
 public class BasePatternMatcher implements PatternMatcher {
 

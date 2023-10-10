@@ -2,27 +2,28 @@ package pretask;
 
 import java.util.Objects;
 import lombok.Getter;
+import task.PostTaskWorker;
 import task.PreTaskWorker;
 
 
 @Getter
-public class PreTaskInfo {
+public class PostTaskInfo {
     private final String name;
     private final String pattern;
-    private final PreTaskWorker preTaskWorker;
+    private final PostTaskWorker postTaskWorker;
 
-    public PreTaskInfo(String name, String pattern, PreTaskWorker preTaskWorker) {
+    public PostTaskInfo(String name, String pattern, PostTaskWorker postTaskWorker) {
         if(Objects.isNull(name) || name.isBlank()){
             throw new RuntimeException("name is empty.");
         }
         if(Objects.isNull(pattern) || pattern.isBlank()){
             throw new RuntimeException("pattern is empty.");
         }
-        if(Objects.isNull(preTaskWorker)){
+        if(Objects.isNull(postTaskWorker)){
             throw new RuntimeException("filterWorker is empty.");
         }
         this.name = name;
         this.pattern = pattern;
-        this.preTaskWorker = preTaskWorker;
+        this.postTaskWorker = postTaskWorker;
     }
 }

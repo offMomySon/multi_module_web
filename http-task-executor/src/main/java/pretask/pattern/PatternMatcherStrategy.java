@@ -1,6 +1,7 @@
 package pretask.pattern;
 
 import java.util.Objects;
+import task.pattern.PatternMatcher;
 
 public class PatternMatcherStrategy {
     private static final String WILD_CARD_PATH_MATTER = "/*";

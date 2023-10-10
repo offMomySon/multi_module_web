@@ -129,7 +129,7 @@ public class PreTasks {
         public void execute(HttpRequest request, HttpResponse response) {
             List<PreTaskWorker> preTaskWorkers = findFilterWorkers(request.getHttpRequestPath().getValue().toString());
             for (PreTaskWorker preTaskWorker : preTaskWorkers) {
-                preTaskWorker.prevExecute(request, response);
+                preTaskWorker.execute(request, response);
             }
 
         }

@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface WebFilter {
+public @interface PreWebFilter {
     String[] patterns() default {"/*"};
 
     String filterName() default "";

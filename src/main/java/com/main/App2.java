@@ -8,7 +8,7 @@ import annotation.PathVariable;
 import annotation.RequestBody;
 import annotation.RequestMapping;
 import annotation.RequestParam;
-import annotation.WebFilter;
+import annotation.PreWebFilter;
 import com.main.config.HttpConfig;
 import com.main.task.executor.EndPointTaskExecutor;
 import com.main.task.response.HttpResponseSender;
@@ -97,9 +97,9 @@ public class App2 {
         SIMPLE_DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
         HOST_ADDRESS = getHostAddress();
 
-        AnnotationPropertyMapper webFilterPropertyMapper = new AnnotationPropertyMapper(WebFilter.class,
-                                                                                        Map.of("patterns", (a) -> ((WebFilter) a).patterns(),
-                                                                                               "filterName", (a) -> ((WebFilter) a).filterName()));
+        AnnotationPropertyMapper webFilterPropertyMapper = new AnnotationPropertyMapper(PreWebFilter.class,
+                                                                                        Map.of("patterns", (a) -> ((PreWebFilter) a).patterns(),
+                                                                                               "filterName", (a) -> ((PreWebFilter) a).filterName()));
         AnnotationPropertyMapper pathVariablePropertyMapper = new AnnotationPropertyMapper(PathVariable.class,
                                                                                            Map.of("name", (a) -> ((PathVariable) a).name(),
                                                                                                   "required", (a) -> ((PathVariable) a).required()));
@@ -113,7 +113,7 @@ public class App2 {
                                                                                            Map.of("name", (a) -> ((RequestParam) a).name(),
                                                                                                   "defaultValue", (a) -> ((RequestParam) a).defaultValue(),
                                                                                                   "required", (a) -> ((RequestParam) a).required()));
-        ANNOTATION_PROPERTY_MAPPERS = new AnnotationPropertyMappers(Map.of(WebFilter.class, webFilterPropertyMapper,
+        ANNOTATION_PROPERTY_MAPPERS = new AnnotationPropertyMappers(Map.of(PreWebFilter.class, webFilterPropertyMapper,
                                                                            PathVariable.class, pathVariablePropertyMapper,
                                                                            RequestBody.class, requestBodyPropertyMapper,
                                                                            RequestMapping.class, requestMappingPropertyMapper,
@@ -125,14 +125,14 @@ public class App2 {
         AnnotationPropertyGetter annotationPropertyGetter = new AnnotationPropertyGetter(ANNOTATION_PROPERTY_MAPPERS);
         AnnotatedClassObjectRepositoryCreator objectRepositoryCreator = AnnotatedClassObjectRepositoryCreator
             .builderWithDefaultAnnotations()
-            .annotations(new Annotations(List.of(WebFilter.class, Controller.class)))
+            .annotations(new Annotations(List.of(PreWebFilter.class, Controller.class)))
             .annotationPropertyGetter(annotationPropertyGetter)
             .build();
         AnnotatedClassObjectRepository objectRepository = objectRepositoryCreator.fromPackage(App2.class, "com.main");
 
         // 2. webfilter 생성.
         List<AnnotatedObjectProperties> webFilerAnnotatedPreTaskWorkersWithProperties = objectRepository.findObjectAndAnnotationPropertiesByClassAndAnnotatedClass(PreTaskWorker.class,
-                                                                                                                                                                   WebFilter.class,
+                                                                                                                                                                   PreWebFilter.class,
                                                                                                                                                                    List.of("filterName", "patterns"));
         ReadOnlyPreTasks preTasks = webFilerAnnotatedPreTaskWorkersWithProperties.stream()
             .map(webFilerAnnotatedPreTaskWorkerWithProperties -> {

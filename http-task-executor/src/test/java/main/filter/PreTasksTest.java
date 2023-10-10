@@ -91,7 +91,7 @@ class PreTasksTest {
 
     public static class TestPreTaskWorker implements PreTaskWorker {
         @Override
-        public boolean prevExecute(HttpRequest httpRequest, HttpResponse httpResponse) {
+        public boolean execute(HttpRequest httpRequest, HttpResponse httpResponse) {
             return true;
         }
 

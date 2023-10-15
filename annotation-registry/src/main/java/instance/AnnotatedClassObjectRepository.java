@@ -1,6 +1,5 @@
 package instance;
 
-import annotation.AnnotationPropertyMappers;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Collections;
@@ -59,7 +58,8 @@ public class AnnotatedClassObjectRepository {
             .collect(Collectors.toUnmodifiableList());
     }
 
-    public List<AnnotatedObjectAndMethodProperties> findAnnotatedObjectAndMethodPropertiesByClassAndAnnotatedClassFocusOnMethod(List<Class<?>> findClasses, Class<?> findAnnotation, List<String> _properties) {
+    public List<AnnotatedObjectAndMethodProperties> findAnnotatedObjectAndMethodPropertiesByClassAndAnnotatedClassFocusOnMethod(List<Class<?>> findClasses, Class<?> findAnnotation,
+                                                                                                                                List<String> _properties) {
         return findClasses.stream()
             .map(findClazz -> findAnnotatedObjectAndMethodPropertiesByClassAndAnnotatedClassFocusOnMethod(findClazz, findAnnotation, _properties))
             .flatMap(Collection::stream)
@@ -91,7 +91,7 @@ public class AnnotatedClassObjectRepository {
 //    // 역할에 어울리는 네이밍인 annotatedObjectRepository 라고 명명하자.
 //    // 자연스럽게 annotation 의 property 값을 찾는 역할도 녹일 수 있다.
 //    // 그래서. 이 클래스틑 폐기하고 기존의 objectRepository 의 네이밍을 변경하고 역할을 추가한다.
-    public List<AnnotatedObjectAndMethodProperties> findAnnotatedObjectAndMethodPropertiesByClassAndAnnotatedClassFocusOnMethod(Class<?> findClazz, Class<?> findAnnotation, List<String> _properties) {
+    private List<AnnotatedObjectAndMethodProperties> findAnnotatedObjectAndMethodPropertiesByClassAndAnnotatedClassFocusOnMethod(Class<?> findClazz, Class<?> findAnnotation, List<String> _properties) {
         if (Objects.isNull(findClazz) || Objects.isNull(findAnnotation) || Objects.isNull(_properties)) {
             throw new RuntimeException("Empty parameter.");
         }

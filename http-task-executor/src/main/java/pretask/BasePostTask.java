@@ -37,6 +37,18 @@ public class BasePostTask implements PostTask {
         return new BasePostTask(name, patternMatcher, postTaskWorker);
     }
 
+    public static BasePostTask from2(PostTaskInfo postTaskInfo) {
+        Objects.requireNonNull(postTaskInfo);
+
+        String name = postTaskInfo.getName();
+        String pattern = postTaskInfo.getPattern();
+        PatternMatcherStrategy patternMatcherStrategy = new PatternMatcherStrategy(pattern);
+        PatternMatcher patternMatcher = patternMatcherStrategy.create();
+        PostTaskWorker postTaskWorker = postTaskInfo.getPostTaskWorker();
+
+        return new BasePostTask(name, patternMatcher, postTaskWorker);
+    }
+
     public String getName() {
         return name;
     }

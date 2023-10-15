@@ -11,15 +11,12 @@ public class PreTaskCreator {
         if (Objects.isNull(preTaskInfo)) {
             throw new RuntimeException("filterInfo is emtpy.");
         }
-
         String name = preTaskInfo.getName();
-        String pattern = preTaskInfo.getPattern();
+        PatternMatcherStrategy patternMatcherStrategy = new PatternMatcherStrategy(preTaskInfo.getPattern());
         PreTaskWorker preTaskWorker = preTaskInfo.getPreTaskWorker();
 
-        PatternMatcherStrategy patternMatcherStrategy = new PatternMatcherStrategy(pattern);
-        PatternMatcher patternMatcher = patternMatcherStrategy.create();
-
-        return new BasePreTask(name, patternMatcher, preTaskWorker);
+        return null;
+//        return BasePreTask.from2(name, patternMatcherStrategy, preTaskWorker);
     }
 }
 

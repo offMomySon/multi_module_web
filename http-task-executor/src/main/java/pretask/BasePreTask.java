@@ -35,6 +35,17 @@ public class BasePreTask implements PreTask {
         return new BasePreTask(name, patternMatcher, preTaskWorker);
     }
 
+    public static BasePreTask from2(PreTaskInfo preTaskInfo) {
+        Objects.requireNonNull(preTaskInfo);
+
+        String name = preTaskInfo.getName();
+        PatternMatcherStrategy patternMatcherStrategy = new PatternMatcherStrategy(preTaskInfo.getPattern());
+        PatternMatcher patternMatcher = patternMatcherStrategy.create();
+        PreTaskWorker preTaskWorker = preTaskInfo.getPreTaskWorker();
+
+        return new BasePreTask(name, patternMatcher, preTaskWorker);
+    }
+
     public String getName() {
         return name;
     }

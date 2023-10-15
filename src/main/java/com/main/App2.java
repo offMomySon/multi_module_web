@@ -43,6 +43,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
+import matcher.MatchedEndPointTaskWorker2;
 import matcher.RequestMethod;
 import matcher.creator.EndPointMethodInfo;
 import matcher.creator.JavaMethodInvokeTaskWorkerCreator2;
@@ -54,9 +55,9 @@ import parameter.matcher.HttpUrlParameterValueAssignee;
 import parameter.matcher.ParameterAndValueAssigneeType;
 import parameter.matcher.ParameterValueAssignee;
 import parameter.matcher.ParameterValueAssignees2;
-import pretask.PostTaskCreator;
+import pretask.BasePostTask;
+import pretask.BasePreTask;
 import pretask.PostTaskInfo;
-import pretask.PreTaskCreator;
 import pretask.PreTaskInfo;
 import response.HttpResponseHeader;
 import response.HttpResponseHeaderCreator2;
@@ -71,14 +72,28 @@ import task.PreTasks;
 import task.PreTasks.ReadOnlyPreTasks;
 import task.ResourceEndPointFindTask2;
 import task.SystemResourceFinder;
+import task.worker.EndPointTaskWorker2;
 import task.worker.EndPointWorkerResult;
 import task.worker.JavaMethodInvokeTaskWorker2;
 import task.worker.WorkerResultType;
 import vo.ContentType2;
+import static com.main.config.HttpConfig.*;
 import static parameter.extractor.HttpUrlParameterInfoExtractor.HttpUrlParameterInfo;
-import static parameter.matcher.ParameterValueAssigneeType.*;
+import static parameter.matcher.ParameterValueAssigneeType.BODY;
+import static parameter.matcher.ParameterValueAssigneeType.INPUT_STREAM;
+import static parameter.matcher.ParameterValueAssigneeType.OUTPUT_STREAM;
+import static parameter.matcher.ParameterValueAssigneeType.QUERY_PARAM;
+import static parameter.matcher.ParameterValueAssigneeType.URL;
 import static task.worker.WorkerResultType.EMPTY;
-import static vo.ContentType2.*;
+import static vo.ContentType2.APPLICATION_JAVASCRIPT;
+import static vo.ContentType2.APPLICATION_JAVA_VM;
+import static vo.ContentType2.APPLICATION_JSON;
+import static vo.ContentType2.IMAGE_GIF;
+import static vo.ContentType2.IMAGE_JPEG;
+import static vo.ContentType2.IMAGE_PNG;
+import static vo.ContentType2.TEXT_CSS;
+import static vo.ContentType2.TEXT_HTML;
+import static vo.ContentType2.TEXT_PLAIN;
 
 @Slf4j
 public class App2 {
@@ -133,15 +148,16 @@ public class App2 {
         ReadOnlyPreTasks preTasks = preWebFilerAnnotatedPreTaskWorkersWithProperties.stream()
             .map(webFilerAnnotatedPreTaskWorkerWithProperties -> {
                 PreTaskWorker preTaskWorker = (PreTaskWorker) webFilerAnnotatedPreTaskWorkerWithProperties.getObject();
-                AnnotationProperties properties = webFilerAnnotatedPreTaskWorkerWithProperties.getAnnotationProperties();
 
+                AnnotationProperties properties = webFilerAnnotatedPreTaskWorkerWithProperties.getAnnotationProperties();
                 String filterName = ((String) properties.getValue("filterName")).isBlank() ?
                     preTaskWorker.getClass().getSimpleName() : (String) properties.getValue("filterName");
                 String[] patterns = (String[]) properties.getValue("patterns");
+
                 return createPreTaskInfos(preTaskWorker, filterName, patterns);
             })
             .flatMap(Collection::stream)
-            .map(PreTaskCreator::create)
+            .map(BasePreTask::from2)
             .reduce(PreTasks.empty(), PreTasks::add, PreTasks::merge)
             .lock();
 
@@ -153,12 +169,13 @@ public class App2 {
                 PostTaskWorker postTaskWorker = (PostTaskWorker) webFilerAnnotatedPreTaskWorkerWithProperties.getObject();
                 AnnotationProperties properties = webFilerAnnotatedPreTaskWorkerWithProperties.getAnnotationProperties();
 
-                String filterName = ((String) properties.getValue("filterName")).isBlank() ? postTaskWorker.getClass().getSimpleName() : (String) properties.getValue("filterName");
+                String filterName = ((String) properties.getValue("filterName")).isBlank() ?
+                    postTaskWorker.getClass().getSimpleName() : (String) properties.getValue("filterName");
                 String[] patterns = (String[]) properties.getValue("patterns");
                 return createPostTaskInfos(postTaskWorker, filterName, patterns);
             })
             .flatMap(Collection::stream)
-            .map(PostTaskCreator::create)
+            .map(BasePostTask::from2)
             .reduce(PostTasks.empty(), PostTasks::add, PostTasks::merge)
             .lock();
 
@@ -166,19 +183,20 @@ public class App2 {
         List<Class<?>> controllerAnnotatedClasses = objectRepository.findClassByAnnotatedClass(Controller.class);
         List<AnnotatedObjectAndMethodProperties> requestMappedProperties =
             objectRepository.findAnnotatedObjectAndMethodPropertiesByClassAndAnnotatedClassFocusOnMethod(controllerAnnotatedClasses, RequestMapping.class, List.of("url", "httpMethod"));
+
         List<EndPointMethodInfo> endPointJavaMethodInfos = requestMappedProperties.stream()
             .map(requestMappedProperty -> {
                 AnnotatedObjectProperties annotatedObjectProperties = requestMappedProperty.getAnnotatedObjectProperties();
-                Object object = annotatedObjectProperties.getObject();
                 AnnotationProperties objectProperties = annotatedObjectProperties.getAnnotationProperties();
 
                 AnnotatedMethodProperties annotatedMethodProperties = requestMappedProperty.getAnnotatedMethodProperties();
-                Method javaMethod = annotatedMethodProperties.getJavaMethod();
                 AnnotationProperties methodProperties = annotatedMethodProperties.getAnnotationProperties();
 
                 RequestMethod[] httpMethods = (RequestMethod[]) methodProperties.getValueOrDefault("httpMethod", new RequestMethod[]{});
                 String[] classUrls = (String[]) objectProperties.getValueOrDefault("url", Collections.emptyList());
                 String[] methodUrls = (String[]) methodProperties.getValueOrDefault("url", Collections.emptyList());
+                Object object = annotatedObjectProperties.getObject();
+                Method javaMethod = annotatedMethodProperties.getJavaMethod();
                 return createEndPointMethodInfos(httpMethods, classUrls, methodUrls, object, javaMethod);
             })
             .flatMap(Collection::stream)
@@ -207,34 +225,33 @@ public class App2 {
         CompositedEndpointTasks compositedEndpointTasks = new CompositedEndpointTasks(endPointTasks);
 
         // 8. execute service.
-        SocketHttpTaskExecutor socketHttpTaskExecutor = SocketHttpTaskExecutor.create(HttpConfig.INSTANCE.getPort(),
-                                                                                      HttpConfig.INSTANCE.getMaxConnection(),
-                                                                                      HttpConfig.INSTANCE.getWaitConnection(),
-                                                                                      HttpConfig.INSTANCE.getKeepAliveTime());
+        SocketHttpTaskExecutor socketHttpTaskExecutor = SocketHttpTaskExecutor.create(INSTANCE.getPort(),
+                                                                                      INSTANCE.getMaxConnection(),
+                                                                                      INSTANCE.getWaitConnection(),
+                                                                                      INSTANCE.getKeepAliveTime());
         log.info("server start.");
         socketHttpTaskExecutor.execute(((request, response) -> {
-            preTasks.execute(request, response);
-
-            InputStream bodyInputStream = request.getBodyInputStream();
-            UrlParameterValues queryParamValues = new UrlParameterValues(request.getQueryParameters().getParameterMap());
-            Function<UrlParameterValues, ParameterValueAssignees2> urlParameterValuesParameterValueAssignees2Function = createUrlParameterValuesParameterValueAssignees2Function(
-                (pathParameters) -> new HttpUrlParameterValueAssignee(pathVariableHttpUrlParameterInfoFunction(annotationPropertyGetter), pathParameters),
-                new HttpUrlParameterValueAssignee(requestParamHttpUrlParameterInfoFunction(annotationPropertyGetter), queryParamValues),
-                new HttpBodyParameterValueAssignee(requestBodyHttpUrlParameterInfoFunction(annotationPropertyGetter), bodyInputStream)
-            );
-            EndPointTaskExecutor endPointTaskExecutor = new EndPointTaskExecutor(urlParameterValuesParameterValueAssignees2Function, compositedEndpointTasks);
 
             RequestMethod method = RequestMethod.find(request.getHttpMethod().name());
             PathUrl requestUrl = PathUrl.from(request.getHttpRequestPath().getValue().toString());
-            EndPointWorkerResult endPointWorkerResult = endPointTaskExecutor.execute(method, requestUrl);
+            MatchedEndPointTaskWorker2 matchedEndPointTaskWorker = compositedEndpointTasks.match(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
 
-            postTasks.execute(request, response);
+            EndPointTaskWorker2 endPointTaskWorker = matchedEndPointTaskWorker.getEndPointTaskWorker();
+            UrlParameterValues pathVariableValue = new UrlParameterValues(matchedEndPointTaskWorker.getPathVariableValue().getValues());
+            UrlParameterValues queryParamValues = new UrlParameterValues(request.getQueryParameters().getParameterMap());
+            InputStream bodyInputStream = request.getBodyInputStream();
+
+            ParameterValueAssignees2 parameterValueAssignees2 = new ParameterValueAssignees2(
+                Map.of(URL, new HttpUrlParameterValueAssignee(pathVariableHttpUrlParameterInfoFunction(annotationPropertyGetter), pathVariableValue),
+                       QUERY_PARAM, new HttpUrlParameterValueAssignee(requestParamHttpUrlParameterInfoFunction(annotationPropertyGetter), queryParamValues),
+                       BODY, new HttpBodyParameterValueAssignee(requestBodyHttpUrlParameterInfoFunction(annotationPropertyGetter), bodyInputStream)));
+            EndPointTaskExecutor endPointTaskExecutor = new EndPointTaskExecutor(parameterValueAssignees2);
+            EndPointWorkerResult endPointWorkerResult = endPointTaskExecutor.execute(endPointTaskWorker);
 
             WorkerResultType type = endPointWorkerResult.getType();
             Object result = endPointWorkerResult.getResult();
-            InputStream content = VALUE_TYPE_CONVERTER.convertToInputStream(result);
             ContentType2 contentType = getContentType2(type);
-
+            InputStream content = VALUE_TYPE_CONVERTER.convertToInputStream(result);
             HttpResponseHeaderCreator2 headerCreator = new HttpResponseHeaderCreator2(SIMPLE_DATE_FORMAT, HOST_ADDRESS, contentType);
             HttpResponseHeader httpResponseHeader = headerCreator.create();
             HttpResponseSender httpResponseSender = new HttpResponseSender(response);
@@ -247,19 +264,6 @@ public class App2 {
             return null;
         }
         return convertToContentType(type);
-    }
-
-    private static Function<UrlParameterValues, ParameterValueAssignees2> createUrlParameterValuesParameterValueAssignees2Function(
-        Function<UrlParameterValues, ParameterValueAssignee> urlParameterValuesPathParametersValueAssigneeFunction,
-        HttpUrlParameterValueAssignee requestParamValueAssignee,
-        HttpBodyParameterValueAssignee bodyParameterValueAssignee
-    ) {
-        return (pathVariableValue) -> new ParameterValueAssignees2(
-            Map.of(
-                URL, urlParameterValuesPathParametersValueAssigneeFunction.apply(pathVariableValue),
-                QUERY_PARAM, requestParamValueAssignee,
-                BODY, bodyParameterValueAssignee
-            ));
     }
 
     private static List<PreTaskInfo> createPreTaskInfos(PreTaskWorker preTaskWorker, String filterName, String[] patterns) {

@@ -1,5 +1,5 @@
 dependencies {
-    implementation project(':annotation-registry')
+    implementation project(':annotation-instance')
     implementation project(':http')
     implementation project(':util')
 

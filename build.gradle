@@ -11,7 +11,7 @@ repositories {
 
 dependencies {
     api project(':http')
-    api project(':annotation-registry')
+    api project(':annotation-instance')
     api project(':http-task-executor')
     api project(':util')
 

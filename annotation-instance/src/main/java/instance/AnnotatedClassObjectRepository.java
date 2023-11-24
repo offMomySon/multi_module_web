@@ -3,6 +3,7 @@ package instance;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -166,5 +167,15 @@ public class AnnotatedClassObjectRepository {
         if (properties.isEmpty()) {
             throw new RuntimeException("Empty parameter.");
         }
+    }
+
+    public AnnotatedClassObjectRepository append(Class<?> clazz, Object object) {
+        if(Objects.isNull(clazz) || Objects.isNull(object)){
+            throw new RuntimeException("Must parameter not be null.");
+        }
+
+        Map<Class<?>, Object> newValues = new HashMap<>(values);
+        newValues.put(clazz, object);
+        return new AnnotatedClassObjectRepository(annotationPropertyGetter, newValues);
     }
 }

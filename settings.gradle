@@ -4,4 +4,5 @@ include 'annotation-instance'
 include 'http'
 include 'http-task-executor'
 include 'util'
+include 'pattern-matcher'
 

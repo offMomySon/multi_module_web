@@ -6,7 +6,7 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import matcher.path.PathUrl;
 import matcher.path.PathUtil;
-import matcher.path.PathVariableValue;
+import matcher.path.PathVariable;
 import static java.util.Objects.isNull;
 
 @Slf4j
@@ -36,7 +36,7 @@ public class WildCardPathVariableSegmentChunk extends AbstractPathVariableSegmen
     }
 
     @Override
-    public LinkedHashMap<PathUrl, PathVariableValue> internalConsume(PathUrl requestUrl) {
+    public LinkedHashMap<PathUrl, PathVariable> internalConsume(PathUrl requestUrl) {
         if (isNull(requestUrl)) {
             throw new RuntimeException("Ensure the parameter is not null.");
         }
@@ -47,14 +47,14 @@ public class WildCardPathVariableSegmentChunk extends AbstractPathVariableSegmen
 
         PathVariableSegmentChunk pathVariableSegmentChunk = new PathVariableSegmentChunk(copiedBaseUrl.copy());
 
-        LinkedHashMap<PathUrl, PathVariableValue> matchedPathVariableValue = new LinkedHashMap<>();
+        LinkedHashMap<PathUrl, PathVariable> matchedPathVariableValue = new LinkedHashMap<>();
         while (copiedRequestUrl.doesNotEmpty()) {
             boolean doesNotSufficientRequestUrl = copiedBaseUrl.segmentSize() > copiedRequestUrl.segmentSize();
             if (doesNotSufficientRequestUrl) {
                 break;
             }
 
-            Map<PathUrl, PathVariableValue> pathVariableValueMap = pathVariableSegmentChunk.internalConsume(copiedRequestUrl);
+            Map<PathUrl, PathVariable> pathVariableValueMap = pathVariableSegmentChunk.internalConsume(copiedRequestUrl);
 
             boolean doesNotMatch = pathVariableValueMap.isEmpty();
             if (doesNotMatch) {

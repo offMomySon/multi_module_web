@@ -2,12 +2,12 @@ package matcher;
 
 import java.util.List;
 import java.util.Optional;
+import matcher.path.PathUrl;
+import matcher.path.PathVariable;
 import matcher.segment.SegmentChunk;
 import matcher.segment.SegmentChunkChain;
 import matcher.segment.SegmentChunkChain.ConsumeResult;
 import matcher.segment.factory.SegmentChunkFactory;
-import matcher.path.PathUrl;
-import matcher.path.PathVariableValue;
 import static java.util.Objects.isNull;
 
 public class PathMatcher {
@@ -38,7 +38,7 @@ public class PathMatcher {
         return new PathMatcher(headChunkChain);
     }
 
-    public Optional<PathVariableValue> match(PathUrl requestUrl) {
+    public Optional<PathVariable> match(PathUrl requestUrl) {
         if (isNull(requestUrl)) {
             throw new RuntimeException("Ensure the parameter is not null.");
         }
@@ -48,7 +48,7 @@ public class PathMatcher {
             return Optional.empty();
         }
 
-        PathVariableValue pathVariableValue = consumeResult.getPathVariableValue();
-        return Optional.of(pathVariableValue);
+        PathVariable pathVariable = consumeResult.getPathVariableValue();
+        return Optional.of(pathVariable);
     }
 }

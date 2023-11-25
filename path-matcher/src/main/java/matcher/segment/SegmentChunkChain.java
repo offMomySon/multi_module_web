@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import matcher.path.PathUrl;
-import matcher.path.PathVariableValue;
+import matcher.path.PathVariable;
 import static java.util.Objects.isNull;
 
 public class SegmentChunkChain {
@@ -44,7 +44,7 @@ public class SegmentChunkChain {
             return ConsumeResult.notAllConsumed();
         }
 
-        Map<PathUrl, PathVariableValue> matchedPathVariables = getMatchedPathVariables(segmentChunk);
+        Map<PathUrl, PathVariable> matchedPathVariables = getMatchedPathVariables(segmentChunk);
 
         boolean isLastChain = isNull(segmentChunkChain);
         if (isLastChain) {
@@ -56,8 +56,8 @@ public class SegmentChunkChain {
             }
 
             PathUrl allConsumedPathUrl = optionalEmtpyPathUrl.get();
-            PathVariableValue pathVariableValue = matchedPathVariables.getOrDefault(allConsumedPathUrl, PathVariableValue.empty());
-            return ConsumeResult.allConsumed(pathVariableValue);
+            PathVariable pathVariable = matchedPathVariables.getOrDefault(allConsumedPathUrl, PathVariable.empty());
+            return ConsumeResult.allConsumed(pathVariable);
         }
 
         Optional<NextChainConsumeResult> optionalNextChainConsumeResult = remainPathUrls.stream()
@@ -72,15 +72,15 @@ public class SegmentChunkChain {
         }
 
         NextChainConsumeResult nextChainConsumeResult = optionalNextChainConsumeResult.get();
-        PathVariableValue nextChainPathVariableValue = nextChainConsumeResult.getPathVariableValue();
+        PathVariable nextChainPathVariable = nextChainConsumeResult.getPathVariableValue();
         PathUrl nexChainProvidedPathUrl = nextChainConsumeResult.getProvidePathUrl();
 
-        PathVariableValue pathVariableValue = matchedPathVariables.getOrDefault(nexChainProvidedPathUrl, PathVariableValue.empty());
-        pathVariableValue = pathVariableValue.merge(nextChainPathVariableValue);
-        return ConsumeResult.allConsumed(pathVariableValue);
+        PathVariable pathVariable = matchedPathVariables.getOrDefault(nexChainProvidedPathUrl, PathVariable.empty());
+        pathVariable = pathVariable.merge(nextChainPathVariable);
+        return ConsumeResult.allConsumed(pathVariable);
     }
 
-    private static Map<PathUrl, PathVariableValue> getMatchedPathVariables(SegmentChunk segmentChunk) {
+    private static Map<PathUrl, PathVariable> getMatchedPathVariables(SegmentChunk segmentChunk) {
         if (segmentChunk instanceof AbstractPathVariableSegmentChunk) {
             AbstractPathVariableSegmentChunk abstractPathVariableSegmentChunk = (AbstractPathVariableSegmentChunk) segmentChunk;
             return abstractPathVariableSegmentChunk.getMatchedPathVariables();
@@ -94,52 +94,52 @@ public class SegmentChunkChain {
             return Optional.empty();
         }
 
-        PathVariableValue nextChainPathVariableValue = nextConsumeResult.getPathVariableValue();
-        NextChainConsumeResult nextChainConsumeResult = new NextChainConsumeResult(remainPathUrl, nextChainPathVariableValue);
+        PathVariable nextChainPathVariable = nextConsumeResult.getPathVariableValue();
+        NextChainConsumeResult nextChainConsumeResult = new NextChainConsumeResult(remainPathUrl, nextChainPathVariable);
         return Optional.of(nextChainConsumeResult);
     }
 
     private static class NextChainConsumeResult {
         private final PathUrl providePathUrl;
-        private final PathVariableValue pathVariableValue;
+        private final PathVariable pathVariable;
 
-        public NextChainConsumeResult(PathUrl providePathUrl, PathVariableValue pathVariableValue) {
-            if (isNull(providePathUrl) || isNull(pathVariableValue)) {
+        public NextChainConsumeResult(PathUrl providePathUrl, PathVariable pathVariable) {
+            if (isNull(providePathUrl) || isNull(pathVariable)) {
                 throw new RuntimeException("Must segmentChunk not be null.");
             }
 
             this.providePathUrl = providePathUrl;
-            this.pathVariableValue = pathVariableValue;
+            this.pathVariable = pathVariable;
         }
 
         public PathUrl getProvidePathUrl() {
             return providePathUrl;
         }
 
-        public PathVariableValue getPathVariableValue() {
-            return pathVariableValue;
+        public PathVariable getPathVariableValue() {
+            return pathVariable;
         }
     }
 
     public static class ConsumeResult {
         private final boolean isAllConsumed;
-        private final PathVariableValue pathVariableValue;
+        private final PathVariable pathVariable;
 
-        private ConsumeResult(boolean isAllConsumed, PathVariableValue pathVariableValue) {
-            if (isNull(pathVariableValue)) {
+        private ConsumeResult(boolean isAllConsumed, PathVariable pathVariable) {
+            if (isNull(pathVariable)) {
                 throw new RuntimeException("Must segmentChunk not be null.");
             }
 
             this.isAllConsumed = isAllConsumed;
-            this.pathVariableValue = pathVariableValue;
+            this.pathVariable = pathVariable;
         }
 
         public static ConsumeResult notAllConsumed() {
-            return new ConsumeResult(false, PathVariableValue.empty());
+            return new ConsumeResult(false, PathVariable.empty());
         }
 
-        public static ConsumeResult allConsumed(PathVariableValue pathVariableValue) {
-            return new ConsumeResult(true, pathVariableValue);
+        public static ConsumeResult allConsumed(PathVariable pathVariable) {
+            return new ConsumeResult(true, pathVariable);
         }
 
         public boolean isAllConsumed() {
@@ -150,8 +150,8 @@ public class SegmentChunkChain {
             return !isAllConsumed();
         }
 
-        public PathVariableValue getPathVariableValue() {
-            return pathVariableValue;
+        public PathVariable getPathVariableValue() {
+            return pathVariable;
         }
     }
 }

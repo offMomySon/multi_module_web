@@ -6,10 +6,10 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import static java.util.Objects.isNull;
 
-public class PathVariableValue {
+public class PathVariable {
     private final Map<String, String> values;
 
-    public PathVariableValue(Map<String, String> values) {
+    public PathVariable(Map<String, String> values) {
         if (isNull(values)) {
             throw new RuntimeException("Ensure the parameter is not null.");
         }
@@ -21,8 +21,8 @@ public class PathVariableValue {
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
     }
 
-    public static PathVariableValue empty() {
-        return new PathVariableValue(new HashMap<>());
+    public static PathVariable empty() {
+        return new PathVariable(new HashMap<>());
     }
 
     public String get(String key) {
@@ -41,8 +41,8 @@ public class PathVariableValue {
         return new HashMap<>(values);
     }
 
-    public PathVariableValue copy() {
-        return new PathVariableValue(this.values);
+    public PathVariable copy() {
+        return new PathVariable(this.values);
     }
 
     public void clear() {
@@ -53,7 +53,7 @@ public class PathVariableValue {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        PathVariableValue that = (PathVariableValue) o;
+        PathVariable that = (PathVariable) o;
         return Objects.equals(values, that.values);
     }
 
@@ -62,14 +62,14 @@ public class PathVariableValue {
         return Objects.hash(values);
     }
 
-    public PathVariableValue merge(PathVariableValue otherPathVariableValue) {
-        Objects.requireNonNull(otherPathVariableValue);
+    public PathVariable merge(PathVariable otherPathVariable) {
+        Objects.requireNonNull(otherPathVariable);
 
         Map<String, String> newMap = new HashMap<>(this.values);
-        otherPathVariableValue.values
+        otherPathVariable.values
             .forEach((key, value) -> newMap.merge(key, value, (prev, curr) -> prev));
 
-        return new PathVariableValue(newMap);
+        return new PathVariable(newMap);
     }
 
     @Override

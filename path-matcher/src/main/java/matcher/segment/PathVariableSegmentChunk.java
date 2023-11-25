@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import matcher.path.PathUrl;
 import matcher.path.PathUtil;
-import matcher.path.PathVariableValue;
+import matcher.path.PathVariable;
 import static java.util.Objects.isNull;
 
 public class PathVariableSegmentChunk extends AbstractPathVariableSegmentChunk {
@@ -26,7 +26,7 @@ public class PathVariableSegmentChunk extends AbstractPathVariableSegmentChunk {
     }
 
     @Override
-    public LinkedHashMap<PathUrl, PathVariableValue> internalConsume(PathUrl requestUrl) {
+    public LinkedHashMap<PathUrl, PathVariable> internalConsume(PathUrl requestUrl) {
         if (isNull(requestUrl)) {
             throw new RuntimeException("Ensure the parameter is not null.");
         }
@@ -39,14 +39,14 @@ public class PathVariableSegmentChunk extends AbstractPathVariableSegmentChunk {
         PathUrl copiedBaseUrl = baseUrl.copy();
         PathUrl copiedRequestUrl = requestUrl.copy();
 
-        PathVariableValue pathVariableValue = PathVariableValue.empty();
+        PathVariable pathVariable = PathVariable.empty();
         while (copiedBaseUrl.doesNotEmpty()) {
             String baseSegment = copiedBaseUrl.popSegment();
             String requestSegment = copiedRequestUrl.popSegment();
 
             if (PathUtil.isPathVariable(baseSegment)) {
                 String key = PathUtil.parsePathVariable(baseSegment);
-                pathVariableValue.put(key, requestSegment);
+                pathVariable.put(key, requestSegment);
                 continue;
             }
 
@@ -56,8 +56,8 @@ public class PathVariableSegmentChunk extends AbstractPathVariableSegmentChunk {
             }
         }
 
-        LinkedHashMap<PathUrl, PathVariableValue> result = new LinkedHashMap<>();
-        result.put(copiedRequestUrl, pathVariableValue);
+        LinkedHashMap<PathUrl, PathVariable> result = new LinkedHashMap<>();
+        result.put(copiedRequestUrl, pathVariable);
         return result;
     }
 }

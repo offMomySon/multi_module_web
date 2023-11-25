@@ -13,7 +13,7 @@ dependencies {
     api project(':http')
     api project(':annotation-instance')
     api project(':http-task-executor')
-    api project(':pattern-matcher')
+    api project(':path-matcher')
     api project(':util')
 
     //logback

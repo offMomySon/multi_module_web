@@ -12,7 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import matcher.EndpointTaskMatcher;
 import matcher.MatchedEndPoint;
 import matcher.RequestMethod;
-import matcher.segment.path.PathUrl;
+import matcher.segment.PathUrl;
 import parameter.ParameterValueGetter;
 import parameter.UrlParameterValues;
 import parameter.extractor.HttpBodyParameterInfoExtractor;

@@ -16,7 +16,7 @@ public class WildCardSegmentChunkCreateStrategy {
 
     public static List<SegmentChunk> create(PathUrl _basePathUrl) {
         if (isNull(_basePathUrl)) {
-            throw new RuntimeException("Must parameter not be null.");
+            throw new RuntimeException("Ensure the parameter is not null.");
         }
 
         if (_basePathUrl.isEmpty()) {

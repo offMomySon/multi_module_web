@@ -17,7 +17,7 @@ public class WildCardPathVariableSegmentChunk extends AbstractPathVariableSegmen
 
     public WildCardPathVariableSegmentChunk(PathUrl baseUrl) {
         if (isNull(baseUrl)) {
-            throw new RuntimeException("Must parameter not be null.");
+            throw new RuntimeException("Ensure the parameter is not null.");
         }
 
         String segment = baseUrl.peekSegment();
@@ -38,7 +38,7 @@ public class WildCardPathVariableSegmentChunk extends AbstractPathVariableSegmen
     @Override
     public LinkedHashMap<PathUrl, PathVariableValue> internalConsume(PathUrl requestUrl) {
         if (isNull(requestUrl)) {
-            throw new RuntimeException("Must parameter not be null.");
+            throw new RuntimeException("Ensure the parameter is not null.");
         }
 
         PathUrl copiedBaseUrl = baseUrl.copy();

@@ -11,7 +11,7 @@ public class NormalSegmentChunk implements SegmentChunk {
 
     public NormalSegmentChunk(PathUrl baseUrl) {
         if (isNull(baseUrl)) {
-            throw new RuntimeException("Must parameter not be null.");
+            throw new RuntimeException("Ensure the parameter is not null.");
         }
         this.baseUrl = baseUrl;
     }
@@ -19,7 +19,7 @@ public class NormalSegmentChunk implements SegmentChunk {
     @Override
     public List<PathUrl> consume(PathUrl requestUrl) {
         if (isNull(requestUrl)) {
-            throw new RuntimeException("Must parameter not be null.");
+            throw new RuntimeException("Ensure the parameter is not null.");
         }
 
         PathUrl copiedBaseUrl = baseUrl.copy();

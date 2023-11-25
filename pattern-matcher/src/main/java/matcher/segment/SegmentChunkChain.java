@@ -9,23 +9,27 @@ import matcher.segment.path.PathVariableValue;
 import static java.util.Objects.isNull;
 
 public class SegmentChunkChain {
-    private final SegmentChunkChain segmentChunkChain;
     private final SegmentChunk segmentChunk;
+    private SegmentChunkChain segmentChunkChain;
 
-    public SegmentChunkChain(SegmentChunkChain segmentChunkChain, SegmentChunk segmentChunk) {
+    public SegmentChunkChain(SegmentChunk segmentChunk, SegmentChunkChain segmentChunkChain) {
         if (isNull(segmentChunk)) {
             throw new RuntimeException("Must segmentChunk not be null.");
         }
-        this.segmentChunkChain = segmentChunkChain;
         this.segmentChunk = segmentChunk;
+        this.segmentChunkChain = segmentChunkChain;
     }
 
-    public static SegmentChunkChain last() {
-        return new SegmentChunkChain(null, new EmptySegmentChunk());
+    public SegmentChunkChain close() {
+        SegmentChunkChain endSegmentChunkChain = new SegmentChunkChain(new EmptySegmentChunk(), null);
+        this.segmentChunkChain = endSegmentChunkChain;
+        return endSegmentChunkChain;
     }
 
     public SegmentChunkChain chaining(SegmentChunk segmentChunk) {
-        return new SegmentChunkChain(this, segmentChunk);
+        SegmentChunkChain nextSegmentChunkChain = new SegmentChunkChain(segmentChunk, null);
+        this.segmentChunkChain = nextSegmentChunkChain;
+        return nextSegmentChunkChain;
     }
 
     public ConsumeResult consume(PathUrl requestPathUrl) {

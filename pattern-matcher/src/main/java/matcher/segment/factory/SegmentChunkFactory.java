@@ -12,7 +12,7 @@ public class SegmentChunkFactory {
 
     public static List<SegmentChunk> create(PathUrl basePathUrl) {
         if (isNull(basePathUrl)) {
-            throw new RuntimeException("Must parameter not be null.");
+            throw new RuntimeException("Ensure the parameter is not null.");
         }
 
         String baseUrl = basePathUrl.toAbsolutePath();
@@ -34,6 +34,6 @@ public class SegmentChunkFactory {
         PathUrl wildCardPathUrl = PathUrl.from(baseUrl.substring(wildCardIndex));
         List<SegmentChunk> wildCardSegmentChunks = WildCardSegmentChunkCreateStrategy.create(wildCardPathUrl);
 
-        return Stream.concat(Stream.of(generalSegmentChunk), wildCardSegmentChunks.stream()).collect(Collectors.toList());
+        return Stream.concat(Stream.of(generalSegmentChunk), wildCardSegmentChunks.stream()).collect(Collectors.toUnmodifiableList());
     }
 }

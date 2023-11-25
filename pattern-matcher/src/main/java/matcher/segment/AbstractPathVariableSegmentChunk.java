@@ -16,7 +16,7 @@ public abstract class AbstractPathVariableSegmentChunk implements SegmentChunk {
     @Override
     public List<PathUrl> consume(PathUrl pathUrl) {
         if (isNull(pathUrl)) {
-            throw new RuntimeException("Must parameter not be null.");
+            throw new RuntimeException("Ensure the parameter is not null.");
         }
 
         matchedPathVariables.clear();

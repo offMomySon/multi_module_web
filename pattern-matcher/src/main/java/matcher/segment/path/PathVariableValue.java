@@ -11,7 +11,7 @@ public class PathVariableValue {
 
     public PathVariableValue(Map<String, String> values) {
         if (isNull(values)) {
-            throw new RuntimeException("Must parameter not be null.");
+            throw new RuntimeException("Ensure the parameter is not null.");
         }
 
         this.values = values.entrySet()

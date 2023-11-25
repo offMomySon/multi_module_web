@@ -12,7 +12,7 @@ public class WildCardSegmentChunk implements SegmentChunk {
 
     public WildCardSegmentChunk(PathUrl baseUrl) {
         if (isNull(baseUrl)) {
-            throw new RuntimeException("Must parameter not be null.");
+            throw new RuntimeException("Ensure the parameter is not null.");
         }
 
         String segment = baseUrl.peekSegment();
@@ -27,7 +27,7 @@ public class WildCardSegmentChunk implements SegmentChunk {
     @Override
     public List<PathUrl> consume(PathUrl requestUrl) {
         if (isNull(requestUrl)) {
-            throw new RuntimeException("Must parameter not be null.");
+            throw new RuntimeException("Ensure the parameter is not null.");
         }
 
         PathUrl copiedBaseUrl = baseUrl.copy();

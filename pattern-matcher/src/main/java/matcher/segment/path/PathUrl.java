@@ -15,7 +15,7 @@ public class PathUrl {
 
     public PathUrl(StringBuilder value, int beginIndex) {
         if (isNull(value)) {
-            throw new RuntimeException("Must parameter not be null.");
+            throw new RuntimeException("Ensure the parameter is not null.");
         }
         this.value = value;
         this.beginIndex = beginIndex;
@@ -27,7 +27,7 @@ public class PathUrl {
 
     public static PathUrl from(String path) {
         if (isNull(path)) {
-            throw new RuntimeException("Must parameter not be null.");
+            throw new RuntimeException("Ensure the parameter is not null.");
         }
 
         path = path.trim();

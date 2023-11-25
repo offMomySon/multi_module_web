@@ -11,7 +11,7 @@ import static java.util.Objects.isNull;
 public class GeneralSegmentChunkCreateStrategy {
     public static SegmentChunk create(PathUrl basePathUrl) {
         if (isNull(basePathUrl)) {
-            throw new RuntimeException("Must parameter not be null.");
+            throw new RuntimeException("Ensure the parameter is not null.");
         }
 
         if (basePathUrl.isEmpty()) {

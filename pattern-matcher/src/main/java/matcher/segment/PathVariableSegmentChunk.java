@@ -13,7 +13,7 @@ public class PathVariableSegmentChunk extends AbstractPathVariableSegmentChunk {
 
     public PathVariableSegmentChunk(PathUrl baseUrl) {
         if(isNull(baseUrl)){
-            throw new RuntimeException("Must parameter not be null.");
+            throw new RuntimeException("Ensure the parameter is not null.");
         }
 
         List<String> segments = baseUrl.toList();
@@ -28,7 +28,7 @@ public class PathVariableSegmentChunk extends AbstractPathVariableSegmentChunk {
     @Override
     public LinkedHashMap<PathUrl, PathVariableValue> internalConsume(PathUrl requestUrl) {
         if (isNull(requestUrl)) {
-            throw new RuntimeException("Must parameter not be null.");
+            throw new RuntimeException("Ensure the parameter is not null.");
         }
 
         boolean doesNotSufficientRequestUrl = baseUrl.segmentSize() > requestUrl.segmentSize();

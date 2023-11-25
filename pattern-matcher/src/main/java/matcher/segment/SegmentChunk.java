@@ -1,7 +1,7 @@
 package matcher.segment;
 
 import java.util.List;
-import matcher.segment.path.PathUrl;
+import matcher.path.PathUrl;
 
 public interface SegmentChunk {
     List<PathUrl> consume(PathUrl pathUrl);

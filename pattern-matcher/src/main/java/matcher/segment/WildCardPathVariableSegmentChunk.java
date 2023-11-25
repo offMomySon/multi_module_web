@@ -4,9 +4,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
-import matcher.segment.path.PathUrl;
-import matcher.segment.path.PathUtil;
-import matcher.segment.path.PathVariableValue;
+import matcher.path.PathUrl;
+import matcher.path.PathUtil;
+import matcher.path.PathVariableValue;
 import static java.util.Objects.isNull;
 
 @Slf4j

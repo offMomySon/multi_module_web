@@ -3,7 +3,7 @@ package matcher.segment.factory;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import matcher.segment.path.PathUrl;
+import matcher.path.PathUrl;
 import matcher.segment.SegmentChunk;
 import static java.util.Objects.isNull;
 

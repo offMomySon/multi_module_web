@@ -3,7 +3,7 @@ package matcher.segment;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import matcher.segment.path.PathUrl;
+import matcher.path.PathUrl;
 import static java.util.Objects.isNull;
 
 public class NormalSegmentChunk implements SegmentChunk {

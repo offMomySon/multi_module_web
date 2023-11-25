@@ -1,4 +1,4 @@
-package matcher.segment.path;
+package matcher.path;
 
 import static java.util.Objects.isNull;
 

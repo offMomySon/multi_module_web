@@ -6,8 +6,8 @@ import matcher.segment.SegmentChunk;
 import matcher.segment.SegmentChunkChain;
 import matcher.segment.SegmentChunkChain.ConsumeResult;
 import matcher.segment.factory.SegmentChunkFactory;
-import matcher.segment.path.PathUrl;
-import matcher.segment.path.PathVariableValue;
+import matcher.path.PathUrl;
+import matcher.path.PathVariableValue;
 import static java.util.Objects.isNull;
 
 public class PathMatcher {
@@ -28,12 +28,12 @@ public class PathMatcher {
 
         SegmentChunk headChunk = segmentChunks.get(0);
         SegmentChunkChain headChunkChain = new SegmentChunkChain(headChunk, null);
-        SegmentChunkChain nextSegmentChunkChain = headChunkChain;
+        SegmentChunkChain nextChunkChain = headChunkChain;
         for (int i = 1; i < segmentChunks.size(); i++) {
             headChunk = segmentChunks.get(i);
-            nextSegmentChunkChain = nextSegmentChunkChain.chaining(headChunk);
+            nextChunkChain = nextChunkChain.chaining(headChunk);
         }
-        nextSegmentChunkChain.close();
+        nextChunkChain.close();
 
         return new PathMatcher(headChunkChain);
     }

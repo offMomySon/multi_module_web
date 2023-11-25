@@ -1,4 +1,4 @@
-package matcher.segment.path;
+package matcher.path;
 
 import java.util.HashMap;
 import java.util.Map;

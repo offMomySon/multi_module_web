@@ -2,8 +2,8 @@ package matcher.segment.factory;
 
 import matcher.segment.EmptySegmentChunk;
 import matcher.segment.NormalSegmentChunk;
-import matcher.segment.path.PathUrl;
-import matcher.segment.path.PathUtil;
+import matcher.path.PathUrl;
+import matcher.path.PathUtil;
 import matcher.segment.PathVariableSegmentChunk;
 import matcher.segment.SegmentChunk;
 import static java.util.Objects.isNull;

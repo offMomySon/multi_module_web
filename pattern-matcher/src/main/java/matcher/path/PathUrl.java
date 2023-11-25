@@ -1,4 +1,4 @@
-package matcher.segment.path;
+package matcher.path;
 
 import java.nio.file.Path;
 import java.util.Arrays;

@@ -13,7 +13,7 @@ import static java.util.Objects.isNull;
 public class PathMatcher {
     private final SegmentChunkChain segmentChunkChain;
 
-    public PathMatcher(SegmentChunkChain segmentChunkChain) {
+    private PathMatcher(SegmentChunkChain segmentChunkChain) {
         if (isNull(segmentChunkChain)) {
             throw new RuntimeException("Ensure the parameter is not null.");
         }

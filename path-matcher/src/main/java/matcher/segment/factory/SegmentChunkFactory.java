@@ -28,10 +28,10 @@ public class SegmentChunkFactory {
             return WildCardSegmentChunkCreateStrategy.create(basePathUrl);
         }
 
-        PathUrl normalPathUrl = PathUrl.from(baseUrl.substring(0, wildCardIndex));
+        PathUrl normalPathUrl = PathUrl.of(baseUrl.substring(0, wildCardIndex));
         SegmentChunk generalSegmentChunk = GeneralSegmentChunkCreateStrategy.create(normalPathUrl);
 
-        PathUrl wildCardPathUrl = PathUrl.from(baseUrl.substring(wildCardIndex));
+        PathUrl wildCardPathUrl = PathUrl.of(baseUrl.substring(wildCardIndex));
         List<SegmentChunk> wildCardSegmentChunks = WildCardSegmentChunkCreateStrategy.create(wildCardPathUrl);
 
         return Stream.concat(Stream.of(generalSegmentChunk), wildCardSegmentChunks.stream()).collect(Collectors.toUnmodifiableList());

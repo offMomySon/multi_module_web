@@ -21,11 +21,11 @@ public class PathUrl {
         this.beginIndex = beginIndex;
     }
 
-    public static PathUrl from(Path path) {
-        return from(path.toString());
+    public static PathUrl of(Path path) {
+        return of(path.toString());
     }
 
-    public static PathUrl from(String path) {
+    public static PathUrl of(String path) {
         if (isNull(path)) {
             throw new RuntimeException("Ensure the parameter is not null.");
         }
@@ -39,7 +39,7 @@ public class PathUrl {
     }
 
     public static PathUrl empty() {
-        return PathUrl.from("");
+        return PathUrl.of("");
     }
 
     public boolean isEmpty() {

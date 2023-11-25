@@ -23,7 +23,7 @@ public class PathMatchers<T> {
             .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
     }
 
-    public Optional<MatchedElement> match(PathUrl pathUrl) {
+    public Optional<MatchedElement<T>> match(PathUrl pathUrl) {
         if (isNull(pathUrl)) {
             throw new RuntimeException("Ensure the parameter is not null.");
         }

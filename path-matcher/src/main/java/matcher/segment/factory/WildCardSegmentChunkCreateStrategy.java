@@ -31,7 +31,7 @@ public class WildCardSegmentChunkCreateStrategy {
         List<String> wildCardPathUrls = splitWildCardPathUrls(basePathUrl);
 
         return wildCardPathUrls.stream()
-            .map(PathUrl::from)
+            .map(PathUrl::of)
             .map(pathUrl -> {
                 if (hasPathVariableSegment(pathUrl)) {
                     return new WildCardPathVariableSegmentChunk(pathUrl);

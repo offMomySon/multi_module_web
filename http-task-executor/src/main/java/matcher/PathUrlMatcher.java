@@ -4,7 +4,7 @@ import matcher.segment.PathUrl;
 import matcher.segment.PathVariableCollectChain;
 import matcher.segment.PathVariableValue;
 import matcher.segment.SegmentChunk;
-import matcher.segment.creator.SegmentChunkFactory;
+import matcher.segment.factory.SegmentChunkFactory;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;

@@ -46,7 +46,7 @@ import matcher.MatchedEndPointTaskWorker2;
 import matcher.RequestMethod;
 import matcher.creator.EndPointMethodInfo;
 import matcher.creator.JavaMethodInvokeTaskWorkerCreator2;
-import matcher.segment.PathUrl;
+import matcher.segment.path.PathUrl;
 import parameter.UrlParameterValues;
 import parameter.extractor.HttpBodyParameterInfoExtractor.HttpBodyParameterInfo;
 import parameter.matcher.HttpBodyParameterValueAssignee;

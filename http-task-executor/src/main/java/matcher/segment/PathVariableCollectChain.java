@@ -39,7 +39,7 @@ public class PathVariableCollectChain {
 
         boolean doesNotExistNextChain = Objects.isNull(segmentChunkChain);
         if (doesNotExistNextChain) {
-            Optional<PathUrl> optionalEmtpyPathUrl = remainPathUrls.stream().filter(PathUrl::isEmtpy).findFirst();
+            Optional<PathUrl> optionalEmtpyPathUrl = remainPathUrls.stream().filter(PathUrl::isEmpty).findFirst();
 
             boolean doesNotAllConsumedPathUrl = optionalEmtpyPathUrl.isEmpty();
             if (doesNotAllConsumedPathUrl) {

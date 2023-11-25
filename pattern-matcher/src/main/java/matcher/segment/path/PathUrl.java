@@ -1,10 +1,11 @@
-package matcher.segment;
+package matcher.segment.path;
 
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import static java.util.Objects.isNull;
 
 public class PathUrl {
     private static final String DELIMITER = "/";
@@ -13,19 +14,20 @@ public class PathUrl {
     private int beginIndex;
 
     public PathUrl(StringBuilder value, int beginIndex) {
-        Objects.requireNonNull(value);
-
+        if (isNull(value)) {
+            throw new RuntimeException("Must parameter not be null.");
+        }
         this.value = value;
         this.beginIndex = beginIndex;
     }
 
-    public static PathUrl from(Path path){
+    public static PathUrl from(Path path) {
         return from(path.toString());
     }
 
     public static PathUrl from(String path) {
-        if (Objects.isNull(path)) {
-            throw new RuntimeException("path is empty.");
+        if (isNull(path)) {
+            throw new RuntimeException("Must parameter not be null.");
         }
 
         path = path.trim();
@@ -74,22 +76,26 @@ public class PathUrl {
 
     public String peekSegment() {
         if (isEmpty()) {
-            throw new RuntimeException("does not left segment.");
+            throw new RuntimeException("Does not left segment.");
         }
 
         int foundIndex = value.indexOf(DELIMITER, beginIndex);
         boolean lastSegment = foundIndex == -1;
-        return lastSegment ? value.substring(beginIndex, value.length()) : value.substring(beginIndex, foundIndex);
+        return lastSegment ?
+            value.substring(beginIndex, value.length())
+            : value.substring(beginIndex, foundIndex);
     }
 
     public String popSegment() {
         if (isEmpty()) {
-            throw new RuntimeException("does not left segment.");
+            throw new RuntimeException("Does not left segment.");
         }
 
         int foundIndex = value.indexOf(DELIMITER, beginIndex);
         boolean lastSegment = foundIndex == -1;
-        String popSegment = lastSegment ? value.substring(beginIndex, value.length()) : value.substring(beginIndex, foundIndex);
+        String popSegment = lastSegment ?
+            value.substring(beginIndex, value.length())
+            : value.substring(beginIndex, foundIndex);
         beginIndex = lastSegment ? value.length() : foundIndex + 1;
 
         return popSegment;

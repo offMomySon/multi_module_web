@@ -1,4 +1,4 @@
-package matcher.segment.creator;
+package matcher.segment.factory;
 
 import matcher.segment.PathVariableUtil;
 
@@ -18,7 +18,7 @@ public class WildCardSegmentChunkCreateStrategy {
     public static List<SegmentChunk> create(PathUrl _basePathUrl) {
         Objects.requireNonNull(_basePathUrl);
 
-        if (_basePathUrl.isEmtpy()) {
+        if (_basePathUrl.isEmpty()) {
             return Collections.emptyList();
         }
 

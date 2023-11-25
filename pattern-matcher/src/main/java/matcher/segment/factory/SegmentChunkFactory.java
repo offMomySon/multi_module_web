@@ -1,28 +1,26 @@
-package matcher.segment.creator;
+package matcher.segment.factory;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import matcher.segment.PathUrl;
+import matcher.segment.path.PathUrl;
 import matcher.segment.SegmentChunk;
+import static java.util.Objects.isNull;
 
 public class SegmentChunkFactory {
     private static final String WILD_CARD = "/**";
 
-    private final PathUrl basePathUrl;
+    public static List<SegmentChunk> create(PathUrl basePathUrl) {
+        if (isNull(basePathUrl)) {
+            throw new RuntimeException("Must parameter not be null.");
+        }
 
-    public SegmentChunkFactory(PathUrl basePathUrl) {
-        Objects.requireNonNull(basePathUrl);
-        this.basePathUrl = basePathUrl;
-    }
-
-    public List<SegmentChunk> create() {
         String baseUrl = basePathUrl.toAbsolutePath();
         int wildCardIndex = baseUrl.indexOf(WILD_CARD);
         boolean onlyExistGeneralSegmentChunk = wildCardIndex == -1;
         if (onlyExistGeneralSegmentChunk) {
-            return GeneralSegmentChunkCreateStrategy.create(basePathUrl);
+            SegmentChunk generalSegmentChunk = GeneralSegmentChunkCreateStrategy.create(basePathUrl);
+            return List.of(generalSegmentChunk);
         }
 
         boolean onlyHasWildCardSegmentChunk = wildCardIndex == 0;
@@ -31,12 +29,11 @@ public class SegmentChunkFactory {
         }
 
         PathUrl normalPathUrl = PathUrl.from(baseUrl.substring(0, wildCardIndex));
-        List<SegmentChunk> normalSegmentChunks = GeneralSegmentChunkCreateStrategy.create(normalPathUrl);
+        SegmentChunk generalSegmentChunk = GeneralSegmentChunkCreateStrategy.create(normalPathUrl);
 
         PathUrl wildCardPathUrl = PathUrl.from(baseUrl.substring(wildCardIndex));
         List<SegmentChunk> wildCardSegmentChunks = WildCardSegmentChunkCreateStrategy.create(wildCardPathUrl);
 
-        return Stream.concat(normalSegmentChunks.stream(), wildCardSegmentChunks.stream()).collect(Collectors.toList());
+        return Stream.concat(Stream.of(generalSegmentChunk), wildCardSegmentChunks.stream()).collect(Collectors.toList());
     }
-
 }

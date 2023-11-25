@@ -5,7 +5,7 @@ import matcher.segment.NormalSegmentChunk;
 import matcher.segment.PathUrl;
 import matcher.segment.PathVariableSegmentChunk;
 import matcher.segment.SegmentChunk;
-import matcher.segment.creator.SegmentChunkFactory;
+import matcher.segment.factory.SegmentChunkFactory;
 import matcher.segment.WildCardPathVariableSegmentChunk;
 import matcher.segment.WildCardSegmentChunk;
 import java.util.List;

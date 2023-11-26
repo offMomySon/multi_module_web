@@ -102,7 +102,7 @@ class PathUrlTest {
         PathUrl emptyPathUrl = PathUrl.empty();
 
         //when
-        boolean actual = emptyPathUrl.isEmtpy();
+        boolean actual = emptyPathUrl.isEmpty();
 
         //then
         assertThat(actual).isTrue();

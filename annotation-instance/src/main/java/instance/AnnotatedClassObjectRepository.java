@@ -171,7 +171,7 @@ public class AnnotatedClassObjectRepository {
 
     public AnnotatedClassObjectRepository append(Class<?> clazz, Object object) {
         if(Objects.isNull(clazz) || Objects.isNull(object)){
-            throw new RuntimeException("Must parameter not be null.");
+            throw new RuntimeException("Ensure the parameter is not null.");
         }
 
         Map<Class<?>, Object> newValues = new HashMap<>(values);

@@ -11,7 +11,7 @@ import matcher.JavaMethodEndpointTaskMatcher;
 import matcher.PathUrlMatcher;
 import matcher.RequestMethod;
 import matcher.segment.PathUrl;
-import matcher.segment.creator.SegmentChunkFactory;
+import matcher.segment.factory.SegmentChunkFactory;
 import parameter.matcher.ParameterAndValueAssigneeType;
 import task.HttpConvertEndPointTask;
 import task.HttpEmptyEndPointTask;

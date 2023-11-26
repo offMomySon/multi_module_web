@@ -2,14 +2,17 @@ package matcher.segment;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import matcher.path.PathUrl;
+import static java.util.Objects.isNull;
 
 public class WildCardSegmentChunk implements SegmentChunk {
     private static final String WILD_CARD = "**";
     private final PathUrl baseUrl;
 
     public WildCardSegmentChunk(PathUrl baseUrl) {
-        Objects.requireNonNull(baseUrl);
+        if (isNull(baseUrl)) {
+            throw new RuntimeException("Ensure the parameter is not null.");
+        }
 
         String segment = baseUrl.peekSegment();
         boolean doesNotWildCard = !WILD_CARD.equals(segment);
@@ -22,7 +25,9 @@ public class WildCardSegmentChunk implements SegmentChunk {
 
     @Override
     public List<PathUrl> consume(PathUrl requestUrl) {
-        Objects.requireNonNull(requestUrl);
+        if (isNull(requestUrl)) {
+            throw new RuntimeException("Ensure the parameter is not null.");
+        }
 
         PathUrl copiedBaseUrl = baseUrl.copy();
         PathUrl copiedRequestUrl = requestUrl.copy();

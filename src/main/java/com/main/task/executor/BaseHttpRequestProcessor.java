@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -18,10 +17,7 @@ import parameter.ParameterValueGetter;
 import parameter.UrlParameterValues;
 import parameter.extractor.HttpBodyParameterInfoExtractor;
 import parameter.extractor.HttpUrlParameterInfoExtractor;
-import parameter.matcher.HttpBodyParameterValueAssignee;
-import parameter.matcher.HttpUrlParameterValueAssignee;
 import parameter.matcher.ParameterValueAssignees;
-import parameter.matcher.SingleValueParameterValueAssignee;
 import response.HttpResponseHeader;
 import response.HttpResponseHeaderCreator;
 import task.HttpEndPointTask;
@@ -30,11 +26,6 @@ import vo.ContentType;
 import vo.HttpRequest;
 import vo.HttpResponse;
 import vo.QueryParameters;
-import static parameter.matcher.ParameterValueAssigneeType.BODY;
-import static parameter.matcher.ParameterValueAssigneeType.INPUT_STREAM;
-import static parameter.matcher.ParameterValueAssigneeType.OUTPUT_STREAM;
-import static parameter.matcher.ParameterValueAssigneeType.QUERY_PARAM;
-import static parameter.matcher.ParameterValueAssigneeType.URL;
 
 @Slf4j
 public class BaseHttpRequestProcessor implements HttpRequestProcessor {

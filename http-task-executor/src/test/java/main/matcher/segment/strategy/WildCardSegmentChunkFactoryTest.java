@@ -4,7 +4,7 @@ import matcher.segment.PathUrl;
 import matcher.segment.SegmentChunk;
 import matcher.segment.WildCardPathVariableSegmentChunk;
 import matcher.segment.WildCardSegmentChunk;
-import matcher.segment.creator.WildCardSegmentChunkCreateStrategy;
+import matcher.segment.factory.WildCardSegmentChunkCreateStrategy;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

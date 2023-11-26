@@ -1,4 +1,4 @@
-package matcher.segment.creator;
+package matcher.segment.factory;
 
 import matcher.segment.PathVariableUtil;
 
@@ -14,7 +14,7 @@ public class GeneralSegmentChunkCreateStrategy {
     public static List<SegmentChunk> create(PathUrl basePathUrl) {
         Objects.requireNonNull(basePathUrl);
 
-        if (basePathUrl.isEmtpy()) {
+        if (basePathUrl.isEmpty()) {
             return List.of(new EmptySegmentChunk());
         }
 

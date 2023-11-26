@@ -7,7 +7,7 @@ import matcher.PathUrlMatcher;
 import matcher.RequestMethod;
 import matcher.segment.PathUrl;
 import matcher.segment.PathVariableValue;
-import matcher.segment.creator.SegmentChunkFactory;
+import matcher.segment.factory.SegmentChunkFactory;
 import task.worker.EndPointTaskWorker2;
 
 public class BaseEndPointTask2 implements EndPointTask2 {

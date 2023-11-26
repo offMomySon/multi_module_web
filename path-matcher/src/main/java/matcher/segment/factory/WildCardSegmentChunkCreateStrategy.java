@@ -1,29 +1,29 @@
-package matcher.segment.creator;
-
-import matcher.segment.PathVariableUtil;
+package matcher.segment.factory;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
-import matcher.segment.PathUrl;
+import matcher.path.PathUrl;
+import matcher.path.PathUtil;
 import matcher.segment.SegmentChunk;
 import matcher.segment.WildCardPathVariableSegmentChunk;
 import matcher.segment.WildCardSegmentChunk;
+import static java.util.Objects.isNull;
 
 public class WildCardSegmentChunkCreateStrategy {
     private static final String WILD_CARD = "/**";
 
     public static List<SegmentChunk> create(PathUrl _basePathUrl) {
-        Objects.requireNonNull(_basePathUrl);
+        if (isNull(_basePathUrl)) {
+            throw new RuntimeException("Ensure the parameter is not null.");
+        }
 
-        if (_basePathUrl.isEmtpy()) {
+        if (_basePathUrl.isEmpty()) {
             return Collections.emptyList();
         }
 
         String basePathUrl = _basePathUrl.toAbsolutePath();
-
         if (!basePathUrl.startsWith(WILD_CARD)) {
             throw new RuntimeException("wildcard 가 처음에 위치해야 합니다.");
         }
@@ -31,7 +31,7 @@ public class WildCardSegmentChunkCreateStrategy {
         List<String> wildCardPathUrls = splitWildCardPathUrls(basePathUrl);
 
         return wildCardPathUrls.stream()
-            .map(PathUrl::from)
+            .map(PathUrl::of)
             .map(pathUrl -> {
                 if (hasPathVariableSegment(pathUrl)) {
                     return new WildCardPathVariableSegmentChunk(pathUrl);
@@ -62,7 +62,7 @@ public class WildCardSegmentChunkCreateStrategy {
         PathUrl copiedWildCardPathUrl = wildCardPathUrl.copy();
         while (copiedWildCardPathUrl.doesNotEmpty()) {
             String segment = copiedWildCardPathUrl.popSegment();
-            if (PathVariableUtil.isPathVariable(segment)) {
+            if (PathUtil.isPathVariable(segment)) {
                 return true;
             }
         }

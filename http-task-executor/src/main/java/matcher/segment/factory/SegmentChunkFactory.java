@@ -1,4 +1,4 @@
-package matcher.segment.creator;
+package matcher.segment.factory;
 
 import java.util.List;
 import java.util.Objects;
@@ -38,5 +38,4 @@ public class SegmentChunkFactory {
 
         return Stream.concat(normalSegmentChunks.stream(), wildCardSegmentChunks.stream()).collect(Collectors.toList());
     }
-
 }

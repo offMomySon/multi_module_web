@@ -30,7 +30,7 @@ class PathMatcherTest {
 
     @DisplayName("matcher 에 대해 path 가 매칭되면, pathVariable 값을 반환합니다.")
     @ParameterizedTest
-    @MethodSource("provideMatchedPathVariableTestSuite")
+    @MethodSource("matcher.PathMatcherTest#provideMatchedPathVariableTestSuite")
     void Given_BasePathAndRequestPath_When_Matched_Then_GetPathVariable(String basePath, String requestPath, Map<String, String> expectMap) throws Exception {
         // given
         PathUrl basePathUrl = PathUrl.of(basePath);

@@ -20,7 +20,7 @@ class PathMatchersTest {
         Method method = TestClass.class.getDeclaredMethod("method");
 
         Map<PathMatcher, Method> map = Map.of(pathMatcher, method);
-        PathMatchers<Method> methodPathMatchers = new PathMatchers<Method>(map);
+        PathMatchers<Method> methodPathMatchers = new PathMatchers<>(map);
 
         //when
         Optional<MatchedElement<Method>> optionalActual = methodPathMatchers.match(requestPathUrl);

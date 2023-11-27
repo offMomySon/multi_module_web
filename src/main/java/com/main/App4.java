@@ -43,12 +43,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import matcher.MatchedEndPointTaskWorker2;
-import matcher.PathMatcher;
-import matcher.PathMatchers;
+import matcher.PathMatcher2;
 import matcher.RequestMethod;
 import matcher.creator.EndPointMethodInfo;
 import matcher.creator.JavaMethodInvokeTaskWorkerCreator2;
-import matcher.segment.PathUrl2;
+import matcher.segment.PathUrl;
 import parameter.UrlParameterValues;
 import parameter.extractor.HttpBodyParameterInfoExtractor.HttpBodyParameterInfo;
 import parameter.matcher.HttpBodyParameterValueAssignee;
@@ -88,7 +87,7 @@ import static vo.ContentType2.TEXT_HTML;
 import static vo.ContentType2.TEXT_PLAIN;
 
 @Slf4j
-public class App3 {
+public class App4 {
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
     private static final String HOST_ADDRESS;
     private static final AnnotationPropertyMappers ANNOTATION_PROPERTY_MAPPERS;
@@ -132,7 +131,7 @@ public class App3 {
             .annotations(new Annotations(List.of(PreWebFilter.class, Controller.class)))
             .annotationPropertyGetter(annotationPropertyGetter)
             .build();
-        AnnotatedClassObjectRepository objectRepository = objectRepositoryCreator.fromPackage(App3.class, "com.main");
+        AnnotatedClassObjectRepository objectRepository = objectRepositoryCreator.fromPackage(App4.class, "com.main");
         objectRepository = objectRepository.append(SystemResourceFinder.class, SystemResourceFinder.fromPackage(App.class, "../../resources/main"));
 
         // 4. java http endpoint task 생성.
@@ -158,31 +157,39 @@ public class App3 {
             .flatMap(Collection::stream)
             .collect(Collectors.toUnmodifiableList());
 
+        PathMatcher2<Method> pahtMatcher2 = endPointJavaMethodInfos.stream()
+            .reduce(PathMatcher2.empty(), (_matcher , info) -> {
+                String name = info.getRequestMethod().name();
+                PathMatcher2.MatchToken matchToken = new PathMatcher2.MatchToken(name);
+
+                String url = info.getUrl();
+                matcher.path.PathUrl pathUrl = matcher.path.PathUrl.of(url);
+
+                Method javaMethod = info.getJavaMethod();
+
+                return _matcher.add(matchToken, pathUrl, javaMethod);
+            }, PathMatcher2::concat);
+
         // 5. endPointTask create.
-
-        PathMatchers.Builder<Method> builder = PathMatchers.builder();
-        endPointJavaMethodInfos
-            .forEach(endPointMethodInfo -> {
-                String requestMethodName = endPointMethodInfo.getRequestMethod().name();
-                String url = endPointMethodInfo.getUrl();
-                String path = "/" + requestMethodName + "/" + url;
-                matcher.path.PathUrl pathUrl = matcher.path.PathUrl.of(path);
-                PathMatcher pathMatcher = PathMatcher.of(pathUrl);
-
-                Method javaMethod = endPointMethodInfo.getJavaMethod();
-                builder.append(pathMatcher, javaMethod);
-            });
-
         JavaMethodInvokeTaskWorkerCreator2 javaMethodInvokeTaskWorkerCreator2 = new JavaMethodInvokeTaskWorkerCreator2(parameterParameterAndValueAssigneeTypeFunction());
         List<EndPointTask2> endPointTasks = endPointJavaMethodInfos.stream()
             .map(endPointJavaMethodInfo -> {
                 RequestMethod requestMethod = endPointJavaMethodInfo.getRequestMethod();
                 String url = endPointJavaMethodInfo.getUrl();
+                Object object = endPointJavaMethodInfo.getObject();
+                Method javaMethod = endPointJavaMethodInfo.getJavaMethod();
+
+                JavaMethodInvokeTaskWorker2 taskWorker = javaMethodInvokeTaskWorkerCreator2.create(object, javaMethod);
 
                 return BaseEndPointTask2.from(requestMethod, url, taskWorker);
             })
             .collect(Collectors.toUnmodifiableList());
+        // 6. static resource find task.
+//        SystemResourceFinder systemResourceFinder = SystemResourceFinder.fromPackage(App.class, "../../resources/main");
+//        ResourceEndPointFindTask2 resourceEndPointFindTask2 = new ResourceEndPointFindTask2(systemResourceFinder, "/static");
 
+        // 7. combine each endpointTask.
+//        endPointTasks = Stream.concat(endPointTasks.stream(), Stream.of(resourceEndPointFindTask2)).collect(Collectors.toUnmodifiableList());
         CompositedEndpointTasks compositedEndpointTasks = new CompositedEndpointTasks(endPointTasks);
 
         // 8. execute service.
@@ -194,7 +201,7 @@ public class App3 {
         socketHttpTaskExecutor.execute(((request, response) -> {
 
             RequestMethod method = RequestMethod.find(request.getHttpMethod().name());
-            PathUrl2 requestUrl = PathUrl2.from(request.getHttpRequestPath().getValue().toString());
+            PathUrl requestUrl = PathUrl.from(request.getHttpRequestPath().getValue().toString());
             MatchedEndPointTaskWorker2 matchedEndPointTaskWorker = compositedEndpointTasks.match(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
 
             EndPointTaskWorker2 endPointTaskWorker = matchedEndPointTaskWorker.getEndPointTaskWorker();

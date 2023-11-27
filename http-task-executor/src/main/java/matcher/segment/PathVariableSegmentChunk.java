@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Objects;
 
 public class PathVariableSegmentChunk extends AbstractPathVariableSegmentChunk {
-    private final PathUrl baseUrl;
+    private final PathUrl2 baseUrl;
 
-    public PathVariableSegmentChunk(PathUrl baseUrl) {
+    public PathVariableSegmentChunk(PathUrl2 baseUrl) {
         Objects.requireNonNull(baseUrl);
 
         List<String> segments = baseUrl.toList();
@@ -20,7 +20,7 @@ public class PathVariableSegmentChunk extends AbstractPathVariableSegmentChunk {
     }
 
     @Override
-    public LinkedHashMap<PathUrl, PathVariableValue> internalConsume(PathUrl requestUrl) {
+    public LinkedHashMap<PathUrl2, PathVariableValue> internalConsume(PathUrl2 requestUrl) {
         Objects.requireNonNull(requestUrl);
 
         boolean doesNotSufficientRequestUrl = baseUrl.segmentSize() > requestUrl.segmentSize();
@@ -28,8 +28,8 @@ public class PathVariableSegmentChunk extends AbstractPathVariableSegmentChunk {
             return new LinkedHashMap<>();
         }
 
-        PathUrl copiedBaseUrl = baseUrl.copy();
-        PathUrl copiedRequestUrl = requestUrl.copy();
+        PathUrl2 copiedBaseUrl = baseUrl.copy();
+        PathUrl2 copiedRequestUrl = requestUrl.copy();
 
         PathVariableValue pathVariableValue = PathVariableValue.empty();
         while (copiedBaseUrl.doesNotEmpty()) {
@@ -48,7 +48,7 @@ public class PathVariableSegmentChunk extends AbstractPathVariableSegmentChunk {
             }
         }
 
-        LinkedHashMap<PathUrl, PathVariableValue> result = new LinkedHashMap<>();
+        LinkedHashMap<PathUrl2, PathVariableValue> result = new LinkedHashMap<>();
         result.put(copiedRequestUrl, pathVariableValue);
         return result;
     }

@@ -46,7 +46,7 @@ import matcher.MatchedEndPointTaskWorker2;
 import matcher.RequestMethod;
 import matcher.creator.EndPointMethodInfo;
 import matcher.creator.JavaMethodInvokeTaskWorkerCreator2;
-import matcher.segment.PathUrl;
+import matcher.segment.PathUrl2;
 import parameter.UrlParameterValues;
 import parameter.extractor.HttpBodyParameterInfoExtractor.HttpBodyParameterInfo;
 import parameter.matcher.HttpBodyParameterValueAssignee;
@@ -187,7 +187,7 @@ public class App3 {
         socketHttpTaskExecutor.execute(((request, response) -> {
 
             RequestMethod method = RequestMethod.find(request.getHttpMethod().name());
-            PathUrl requestUrl = PathUrl.from(request.getHttpRequestPath().getValue().toString());
+            PathUrl2 requestUrl = PathUrl2.from(request.getHttpRequestPath().getValue().toString());
             MatchedEndPointTaskWorker2 matchedEndPointTaskWorker = compositedEndpointTasks.match(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
 
             EndPointTaskWorker2 endPointTaskWorker = matchedEndPointTaskWorker.getEndPointTaskWorker();

@@ -6,9 +6,9 @@ import java.util.Objects;
 
 public class WildCardSegmentChunk implements SegmentChunk {
     private static final String WILD_CARD = "**";
-    private final PathUrl baseUrl;
+    private final PathUrl2 baseUrl;
 
-    public WildCardSegmentChunk(PathUrl baseUrl) {
+    public WildCardSegmentChunk(PathUrl2 baseUrl) {
         Objects.requireNonNull(baseUrl);
 
         String segment = baseUrl.peekSegment();
@@ -21,17 +21,17 @@ public class WildCardSegmentChunk implements SegmentChunk {
     }
 
     @Override
-    public List<PathUrl> consume(PathUrl requestUrl) {
+    public List<PathUrl2> consume(PathUrl2 requestUrl) {
         Objects.requireNonNull(requestUrl);
 
-        PathUrl copiedBaseUrl = baseUrl.copy();
-        PathUrl copiedRequestUrl = requestUrl.copy();
+        PathUrl2 copiedBaseUrl = baseUrl.copy();
+        PathUrl2 copiedRequestUrl = requestUrl.copy();
 
         copiedBaseUrl.popSegment();
 
         boolean onlyHasWildCard = copiedBaseUrl.isEmpty();
         if (onlyHasWildCard) {
-            List<PathUrl> resultPathUrls = new ArrayList<>();
+            List<PathUrl2> resultPathUrls = new ArrayList<>();
 
             while (copiedRequestUrl.doesNotEmpty()) {
                 resultPathUrls.add(copiedRequestUrl.copy());
@@ -41,17 +41,17 @@ public class WildCardSegmentChunk implements SegmentChunk {
             return resultPathUrls;
         }
 
-        PathUrl wildCardDeletedBaseUrl = copiedBaseUrl.copy();
+        PathUrl2 wildCardDeletedBaseUrl = copiedBaseUrl.copy();
         NormalSegmentChunk normalSegmentChunk = new NormalSegmentChunk(wildCardDeletedBaseUrl);
 
-        List<PathUrl> resultPathUrls = new ArrayList<>();
+        List<PathUrl2> resultPathUrls = new ArrayList<>();
         while (copiedRequestUrl.doesNotEmpty()) {
             boolean doesNotSufficientRequestSegment = copiedBaseUrl.segmentSize() > copiedRequestUrl.segmentSize();
             if (doesNotSufficientRequestSegment) {
                 break;
             }
 
-            List<PathUrl> consumeResults = normalSegmentChunk.consume(copiedRequestUrl);
+            List<PathUrl2> consumeResults = normalSegmentChunk.consume(copiedRequestUrl);
 
             boolean doesNotMatch = consumeResults.isEmpty();
             if (doesNotMatch) {
@@ -59,7 +59,7 @@ public class WildCardSegmentChunk implements SegmentChunk {
                 continue;
             }
 
-            PathUrl resultPathUrl = consumeResults.get(0);
+            PathUrl2 resultPathUrl = consumeResults.get(0);
             resultPathUrls.add(resultPathUrl);
 
             copiedRequestUrl.popSegment();

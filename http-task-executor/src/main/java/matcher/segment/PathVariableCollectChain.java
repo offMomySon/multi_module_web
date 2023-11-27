@@ -25,28 +25,28 @@ public class PathVariableCollectChain {
         return new PathVariableCollectChain(this, segmentChunk);
     }
 
-    public ConsumeResult consume(PathUrl requestPathUrl) {
+    public ConsumeResult consume(PathUrl2 requestPathUrl) {
         Objects.requireNonNull(requestPathUrl);
 
-        List<PathUrl> remainPathUrls = segmentChunk.consume(requestPathUrl);
+        List<PathUrl2> remainPathUrls = segmentChunk.consume(requestPathUrl);
 
         boolean doesNotPossibleConsume = remainPathUrls.isEmpty();
         if (doesNotPossibleConsume) {
             return ConsumeResult.notAllConsumed();
         }
 
-        Map<PathUrl, PathVariableValue> matchedPathVariables = getMatchedPathVariables(segmentChunk);
+        Map<PathUrl2, PathVariableValue> matchedPathVariables = getMatchedPathVariables(segmentChunk);
 
         boolean doesNotExistNextChain = Objects.isNull(segmentChunkChain);
         if (doesNotExistNextChain) {
-            Optional<PathUrl> optionalEmtpyPathUrl = remainPathUrls.stream().filter(PathUrl::isEmpty).findFirst();
+            Optional<PathUrl2> optionalEmtpyPathUrl = remainPathUrls.stream().filter(PathUrl2::isEmpty).findFirst();
 
             boolean doesNotAllConsumedPathUrl = optionalEmtpyPathUrl.isEmpty();
             if (doesNotAllConsumedPathUrl) {
                 return ConsumeResult.notAllConsumed();
             }
 
-            PathUrl allConsumedPathUrl = optionalEmtpyPathUrl.get();
+            PathUrl2 allConsumedPathUrl = optionalEmtpyPathUrl.get();
             PathVariableValue pathVariableValue = matchedPathVariables.getOrDefault(allConsumedPathUrl, PathVariableValue.empty());
             return ConsumeResult.allConsumed(pathVariableValue);
         }
@@ -64,14 +64,14 @@ public class PathVariableCollectChain {
 
         NextChainConsumeResult nextChainConsumeResult = optionalNextChainConsumeResult.get();
         PathVariableValue nextChainPathVariableValue = nextChainConsumeResult.getPathVariableValue();
-        PathUrl nexChainProvidedPathUrl = nextChainConsumeResult.getProvidePathUrl();
+        PathUrl2 nexChainProvidedPathUrl = nextChainConsumeResult.getProvidePathUrl();
 
         PathVariableValue pathVariableValue = matchedPathVariables.getOrDefault(nexChainProvidedPathUrl, PathVariableValue.empty());
         pathVariableValue = pathVariableValue.merge(nextChainPathVariableValue);
         return ConsumeResult.allConsumed(pathVariableValue);
     }
 
-    private static Map<PathUrl, PathVariableValue> getMatchedPathVariables(SegmentChunk segmentChunk) {
+    private static Map<PathUrl2, PathVariableValue> getMatchedPathVariables(SegmentChunk segmentChunk) {
         if (segmentChunk instanceof AbstractPathVariableSegmentChunk) {
             AbstractPathVariableSegmentChunk abstractPathVariableSegmentChunk = (AbstractPathVariableSegmentChunk) segmentChunk;
             return abstractPathVariableSegmentChunk.getMatchedPathVariables();
@@ -79,7 +79,7 @@ public class PathVariableCollectChain {
         return Collections.emptyMap();
     }
 
-    private Optional<NextChainConsumeResult> nextChainConsume(PathUrl remainPathUrl) {
+    private Optional<NextChainConsumeResult> nextChainConsume(PathUrl2 remainPathUrl) {
         ConsumeResult nextConsumeResult = segmentChunkChain.consume(remainPathUrl);
         if (nextConsumeResult.doesNotAllConsumed()) {
             return Optional.empty();
@@ -91,15 +91,15 @@ public class PathVariableCollectChain {
     }
 
     private static class NextChainConsumeResult {
-        private final PathUrl providePathUrl;
+        private final PathUrl2 providePathUrl;
         private final PathVariableValue pathVariableValue;
 
-        public NextChainConsumeResult(PathUrl providePathUrl, PathVariableValue pathVariableValue) {
+        public NextChainConsumeResult(PathUrl2 providePathUrl, PathVariableValue pathVariableValue) {
             this.providePathUrl = providePathUrl;
             this.pathVariableValue = pathVariableValue;
         }
 
-        public PathUrl getProvidePathUrl() {
+        public PathUrl2 getProvidePathUrl() {
             return providePathUrl;
         }
 

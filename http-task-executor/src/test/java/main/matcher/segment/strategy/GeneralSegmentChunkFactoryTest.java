@@ -3,7 +3,7 @@ package main.matcher.segment.strategy;
 import matcher.segment.EmptySegmentChunk;
 import matcher.segment.factory.GeneralSegmentChunkCreateStrategy;
 import matcher.segment.NormalSegmentChunk;
-import matcher.segment.PathUrl;
+import matcher.segment.PathUrl2;
 import matcher.segment.PathVariableSegmentChunk;
 import matcher.segment.SegmentChunk;
 import java.util.List;
@@ -17,7 +17,7 @@ class GeneralSegmentChunkFactoryTest {
     @Test
     void tttest() throws Exception {
         //given
-        PathUrl emptyPathUrl = PathUrl.empty();
+        PathUrl2 emptyPathUrl = PathUrl2.empty();
         GeneralSegmentChunkCreateStrategy generalSegmentChunkCreateStrategy = new GeneralSegmentChunkCreateStrategy();
 
         //when
@@ -33,7 +33,7 @@ class GeneralSegmentChunkFactoryTest {
     @Test
     void test() throws Exception {
         //given
-        PathUrl pathUrl = PathUrl.from("/path1/{pv1}/path2");
+        PathUrl2 pathUrl = PathUrl2.from("/path1/{pv1}/path2");
         GeneralSegmentChunkCreateStrategy generalSegmentChunkCreateStrategy = new GeneralSegmentChunkCreateStrategy();
 
         //when
@@ -49,7 +49,7 @@ class GeneralSegmentChunkFactoryTest {
     @Test
     void ttest() throws Exception {
         //given
-        PathUrl pathUrl = PathUrl.from("/path1/path2/path3");
+        PathUrl2 pathUrl = PathUrl2.from("/path1/path2/path3");
         GeneralSegmentChunkCreateStrategy generalSegmentChunkCreateStrategy = new GeneralSegmentChunkCreateStrategy();
 
         //when

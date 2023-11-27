@@ -5,7 +5,7 @@ import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import matcher.MatchedEndPointTaskWorker2;
 import matcher.RequestMethod;
-import matcher.segment.PathUrl;
+import matcher.segment.PathUrl2;
 import matcher.segment.PathVariableValue;
 import task.worker.SystemResourceFileFindTaskWorker2;
 
@@ -22,7 +22,7 @@ public class ResourceEndPointFindTask2 implements EndPointTask2 {
     }
 
     @Override
-    public Optional<MatchedEndPointTaskWorker2> match(RequestMethod requestMethod, PathUrl requestUrl) {
+    public Optional<MatchedEndPointTaskWorker2> match(RequestMethod requestMethod, PathUrl2 requestUrl) {
         if (Objects.isNull(requestUrl)) {
             return Optional.empty();
         }

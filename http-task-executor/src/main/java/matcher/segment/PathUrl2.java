@@ -6,24 +6,24 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class PathUrl {
+public class PathUrl2 {
     private static final String DELIMITER = "/";
 
     private final StringBuilder value;
     private int beginIndex;
 
-    public PathUrl(StringBuilder value, int beginIndex) {
+    public PathUrl2(StringBuilder value, int beginIndex) {
         Objects.requireNonNull(value);
 
         this.value = value;
         this.beginIndex = beginIndex;
     }
 
-    public static PathUrl from(Path path){
+    public static PathUrl2 from(Path path){
         return from(path.toString());
     }
 
-    public static PathUrl from(String path) {
+    public static PathUrl2 from(String path) {
         if (Objects.isNull(path)) {
             throw new RuntimeException("path is empty.");
         }
@@ -33,11 +33,11 @@ public class PathUrl {
         path = path.startsWith(DELIMITER) ? path.substring(1) : path;
 
         StringBuilder value = new StringBuilder(path);
-        return new PathUrl(value, 0);
+        return new PathUrl2(value, 0);
     }
 
-    public static PathUrl empty() {
-        return PathUrl.from("");
+    public static PathUrl2 empty() {
+        return PathUrl2.from("");
     }
 
     public boolean isEmpty() {
@@ -95,8 +95,8 @@ public class PathUrl {
         return popSegment;
     }
 
-    public PathUrl copy() {
-        return new PathUrl(this.value, this.beginIndex);
+    public PathUrl2 copy() {
+        return new PathUrl2(this.value, this.beginIndex);
     }
 
     public String toAbsolutePath() {
@@ -113,7 +113,7 @@ public class PathUrl {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        PathUrl otherPathUrl = (PathUrl) o;
+        PathUrl2 otherPathUrl = (PathUrl2) o;
 
         String thisSubString = this.value.substring(beginIndex);
         String otherSubString = otherPathUrl.value.substring(otherPathUrl.beginIndex);

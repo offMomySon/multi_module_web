@@ -1,6 +1,6 @@
 package main.matcher.segment;
 
-import matcher.segment.PathUrl;
+import matcher.segment.PathUrl2;
 import matcher.segment.PathVariableSegmentChunk;
 import matcher.segment.PathVariableValue;
 import java.util.List;
@@ -14,12 +14,12 @@ class PathVariableValueSegmentChunkTest {
     @Test
     void test() throws Exception {
         //given
-        PathUrl requestUrl = PathUrl.from("/path1/diffPath1/diffPath2");
-        PathUrl baseUrl = PathUrl.from("/path1/{pv1}/path2");
+        PathUrl2 requestUrl = PathUrl2.from("/path1/diffPath1/diffPath2");
+        PathUrl2 baseUrl = PathUrl2.from("/path1/{pv1}/path2");
         PathVariableSegmentChunk pathVariableSegmentChunk = new PathVariableSegmentChunk(baseUrl);
 
         //when
-        List<PathUrl> actual = pathVariableSegmentChunk.consume(requestUrl);
+        List<PathUrl2> actual = pathVariableSegmentChunk.consume(requestUrl);
 
         //then
         Assertions.assertThat(actual).hasSize(0);
@@ -29,18 +29,18 @@ class PathVariableValueSegmentChunkTest {
     @Test
     void ttest() throws Exception {
         //given
-        PathUrl requestUrl = PathUrl.from("path1/diffPath1/path2");
-        PathUrl baseUrl = PathUrl.from("path1/{pv1}");
+        PathUrl2 requestUrl = PathUrl2.from("path1/diffPath1/path2");
+        PathUrl2 baseUrl = PathUrl2.from("path1/{pv1}");
         PathVariableSegmentChunk pathVariableSegmentChunk = new PathVariableSegmentChunk(baseUrl);
 
-        PathUrl expect = new PathUrl(new StringBuilder("path1/diffPath1/path2"), "path1/diffPath1/".length());
+        PathUrl2 expect = new PathUrl2(new StringBuilder("path1/diffPath1/path2"), "path1/diffPath1/".length());
 
         //when
-        List<PathUrl> actuals = pathVariableSegmentChunk.consume(requestUrl);
+        List<PathUrl2> actuals = pathVariableSegmentChunk.consume(requestUrl);
 
         //then
         Assertions.assertThat(actuals).hasSize(1);
-        PathUrl actual = actuals.get(0);
+        PathUrl2 actual = actuals.get(0);
         Assertions.assertThat(actual).isEqualTo(expect);
     }
 
@@ -48,18 +48,18 @@ class PathVariableValueSegmentChunkTest {
     @Test
     void tttttest() throws Exception {
         //given
-        PathUrl requestUrl = PathUrl.from("path1/path2/path3/path4");
-        PathUrl baseUrl = PathUrl.from("{pv1}/{pv2}/{pv3}");
+        PathUrl2 requestUrl = PathUrl2.from("path1/path2/path3/path4");
+        PathUrl2 baseUrl = PathUrl2.from("{pv1}/{pv2}/{pv3}");
         PathVariableSegmentChunk pathVariableSegmentChunk = new PathVariableSegmentChunk(baseUrl);
 
-        PathUrl expect = new PathUrl(new StringBuilder("path1/path2/path3/path4"), "path1/path2/path3/".length());
+        PathUrl2 expect = new PathUrl2(new StringBuilder("path1/path2/path3/path4"), "path1/path2/path3/".length());
 
         //when
-        List<PathUrl> actuals = pathVariableSegmentChunk.consume(requestUrl);
+        List<PathUrl2> actuals = pathVariableSegmentChunk.consume(requestUrl);
 
         //then
         Assertions.assertThat(actuals).hasSize(1);
-        PathUrl actual = actuals.get(0);
+        PathUrl2 actual = actuals.get(0);
         Assertions.assertThat(actual).isEqualTo(expect);
     }
 
@@ -67,17 +67,17 @@ class PathVariableValueSegmentChunkTest {
     @Test
     void ttttest() throws Exception {
         //given
-        PathUrl requestUrl = PathUrl.from("path1/path2/path3/path4");
-        PathUrl baseUrl = PathUrl.from("{pv1}/{pv2}/{pv3}");
+        PathUrl2 requestUrl = PathUrl2.from("path1/path2/path3/path4");
+        PathUrl2 baseUrl = PathUrl2.from("{pv1}/{pv2}/{pv3}");
         PathVariableSegmentChunk pathVariableSegmentChunk = new PathVariableSegmentChunk(baseUrl);
 
-        Map<PathUrl, PathVariableValue> expect = Map.of(new PathUrl(new StringBuilder("path1/path2/path3/path4"), 18)
+        Map<PathUrl2, PathVariableValue> expect = Map.of(new PathUrl2(new StringBuilder("path1/path2/path3/path4"), 18)
             , new PathVariableValue(Map.of("pv1", "path1",
                                            "pv2", "path2",
                                            "pv3", "path3")));
 
         //when
-        Map<PathUrl, PathVariableValue> actual = pathVariableSegmentChunk.internalConsume(requestUrl);
+        Map<PathUrl2, PathVariableValue> actual = pathVariableSegmentChunk.internalConsume(requestUrl);
 //        List<MatchedPathVariable> actuals = (List<MatchedPathVariable>) pathUrlPathVariableValueMap;
 
         //then

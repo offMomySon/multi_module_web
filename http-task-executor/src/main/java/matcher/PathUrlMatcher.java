@@ -1,6 +1,6 @@
 package matcher;
 
-import matcher.segment.PathUrl;
+import matcher.segment.PathUrl2;
 import matcher.segment.PathVariableCollectChain;
 import matcher.segment.PathVariableValue;
 import matcher.segment.SegmentChunk;
@@ -30,7 +30,7 @@ public class PathUrlMatcher {
         return new PathUrlMatcher(baseSegmentChunkChain);
     }
 
-    public Optional<PathVariableValue> match(PathUrl requestUrl) {
+    public Optional<PathVariableValue> match(PathUrl2 requestUrl) {
         Objects.requireNonNull(requestUrl);
 
         ConsumeResult consumeResult = segmentChunkChain.consume(requestUrl);

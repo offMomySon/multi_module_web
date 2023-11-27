@@ -1,21 +1,21 @@
 package main.matcher.segment;
 
-import matcher.segment.PathUrl;
+import matcher.segment.PathUrl2;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class PathUrlTest {
+class PathUrl2Test {
     @DisplayName("PathUrl 을 생성합니다.")
     @Test
     void test() throws Exception {
         //given
-        PathUrl expect = new PathUrl(new StringBuilder("test/p1/p2"), 0);
+        PathUrl2 expect = new PathUrl2(new StringBuilder("test/p1/p2"), 0);
 
         //when
-        PathUrl actual = PathUrl.from("/test/p1/p2");
+        PathUrl2 actual = PathUrl2.from("/test/p1/p2");
 
         //then
         assertThat(actual).isEqualTo(expect);
@@ -25,10 +25,10 @@ class PathUrlTest {
     @Test
     void ttest() throws Exception {
         //given
-        PathUrl expect = PathUrl.from("/test/p1/p2");
+        PathUrl2 expect = PathUrl2.from("/test/p1/p2");
 
         //when
-        PathUrl actual = expect.copy();
+        PathUrl2 actual = expect.copy();
 
         //then
         assertThat(actual).isEqualTo(expect);
@@ -38,7 +38,7 @@ class PathUrlTest {
     @Test
     void tttest() throws Exception {
         //given
-        PathUrl pathUrl = PathUrl.from("/test/p1/p2");
+        PathUrl2 pathUrl = PathUrl2.from("/test/p1/p2");
 
         //when
         List<String> actual = new ArrayList<>();
@@ -55,7 +55,7 @@ class PathUrlTest {
     @Test
     void ttttest() throws Exception {
         //given
-        PathUrl pathUrl = PathUrl.from("/test/p1/p2");
+        PathUrl2 pathUrl = PathUrl2.from("/test/p1/p2");
 
         //when
         List<String> actual = new ArrayList<>();
@@ -72,7 +72,7 @@ class PathUrlTest {
     @Test
     void tttttest() throws Exception {
         //given
-        PathUrl pathUrl = new PathUrl(new StringBuilder("test/p1/p2"), "test/p1/".length());
+        PathUrl2 pathUrl = new PathUrl2(new StringBuilder("test/p1/p2"), "test/p1/".length());
 
         //when
         int size = pathUrl.segmentSize();
@@ -85,7 +85,7 @@ class PathUrlTest {
     @Test
     void ttttttest() throws Exception {
         //given
-        PathUrl pathUrl = new PathUrl(new StringBuilder("p1/p2/p3"), "p1/".length());
+        PathUrl2 pathUrl = new PathUrl2(new StringBuilder("p1/p2/p3"), "p1/".length());
         List<String> expect = List.of("p2", "p3");
 
         //when
@@ -99,7 +99,7 @@ class PathUrlTest {
     @Test
     void tttttttest() throws Exception {
         //given
-        PathUrl emptyPathUrl = PathUrl.empty();
+        PathUrl2 emptyPathUrl = PathUrl2.empty();
 
         //when
         boolean actual = emptyPathUrl.isEmpty();

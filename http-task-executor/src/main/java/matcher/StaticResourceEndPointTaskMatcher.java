@@ -6,7 +6,7 @@ import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import matcher.segment.PathUrl;
+import matcher.segment.PathUrl2;
 import matcher.segment.PathVariableValue;
 import task.HttpConvertEndPointTask;
 import task.HttpEndPointTask;
@@ -17,10 +17,10 @@ import task.worker.WorkerResultType;
 public class StaticResourceEndPointTaskMatcher implements EndpointTaskMatcher {
     private static final RequestMethod REQUEST_METHOD = RequestMethod.GET;
 
-    private final PathUrl endPointUrl;
+    private final PathUrl2 endPointUrl;
     private final Path resourcePath;
 
-    public StaticResourceEndPointTaskMatcher(PathUrl endPointUrl, Path resourcePath) {
+    public StaticResourceEndPointTaskMatcher(PathUrl2 endPointUrl, Path resourcePath) {
         Objects.requireNonNull(endPointUrl);
         Objects.requireNonNull(resourcePath);
         this.endPointUrl = endPointUrl;
@@ -28,7 +28,7 @@ public class StaticResourceEndPointTaskMatcher implements EndpointTaskMatcher {
     }
 
     @Override
-    public Optional<MatchedEndPoint> match(RequestMethod requestMethod, PathUrl requestUrl) {
+    public Optional<MatchedEndPoint> match(RequestMethod requestMethod, PathUrl2 requestUrl) {
         boolean doesNotResourceMethod = !requestMethod.equals(REQUEST_METHOD);
         if (doesNotResourceMethod) {
             return Optional.empty();

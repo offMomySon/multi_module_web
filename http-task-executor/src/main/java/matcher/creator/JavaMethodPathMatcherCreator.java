@@ -10,7 +10,7 @@ import java.util.function.Function;
 import matcher.JavaMethodEndpointTaskMatcher;
 import matcher.PathUrlMatcher;
 import matcher.RequestMethod;
-import matcher.segment.PathUrl;
+import matcher.segment.PathUrl2;
 import matcher.segment.factory.SegmentChunkFactory;
 import parameter.matcher.ParameterAndValueAssigneeType;
 import task.HttpConvertEndPointTask;
@@ -36,7 +36,7 @@ public class JavaMethodPathMatcherCreator {
 
         RequestMethod requestMethod = endPointMethodInfo.getRequestMethod();
 
-        PathUrl baseUrl = PathUrl.from(endPointMethodInfo.getUrl());
+        PathUrl2 baseUrl = PathUrl2.from(endPointMethodInfo.getUrl());
         SegmentChunkFactory segmentChunkFactory = new SegmentChunkFactory(baseUrl);
         PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(segmentChunkFactory);
 

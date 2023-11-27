@@ -1,6 +1,6 @@
 package matcher;
 
-import matcher.segment.PathUrl;
+import matcher.segment.PathUrl2;
 import matcher.segment.PathVariableValue;
 import java.util.Objects;
 import java.util.Optional;
@@ -26,7 +26,7 @@ public class JavaMethodEndpointTaskMatcher implements EndpointTaskMatcher {
     }
 
     @Override
-    public Optional<MatchedEndPoint> match(RequestMethod requestMethod, PathUrl requestUrl) {
+    public Optional<MatchedEndPoint> match(RequestMethod requestMethod, PathUrl2 requestUrl) {
         if (Objects.isNull(requestUrl)) {
             return Optional.empty();
         }

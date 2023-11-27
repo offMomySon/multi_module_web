@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import matcher.segment.PathUrl;
+import matcher.segment.PathUrl2;
 
 // http
 // link
@@ -31,7 +31,7 @@ public class CompositedEndpointTaskMatcher implements EndpointTaskMatcher {
     }
 
 //    1. method, request url 이 매칭되는 pathMatcher 가 존재하면 method, pathVariable value 를 반환합니다.
-    public Optional<MatchedEndPoint> match(RequestMethod requestMethod, PathUrl requestUrl) {
+    public Optional<MatchedEndPoint> match(RequestMethod requestMethod, PathUrl2 requestUrl) {
         return baseHttpPathMatchers.stream()
             .map(methodResolver -> methodResolver.match(requestMethod, requestUrl))
             .filter(Optional::isPresent)

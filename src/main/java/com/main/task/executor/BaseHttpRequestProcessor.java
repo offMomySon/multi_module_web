@@ -12,7 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import matcher.EndpointTaskMatcher;
 import matcher.MatchedEndPoint;
 import matcher.RequestMethod;
-import matcher.segment.PathUrl;
+import matcher.segment.PathUrl2;
 import parameter.ParameterValueGetter;
 import parameter.UrlParameterValues;
 import parameter.extractor.HttpBodyParameterInfoExtractor;
@@ -61,7 +61,7 @@ public class BaseHttpRequestProcessor implements HttpRequestProcessor {
         Objects.requireNonNull(response);
 
         RequestMethod method = RequestMethod.find(request.getHttpMethod().name());
-        PathUrl requestUrl = PathUrl.from(request.getHttpRequestPath().getValue().toString());
+        PathUrl2 requestUrl = PathUrl2.from(request.getHttpRequestPath().getValue().toString());
         QueryParameters queryParameters = request.getQueryParameters();
 
         MatchedEndPoint matchedEndPoint = endpointTaskMatcher.match(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));

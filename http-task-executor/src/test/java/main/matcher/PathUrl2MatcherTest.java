@@ -2,7 +2,7 @@ package main.matcher;
 
 import main.matcher.segment.PathMatchTestSuite;
 import matcher.PathUrlMatcher;
-import matcher.segment.PathUrl;
+import matcher.segment.PathUrl2;
 import matcher.segment.PathVariableValue;
 import matcher.segment.factory.SegmentChunkFactory;
 import java.util.Map;
@@ -14,17 +14,17 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class PathUrlMatcherTest {
+class PathUrl2MatcherTest {
 
     @DisplayName("http path 와 일치하면 resolve 데이터를 가져옵니다.")
     @PathMatchTestSuite.PathMatchTest
     void test1(String baseUrl, String requestPath, boolean expect) throws Exception {
         //given
-        SegmentChunkFactory segmentChunkFactory = new SegmentChunkFactory(PathUrl.from(baseUrl));
+        SegmentChunkFactory segmentChunkFactory = new SegmentChunkFactory(PathUrl2.from(baseUrl));
         PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(segmentChunkFactory);
 
         //when
-        boolean actual = pathUrlMatcher.match(PathUrl.from(requestPath)).isPresent();
+        boolean actual = pathUrlMatcher.match(PathUrl2.from(requestPath)).isPresent();
 
         //then
         Assertions.assertThat(actual).isEqualTo(expect);
@@ -36,11 +36,11 @@ class PathUrlMatcherTest {
     void test1(String baseUrl, String requestPath, Map<String, String> expectMap) throws Exception {
         //given
         PathVariableValue expect = new PathVariableValue(expectMap);
-        SegmentChunkFactory segmentChunkFactory = new SegmentChunkFactory(PathUrl.from(baseUrl));
+        SegmentChunkFactory segmentChunkFactory = new SegmentChunkFactory(PathUrl2.from(baseUrl));
         PathUrlMatcher pathUrlMatcher = PathUrlMatcher.from(segmentChunkFactory);
 
         //when
-        Optional<PathVariableValue> optionalResolvedMethod = pathUrlMatcher.match(PathUrl.from(requestPath));
+        Optional<PathVariableValue> optionalResolvedMethod = pathUrlMatcher.match(PathUrl2.from(requestPath));
 
         //then
         Assertions.assertThat(optionalResolvedMethod).isPresent();

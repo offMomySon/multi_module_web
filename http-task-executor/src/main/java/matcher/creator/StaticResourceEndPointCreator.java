@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import matcher.StaticResourceEndPointTaskMatcher;
-import matcher.segment.PathUrl;
+import matcher.segment.PathUrl2;
 
 @Slf4j
 public class StaticResourceEndPointCreator {
@@ -62,7 +62,7 @@ public class StaticResourceEndPointCreator {
     }
 
     private static StaticResourceEndPointTaskMatcher createStaticResourceEndPointMatcher(ResourceUrl resourceAndUrl) {
-        PathUrl resourceUrl = resourceAndUrl.getUrl();
+        PathUrl2 resourceUrl = resourceAndUrl.getUrl();
         Path resource = resourceAndUrl.getResource();
         return new StaticResourceEndPointTaskMatcher(resourceUrl, resource);
     }
@@ -71,9 +71,9 @@ public class StaticResourceEndPointCreator {
         private static final String DELIMITER = "/";
 
         private final Path resource;
-        private final PathUrl url;
+        private final PathUrl2 url;
 
-        public ResourceUrl(Path resource, PathUrl url) {
+        public ResourceUrl(Path resource, PathUrl2 url) {
             Objects.requireNonNull(resource);
             Objects.requireNonNull(url);
             this.resource = resource;
@@ -87,7 +87,7 @@ public class StaticResourceEndPointCreator {
 
             Path relativeResourcePath = resourceDirectory.relativize(resource);
             Path resourcePath = Path.of(DELIMITER).resolve(urlPrefix).resolve(relativeResourcePath);
-            PathUrl resourceUrl = PathUrl.from(resourcePath);
+            PathUrl2 resourceUrl = PathUrl2.from(resourcePath);
             return new ResourceUrl(resource, resourceUrl);
         }
 
@@ -95,7 +95,7 @@ public class StaticResourceEndPointCreator {
             return resource;
         }
 
-        public PathUrl getUrl() {
+        public PathUrl2 getUrl() {
             return url;
         }
     }

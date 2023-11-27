@@ -6,7 +6,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import matcher.MatchedEndPointTaskWorker2;
 import matcher.RequestMethod;
-import matcher.segment.PathUrl;
+import matcher.segment.PathUrl2;
 
 public class CompositedEndpointTasks implements EndPointTask2 {
     private final List<EndPointTask2> endPointTasks;
@@ -20,7 +20,7 @@ public class CompositedEndpointTasks implements EndPointTask2 {
             .collect(Collectors.toUnmodifiableList());
     }
 
-    public Optional<MatchedEndPointTaskWorker2> match(RequestMethod requestMethod, PathUrl requestUrl) {
+    public Optional<MatchedEndPointTaskWorker2> match(RequestMethod requestMethod, PathUrl2 requestUrl) {
         return endPointTasks.stream()
             .map(endPointTask -> endPointTask.match(requestMethod, requestUrl))
             .filter(Optional::isPresent)

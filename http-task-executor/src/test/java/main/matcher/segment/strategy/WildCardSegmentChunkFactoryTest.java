@@ -1,6 +1,6 @@
 package main.matcher.segment.strategy;
 
-import matcher.segment.PathUrl;
+import matcher.segment.PathUrl2;
 import matcher.segment.SegmentChunk;
 import matcher.segment.WildCardPathVariableSegmentChunk;
 import matcher.segment.WildCardSegmentChunk;
@@ -20,7 +20,7 @@ class WildCardSegmentChunkFactoryTest {
     @Test
     void test() throws Exception {
         //given
-        PathUrl pathUrl = PathUrl.from("/doesNotWildCard/**/path1");
+        PathUrl2 pathUrl = PathUrl2.from("/doesNotWildCard/**/path1");
 
         //when
         Throwable actual = Assertions.catchThrowable(() -> WildCardSegmentChunkCreateStrategy.create(pathUrl));
@@ -35,7 +35,7 @@ class WildCardSegmentChunkFactoryTest {
     @MethodSource("provideSegmentChunks")
     void ttest(String baseUrl, List<? extends Class<? extends SegmentChunk>> expectInstances) throws Exception {
         //given
-        PathUrl pathUrl = PathUrl.from(baseUrl);
+        PathUrl2 pathUrl = PathUrl2.from(baseUrl);
 
         //when
         List<SegmentChunk> actuals = WildCardSegmentChunkCreateStrategy.create(pathUrl);

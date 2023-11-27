@@ -1,7 +1,7 @@
 package main.matcher.segment;
 
 import matcher.segment.NormalSegmentChunk;
-import matcher.segment.PathUrl;
+import matcher.segment.PathUrl2;
 import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -13,12 +13,12 @@ class NormalSegmentChunkTest {
     @Test
     void test() throws Exception {
         //given
-        PathUrl requestUrl = PathUrl.from("/path1/path2");
-        PathUrl baseUrl = PathUrl.from("/path1/diffPath2");
+        PathUrl2 requestUrl = PathUrl2.from("/path1/path2");
+        PathUrl2 baseUrl = PathUrl2.from("/path1/diffPath2");
         NormalSegmentChunk normalSegmentChunk = new NormalSegmentChunk(baseUrl);
 
         //when
-        List<PathUrl> actual = normalSegmentChunk.consume(requestUrl);
+        List<PathUrl2> actual = normalSegmentChunk.consume(requestUrl);
 
         //then
         Assertions.assertThat(actual).hasSize(0);
@@ -28,18 +28,18 @@ class NormalSegmentChunkTest {
     @Test
     void ttest() throws Exception {
         //given
-        PathUrl requestUrl = PathUrl.from("/path1/path2/path3/path4");
-        PathUrl baseUrl = PathUrl.from("/path1/path2");
+        PathUrl2 requestUrl = PathUrl2.from("/path1/path2/path3/path4");
+        PathUrl2 baseUrl = PathUrl2.from("/path1/path2");
         NormalSegmentChunk normalSegmentChunk = new NormalSegmentChunk(baseUrl);
 
-        PathUrl expectUrl = new PathUrl(new StringBuilder("/path1/path2/path3/path4"), "/path1/path2/".length());
+        PathUrl2 expectUrl = new PathUrl2(new StringBuilder("/path1/path2/path3/path4"), "/path1/path2/".length());
 
         //when
-        List<PathUrl> actuals = normalSegmentChunk.consume(requestUrl);
+        List<PathUrl2> actuals = normalSegmentChunk.consume(requestUrl);
 
         //then
         Assertions.assertThat(actuals).hasSize(1);
-        PathUrl actual = actuals.get(0);
+        PathUrl2 actual = actuals.get(0);
         Assertions.assertThat(actual).isEqualTo(expectUrl);
     }
 
@@ -47,12 +47,12 @@ class NormalSegmentChunkTest {
     @Test
     void tttest() throws Exception {
         //given
-        PathUrl requestUrl = PathUrl.from("/path1");
-        PathUrl baseUrl = PathUrl.from("/path1/path2/path3/path4");
+        PathUrl2 requestUrl = PathUrl2.from("/path1");
+        PathUrl2 baseUrl = PathUrl2.from("/path1/path2/path3/path4");
         NormalSegmentChunk normalSegmentChunk = new NormalSegmentChunk(baseUrl);
 
         //when
-        List<PathUrl> actuals = normalSegmentChunk.consume(requestUrl);
+        List<PathUrl2> actuals = normalSegmentChunk.consume(requestUrl);
 
         //then
         Assertions.assertThat(actuals).hasSize(0);

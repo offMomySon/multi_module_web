@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import matcher.segment.PathUrl;
+import matcher.segment.PathUrl2;
 import matcher.segment.SegmentChunk;
 import matcher.segment.WildCardPathVariableSegmentChunk;
 import matcher.segment.WildCardSegmentChunk;
@@ -15,7 +15,7 @@ import matcher.segment.WildCardSegmentChunk;
 public class WildCardSegmentChunkCreateStrategy {
     private static final String WILD_CARD = "/**";
 
-    public static List<SegmentChunk> create(PathUrl _basePathUrl) {
+    public static List<SegmentChunk> create(PathUrl2 _basePathUrl) {
         Objects.requireNonNull(_basePathUrl);
 
         if (_basePathUrl.isEmpty()) {
@@ -31,7 +31,7 @@ public class WildCardSegmentChunkCreateStrategy {
         List<String> wildCardPathUrls = splitWildCardPathUrls(basePathUrl);
 
         return wildCardPathUrls.stream()
-            .map(PathUrl::from)
+            .map(PathUrl2::from)
             .map(pathUrl -> {
                 if (hasPathVariableSegment(pathUrl)) {
                     return new WildCardPathVariableSegmentChunk(pathUrl);
@@ -58,8 +58,8 @@ public class WildCardSegmentChunkCreateStrategy {
         return wildCardPathUrls;
     }
 
-    private static boolean hasPathVariableSegment(PathUrl wildCardPathUrl) {
-        PathUrl copiedWildCardPathUrl = wildCardPathUrl.copy();
+    private static boolean hasPathVariableSegment(PathUrl2 wildCardPathUrl) {
+        PathUrl2 copiedWildCardPathUrl = wildCardPathUrl.copy();
         while (copiedWildCardPathUrl.doesNotEmpty()) {
             String segment = copiedWildCardPathUrl.popSegment();
             if (PathVariableUtil.isPathVariable(segment)) {

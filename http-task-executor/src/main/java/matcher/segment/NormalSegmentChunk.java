@@ -5,19 +5,19 @@ import java.util.List;
 import java.util.Objects;
 
 public class NormalSegmentChunk implements SegmentChunk {
-    private final PathUrl baseUrl;
+    private final PathUrl2 baseUrl;
 
-    public NormalSegmentChunk(PathUrl baseUrl) {
+    public NormalSegmentChunk(PathUrl2 baseUrl) {
         Objects.requireNonNull(baseUrl);
         this.baseUrl = baseUrl;
     }
 
     @Override
-    public List<PathUrl> consume(PathUrl requestUrl) {
+    public List<PathUrl2> consume(PathUrl2 requestUrl) {
         Objects.requireNonNull(requestUrl);
 
-        PathUrl copiedBaseUrl = baseUrl.copy();
-        PathUrl copiedRequestUrl = requestUrl.copy();
+        PathUrl2 copiedBaseUrl = baseUrl.copy();
+        PathUrl2 copiedRequestUrl = requestUrl.copy();
 
         while (copiedBaseUrl.doesNotEmpty()) {
             boolean doesNotSufficientRequestUrl = copiedRequestUrl.isEmpty();

@@ -2,7 +2,7 @@ package main.matcher.segment.strategy;
 
 import matcher.segment.EmptySegmentChunk;
 import matcher.segment.NormalSegmentChunk;
-import matcher.segment.PathUrl;
+import matcher.segment.PathUrl2;
 import matcher.segment.PathVariableSegmentChunk;
 import matcher.segment.SegmentChunk;
 import matcher.segment.factory.SegmentChunkFactory;
@@ -24,7 +24,7 @@ class SegmentChunkFactoryTest {
     @MethodSource("provideSegmentChunks")
     void ttest(String baseUrl, List<? extends Class<? extends SegmentChunk>> expectInstances) throws Exception {
         //given
-        PathUrl pathUrl = PathUrl.from(baseUrl);
+        PathUrl2 pathUrl = PathUrl2.from(baseUrl);
 
         //when
         List<SegmentChunk> actuals = new SegmentChunkFactory(pathUrl).create();

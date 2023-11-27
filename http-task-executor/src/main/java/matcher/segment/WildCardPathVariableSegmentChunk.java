@@ -10,9 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 public class WildCardPathVariableSegmentChunk extends AbstractPathVariableSegmentChunk {
     private static final String WILD_CARD = "**";
 
-    private final PathUrl baseUrl;
+    private final PathUrl2 baseUrl;
 
-    public WildCardPathVariableSegmentChunk(PathUrl baseUrl) {
+    public WildCardPathVariableSegmentChunk(PathUrl2 baseUrl) {
         Objects.requireNonNull(baseUrl);
 
         String segment = baseUrl.peekSegment();
@@ -31,23 +31,23 @@ public class WildCardPathVariableSegmentChunk extends AbstractPathVariableSegmen
     }
 
     @Override
-    public LinkedHashMap<PathUrl, PathVariableValue> internalConsume(PathUrl requestUrl) {
+    public LinkedHashMap<PathUrl2, PathVariableValue> internalConsume(PathUrl2 requestUrl) {
         Objects.requireNonNull(requestUrl);
 
-        PathUrl copiedBaseUrl = baseUrl.copy();
+        PathUrl2 copiedBaseUrl = baseUrl.copy();
         copiedBaseUrl.popSegment();
-        PathUrl copiedRequestUrl = requestUrl.copy();
+        PathUrl2 copiedRequestUrl = requestUrl.copy();
 
         PathVariableSegmentChunk pathVariableSegmentChunk = new PathVariableSegmentChunk(copiedBaseUrl.copy());
 
-        LinkedHashMap<PathUrl, PathVariableValue> matchedPathVariableValue = new LinkedHashMap<>();
+        LinkedHashMap<PathUrl2, PathVariableValue> matchedPathVariableValue = new LinkedHashMap<>();
         while (copiedRequestUrl.doesNotEmpty()) {
             boolean doesNotSufficientRequestUrl = copiedBaseUrl.segmentSize() > copiedRequestUrl.segmentSize();
             if (doesNotSufficientRequestUrl) {
                 break;
             }
 
-            Map<PathUrl, PathVariableValue> pathVariableValueMap = pathVariableSegmentChunk.internalConsume(copiedRequestUrl);
+            Map<PathUrl2, PathVariableValue> pathVariableValueMap = pathVariableSegmentChunk.internalConsume(copiedRequestUrl);
 
             boolean doesNotMatch = pathVariableValueMap.isEmpty();
             if (doesNotMatch) {

@@ -11,7 +11,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import static matcher.PathMatchTestSuite.PathMatchGetValueTest;
 
-class PathMatcherTest {
+class OldPathMatcherTest {
     @DisplayName("matcher 에 대해 path 가 매칭되면, 존재하는 값을 반환합니다.")
     @PathMatchGetValueTest
     void Given_BasePahAndRequestPath_When_Matched_Then_GetPresentValue(String basePath, String requestPath, boolean expect) throws Exception {
@@ -19,10 +19,10 @@ class PathMatcherTest {
         PathUrl basePathUrl = PathUrl.of(basePath);
         PathUrl requestPathUrl = PathUrl.of(requestPath);
 
-        PathMatcher pathMatcher = PathMatcher.of(basePathUrl);
+        OldPathMatcher oldPathMatcher = OldPathMatcher.of(basePathUrl);
 
         // when
-        boolean actual = pathMatcher.match(requestPathUrl).isPresent();
+        boolean actual = oldPathMatcher.match(requestPathUrl).isPresent();
 
         // then
         Assertions.assertThat(actual).isEqualTo(expect);
@@ -37,10 +37,10 @@ class PathMatcherTest {
         PathUrl requestPathUrl = PathUrl.of(requestPath);
         PathVariable expect = new PathVariable(expectMap);
 
-        PathMatcher pathMatcher = PathMatcher.of(basePathUrl);
+        OldPathMatcher oldPathMatcher = OldPathMatcher.of(basePathUrl);
 
         // when
-        PathVariable actual = pathMatcher.match(requestPathUrl)
+        PathVariable actual = oldPathMatcher.match(requestPathUrl)
             .orElseThrow(() -> new RuntimeException("Does not exist pathVariable."));
 
         // then

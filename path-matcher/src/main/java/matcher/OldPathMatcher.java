@@ -10,17 +10,17 @@ import matcher.segment.SegmentChunkChain.ConsumeResult;
 import matcher.segment.factory.SegmentChunkFactory;
 import static java.util.Objects.isNull;
 
-public class PathMatcher {
+public class OldPathMatcher {
     private final SegmentChunkChain segmentChunkChain;
 
-    private PathMatcher(SegmentChunkChain segmentChunkChain) {
+    private OldPathMatcher(SegmentChunkChain segmentChunkChain) {
         if (isNull(segmentChunkChain)) {
             throw new RuntimeException("Ensure the parameter is not null.");
         }
         this.segmentChunkChain = segmentChunkChain;
     }
 
-    public static PathMatcher of(PathUrl pathUrl) {
+    public static OldPathMatcher of(PathUrl pathUrl) {
         if (isNull(pathUrl)) {
             throw new RuntimeException("Ensure the parameter is not null.");
         }
@@ -35,7 +35,7 @@ public class PathMatcher {
         }
         nextChunkChain.close();
 
-        return new PathMatcher(headChunkChain);
+        return new OldPathMatcher(headChunkChain);
     }
 
     public Optional<PathVariable> match(PathUrl requestUrl) {

@@ -13,7 +13,7 @@ public class SegmentChunkChain {
     private final SegmentChunk segmentChunk;
     private SegmentChunkChain segmentChunkChain;
 
-    private SegmentChunkChain(@NonNull SegmentChunk segmentChunk, SegmentChunkChain segmentChunkChain) {
+    public SegmentChunkChain(@NonNull SegmentChunk segmentChunk, SegmentChunkChain segmentChunkChain) {
         this.segmentChunk = segmentChunk;
         this.segmentChunkChain = segmentChunkChain;
     }

@@ -24,19 +24,18 @@ public class OldPathMatcher {
         if (isNull(pathUrl)) {
             throw new RuntimeException("Ensure the parameter is not null.");
         }
-//        List<SegmentChunk> segmentChunks = SegmentChunkFactory.create(pathUrl);
-//
-//        SegmentChunk headChunk = segmentChunks.get(0);
-//        SegmentChunkChain headChunkChain = new SegmentChunkChain(headChunk, null);
-//        SegmentChunkChain nextChunkChain = headChunkChain;
-//        for (int i = 1; i < segmentChunks.size(); i++) {
-//            headChunk = segmentChunks.get(i);
-//            nextChunkChain = nextChunkChain.chaining(headChunk);
-//        }
-//        nextChunkChain.close();
+        List<SegmentChunk> segmentChunks = SegmentChunkFactory.create(pathUrl);
 
-        return null;
-//        return new OldPathMatcher(headChunkChain);
+        SegmentChunk headChunk = segmentChunks.get(0);
+        SegmentChunkChain headChunkChain = new SegmentChunkChain(headChunk, null);
+        SegmentChunkChain nextChunkChain = headChunkChain;
+        for (int i = 1; i < segmentChunks.size(); i++) {
+            headChunk = segmentChunks.get(i);
+            nextChunkChain = nextChunkChain.chaining(headChunk);
+        }
+        nextChunkChain.close();
+
+        return new OldPathMatcher(headChunkChain);
     }
 
     public Optional<PathVariable> match(PathUrl requestUrl) {

@@ -16,6 +16,32 @@ public class PathMatchTestSuite {
     @Target(METHOD)
     @Retention(RUNTIME)
     @ParameterizedTest
+    @CsvSource(value = {
+        "/path1",
+        "/path1/path2",
+        "/path1/path2/path3",
+        "/path1/**",
+        "/path1/**/path2",
+        "/path1/**/path2/path3",
+        "/path1/**/path2/**/path3",
+        "/p1/**/p2/**/p3/**/p4/**/p5/**/p6",
+        "/path1/{pv1}",
+        "/path1/{pv1}/{pv2}",
+        "/**",
+        "/path1/**",
+        "/path1/**/{pv1}",
+        "/path1/**/path1/{pv1}/path1",
+        "/path1/{pv1}/**",
+        "/p1/{pv1}/**/p2/{pv2}/**/p3/{pv3}/**/p4/{pv4}/**/p5/{pv5}/**/p6",
+        "/p1/**/p2/**/p3/**/p4/**/p5/**/p6",
+    })
+    public @interface TestSuiteSegmentChunkChainCreate {
+
+    }
+
+    @Target(METHOD)
+    @Retention(RUNTIME)
+    @ParameterizedTest
     @CsvSource({
         "/path1, /path1, true",
         "/path1, /path2, false",
@@ -233,7 +259,7 @@ public class PathMatchTestSuite {
         "/, /, true",
         "/, /path1, false"
     })
-    public @interface PathMatchGetValueTest {
+    public @interface TestSuiteSegmentChunkChainConsumeResult {
 
     }
 
@@ -241,38 +267,38 @@ public class PathMatchTestSuite {
     @Retention(RUNTIME)
     @ParameterizedTest
     @MethodSource("matcher.PathMatchTestSuite#provideMatchedPathVariableTestSuite")
-    public @interface PathMatcherMatchedPathVariableTest {
+    public @interface TestSuiteSegmentChunkChainConsumePathVariableResult {
 
     }
 
     public static Stream<Arguments> provideMatchedPathVariableTestSuite() {
         return Stream.of(
-            Arguments.of("/GET/{pv1}/{pv2}/{pv3}", "/GET/path1/path2/path3", Map.of("pv1", "path1", "pv2", "path2", "pv3", "path3")),
-            Arguments.of("/GET/{pv1}/path2/path3", "/GET/path1/path2/path3", Map.of("pv1", "path1")),
-            Arguments.of("/GET/{pv1}/{pv2}/path3", "/GET/path1/path2/path3", Map.of("pv1", "path1", "pv2", "path2")),
-            Arguments.of("/GET/{pv1}/path2/{pv3}", "/GET/path1/path2/path3", Map.of("pv1", "path1", "pv3", "path3")),
-            Arguments.of("/GET/path1/path2/{pv3}", "/GET/path1/path2/path3", Map.of("pv3", "path3")),
-            Arguments.of("/GET/path1/{pv2}/{pv3}", "/GET/path1/path2/path3", Map.of("pv2", "path2", "pv3", "path3")),
-            Arguments.of("/GET/path1/path2/{pv3}", "/GET/path1/path2/path3", Map.of("pv3", "path3")),
-            Arguments.of("/GET/path1/path2/{pv3}", "/GET/path1/path2/path3", Map.of("pv3", "path3")),
-            Arguments.of("/GET/**/{pv1}", "/GET/path1", Map.of("pv1", "path1")),
-            Arguments.of("/GET/**/{pv1}", "/GET/path1/path2", Map.of("pv1", "path2")),
-            Arguments.of("/GET/**/{pv1}", "/GET/path1/path2/path3", Map.of("pv1", "path3")),
-            Arguments.of("/GET/**/{pv1}", "/GET/path1/path2/path3/path4", Map.of("pv1", "path4")),
-            Arguments.of("/GET/**/{pv1}", "/GET/path1/path2/path3/path4", Map.of("pv1", "path4")),
-            Arguments.of("/GET/**/{pv1}/path2", "/GET/path1/path2", Map.of("pv1", "path1")),
-            Arguments.of("/GET/**/{pv1}/path3", "/GET/path1/path2/path3", Map.of("pv1", "path2")),
-            Arguments.of("/GET/**/{pv1}/path4", "/GET/path1/path2/path3/path4", Map.of("pv1", "path3")),
-            Arguments.of("/GET/**/path0/{pv1}", "/GET/path0/path1", Map.of("pv1", "path1")),
-            Arguments.of("/GET/**/path1/{pv1}", "/GET/path0/path1/path2", Map.of("pv1", "path2")),
-            Arguments.of("/GET/path1/**/path2/{pv1}", "/GET/path1/path2/path3", Map.of("pv1", "path3")),
-            Arguments.of("/GET/path1/**/path3/{pv1}", "/GET/path1/path2/path3/path4", Map.of("pv1", "path4")),
-            Arguments.of("/GET/path1/**/path4/{pv1}", "/GET/path1/path2/path3/path4/path5", Map.of("pv1", "path5")),
-            Arguments.of("/GET/path1/**/path2/**/{pv1}/path6", "/GET/path1/path2/path3/path4/path5/path6", Map.of("pv1", "path5")),
-            Arguments.of("/GET/path1/**/path2/**/{pv1}/path7", "/GET/path1/path2/path3/path4/path5/path6/path7", Map.of("pv1", "path6")),
-            Arguments.of("/GET/path1/**/path3/{pv1}/**/{pv2}/path6", "/GET/path1/path2/path3/path4/path5/path6", Map.of("pv1", "path4", "pv2", "path5")),
-            Arguments.of("/GET/path1/**/path3/**/{pv1}/**/{pv2}/path8",
-                         "/GET/path1/path2/path3/path4/path5/path6/path7/path8",
+            Arguments.of("/{pv1}/{pv2}/{pv3}", "/path1/path2/path3", Map.of("pv1", "path1", "pv2", "path2", "pv3", "path3")),
+            Arguments.of("/{pv1}/path2/path3", "/path1/path2/path3", Map.of("pv1", "path1")),
+            Arguments.of("/{pv1}/{pv2}/path3", "/path1/path2/path3", Map.of("pv1", "path1", "pv2", "path2")),
+            Arguments.of("/{pv1}/path2/{pv3}", "/path1/path2/path3", Map.of("pv1", "path1", "pv3", "path3")),
+            Arguments.of("/path1/path2/{pv3}", "/path1/path2/path3", Map.of("pv3", "path3")),
+            Arguments.of("/path1/{pv2}/{pv3}", "/path1/path2/path3", Map.of("pv2", "path2", "pv3", "path3")),
+            Arguments.of("/path1/path2/{pv3}", "/path1/path2/path3", Map.of("pv3", "path3")),
+            Arguments.of("/path1/path2/{pv3}", "/path1/path2/path3", Map.of("pv3", "path3")),
+            Arguments.of("/**/{pv1}", "/path1", Map.of("pv1", "path1")),
+            Arguments.of("/**/{pv1}", "/path1/path2", Map.of("pv1", "path2")),
+            Arguments.of("/**/{pv1}", "/path1/path2/path3", Map.of("pv1", "path3")),
+            Arguments.of("/**/{pv1}", "/path1/path2/path3/path4", Map.of("pv1", "path4")),
+            Arguments.of("/**/{pv1}", "/path1/path2/path3/path4", Map.of("pv1", "path4")),
+            Arguments.of("/**/{pv1}/path2", "/path1/path2", Map.of("pv1", "path1")),
+            Arguments.of("/**/{pv1}/path3", "/path1/path2/path3", Map.of("pv1", "path2")),
+            Arguments.of("/**/{pv1}/path4", "/path1/path2/path3/path4", Map.of("pv1", "path3")),
+            Arguments.of("/**/path0/{pv1}", "/path0/path1", Map.of("pv1", "path1")),
+            Arguments.of("/**/path1/{pv1}", "/path0/path1/path2", Map.of("pv1", "path2")),
+            Arguments.of("/path1/**/path2/{pv1}", "/path1/path2/path3", Map.of("pv1", "path3")),
+            Arguments.of("/path1/**/path3/{pv1}", "/path1/path2/path3/path4", Map.of("pv1", "path4")),
+            Arguments.of("/path1/**/path4/{pv1}", "/path1/path2/path3/path4/path5", Map.of("pv1", "path5")),
+            Arguments.of("/path1/**/path2/**/{pv1}/path6", "/path1/path2/path3/path4/path5/path6", Map.of("pv1", "path5")),
+            Arguments.of("/path1/**/path2/**/{pv1}/path7", "/path1/path2/path3/path4/path5/path6/path7", Map.of("pv1", "path6")),
+            Arguments.of("/path1/**/path3/{pv1}/**/{pv2}/path6", "/path1/path2/path3/path4/path5/path6", Map.of("pv1", "path4", "pv2", "path5")),
+            Arguments.of("/path1/**/path3/**/{pv1}/**/{pv2}/path8",
+                         "/path1/path2/path3/path4/path5/path6/path7/path8",
                          Map.of("pv1", "path4", "pv2", "path7")),
             Arguments.of("/POST/path1/**/path3/**/{pv1}/**/{pv2}/path9",
                          "/POST/path1/path2/path3/path4/path5/path6/path7/path8/path9", Map.of("pv1", "path4", "pv2", "path8")),

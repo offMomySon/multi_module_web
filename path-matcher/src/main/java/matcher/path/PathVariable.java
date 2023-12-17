@@ -4,8 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import lombok.EqualsAndHashCode;
 import static java.util.Objects.isNull;
 
+@EqualsAndHashCode
 public class PathVariable {
     private final Map<String, String> values;
 
@@ -47,19 +49,6 @@ public class PathVariable {
 
     public void clear() {
         values.clear();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        PathVariable that = (PathVariable) o;
-        return Objects.equals(values, that.values);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(values);
     }
 
     public PathVariable merge(PathVariable otherPathVariable) {

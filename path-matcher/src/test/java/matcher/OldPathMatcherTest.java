@@ -1,20 +1,16 @@
 package matcher;
 
 import java.util.Map;
-import java.util.stream.Stream;
-import matcher.PathMatchTestSuite.PathMatcherMatchedPathVariableTest;
+import matcher.PathMatchTestSuite.TestSuiteSegmentChunkChainConsumePathVariableResult;
 import matcher.path.PathUrl;
 import matcher.path.PathVariable;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import static matcher.PathMatchTestSuite.PathMatchGetValueTest;
+import static matcher.PathMatchTestSuite.TestSuiteSegmentChunkChainConsumeResult;
 
 class OldPathMatcherTest {
     @DisplayName("matcher 에 대해 path 가 매칭되면, 존재하는 값을 반환합니다.")
-    @PathMatchGetValueTest
+    @TestSuiteSegmentChunkChainConsumeResult
     void Given_BasePahAndRequestPath_When_Matched_Then_GetPresentValue(String basePath, String requestPath, boolean expect) throws Exception {
         // given
         PathUrl basePathUrl = PathUrl.of(basePath);
@@ -30,7 +26,7 @@ class OldPathMatcherTest {
     }
 
     @DisplayName("matcher 에 대해 path 가 매칭되면, pathVariable 값을 반환합니다.")
-    @PathMatcherMatchedPathVariableTest
+    @TestSuiteSegmentChunkChainConsumePathVariableResult
     void Given_BasePathAndRequestPath_When_Matched_Then_GetPathVariable(String basePath, String requestPath, Map<String, String> expectMap) throws Exception {
         // given
         PathUrl basePathUrl = PathUrl.of(basePath);

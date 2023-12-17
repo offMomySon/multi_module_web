@@ -7,6 +7,7 @@ import java.util.Optional;
 import lombok.NonNull;
 import matcher.path.PathUrl;
 import matcher.path.PathVariable;
+import matcher.segment.factory.SegmentChunkFactory;
 import static java.util.Objects.isNull;
 
 public class SegmentChunkChain {
@@ -16,6 +17,21 @@ public class SegmentChunkChain {
     public SegmentChunkChain(@NonNull SegmentChunk segmentChunk, SegmentChunkChain segmentChunkChain) {
         this.segmentChunk = segmentChunk;
         this.segmentChunkChain = segmentChunkChain;
+    }
+
+    public static SegmentChunkChain of(@NonNull PathUrl pathUrl) {
+        List<SegmentChunk> segmentChunks = SegmentChunkFactory.create(pathUrl);
+
+        SegmentChunk segmentChunk = segmentChunks.get(0);
+        SegmentChunkChain headSegmentChunkChain = SegmentChunkChain.open(segmentChunk);
+        SegmentChunkChain nextSegmentChunkChain = headSegmentChunkChain;
+        for (int i = 1; i < segmentChunks.size(); i++) {
+            segmentChunk = segmentChunks.get(i);
+            nextSegmentChunkChain = nextSegmentChunkChain.chaining(segmentChunk);
+        }
+        nextSegmentChunkChain.close();
+
+        return headSegmentChunkChain;
     }
 
     public static SegmentChunkChain open(@NonNull SegmentChunk segmentChunk) {

@@ -10,9 +10,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import matcher.path.PathUrl;
 import matcher.path.PathVariable;
-import matcher.segment.SegmentChunk;
 import matcher.segment.SegmentChunkChain;
-import matcher.segment.factory.SegmentChunkFactory;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toUnmodifiableList;
@@ -32,8 +30,8 @@ public class PathMatcher<T> {
     public PathMatcher<T> add(@NonNull Token token, @NonNull PathUrl basePathUrl, @NonNull T element) {
         List<MatchConsumer<T>> consumers = tokenConsumers.getOrDefault(token, emptyList());
 
-        SegmentChunkChain headSegmentChunkChain = createSegmentChunkChain(basePathUrl);
-        MatchConsumer<T> matchConsumer = new MatchConsumer<>(headSegmentChunkChain, element);
+        SegmentChunkChain segmentChunkChain = SegmentChunkChain.of(basePathUrl);
+        MatchConsumer<T> matchConsumer = new MatchConsumer<>(segmentChunkChain, element);
         List<MatchConsumer<T>> newConsumers = Stream.concat(consumers.stream(), Stream.of(matchConsumer)).collect(toUnmodifiableList());
 
         Map<Token, List<MatchConsumer<T>>> newTokenConsumers = new HashMap<>(this.tokenConsumers);
@@ -50,21 +48,6 @@ public class PathMatcher<T> {
         Map<Token, List<MatchConsumer<T>>> newTokenConsumers = new HashMap<>(base.tokenConsumers);
         newTokenConsumers.putAll(other.tokenConsumers);
         return new PathMatcher<>(Map.copyOf(newTokenConsumers));
-    }
-
-    private static SegmentChunkChain createSegmentChunkChain(PathUrl pathUrl) {
-        List<SegmentChunk> segmentChunks = SegmentChunkFactory.create(pathUrl);
-
-        SegmentChunk segmentChunk = segmentChunks.get(0);
-        SegmentChunkChain headSegmentChunkChain = SegmentChunkChain.open(segmentChunk);
-        SegmentChunkChain nextSegmentChunkChain = headSegmentChunkChain;
-        for (int i = 1; i < segmentChunks.size(); i++) {
-            segmentChunk = segmentChunks.get(i);
-            nextSegmentChunkChain = nextSegmentChunkChain.chaining(segmentChunk);
-        }
-        nextSegmentChunkChain.close();
-
-        return headSegmentChunkChain;
     }
 
     public Optional<MatchedElement<T>> match(@NonNull Token token, @NonNull PathUrl pathUrl) {

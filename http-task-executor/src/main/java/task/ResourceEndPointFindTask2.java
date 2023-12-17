@@ -8,16 +8,17 @@ import matcher.RequestMethod;
 import matcher.segment.PathUrl2;
 import matcher.segment.PathVariableValue;
 import task.worker.SystemResourceFileFindTaskWorker2;
+import static matcher.RequestMethod.GET;
 
 @Slf4j
 public class ResourceEndPointFindTask2 implements EndPointTask2 {
     private final SystemResourceFinder systemResourceFinder;
     private final String urlPrefix;
 
-    public ResourceEndPointFindTask2(SystemResourceFinder systemResourceFinder, String urlPrefix) {
-        Objects.requireNonNull(systemResourceFinder);
+    public ResourceEndPointFindTask2(SystemResourceFinder SystemResourceFinder, String urlPrefix) {
+        Objects.requireNonNull(SystemResourceFinder);
         Objects.requireNonNull(urlPrefix);
-        this.systemResourceFinder = systemResourceFinder;
+        this.SystemResourceFinder = SystemResourceFinder;
         this.urlPrefix = urlPrefix;
     }
 
@@ -26,7 +27,7 @@ public class ResourceEndPointFindTask2 implements EndPointTask2 {
         if (Objects.isNull(requestUrl)) {
             return Optional.empty();
         }
-        if (RequestMethod.GET != requestMethod) {
+        if (GET != requestMethod) {
             return Optional.empty();
         }
 
@@ -38,11 +39,11 @@ public class ResourceEndPointFindTask2 implements EndPointTask2 {
         int excludeUrlPrefixIndex = newRequestUrl.indexOf(urlPrefix) + urlPrefix.length();
         String resourcePath = newRequestUrl.substring(excludeUrlPrefixIndex);
 
-        if (systemResourceFinder.doesNotExistFile(resourcePath)) {
+        if (SystemResourceFinder.doesNotExistFile(resourcePath)) {
             return Optional.empty();
         }
 
-        SystemResourceFileFindTaskWorker2 taskWorker = new SystemResourceFileFindTaskWorker2(this.systemResourceFinder, resourcePath);
+        SystemResourceFileFindTaskWorker2 taskWorker = new SystemResourceFileFindTaskWorker2(this.SystemResourceFinder, resourcePath);
         PathVariableValue emptyPathVariableValue = PathVariableValue.empty();
         MatchedEndPointTaskWorker2 matchedEndPoint = new MatchedEndPointTaskWorker2(taskWorker, emptyPathVariableValue);
         return Optional.of(matchedEndPoint);

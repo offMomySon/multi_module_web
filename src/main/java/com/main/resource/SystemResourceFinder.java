@@ -17,7 +17,7 @@ public class SystemResourceFinder {
         this.resourceDirectory = resourceDirectory;
     }
 
-    public static task.SystemResourceFinder fromPackage(Class<?> rootClazz, String resourcePackage) {
+    public static SystemResourceFinder fromPackage(Class<?> rootClazz, String resourcePackage) {
         Objects.requireNonNull(rootClazz);
         if (Objects.isNull(resourcePackage) || resourcePackage.isBlank()) {
             throw new RuntimeException("requestPackage is empty.");
@@ -29,7 +29,7 @@ public class SystemResourceFinder {
         log.info("clazzPath : {}", clazzPath);
         log.info("projectPackageDirectory : {}", projectPackageDirectory);
         log.info("resourceDirectory : {}", resourceDirectory);
-        return new task.SystemResourceFinder(resourceDirectory);
+        return new SystemResourceFinder(resourceDirectory);
     }
 
     public boolean isExistFile(String url) {

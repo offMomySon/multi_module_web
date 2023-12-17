@@ -11,8 +11,6 @@ import annotation.RequestBody;
 import annotation.RequestMapping;
 import annotation.RequestParam;
 import com.main.resource.SystemResourceFinder;
-import com.main.task.executor.EndPointTaskExecutor;
-import com.main.task.response.HttpResponseSender;
 import com.main.util.AnnotationUtils;
 import converter.CompositeValueTypeConverter;
 import executor.SocketHttpTaskExecutor;
@@ -42,32 +40,21 @@ import java.util.TimeZone;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import matcher.MatchedEndPointTaskWorker2;
+import matcher.PathMatcher;
 import matcher.RequestMethod;
 import matcher.creator.EndPointMethodInfo;
-import matcher.creator.JavaMethodInvokeTaskWorkerCreator2;
-import matcher.segment.PathUrl2;
-import parameter.UrlParameterValues;
+import matcher.path.PathUrl;
 import parameter.extractor.HttpBodyParameterInfoExtractor.HttpBodyParameterInfo;
-import parameter.matcher.HttpBodyParameterValueAssignee;
-import parameter.matcher.HttpUrlParameterValueAssignee;
 import parameter.matcher.ParameterAndValueAssigneeType;
-import parameter.matcher.ParameterValueAssignees2;
 import pretask.PostTaskInfo;
 import pretask.PreTaskInfo;
-import response.HttpResponseHeader;
-import response.HttpResponseHeaderCreator2;
-import task.BaseEndPointTask2;
-import task.CompositedEndpointTasks;
-import task.EndPointTask2;
 import task.PostTaskWorker;
 import task.PreTaskWorker;
-import task.worker.EndPointTaskWorker2;
-import task.worker.EndPointWorkerResult;
-import task.worker.JavaMethodInvokeTaskWorker2;
 import task.worker.WorkerResultType;
 import vo.ContentType2;
 import static com.main.config.HttpConfig.INSTANCE;
+import static matcher.PathMatcher.MatchedElement;
+import static matcher.PathMatcher.Token;
 import static parameter.extractor.HttpUrlParameterInfoExtractor.HttpUrlParameterInfo;
 import static parameter.matcher.ParameterValueAssigneeType.BODY;
 import static parameter.matcher.ParameterValueAssigneeType.INPUT_STREAM;
@@ -88,6 +75,7 @@ import static vo.ContentType2.TEXT_PLAIN;
 @Slf4j
 public class App4 {
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
+    private static final String RESOURCE_PREFIX = "/static";
     private static final String HOST_ADDRESS;
     private static final AnnotationPropertyMappers ANNOTATION_PROPERTY_MAPPERS;
     private static final CompositeValueTypeConverter VALUE_TYPE_CONVERTER = new CompositeValueTypeConverter();
@@ -130,8 +118,8 @@ public class App4 {
             .annotations(new Annotations(List.of(PreWebFilter.class, Controller.class)))
             .annotationPropertyGetter(annotationPropertyGetter)
             .build();
-        AnnotatedClassObjectRepository objectRepository = objectRepositoryCreator.fromPackage(App4.class, "com.main");
-        objectRepository = objectRepository.append(SystemResourceFinder.class, SystemResourceFinder.fromPackage(App.class, "../../resources/main"));
+        AnnotatedClassObjectRepository objectRepository = objectRepositoryCreator.fromPackage(App4.class, "com.main")
+            .append(SystemResourceFinder.class, SystemResourceFinder.fromPackage(App.class, "../../resources/main"));
 
         // 4. java http endpoint task 생성.
         List<Class<?>> controllerAnnotatedClasses = objectRepository.findClassByAnnotatedClass(Controller.class);
@@ -157,26 +145,22 @@ public class App4 {
             .collect(Collectors.toUnmodifiableList());
 
         // 5. endPointTask create.
-        JavaMethodInvokeTaskWorkerCreator2 javaMethodInvokeTaskWorkerCreator2 = new JavaMethodInvokeTaskWorkerCreator2(parameterParameterAndValueAssigneeTypeFunction());
-        List<EndPointTask2> endPointTasks = endPointJavaMethodInfos.stream()
-            .map(endPointJavaMethodInfo -> {
-                RequestMethod requestMethod = endPointJavaMethodInfo.getRequestMethod();
-                String url = endPointJavaMethodInfo.getUrl();
-                Object object = endPointJavaMethodInfo.getObject();
-                Method javaMethod = endPointJavaMethodInfo.getJavaMethod();
+        PathMatcher<InstanceMethod> pathMatcher =
+            endPointJavaMethodInfos.stream().reduce(PathMatcher.empty(), (pm, em) -> {
+                String requestMethodName = em.getRequestMethod().name();
+                Token token = new Token(requestMethodName);
 
-                JavaMethodInvokeTaskWorker2 taskWorker = javaMethodInvokeTaskWorkerCreator2.create(object, javaMethod);
+                String url = em.getUrl();
+                PathUrl pathUrl = PathUrl.of(url);
 
-                return BaseEndPointTask2.from(requestMethod, url, taskWorker);
-            })
-            .collect(Collectors.toUnmodifiableList());
-        // 6. static resource find task.
-//        SystemResourceFinder systemResourceFinder = SystemResourceFinder.fromPackage(App.class, "../../resources/main");
-//        ResourceEndPointFindTask2 resourceEndPointFindTask2 = new ResourceEndPointFindTask2(systemResourceFinder, "/static");
+                Method javaMethod = em.getJavaMethod();
+                Object object = objectRepository.findObjectByMethod(javaMethod)
+                    .orElseThrow(() -> new RuntimeException("does not exist object."));
+                InstanceMethod instanceMethod = new InstanceMethod(object, javaMethod);
 
-        // 7. combine each endpointTask.
-//        endPointTasks = Stream.concat(endPointTasks.stream(), Stream.of(resourceEndPointFindTask2)).collect(Collectors.toUnmodifiableList());
-        CompositedEndpointTasks compositedEndpointTasks = new CompositedEndpointTasks(endPointTasks);
+                return pm.add(token, pathUrl, instanceMethod);
+            }, PathMatcher::concat);
+//        ResourcePathFinder resourceFinder = ResourcePathFinder.from(App.class, "../../resources/main")
 
         // 8. execute service.
         SocketHttpTaskExecutor socketHttpTaskExecutor = SocketHttpTaskExecutor.create(INSTANCE.getPort(),
@@ -186,30 +170,34 @@ public class App4 {
         log.info("server start.");
         socketHttpTaskExecutor.execute(((request, response) -> {
 
-            RequestMethod method = RequestMethod.find(request.getHttpMethod().name());
-            PathUrl2 requestUrl = PathUrl2.from(request.getHttpRequestPath().getValue().toString());
-            MatchedEndPointTaskWorker2 matchedEndPointTaskWorker = compositedEndpointTasks.match(method, requestUrl).orElseThrow(() -> new RuntimeException("Does not exist match method."));
+            Token token = new Token(RequestMethod.find(request.getHttpMethod().name()).name());
+            PathUrl requestUrl = PathUrl.of(request.getHttpRequestPath().getValue().toString());
+            MatchedElement<InstanceMethod> matchedElement = pathMatcher.match(token, requestUrl).orElseThrow(() -> new RuntimeException("does not exist matched element"));
 
-            EndPointTaskWorker2 endPointTaskWorker = matchedEndPointTaskWorker.getEndPointTaskWorker();
-            UrlParameterValues pathVariableValue = new UrlParameterValues(matchedEndPointTaskWorker.getPathVariableValue().getValues());
-            UrlParameterValues queryParamValues = new UrlParameterValues(request.getQueryParameters().getParameterMap());
-            InputStream bodyInputStream = request.getBodyInputStream();
+            InstanceMethod element1 = matchedElement.getElement();
+            matcher.path.PathVariable pathVariable = matchedElement.getPathVariable();
+//            Method element = matchedElement.getElement();
 
-            ParameterValueAssignees2 parameterValueAssignees2 = new ParameterValueAssignees2(
-                Map.of(URL, new HttpUrlParameterValueAssignee(pathVariableHttpUrlParameterInfoFunction(annotationPropertyGetter), pathVariableValue),
-                       QUERY_PARAM, new HttpUrlParameterValueAssignee(requestParamHttpUrlParameterInfoFunction(annotationPropertyGetter), queryParamValues),
-                       BODY, new HttpBodyParameterValueAssignee(requestBodyHttpUrlParameterInfoFunction(annotationPropertyGetter), bodyInputStream)));
-            EndPointTaskExecutor endPointTaskExecutor = new EndPointTaskExecutor(parameterValueAssignees2);
-            EndPointWorkerResult endPointWorkerResult = endPointTaskExecutor.execute(endPointTaskWorker);
-
-            WorkerResultType type = endPointWorkerResult.getType();
-            Object result = endPointWorkerResult.getResult();
-            ContentType2 contentType = getContentType2(type);
-            InputStream content = VALUE_TYPE_CONVERTER.convertToInputStream(result);
-            HttpResponseHeaderCreator2 headerCreator = new HttpResponseHeaderCreator2(SIMPLE_DATE_FORMAT, HOST_ADDRESS, contentType);
-            HttpResponseHeader httpResponseHeader = headerCreator.create();
-            HttpResponseSender httpResponseSender = new HttpResponseSender(response);
-            httpResponseSender.send(httpResponseHeader, content);
+//            EndPointTaskWorker2 endPointTaskWorker = matchedEndPointTaskWorker.getEndPointTaskWorker();
+//            UrlParameterValues pathVariableValue = new UrlParameterValues(matchedEndPointTaskWorker.getPathVariableValue().getValues());
+//            UrlParameterValues queryParamValues = new UrlParameterValues(request.getQueryParameters().getParameterMap());
+//            InputStream bodyInputStream = request.getBodyInputStream();
+//
+//            ParameterValueAssignees2 parameterValueAssignees2 = new ParameterValueAssignees2(
+//                Map.of(URL, new HttpUrlParameterValueAssignee(pathVariableHttpUrlParameterInfoFunction(annotationPropertyGetter), pathVariableValue),
+//                       QUERY_PARAM, new HttpUrlParameterValueAssignee(requestParamHttpUrlParameterInfoFunction(annotationPropertyGetter), queryParamValues),
+//                       BODY, new HttpBodyParameterValueAssignee(requestBodyHttpUrlParameterInfoFunction(annotationPropertyGetter), bodyInputStream)));
+//            EndPointTaskExecutor endPointTaskExecutor = new EndPointTaskExecutor(parameterValueAssignees2);
+//            EndPointWorkerResult endPointWorkerResult = endPointTaskExecutor.execute(endPointTaskWorker);
+//
+//            WorkerResultType type = endPointWorkerResult.getType();
+//            Object result = endPointWorkerResult.getResult();
+//            ContentType2 contentType = getContentType2(type);
+//            InputStream content = VALUE_TYPE_CONVERTER.convertToInputStream(result);
+//            HttpResponseHeaderCreator2 headerCreator = new HttpResponseHeaderCreator2(SIMPLE_DATE_FORMAT, HOST_ADDRESS, contentType);
+//            HttpResponseHeader httpResponseHeader = headerCreator.create();
+//            HttpResponseSender httpResponseSender = new HttpResponseSender(response);
+//            httpResponseSender.send(httpResponseHeader, content);
         }));
     }
 

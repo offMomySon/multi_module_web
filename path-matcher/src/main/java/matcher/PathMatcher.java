@@ -46,6 +46,12 @@ public class PathMatcher<T> {
         return add(token, basePathUrl, element);
     }
 
+    public static <T> PathMatcher<T> concat(@NonNull PathMatcher<T> base, @NonNull PathMatcher<T> other) {
+        Map<Token, List<MatchConsumer<T>>> newTokenConsumers = new HashMap<>(base.tokenConsumers);
+        newTokenConsumers.putAll(other.tokenConsumers);
+        return new PathMatcher<>(Map.copyOf(newTokenConsumers));
+    }
+
     private static SegmentChunkChain createSegmentChunkChain(PathUrl pathUrl) {
         List<SegmentChunk> segmentChunks = SegmentChunkFactory.create(pathUrl);
 
@@ -62,8 +68,12 @@ public class PathMatcher<T> {
     }
 
     public Optional<MatchedElement<T>> match(@NonNull Token token, @NonNull PathUrl pathUrl) {
-        return tokenConsumers.getOrDefault(token, emptyList()).stream().map(matchConsumer -> matchConsumer.consume(pathUrl)).filter(MatchConsumeResult::isMatched).map(
-            MatchConsumeResult::toMatchedElement).findFirst();
+        return tokenConsumers.getOrDefault(token, emptyList())
+            .stream()
+            .map(matchConsumer -> matchConsumer.consume(pathUrl))
+            .filter(MatchConsumeResult::isMatched)
+            .map(MatchConsumeResult::toMatchedElement)
+            .findFirst();
     }
 
     @EqualsAndHashCode

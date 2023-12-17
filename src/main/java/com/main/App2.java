@@ -39,8 +39,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import matcher.MatchedEndPointTaskWorker2;
 import matcher.RequestMethod;
@@ -68,14 +66,13 @@ import task.PostTasks.ReadOnlyPostTasks;
 import task.PreTaskWorker;
 import task.PreTasks;
 import task.PreTasks.ReadOnlyPreTasks;
-import task.ResourceEndPointFindTask2;
-import task.SystemResourceFinder;
 import task.worker.EndPointTaskWorker2;
 import task.worker.EndPointWorkerResult;
 import task.worker.JavaMethodInvokeTaskWorker2;
 import task.worker.WorkerResultType;
 import vo.ContentType2;
-import static com.main.config.HttpConfig.*;
+import static com.main.config.HttpConfig.INSTANCE;
+import static java.util.stream.Collectors.toUnmodifiableList;
 import static parameter.extractor.HttpUrlParameterInfoExtractor.HttpUrlParameterInfo;
 import static parameter.matcher.ParameterValueAssigneeType.BODY;
 import static parameter.matcher.ParameterValueAssigneeType.INPUT_STREAM;
@@ -198,7 +195,7 @@ public class App2 {
                 return createEndPointMethodInfos(httpMethods, classUrls, methodUrls, object, javaMethod);
             })
             .flatMap(Collection::stream)
-            .collect(Collectors.toUnmodifiableList());
+            .collect(toUnmodifiableList());
 
         // 5. endPointTask create.
         JavaMethodInvokeTaskWorkerCreator2 javaMethodInvokeTaskWorkerCreator2 = new JavaMethodInvokeTaskWorkerCreator2(parameterParameterAndValueAssigneeTypeFunction());
@@ -213,13 +210,13 @@ public class App2 {
 
                 return BaseEndPointTask2.from(requestMethod, url, taskWorker);
             })
-            .collect(Collectors.toUnmodifiableList());
+            .collect(toUnmodifiableList());
         // 6. static resource find task.
-        SystemResourceFinder systemResourceFinder = SystemResourceFinder.fromPackage(App.class, "../../resources/main");
-        ResourceEndPointFindTask2 resourceEndPointFindTask2 = new ResourceEndPointFindTask2(systemResourceFinder, "/static");
+//        SystemResourceFinder systemResourceFinder3 = SystemResourceFinder.fromPackage(App.class, "../../resources/main");
+//        ResourceEndPointFindTask2 resourceEndPointFindTask2 = new ResourceEndPointFindTask2(systemResourceFinder3, "/static");
 
         // 7. combine each endpointTask.
-        endPointTasks = Stream.concat(endPointTasks.stream(), Stream.of(resourceEndPointFindTask2)).collect(Collectors.toUnmodifiableList());
+//        endPointTasks = Stream.concat(endPointTasks.stream(), Stream.of(resourceEndPointFindTask2)).collect(toUnmodifiableList());
         CompositedEndpointTasks compositedEndpointTasks = new CompositedEndpointTasks(endPointTasks);
 
         // 8. execute service.
@@ -267,27 +264,27 @@ public class App2 {
     private static List<PreTaskInfo> createPreTaskInfos(PreTaskWorker preTaskWorker, String filterName, String[] patterns) {
         return Arrays.stream(patterns)
             .map(pattern -> new PreTaskInfo(filterName, pattern, preTaskWorker))
-            .collect(Collectors.toUnmodifiableList());
+            .collect(toUnmodifiableList());
     }
 
     private static List<PostTaskInfo> createPostTaskInfos(PostTaskWorker postTaskWorker, String filterName, String[] patterns) {
         return Arrays.stream(patterns)
             .map(pattern -> new PostTaskInfo(filterName, pattern, postTaskWorker))
-            .collect(Collectors.toUnmodifiableList());
+            .collect(toUnmodifiableList());
     }
 
     private static List<EndPointMethodInfo> createEndPointMethodInfos(RequestMethod[] requestMethods, String[] classUrls, String[] _methodUrls, Object object, Method javaMethod) {
-        List<String> clazzUrls = Arrays.stream(classUrls).collect(Collectors.toUnmodifiableList());
-        List<String> methodUrls = Arrays.stream(_methodUrls).collect(Collectors.toUnmodifiableList());
+        List<String> clazzUrls = Arrays.stream(classUrls).collect(toUnmodifiableList());
+        List<String> methodUrls = Arrays.stream(_methodUrls).collect(toUnmodifiableList());
         List<String> fullMethodUrls = clazzUrls.stream()
             .flatMap(clazzUrl -> methodUrls.stream()
                 .map(methodUrl -> clazzUrl + methodUrl))
-            .collect(Collectors.toUnmodifiableList());
+            .collect(toUnmodifiableList());
 
         return Arrays.stream(requestMethods)
             .flatMap(httpMethod -> fullMethodUrls.stream()
                 .map(methodUrl -> new EndPointMethodInfo(httpMethod, methodUrl, object, javaMethod)))
-            .collect(Collectors.toUnmodifiableList());
+            .collect(toUnmodifiableList());
     }
 
     private static String getHostAddress() {

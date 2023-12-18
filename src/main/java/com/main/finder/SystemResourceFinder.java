@@ -1,4 +1,4 @@
-package com.main.resource;
+package com.main.finder;
 
 import com.main.util.FileSystemUtil;
 import java.nio.file.Files;

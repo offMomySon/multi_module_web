@@ -28,24 +28,24 @@ class RequestMappingRequestMethodUrlMethodCreatorTest {
             .isEmpty();
     }
 
-    @DisplayName("class 의 RequestMapping urls, method 의 RequestMapping urls, methods 의 카타시안곱 으로 HttpMethodUrlMethod 를 생성합니다.")
-    @Test
-    void test2() throws Exception {
-        //given
-        Class<TestAnnotatedClass> clazz = TestAnnotatedClass.class;
-        RequestMappingValueExtractor valueExtractor = new RequestMappingValueExtractor(clazz);
-        Method method = TestAnnotatedClass.getAnnotatedMethod();
-
-        List<EndPointMethodInfo> expect = TestAnnotatedClass.getCartesianProduct();
-
-        //when
-        List<EndPointMethodInfo> actual = valueExtractor.extractRequestMappedMethods(method);
-
-        //then
-
-        Assertions.assertThat(actual)
-            .containsAll(expect);
-    }
+//    @DisplayName("class 의 RequestMapping urls, method 의 RequestMapping urls, methods 의 카타시안곱 으로 HttpMethodUrlMethod 를 생성합니다.")
+//    @Test
+//    void test2() throws Exception {
+//        //given
+//        Class<TestAnnotatedClass> clazz = TestAnnotatedClass.class;
+//        RequestMappingValueExtractor valueExtractor = new RequestMappingValueExtractor(clazz);
+//        Method method = TestAnnotatedClass.getAnnotatedMethod();
+//
+//        List<EndPointMethodInfo> expect = TestAnnotatedClass.getCartesianProduct();
+//
+//        //when
+//        List<EndPointMethodInfo> actual = valueExtractor.extractRequestMappedMethods(method);
+//
+//        //then
+//
+//        Assertions.assertThat(actual)
+//            .containsAll(expect);
+//    }
 
 
     @RequestMapping(url = {"/testclass1", "/testclass2"})

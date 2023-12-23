@@ -136,7 +136,7 @@ public class AnnotatedClassObjectRepository {
 
     private static AnnotatedObject createAnnotatedObject(Class<?> clazz, Object object, Class<?> findAnnotation) {
         Annotation annotation = (Annotation) find(clazz, findAnnotation).orElseThrow(() -> new RuntimeException("Does not exist annotation."));
-        return new AnnotatedObject(object, annotation);
+        return new AnnotatedObject(annotation, object);
     }
 
     private static List<String> excludeNull(List<String> properties) {

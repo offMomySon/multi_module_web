@@ -16,6 +16,7 @@ import converter.CompositeValueTypeConverter;
 import executor.SocketHttpTaskExecutor;
 import instance.AnnotatedClassObjectRepository;
 import instance.AnnotatedClassObjectRepositoryCreator;
+import instance.AnnotatedClassObjectRepositoryCreator2;
 import instance.AnnotatedMethodProperties;
 import instance.AnnotatedObjectAndMethodProperties;
 import instance.AnnotatedObjectProperties;
@@ -113,7 +114,7 @@ public class App4 {
     public static void main(String[] args) {
         // 1. annotating 된 class 의 instance 를 생성한다.
         AnnotationPropertyGetter annotationPropertyGetter = new AnnotationPropertyGetter(ANNOTATION_PROPERTY_MAPPERS);
-        AnnotatedClassObjectRepositoryCreator objectRepositoryCreator = AnnotatedClassObjectRepositoryCreator
+        AnnotatedClassObjectRepositoryCreator2 objectRepositoryCreator = AnnotatedClassObjectRepositoryCreator2
             .builderWithDefaultAnnotations()
             .annotations(new Annotations(List.of(PreWebFilter.class, Controller.class)))
             .annotationPropertyGetter(annotationPropertyGetter)

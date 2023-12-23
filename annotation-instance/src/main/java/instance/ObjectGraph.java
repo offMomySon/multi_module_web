@@ -6,27 +6,20 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.NonNull;
 
 // 역할.
 // instance graph 생성용 dto.
 public class ObjectGraph {
     private final Map<Class<?>, Object> values;
 
-    public ObjectGraph(Map<Class<?>, Object> values) {
-        if (Objects.isNull(values)) {
-            values = Collections.emptyMap();
-        }
-
-        this.values = values.entrySet().stream()
-            .filter(entry -> !Objects.isNull(entry.getKey()))
-            .filter(entry -> !Objects.isNull(entry.getValue()))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
+    public ObjectGraph(@NonNull Map<Class<?>, Object> values) {
+        this.values = Map.copyOf(values);
     }
 
     public static ObjectGraph empty() {
         return new ObjectGraph(Collections.emptyMap());
     }
-
 
     public Object get(Class<?> key) {
         return values.get(key);
@@ -84,7 +77,7 @@ public class ObjectGraph {
         }
 
         public Map<Class<?>, Object> copyValues() {
-            return new HashMap<>(this.values);
+            return Map.copyOf(this.values);
         }
     }
 }

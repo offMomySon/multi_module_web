@@ -14,7 +14,6 @@ import static com.main.util.AnnotationUtils.peekAnnotatedMethods;
 
 // object, class, method, parameter 에 대해 찾고자하는 annotation 의 properties 를 가져온다.
 // 어노테이션에 대해서 값을 가져오는 역할.
-
 public class AnnotationPropertyGetter {
     private final AnnotationPropertyMappers propertyMappers;
 

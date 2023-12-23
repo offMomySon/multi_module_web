@@ -15,9 +15,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.Getter;
+import lombok.NonNull;
+import static java.util.Objects.isNull;
 
 public class AnnotationUtils {
-    private static final Set<Class<?>> selfReferenceAnnotations = Set.of(Retention.class, Target.class, Documented.class);
+    private static final Set<Class<?>> SELF_REFERENCE_ANNOTATION = Set.of(Retention.class, Target.class, Documented.class);
 
     public static boolean doesNotExistAll(Class<?> clazz, Class<?>... _annotationClazzes) {
         return !existAll(clazz, _annotationClazzes);
@@ -34,13 +36,13 @@ public class AnnotationUtils {
         clazzes = clazzes.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableList());
 
         return clazzes.stream()
-            .filter(clazz -> !Objects.isNull(clazz))
+            .filter(clazz -> !isNull(clazz))
             .filter(clazz -> exist(clazz, annotationClazz))
             .collect(Collectors.toUnmodifiableList());
     }
 
     public static boolean existAll(Class<?> clazz, Class<?>... annotationClasses) {
-        if (Objects.isNull(clazz) || Objects.isNull(annotationClasses) || annotationClasses.length == 0) {
+        if (isNull(clazz) || isNull(annotationClasses) || annotationClasses.length == 0) {
             throw new RuntimeException("param is invalid.");
         }
         annotationClasses = (Class<?>[]) excludeEmptyElement(annotationClasses);
@@ -53,7 +55,7 @@ public class AnnotationUtils {
     }
 
     public static boolean hasAny(Class<?> clazz, List<Class<?>> annotationClasses) {
-        if (Objects.isNull(clazz) || Objects.isNull(annotationClasses) || annotationClasses.isEmpty()) {
+        if (isNull(clazz) || isNull(annotationClasses) || annotationClasses.isEmpty()) {
             throw new RuntimeException("Invalid param.");
         }
         List<Class<?>> newAnnotationClasses = excludeEmptyElement(annotationClasses);
@@ -73,7 +75,7 @@ public class AnnotationUtils {
     }
 
     public static List<Method> peekAllAnnotatedMethods(Class<?> clazz, Class<?>... annotationClasses) {
-        if (Objects.isNull(clazz) || Objects.isNull(annotationClasses) || annotationClasses.length == 0) {
+        if (isNull(clazz) || isNull(annotationClasses) || annotationClasses.length == 0) {
             throw new RuntimeException("Empty param.");
         }
         Class<?>[] newAnnotationClasses = excludeEmptyElement(annotationClasses);
@@ -89,7 +91,7 @@ public class AnnotationUtils {
     }
 
     public static List<AnnotatedMethod> peekAnnotatedMethods(Class<?> clazz, Class<?> annotationClazz) {
-        if (Objects.isNull(clazz) || Objects.isNull(annotationClazz)) {
+        if (isNull(clazz) || isNull(annotationClazz)) {
             throw new RuntimeException("Empty param");
         }
 
@@ -131,7 +133,7 @@ public class AnnotationUtils {
         return find(field.getDeclaredAnnotations(), annotationClazz);
     }
 
-    public static <T> Optional<T> find(Class<?> clazz, Class<T> annotationClazz) {
+    public static <T> Optional<T> find(@NonNull Class<?> clazz, @NonNull Class<T> annotationClazz) {
         return find(clazz.getDeclaredAnnotations(), annotationClazz);
     }
 
@@ -143,42 +145,36 @@ public class AnnotationUtils {
         return find(parameter.getDeclaredAnnotations(), annotationClazz);
     }
 
-    private static <T> Optional<T> find(Annotation[] annotations, Class<T> findAnnotationClazz) {
-        if (Objects.isNull(annotations) || annotations.length == 0 || !findAnnotationClazz.isAnnotation()) {
+    private static <T> Optional<T> find(@NonNull Annotation[] annotations, @NonNull Class<T> findAnnotationClazz) {
+        if (annotations.length == 0 || !findAnnotationClazz.isAnnotation()) {
             return Optional.empty();
         }
 
         return Arrays.stream(annotations)
-            .map(annotation -> find(annotation, findAnnotationClazz))
+            .map(annotation -> doFind(annotation, findAnnotationClazz))
             .filter(Optional::isPresent)
             .map(Optional::get)
             .findAny();
     }
 
-    private static <T> Optional<T> find(Annotation annotation, Class<T> findAnnotationClazz) {
-        if (Objects.isNull(annotation) || !findAnnotationClazz.isAnnotation()) {
+    private static <T> Optional<T> doFind(@NonNull Annotation annotation, @NonNull Class<T> findAnnotationClazz) {
+        if (!findAnnotationClazz.isAnnotation()) {
             return Optional.empty();
         }
 
-        if (selfReferenceAnnotations.contains(annotation.annotationType())) {
+        if (SELF_REFERENCE_ANNOTATION.contains(annotation.annotationType())) {
             return Optional.empty();
         }
 
-        if (isAnnotationType(annotation, findAnnotationClazz)) {
+        if (isMatchAnnotationType(annotation, findAnnotationClazz)) {
             return Optional.of((T) annotation);
         }
 
-        return Arrays.stream(annotation.annotationType().getAnnotations())
-            .map(subAnnotation -> find(subAnnotation, findAnnotationClazz))
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .findAny();
+        Annotation[] childAnnotations = annotation.annotationType().getAnnotations();
+        return find(childAnnotations, findAnnotationClazz);
     }
 
-    private static boolean isAnnotationType(Annotation annotation, Class<?> annotationClass) {
-        if (Objects.isNull(annotation) || Objects.isNull(annotationClass)) {
-            return false;
-        }
+    private static boolean isMatchAnnotationType(Annotation annotation, Class<?> annotationClass) {
         return annotation.annotationType() == annotationClass;
     }
 

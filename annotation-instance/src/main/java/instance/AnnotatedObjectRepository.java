@@ -7,11 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NonNull;
 import static com.main.util.AnnotationUtils.exist;
 import static com.main.util.AnnotationUtils.find;
 import static instance.ObjectGraph.ReadOnlyObjectGraph;
-import static java.util.stream.Collectors.toUnmodifiableMap;
 
 public class AnnotatedObjectRepository {
     private final Map<Class<?>, Object> values;
@@ -40,7 +41,7 @@ public class AnnotatedObjectRepository {
             .collect(Collectors.toUnmodifiableList());
     }
 
-    public List<AnnotatedObject> findAnnotatedObjectByAnnotatedClass(@NonNull Class<?> findAnnotation){
+    public List<AnnotatedObject> findAnnotatedObjectByAnnotatedClass(@NonNull Class<?> findAnnotation) {
         checkAnnotationClazz(findAnnotation);
 
         return values.entrySet().stream()
@@ -71,6 +72,42 @@ public class AnnotatedObjectRepository {
     private static void checkAnnotationClazz(Class<?> findAnnotation) {
         if (!findAnnotation.isAnnotation()) {
             throw new RuntimeException("Does not annotation clazz.");
+        }
+    }
+
+    @Getter
+    @EqualsAndHashCode
+    public static class AnnotatedObject {
+        private final Annotation annotation;
+        private final Object object;
+
+        public AnnotatedObject(@NonNull Annotation annotation, @NonNull Object object) {
+            this.annotation = annotation;
+            this.object = object;
+        }
+    }
+
+    @Getter
+    @EqualsAndHashCode
+    public static class AnnotatedMethod {
+        private final Annotation annotation;
+        private final Method method;
+
+        public AnnotatedMethod(@NonNull Annotation annotation, @NonNull Method method) {
+            this.annotation = annotation;
+            this.method = method;
+        }
+    }
+
+    @Getter
+    @EqualsAndHashCode
+    public static class AnnotatedObjectMethod {
+        private final AnnotatedObject annotatedObject;
+        private final AnnotatedMethod annotatedMethod;
+
+        public AnnotatedObjectMethod(@NonNull AnnotatedObject annotatedObject, @NonNull AnnotatedMethod annotatedMethod) {
+            this.annotatedObject = annotatedObject;
+            this.annotatedMethod = annotatedMethod;
         }
     }
 }

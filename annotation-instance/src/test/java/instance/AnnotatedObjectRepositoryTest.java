@@ -66,25 +66,23 @@ class AnnotatedObjectRepositoryTest {
                                                                                     AnotherTestClass.class, new AnotherTestClass()));
 
         //when
-        Throwable actual = Assertions.catchThrowable(()-> repository.findClassByAnnotatedClass(TestClass.class));
+        Throwable actual = Assertions.catchThrowable(() -> repository.findClassByAnnotatedClass(TestClass.class));
 
         //then
         Assertions.assertThat(actual).isNotNull();
     }
-
-
 
     @DisplayName("annotation 이 annotated 된 object 를 찾아옵니다.")
     @ParameterizedTest
     @MethodSource("provideFindAnnotatedObjectByAnnotatedClassTestSuite")
     void Given_repository_When_findAnnotatedObjectByAnnotatedClass_Then_findAnnotatedObject(Map<Class<?>, Object> repositoryMap,
                                                                                             Class<?> findAnnotationClazz,
-                                                                                            List<AnnotatedObject> result) throws Exception {
+                                                                                            List<AnnotatedObjectRepository.AnnotatedObject> result) throws Exception {
         //given
         AnnotatedObjectRepository repository = new AnnotatedObjectRepository(repositoryMap);
 
         //when
-        List<AnnotatedObject> actuals = repository.findAnnotatedObjectByAnnotatedClass(findAnnotationClazz);
+        List<AnnotatedObjectRepository.AnnotatedObject> actuals = repository.findAnnotatedObjectByAnnotatedClass(findAnnotationClazz);
 
         //then
         Assertions.assertThat(actuals).containsAll(result);
@@ -98,23 +96,24 @@ class AnnotatedObjectRepositoryTest {
                                                                                     AnotherTestClass.class, new AnotherTestClass()));
 
         //when
-        Throwable actual = Assertions.catchThrowable(()-> repository.findAnnotatedObjectByAnnotatedClass(TestClass.class));
+        Throwable actual = Assertions.catchThrowable(() -> repository.findAnnotatedObjectByAnnotatedClass(TestClass.class));
 
         //then
         Assertions.assertThat(actual).isNotNull();
     }
+
     @DisplayName("class 에 할당할수 있고, annotation 이 annotated 된 object 를 찾아옵니다.")
     @ParameterizedTest
     @MethodSource("provideFindAnnotatedObjectByClassAndAnnotatedClassTestSuite")
     void Given_repository_When_findAnnotatedObjectByClassAndAnnotatedClass_Then_findAnnotatedObject(Map<Class<?>, Object> repositoryMap,
                                                                                                     Class<?> findClazz,
                                                                                                     Class<?> findAnnotationClazz,
-                                                                                                    List<AnnotatedObject> result) throws Exception {
+                                                                                                    List<AnnotatedObjectRepository.AnnotatedObject> result) throws Exception {
         //given
         AnnotatedObjectRepository repository = new AnnotatedObjectRepository(repositoryMap);
 
         //when
-        List<AnnotatedObject> actuals = repository.findAnnotatedObjectByClassAndAnnotatedClass(findClazz, findAnnotationClazz);
+        List<AnnotatedObjectRepository.AnnotatedObject> actuals = repository.findAnnotatedObjectByClassAndAnnotatedClass(findClazz, findAnnotationClazz);
 
         //then
         Assertions.assertThat(actuals).containsAll(result);
@@ -128,7 +127,7 @@ class AnnotatedObjectRepositoryTest {
                                                                                     AnotherTestClass.class, new AnotherTestClass()));
 
         //when
-        Throwable actual = Assertions.catchThrowable(()-> repository.findAnnotatedObjectByClassAndAnnotatedClass(TestClass.class, TestClass.class));
+        Throwable actual = Assertions.catchThrowable(() -> repository.findAnnotatedObjectByClassAndAnnotatedClass(TestClass.class, TestClass.class));
 
         //then
         Assertions.assertThat(actual).isNotNull();
@@ -182,8 +181,8 @@ class AnnotatedObjectRepositoryTest {
         AnotherTestClass anotherTestClassObject = new AnotherTestClass();
         NoneAnnotatedClass noneAnnotatedClassObject = new NoneAnnotatedClass();
 
-        AnnotatedObject annotatedTestClassObject = new AnnotatedObject(testAnnotation, testClassObject);
-        AnnotatedObject annotatedAnotherTestClassObject = new AnnotatedObject(testAnnotation, anotherTestClassObject);
+        AnnotatedObjectRepository.AnnotatedObject annotatedTestClassObject = new AnnotatedObjectRepository.AnnotatedObject(testAnnotation, testClassObject);
+        AnnotatedObjectRepository.AnnotatedObject annotatedAnotherTestClassObject = new AnnotatedObjectRepository.AnnotatedObject(testAnnotation, anotherTestClassObject);
 
         return Stream.of(
             Arguments.of(
@@ -226,8 +225,8 @@ class AnnotatedObjectRepositoryTest {
         AnotherTestClass anotherTestClassObject = new AnotherTestClass();
         NoneAnnotatedClass noneAnnotatedClassObject = new NoneAnnotatedClass();
 
-        AnnotatedObject annotatedTestClassObject = new AnnotatedObject(testAnnotation, testClassObject);
-        AnnotatedObject annotatedAnotherTestClassObject = new AnnotatedObject(testAnnotation, anotherTestClassObject);
+        AnnotatedObjectRepository.AnnotatedObject annotatedTestClassObject = new AnnotatedObjectRepository.AnnotatedObject(testAnnotation, testClassObject);
+        AnnotatedObjectRepository.AnnotatedObject annotatedAnotherTestClassObject = new AnnotatedObjectRepository.AnnotatedObject(testAnnotation, anotherTestClassObject);
 
         return Stream.of(
             Arguments.of(
@@ -280,14 +279,17 @@ class AnnotatedObjectRepositoryTest {
 
 
     }
+
     private @interface DoesNotUsedAnnotation {
 
 
     }
+
     private interface TestInterface {
 
 
     }
+
     @TestAnnotation
     public static class TestClass implements TestInterface {
 
@@ -303,6 +305,7 @@ class AnnotatedObjectRepositoryTest {
             }
         }
     }
+
     @TestAnnotation
     public static class AnotherTestClass {
 
@@ -318,6 +321,7 @@ class AnnotatedObjectRepositoryTest {
             }
         }
     }
+
     public static class NoneAnnotatedClass {
 
         public void method(int param) {

@@ -113,94 +113,96 @@ public class App4 {
     }
 
     public static void main(String[] args) {
-        // 1. annotating 된 class 의 instance 를 생성한다.
-        AnnotationPropertyGetter annotationPropertyGetter = new AnnotationPropertyGetter(ANNOTATION_PROPERTY_MAPPERS);
-        AnnotatedClassObjectRepositoryCreator2 objectRepositoryCreator = AnnotatedClassObjectRepositoryCreator2
-            .builderWithDefaultAnnotations()
-            .annotations(new Annotations(List.of(PreWebFilter.class, Controller.class)))
-            .annotationPropertyGetter(annotationPropertyGetter)
-            .build();
-        AnnotatedClassObjectRepository objectRepository = objectRepositoryCreator.fromPackage(App4.class, "com.main")
-            .append(SystemResourceFinder.class, SystemResourceFinder.fromPackage(App.class, "../../resources/main"));
-
-        // 4. java http endpoint task 생성.
-        List<Class<?>> controllerAnnotatedClasses = objectRepository.findClassByAnnotatedClass(Controller.class);
-        List<AnnotatedObjectAndMethodProperties> requestMappedProperties =
-            objectRepository.findAnnotatedObjectAndMethodPropertiesByClassAndAnnotatedClassFocusOnMethod(controllerAnnotatedClasses, RequestMapping.class, List.of("url", "httpMethod"));
-
-        List<EndPointMethodInfo> endPointJavaMethodInfos = requestMappedProperties.stream()
-            .map(requestMappedProperty -> {
-                AnnotatedObjectProperties annotatedObjectProperties = requestMappedProperty.getAnnotatedObjectProperties();
-                AnnotationProperties objectProperties = annotatedObjectProperties.getAnnotationProperties();
-
-                AnnotatedMethodProperties annotatedMethodProperties = requestMappedProperty.getAnnotatedMethodProperties();
-                AnnotationProperties methodProperties = annotatedMethodProperties.getAnnotationProperties();
-
-                RequestMethod[] httpMethods = (RequestMethod[]) methodProperties.getValueOrDefault("httpMethod", new RequestMethod[]{});
-                String[] classUrls = (String[]) objectProperties.getValueOrDefault("url", Collections.emptyList());
-                String[] methodUrls = (String[]) methodProperties.getValueOrDefault("url", Collections.emptyList());
-                Object object = annotatedObjectProperties.getObject();
-                Method javaMethod = annotatedMethodProperties.getJavaMethod();
-                return createEndPointMethodInfos(httpMethods, classUrls, methodUrls, object, javaMethod);
-            })
-            .flatMap(Collection::stream)
-            .collect(Collectors.toUnmodifiableList());
-
-        // 5. endPointTask create.
-        PathMatcher<InstanceMethod> pathMatcher =
-            endPointJavaMethodInfos.stream().reduce(PathMatcher.empty(), (pm, em) -> {
-                String requestMethodName = em.getRequestMethod().name();
-                Token token = new Token(requestMethodName);
-
-                String url = em.getUrl();
-                PathUrl pathUrl = PathUrl.of(url);
-
-                Method javaMethod = em.getJavaMethod();
-                Object object = objectRepository.findObjectByMethod(javaMethod)
-                    .orElseThrow(() -> new RuntimeException("does not exist object."));
-                InstanceMethod instanceMethod = new InstanceMethod(object, javaMethod);
-
-                return pm.add(token, pathUrl, instanceMethod);
-            }, PathMatcher::concat);
-//        ResourcePathFinder resourceFinder = ResourcePathFinder.from(App.class, "../../resources/main")
-
-        // 8. execute service.
-        SocketHttpTaskExecutor socketHttpTaskExecutor = SocketHttpTaskExecutor.create(INSTANCE.getPort(),
-                                                                                      INSTANCE.getMaxConnection(),
-                                                                                      INSTANCE.getWaitConnection(),
-                                                                                      INSTANCE.getKeepAliveTime());
-        log.info("server start.");
-        socketHttpTaskExecutor.execute(((request, response) -> {
-
-            Token token = new Token(RequestMethod.find(request.getHttpMethod().name()).name());
-            PathUrl requestUrl = PathUrl.of(request.getHttpRequestPath().getValue().toString());
-            MatchedElement<InstanceMethod> matchedElement = pathMatcher.match(token, requestUrl).orElseThrow(() -> new RuntimeException("does not exist matched element"));
-
-            InstanceMethod element1 = matchedElement.getElement();
-            matcher.path.PathVariable pathVariable = matchedElement.getPathVariable();
-//            Method element = matchedElement.getElement();
-
-//            EndPointTaskWorker2 endPointTaskWorker = matchedEndPointTaskWorker.getEndPointTaskWorker();
-//            UrlParameterValues pathVariableValue = new UrlParameterValues(matchedEndPointTaskWorker.getPathVariableValue().getValues());
-//            UrlParameterValues queryParamValues = new UrlParameterValues(request.getQueryParameters().getParameterMap());
-//            InputStream bodyInputStream = request.getBodyInputStream();
+//        // 1. annotating 된 class 의 instance 를 생성한다.
+//        AnnotatedObjectRepositoryCreator repositoryCreator = AnnotatedObjectRepositoryCreator
+//            .builder()
+//            .annotations(PreWebFilter.class,
+//                         Controller.class,
+//                         Component.class,
+//                         Domain.class,
+//                         Repository.class,
+//                         Service.class)
+//            .build();
+//        AnnotatedObjectRepository objectRepository = repositoryCreator.creaet(App4.class, "com.main");
 //
-//            ParameterValueAssignees2 parameterValueAssignees2 = new ParameterValueAssignees2(
-//                Map.of(URL, new HttpUrlParameterValueAssignee(pathVariableHttpUrlParameterInfoFunction(annotationPropertyGetter), pathVariableValue),
-//                       QUERY_PARAM, new HttpUrlParameterValueAssignee(requestParamHttpUrlParameterInfoFunction(annotationPropertyGetter), queryParamValues),
-//                       BODY, new HttpBodyParameterValueAssignee(requestBodyHttpUrlParameterInfoFunction(annotationPropertyGetter), bodyInputStream)));
-//            EndPointTaskExecutor endPointTaskExecutor = new EndPointTaskExecutor(parameterValueAssignees2);
-//            EndPointWorkerResult endPointWorkerResult = endPointTaskExecutor.execute(endPointTaskWorker);
+//        // 4. java http endpoint task 생성.
+//        List<Class<?>> controllerAnnotatedClasses = objectRepository.findClassByAnnotatedClass(Controller.class);
+//        List<AnnotatedObjectAndMethodProperties> requestMappedProperties =
+//            objectRepository.findAnnotatedObjectAndMethodPropertiesByClassAndAnnotatedClassFocusOnMethod(controllerAnnotatedClasses, RequestMapping.class, List.of("url", "httpMethod"));
 //
-//            WorkerResultType type = endPointWorkerResult.getType();
-//            Object result = endPointWorkerResult.getResult();
-//            ContentType2 contentType = getContentType2(type);
-//            InputStream content = VALUE_TYPE_CONVERTER.convertToInputStream(result);
-//            HttpResponseHeaderCreator2 headerCreator = new HttpResponseHeaderCreator2(SIMPLE_DATE_FORMAT, HOST_ADDRESS, contentType);
-//            HttpResponseHeader httpResponseHeader = headerCreator.create();
-//            HttpResponseSender httpResponseSender = new HttpResponseSender(response);
-//            httpResponseSender.send(httpResponseHeader, content);
-        }));
+//        List<EndPointMethodInfo> endPointJavaMethodInfos = requestMappedProperties.stream()
+//            .map(requestMappedProperty -> {
+//                AnnotatedObjectProperties annotatedObjectProperties = requestMappedProperty.getAnnotatedObjectProperties();
+//                AnnotationProperties objectProperties = annotatedObjectProperties.getAnnotationProperties();
+//
+//                AnnotatedMethodProperties annotatedMethodProperties = requestMappedProperty.getAnnotatedMethodProperties();
+//                AnnotationProperties methodProperties = annotatedMethodProperties.getAnnotationProperties();
+//
+//                RequestMethod[] httpMethods = (RequestMethod[]) methodProperties.getValueOrDefault("httpMethod", new RequestMethod[]{});
+//                String[] classUrls = (String[]) objectProperties.getValueOrDefault("url", Collections.emptyList());
+//                String[] methodUrls = (String[]) methodProperties.getValueOrDefault("url", Collections.emptyList());
+//                Object object = annotatedObjectProperties.getObject();
+//                Method javaMethod = annotatedMethodProperties.getJavaMethod();
+//                return createEndPointMethodInfos(httpMethods, classUrls, methodUrls, object, javaMethod);
+//            })
+//            .flatMap(Collection::stream)
+//            .collect(Collectors.toUnmodifiableList());
+//
+//        // 5. endPointTask create.
+//        PathMatcher<InstanceMethod> pathMatcher =
+//            endPointJavaMethodInfos.stream().reduce(PathMatcher.empty(), (pm, em) -> {
+//                String requestMethodName = em.getRequestMethod().name();
+//                Token token = new Token(requestMethodName);
+//
+//                String url = em.getUrl();
+//                PathUrl pathUrl = PathUrl.of(url);
+//
+//                Method javaMethod = em.getJavaMethod();
+//                Object object = objectRepository.findObjectByMethod(javaMethod)
+//                    .orElseThrow(() -> new RuntimeException("does not exist object."));
+//                InstanceMethod instanceMethod = new InstanceMethod(object, javaMethod);
+//
+//                return pm.add(token, pathUrl, instanceMethod);
+//            }, PathMatcher::concat);
+////        ResourcePathFinder resourceFinder = ResourcePathFinder.from(App.class, "../../resources/main")
+//
+//        // 8. execute service.
+//        SocketHttpTaskExecutor socketHttpTaskExecutor = SocketHttpTaskExecutor.create(INSTANCE.getPort(),
+//                                                                                      INSTANCE.getMaxConnection(),
+//                                                                                      INSTANCE.getWaitConnection(),
+//                                                                                      INSTANCE.getKeepAliveTime());
+//        log.info("server start.");
+//        socketHttpTaskExecutor.execute(((request, response) -> {
+//
+//            Token token = new Token(RequestMethod.find(request.getHttpMethod().name()).name());
+//            PathUrl requestUrl = PathUrl.of(request.getHttpRequestPath().getValue().toString());
+//            MatchedElement<InstanceMethod> matchedElement = pathMatcher.match(token, requestUrl).orElseThrow(() -> new RuntimeException("does not exist matched element"));
+//
+//            InstanceMethod element1 = matchedElement.getElement();
+//            matcher.path.PathVariable pathVariable = matchedElement.getPathVariable();
+////            Method element = matchedElement.getElement();
+//
+////            EndPointTaskWorker2 endPointTaskWorker = matchedEndPointTaskWorker.getEndPointTaskWorker();
+////            UrlParameterValues pathVariableValue = new UrlParameterValues(matchedEndPointTaskWorker.getPathVariableValue().getValues());
+////            UrlParameterValues queryParamValues = new UrlParameterValues(request.getQueryParameters().getParameterMap());
+////            InputStream bodyInputStream = request.getBodyInputStream();
+////
+////            ParameterValueAssignees2 parameterValueAssignees2 = new ParameterValueAssignees2(
+////                Map.of(URL, new HttpUrlParameterValueAssignee(pathVariableHttpUrlParameterInfoFunction(annotationPropertyGetter), pathVariableValue),
+////                       QUERY_PARAM, new HttpUrlParameterValueAssignee(requestParamHttpUrlParameterInfoFunction(annotationPropertyGetter), queryParamValues),
+////                       BODY, new HttpBodyParameterValueAssignee(requestBodyHttpUrlParameterInfoFunction(annotationPropertyGetter), bodyInputStream)));
+////            EndPointTaskExecutor endPointTaskExecutor = new EndPointTaskExecutor(parameterValueAssignees2);
+////            EndPointWorkerResult endPointWorkerResult = endPointTaskExecutor.execute(endPointTaskWorker);
+////
+////            WorkerResultType type = endPointWorkerResult.getType();
+////            Object result = endPointWorkerResult.getResult();
+////            ContentType2 contentType = getContentType2(type);
+////            InputStream content = VALUE_TYPE_CONVERTER.convertToInputStream(result);
+////            HttpResponseHeaderCreator2 headerCreator = new HttpResponseHeaderCreator2(SIMPLE_DATE_FORMAT, HOST_ADDRESS, contentType);
+////            HttpResponseHeader httpResponseHeader = headerCreator.create();
+////            HttpResponseSender httpResponseSender = new HttpResponseSender(response);
+////            httpResponseSender.send(httpResponseHeader, content);
+//        }));
     }
 
     private static ContentType2 getContentType2(WorkerResultType type) {

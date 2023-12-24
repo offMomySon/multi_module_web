@@ -19,14 +19,14 @@ import org.junit.jupiter.params.provider.MethodSource;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-class AnnotatedObjectRepository2Test {
+class AnnotatedObjectRepositoryTest {
 
     @DisplayName("java method 를 가진 object 를 가져옵니다.")
     @ParameterizedTest
     @MethodSource("provideFindByMethodTestSuite")
     void Given_repository_When_findObjectByMethod_Then_foundOptionalObject(Class<?> clazz, Object instance, Method method, boolean result) throws Exception {
         //given
-        AnnotatedObjectRepository2 repository = new AnnotatedObjectRepository2(Map.of(clazz, instance));
+        AnnotatedObjectRepository repository = new AnnotatedObjectRepository(Map.of(clazz, instance));
 
         //when
         Optional<Object> optionalActual = repository.findObjectByMethod(method);
@@ -49,7 +49,7 @@ class AnnotatedObjectRepository2Test {
                                                                                   Class<?> findAnnotationClazz,
                                                                                   List<Class<?>> result) throws Exception {
         //given
-        AnnotatedObjectRepository2 repository = new AnnotatedObjectRepository2(repositoryMap);
+        AnnotatedObjectRepository repository = new AnnotatedObjectRepository(repositoryMap);
 
         //when
         List<Class<?>> actuals = repository.findClassByAnnotatedClass(findAnnotationClazz);
@@ -62,8 +62,8 @@ class AnnotatedObjectRepository2Test {
     @Test
     void Given_repository_When_findClassByAnnotatedClass_with_none_Annotation_class_Then_Exception() throws Exception {
         //given
-        AnnotatedObjectRepository2 repository = new AnnotatedObjectRepository2(Map.of(TestClass.class, new TestClass(),
-                                                                                      AnotherTestClass.class, new AnotherTestClass()));
+        AnnotatedObjectRepository repository = new AnnotatedObjectRepository(Map.of(TestClass.class, new TestClass(),
+                                                                                    AnotherTestClass.class, new AnotherTestClass()));
 
         //when
         Throwable actual = Assertions.catchThrowable(()-> repository.findClassByAnnotatedClass(TestClass.class));
@@ -81,7 +81,7 @@ class AnnotatedObjectRepository2Test {
                                                                                             Class<?> findAnnotationClazz,
                                                                                             List<AnnotatedObject> result) throws Exception {
         //given
-        AnnotatedObjectRepository2 repository = new AnnotatedObjectRepository2(repositoryMap);
+        AnnotatedObjectRepository repository = new AnnotatedObjectRepository(repositoryMap);
 
         //when
         List<AnnotatedObject> actuals = repository.findAnnotatedObjectByAnnotatedClass(findAnnotationClazz);
@@ -94,8 +94,8 @@ class AnnotatedObjectRepository2Test {
     @Test
     void Given_repository_When_findAnnotatedObjectByAnnotatedClass_with_none_Annotation_class_Then_Exception() throws Exception {
         //given
-        AnnotatedObjectRepository2 repository = new AnnotatedObjectRepository2(Map.of(TestClass.class, new TestClass(),
-                                                                                      AnotherTestClass.class, new AnotherTestClass()));
+        AnnotatedObjectRepository repository = new AnnotatedObjectRepository(Map.of(TestClass.class, new TestClass(),
+                                                                                    AnotherTestClass.class, new AnotherTestClass()));
 
         //when
         Throwable actual = Assertions.catchThrowable(()-> repository.findAnnotatedObjectByAnnotatedClass(TestClass.class));
@@ -111,7 +111,7 @@ class AnnotatedObjectRepository2Test {
                                                                                                     Class<?> findAnnotationClazz,
                                                                                                     List<AnnotatedObject> result) throws Exception {
         //given
-        AnnotatedObjectRepository2 repository = new AnnotatedObjectRepository2(repositoryMap);
+        AnnotatedObjectRepository repository = new AnnotatedObjectRepository(repositoryMap);
 
         //when
         List<AnnotatedObject> actuals = repository.findAnnotatedObjectByClassAndAnnotatedClass(findClazz, findAnnotationClazz);
@@ -124,8 +124,8 @@ class AnnotatedObjectRepository2Test {
     @Test
     void Given_repository_When_findAnnotatedObjectByClassAndAnnotatedClass_with_none_Annotation_class_Then_Exception() throws Exception {
         //given
-        AnnotatedObjectRepository2 repository = new AnnotatedObjectRepository2(Map.of(TestClass.class, new TestClass(),
-                                                                                      AnotherTestClass.class, new AnotherTestClass()));
+        AnnotatedObjectRepository repository = new AnnotatedObjectRepository(Map.of(TestClass.class, new TestClass(),
+                                                                                    AnotherTestClass.class, new AnotherTestClass()));
 
         //when
         Throwable actual = Assertions.catchThrowable(()-> repository.findAnnotatedObjectByClassAndAnnotatedClass(TestClass.class, TestClass.class));

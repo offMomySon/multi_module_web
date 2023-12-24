@@ -13,20 +13,16 @@ import static com.main.util.AnnotationUtils.find;
 import static instance.ObjectGraph.ReadOnlyObjectGraph;
 import static java.util.stream.Collectors.toUnmodifiableMap;
 
-public class AnnotatedObjectRepository2 {
+public class AnnotatedObjectRepository {
     private final Map<Class<?>, Object> values;
 
-    public AnnotatedObjectRepository2(@NonNull Map<Class<?>, Object> values) {
+    public AnnotatedObjectRepository(@NonNull Map<Class<?>, Object> values) {
         this.values = Map.copyOf(values);
     }
 
-    private static boolean hasDeclaredAnnotation(Class<?> clazz) {
-        return clazz.getDeclaredAnnotations().length != 0;
-    }
-
-    public static AnnotatedObjectRepository2 from(@NonNull ReadOnlyObjectGraph objectGraph) {
+    public static AnnotatedObjectRepository of(@NonNull ReadOnlyObjectGraph objectGraph) {
         Map<Class<?>, Object> objectGraphValues = objectGraph.copyValues();
-        return new AnnotatedObjectRepository2(objectGraphValues);
+        return new AnnotatedObjectRepository(objectGraphValues);
     }
 
     public Optional<Object> findObjectByMethod(@NonNull Method method) {

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
@@ -33,35 +34,103 @@ public class AnnotatedObjectRepository {
             .findFirst();
     }
 
-    public List<Class<?>> findClassByAnnotatedClass(@NonNull Class<?> findAnnotation) {
+    public List<Class<?>> findClassByAnnotationClass(@NonNull Class<?> findAnnotation) {
         checkAnnotationClazz(findAnnotation);
 
-        return values.keySet().stream()
-            .filter(o -> exist(o, findAnnotation))
+        return findClassAnnotatedEntryByAnnotationClass(findAnnotation)
+            .map(Map.Entry::getKey)
             .collect(Collectors.toUnmodifiableList());
     }
 
-    public List<AnnotatedObject> findAnnotatedObjectByAnnotatedClass(@NonNull Class<?> findAnnotation) {
-        checkAnnotationClazz(findAnnotation);
-
-        return values.entrySet().stream()
-            .filter(e -> exist(e.getKey(), findAnnotation))
-            .map(e -> createAnnotatedObject(e.getKey(), e.getValue(), findAnnotation))
-            .collect(Collectors.toUnmodifiableList());
-    }
-
-    public List<AnnotatedObject> findAnnotatedObjectByClassAndAnnotatedClass(@NonNull Class<?> findClazz, @NonNull Class<?> findAnnotation) {
+    public List<AnnotatedObject> findAnnotatedObjectByClassAndAnnotationClass(@NonNull Class<?> findClazz, @NonNull Class<?> findAnnotation) {
         checkAnnotationClazz(findAnnotation);
 
         return values.entrySet().stream()
             .filter(entry -> findClazz.isAssignableFrom(entry.getKey()))
-            .filter(entry -> exist(entry.getKey(), findAnnotation))
+            .filter(entry -> isAnnotated(entry.getKey(), findAnnotation))
             .map(entry -> createAnnotatedObject(entry.getKey(), entry.getValue(), findAnnotation))
             .collect(Collectors.toUnmodifiableList());
     }
 
+    public List<AnnotatedObjectMethod> findAnnotatedObjectMethodByAnnotationClass(@NonNull Class<?> findAnnotation) {
+        checkAnnotationClazz(findAnnotation);
+
+        return findAnnotatedObjectByAnnotationClass(findAnnotation)
+            .stream()
+            .flatMap(AnnotatedObjectRepository::createInnerAnnotatedObjectMethod)
+            .map(iaom -> iaom.createAnnotatedObjectMethod(findAnnotation))
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .collect(Collectors.toUnmodifiableList());
+    }
+
+    private static Stream<InnerAnnotatedObjectMethod> createInnerAnnotatedObjectMethod(AnnotatedObject ao) {
+        return Arrays.stream(ao.getObject().getClass().getDeclaredMethods())
+            .map(method -> new InnerAnnotatedObjectMethod(ao.getAnnotation(), ao.getObject(), method));
+    }
+
+    public List<AnnotatedObject> findAnnotatedObjectByAnnotationClass(@NonNull Class<?> findAnnotation) {
+        checkAnnotationClazz(findAnnotation);
+
+        return findClassAnnotatedEntryByAnnotationClass(findAnnotation)
+            .map(e -> createAnnotatedObject(e.getKey(), e.getValue(), findAnnotation))
+            .collect(Collectors.toUnmodifiableList());
+    }
+
+    private static class InnerAnnotatedObjectMethod {
+        private final Annotation annotation;
+        private final Object object;
+        private final Method method;
+
+        public InnerAnnotatedObjectMethod(@NonNull Annotation annotation, @NonNull Object object, @NonNull Method method) {
+            this.annotation = annotation;
+            this.object = object;
+            this.method = method;
+        }
+
+        public Optional<AnnotatedObjectMethod> createAnnotatedObjectMethod(@NonNull Class<?> findAnnotation) {
+            Optional<Annotation> optionalAnnotation = (Optional<Annotation>) find(method, findAnnotation);
+
+            if (optionalAnnotation.isEmpty()) {
+                return Optional.empty();
+            }
+
+            Annotation methodAnnotation = optionalAnnotation.get();
+
+            AnnotatedObject annotatedObject = new AnnotatedObject(this.annotation, this.object);
+            AnnotatedMethod annotatedMethod = new AnnotatedMethod(methodAnnotation, this.method);
+            AnnotatedObjectMethod annotatedObjectMethod = new AnnotatedObjectMethod(annotatedObject, annotatedMethod);
+            return Optional.of(annotatedObjectMethod);
+        }
+    }
+
+    private static void checkAnnotationClazz(Class<?> findAnnotation) {
+        if (!findAnnotation.isAnnotation()) {
+            throw new RuntimeException("Does not annotation clazz.");
+        }
+    }
+
+    private Stream<Map.Entry<Class<?>, Object>> findClassAnnotatedEntryByAnnotationClass(Class<?> findAnnotation) {
+        return values.entrySet().stream()
+            .filter(entry -> isAnnotated(entry.getKey(), findAnnotation));
+    }
+
+    private static boolean isAnnotated(Class<?> clazz, Class<?> findAnnotation) {
+        return exist(clazz, findAnnotation);
+    }
+
+    private static boolean isAnnotated(Method method, Class<?> findAnnotation) {
+        return exist(method, findAnnotation);
+    }
+
     private static boolean containMethod(Class<?> clazz, Method method) {
         return Arrays.asList(clazz.getMethods()).contains(method);
+    }
+
+    private static AnnotatedObjectMethod createAnnotatedObjectMethod(Class<?> clazz, Object object, Method method, Class<?> findAnnotation) {
+        AnnotatedObject annotatedObject = createAnnotatedObject(clazz, object, findAnnotation);
+        AnnotatedMethod annotatedMethod = createAnnotatedMethod(method, findAnnotation);
+        return new AnnotatedObjectMethod(annotatedObject, annotatedMethod);
     }
 
     private static AnnotatedObject createAnnotatedObject(Class<?> clazz, Object object, Class<?> findAnnotation) {
@@ -69,10 +138,9 @@ public class AnnotatedObjectRepository {
         return new AnnotatedObject(annotation, object);
     }
 
-    private static void checkAnnotationClazz(Class<?> findAnnotation) {
-        if (!findAnnotation.isAnnotation()) {
-            throw new RuntimeException("Does not annotation clazz.");
-        }
+    private static AnnotatedMethod createAnnotatedMethod(Method method, Class<?> findAnnotation) {
+        Annotation annotation = (Annotation) find(method, findAnnotation).orElseThrow(() -> new RuntimeException("Does not exist annotation."));
+        return new AnnotatedMethod(annotation, method);
     }
 
     @Getter

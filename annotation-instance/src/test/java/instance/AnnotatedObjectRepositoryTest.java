@@ -1,6 +1,9 @@
 package instance;
 
 import com.main.util.AnnotationUtils;
+import instance.AnnotatedObjectRepository.AnnotatedMethod;
+import instance.AnnotatedObjectRepository.AnnotatedObjectMethod;
+import instance.AnnotatedObjectRepository.AnnotatedObject;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
@@ -16,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
@@ -45,14 +49,14 @@ class AnnotatedObjectRepositoryTest {
     @DisplayName("annotated 된 class 를 찾아옵니다.")
     @ParameterizedTest
     @MethodSource("provideFindClassByAnnotatedClassTestSuite")
-    void Given_repository_When_findClassByAnnotatedClass_Then_foundOptionalObject(Map<Class<?>, Object> repositoryMap,
-                                                                                  Class<?> findAnnotationClazz,
-                                                                                  List<Class<?>> result) throws Exception {
+    void Given_repository_When_findClassByAnnotationClass_Then_foundOptionalObject(Map<Class<?>, Object> repositoryMap,
+                                                                                   Class<?> findAnnotationClazz,
+                                                                                   List<Class<?>> result) throws Exception {
         //given
         AnnotatedObjectRepository repository = new AnnotatedObjectRepository(repositoryMap);
 
         //when
-        List<Class<?>> actuals = repository.findClassByAnnotatedClass(findAnnotationClazz);
+        List<Class<?>> actuals = repository.findClassByAnnotationClass(findAnnotationClazz);
 
         //then
         Assertions.assertThat(actuals).containsAll(result);
@@ -60,13 +64,13 @@ class AnnotatedObjectRepositoryTest {
 
     @DisplayName("annoation class 가 아니면 class 를 찾을 수 없습니다.")
     @Test
-    void Given_repository_When_findClassByAnnotatedClass_with_none_Annotation_class_Then_Exception() throws Exception {
+    void Given_repository_When_findClassByAnnotationClass_with_none_Annotation_class_Then_Exception() throws Exception {
         //given
         AnnotatedObjectRepository repository = new AnnotatedObjectRepository(Map.of(TestClass.class, new TestClass(),
                                                                                     AnotherTestClass.class, new AnotherTestClass()));
 
         //when
-        Throwable actual = Assertions.catchThrowable(() -> repository.findClassByAnnotatedClass(TestClass.class));
+        Throwable actual = Assertions.catchThrowable(() -> repository.findClassByAnnotationClass(TestClass.class));
 
         //then
         Assertions.assertThat(actual).isNotNull();
@@ -75,14 +79,14 @@ class AnnotatedObjectRepositoryTest {
     @DisplayName("annotation 이 annotated 된 object 를 찾아옵니다.")
     @ParameterizedTest
     @MethodSource("provideFindAnnotatedObjectByAnnotatedClassTestSuite")
-    void Given_repository_When_findAnnotatedObjectByAnnotatedClass_Then_findAnnotatedObject(Map<Class<?>, Object> repositoryMap,
-                                                                                            Class<?> findAnnotationClazz,
-                                                                                            List<AnnotatedObjectRepository.AnnotatedObject> result) throws Exception {
+    void Given_repository_When_findAnnotatedObjectByAnnotationClass_Then_findAnnotatedObject(Map<Class<?>, Object> repositoryMap,
+                                                                                             Class<?> findAnnotationClazz,
+                                                                                             List<AnnotatedObject> result) throws Exception {
         //given
         AnnotatedObjectRepository repository = new AnnotatedObjectRepository(repositoryMap);
 
         //when
-        List<AnnotatedObjectRepository.AnnotatedObject> actuals = repository.findAnnotatedObjectByAnnotatedClass(findAnnotationClazz);
+        List<AnnotatedObject> actuals = repository.findAnnotatedObjectByAnnotationClass(findAnnotationClazz);
 
         //then
         Assertions.assertThat(actuals).containsAll(result);
@@ -90,13 +94,13 @@ class AnnotatedObjectRepositoryTest {
 
     @DisplayName("annoation class 가 아니면 class 를 찾을 수 없습니다.")
     @Test
-    void Given_repository_When_findAnnotatedObjectByAnnotatedClass_with_none_Annotation_class_Then_Exception() throws Exception {
+    void Given_repository_When_findAnnotatedObjectByAnnotationClass_with_none_Annotation_class_Then_Exception() throws Exception {
         //given
         AnnotatedObjectRepository repository = new AnnotatedObjectRepository(Map.of(TestClass.class, new TestClass(),
                                                                                     AnotherTestClass.class, new AnotherTestClass()));
 
         //when
-        Throwable actual = Assertions.catchThrowable(() -> repository.findAnnotatedObjectByAnnotatedClass(TestClass.class));
+        Throwable actual = Assertions.catchThrowable(() -> repository.findAnnotatedObjectByAnnotationClass(TestClass.class));
 
         //then
         Assertions.assertThat(actual).isNotNull();
@@ -105,15 +109,15 @@ class AnnotatedObjectRepositoryTest {
     @DisplayName("class 에 할당할수 있고, annotation 이 annotated 된 object 를 찾아옵니다.")
     @ParameterizedTest
     @MethodSource("provideFindAnnotatedObjectByClassAndAnnotatedClassTestSuite")
-    void Given_repository_When_findAnnotatedObjectByClassAndAnnotatedClass_Then_findAnnotatedObject(Map<Class<?>, Object> repositoryMap,
-                                                                                                    Class<?> findClazz,
-                                                                                                    Class<?> findAnnotationClazz,
-                                                                                                    List<AnnotatedObjectRepository.AnnotatedObject> result) throws Exception {
+    void Given_repository_When_findAnnotatedObjectByClassAndAnnotationClass_Then_findAnnotatedObject(Map<Class<?>, Object> repositoryMap,
+                                                                                                     Class<?> findClazz,
+                                                                                                     Class<?> findAnnotationClazz,
+                                                                                                     List<AnnotatedObject> result) throws Exception {
         //given
         AnnotatedObjectRepository repository = new AnnotatedObjectRepository(repositoryMap);
 
         //when
-        List<AnnotatedObjectRepository.AnnotatedObject> actuals = repository.findAnnotatedObjectByClassAndAnnotatedClass(findClazz, findAnnotationClazz);
+        List<AnnotatedObject> actuals = repository.findAnnotatedObjectByClassAndAnnotationClass(findClazz, findAnnotationClazz);
 
         //then
         Assertions.assertThat(actuals).containsAll(result);
@@ -121,16 +125,32 @@ class AnnotatedObjectRepositoryTest {
 
     @DisplayName("annoation class 가 아니면 class 를 찾을 수 없습니다.")
     @Test
-    void Given_repository_When_findAnnotatedObjectByClassAndAnnotatedClass_with_none_Annotation_class_Then_Exception() throws Exception {
+    void Given_repository_When_findAnnotatedObjectByClassAndAnnotationClass_with_none_Annotation_class_Then_Exception() throws Exception {
         //given
         AnnotatedObjectRepository repository = new AnnotatedObjectRepository(Map.of(TestClass.class, new TestClass(),
                                                                                     AnotherTestClass.class, new AnotherTestClass()));
 
         //when
-        Throwable actual = Assertions.catchThrowable(() -> repository.findAnnotatedObjectByClassAndAnnotatedClass(TestClass.class, TestClass.class));
+        Throwable actual = Assertions.catchThrowable(() -> repository.findAnnotatedObjectByClassAndAnnotationClass(TestClass.class, TestClass.class));
 
         //then
         Assertions.assertThat(actual).isNotNull();
+    }
+
+    @DisplayName("annotated 된 object, method 쌍을 찾아옵니다.")
+    @ParameterizedTest
+    @MethodSource("provideFindAnnotatedObjectMethodByAnnotationClassTestSuite")
+    void Given_repository_When_findAnnotatedObjectMethodByAnnotationClass_Then_foundAnnotatedObjectMethods(Map<Class<?>, Object> repositoryMap,
+                                                                                                           Class<?> findAnnotationClazz,
+                                                                                                           List<AnnotatedObjectMethod> result) throws Exception {
+        //given
+        AnnotatedObjectRepository repository = new AnnotatedObjectRepository(repositoryMap);
+
+        //when
+        List<AnnotatedObjectMethod> actuals = repository.findAnnotatedObjectMethodByAnnotationClass(findAnnotationClazz);
+
+        //then
+        Assertions.assertThat(actuals).containsAll(result);
     }
 
     private static Stream<Arguments> provideFindByMethodTestSuite() {
@@ -147,48 +167,48 @@ class AnnotatedObjectRepositoryTest {
             Arguments.of(
                 Map.of(TestClass.class, new TestClass(),
                        AnotherTestClass.class, new AnotherTestClass()),
-                TestAnnotation.class,
+                TestClassAnnotation.class,
                 List.of(TestClass.class, AnotherTestClass.class)
             ),
             Arguments.of(
                 Map.of(TestClass.class, new TestClass(),
                        AnotherTestClass.class, new AnotherTestClass(),
                        NoneAnnotatedClass.class, new NoneAnnotatedClass()),
-                TestAnnotation.class,
+                TestClassAnnotation.class,
                 List.of(TestClass.class, AnotherTestClass.class)
             ),
             Arguments.of(
                 Map.of(AnotherTestClass.class, new AnotherTestClass()),
-                TestAnnotation.class,
+                TestClassAnnotation.class,
                 List.of(AnotherTestClass.class)
             ),
             Arguments.of(
                 Map.of(TestClass.class, new TestClass()),
-                TestAnnotation.class,
+                TestClassAnnotation.class,
                 List.of(TestClass.class)
             ),
             Arguments.of(
                 Map.of(NoneAnnotatedClass.class, new NoneAnnotatedClass()),
-                TestAnnotation.class,
+                TestClassAnnotation.class,
                 Collections.emptyList()
             )
         );
     }
 
     private static Stream<Arguments> provideFindAnnotatedObjectByAnnotatedClassTestSuite() {
-        TestAnnotation testAnnotation = AnnotationUtils.find(TestClass.class, TestAnnotation.class).orElseThrow();
+        TestClassAnnotation testClassAnnotation = AnnotationUtils.find(TestClass.class, TestClassAnnotation.class).orElseThrow();
         TestClass testClassObject = new TestClass();
         AnotherTestClass anotherTestClassObject = new AnotherTestClass();
         NoneAnnotatedClass noneAnnotatedClassObject = new NoneAnnotatedClass();
 
-        AnnotatedObjectRepository.AnnotatedObject annotatedTestClassObject = new AnnotatedObjectRepository.AnnotatedObject(testAnnotation, testClassObject);
-        AnnotatedObjectRepository.AnnotatedObject annotatedAnotherTestClassObject = new AnnotatedObjectRepository.AnnotatedObject(testAnnotation, anotherTestClassObject);
+        AnnotatedObject annotatedTestClassObject = new AnnotatedObject(testClassAnnotation, testClassObject);
+        AnnotatedObject annotatedAnotherTestClassObject = new AnnotatedObject(testClassAnnotation, anotherTestClassObject);
 
         return Stream.of(
             Arguments.of(
                 Map.of(TestClass.class, testClassObject,
                        AnotherTestClass.class, anotherTestClassObject),
-                TestAnnotation.class,
+                TestClassAnnotation.class,
                 List.of(annotatedTestClassObject,
                         annotatedAnotherTestClassObject)
             ),
@@ -196,37 +216,37 @@ class AnnotatedObjectRepositoryTest {
                 Map.of(TestClass.class, testClassObject,
                        AnotherTestClass.class, anotherTestClassObject,
                        NoneAnnotatedClass.class, noneAnnotatedClassObject),
-                TestAnnotation.class,
+                TestClassAnnotation.class,
                 List.of(annotatedTestClassObject,
                         annotatedAnotherTestClassObject)
             ),
             Arguments.of(
                 Map.of(AnotherTestClass.class, anotherTestClassObject),
-                TestAnnotation.class,
+                TestClassAnnotation.class,
                 List.of(annotatedAnotherTestClassObject)
             ),
             Arguments.of(
                 Map.of(TestClass.class, testClassObject),
-                TestAnnotation.class,
+                TestClassAnnotation.class,
                 List.of(annotatedTestClassObject)
             ),
             Arguments.of(
                 Map.of(NoneAnnotatedClass.class, noneAnnotatedClassObject),
-                TestAnnotation.class,
+                TestClassAnnotation.class,
                 Collections.emptyList()
             )
         );
     }
 
     private static Stream<Arguments> provideFindAnnotatedObjectByClassAndAnnotatedClassTestSuite() {
-        TestAnnotation testAnnotation = AnnotationUtils.find(TestClass.class, TestAnnotation.class).orElseThrow();
+        TestClassAnnotation testClassAnnotation = AnnotationUtils.find(TestClass.class, TestClassAnnotation.class).orElseThrow();
 
         TestClass testClassObject = new TestClass();
         AnotherTestClass anotherTestClassObject = new AnotherTestClass();
         NoneAnnotatedClass noneAnnotatedClassObject = new NoneAnnotatedClass();
 
-        AnnotatedObjectRepository.AnnotatedObject annotatedTestClassObject = new AnnotatedObjectRepository.AnnotatedObject(testAnnotation, testClassObject);
-        AnnotatedObjectRepository.AnnotatedObject annotatedAnotherTestClassObject = new AnnotatedObjectRepository.AnnotatedObject(testAnnotation, anotherTestClassObject);
+        AnnotatedObject annotatedTestClassObject = new AnnotatedObject(testClassAnnotation, testClassObject);
+        AnnotatedObject annotatedAnotherTestClassObject = new AnnotatedObject(testClassAnnotation, anotherTestClassObject);
 
         return Stream.of(
             Arguments.of(
@@ -234,7 +254,7 @@ class AnnotatedObjectRepositoryTest {
                        AnotherTestClass.class, anotherTestClassObject,
                        NoneAnnotatedClass.class, noneAnnotatedClassObject),
                 Object.class,
-                TestAnnotation.class,
+                TestClassAnnotation.class,
                 List.of(annotatedTestClassObject,
                         annotatedAnotherTestClassObject)
             ),
@@ -243,7 +263,7 @@ class AnnotatedObjectRepositoryTest {
                        AnotherTestClass.class, anotherTestClassObject,
                        NoneAnnotatedClass.class, noneAnnotatedClassObject),
                 TestInterface.class,
-                TestAnnotation.class,
+                TestClassAnnotation.class,
                 List.of(annotatedTestClassObject)
             ),
             Arguments.of(
@@ -251,7 +271,7 @@ class AnnotatedObjectRepositoryTest {
                        AnotherTestClass.class, anotherTestClassObject,
                        NoneAnnotatedClass.class, noneAnnotatedClassObject),
                 AnotherTestClass.class,
-                TestAnnotation.class,
+                TestClassAnnotation.class,
                 List.of(annotatedAnotherTestClassObject)
             ),
             Arguments.of(
@@ -259,7 +279,7 @@ class AnnotatedObjectRepositoryTest {
                        AnotherTestClass.class, anotherTestClassObject,
                        NoneAnnotatedClass.class, noneAnnotatedClassObject),
                 TestClass.class,
-                TestAnnotation.class,
+                TestClassAnnotation.class,
                 List.of(annotatedTestClassObject)
             ),
             Arguments.of(
@@ -267,7 +287,38 @@ class AnnotatedObjectRepositoryTest {
                        AnotherTestClass.class, anotherTestClassObject,
                        NoneAnnotatedClass.class, noneAnnotatedClassObject),
                 NoneAnnotatedClass.class,
-                TestAnnotation.class,
+                TestClassAnnotation.class,
+                Collections.emptyList()
+            )
+        );
+    }
+
+    private static Stream<Arguments> provideFindAnnotatedObjectMethodByAnnotationClassTestSuite() {
+        TestClass testClassObject = new TestClass();
+        Method testMethod = TestClass.getTestMethod();
+        TestClassMethodAnnotation testClassAnnotation = AnnotationUtils.find(TestClass.class, TestClassMethodAnnotation.class).orElseThrow();
+        TestClassMethodAnnotation testMethodAnnotation = AnnotationUtils.find(testMethod, TestClassMethodAnnotation.class).orElseThrow();
+
+        AnnotatedObject annotatedObject = new AnnotatedObject(testClassAnnotation, testClassObject);
+        AnnotatedMethod annotatedMethod = new AnnotatedMethod(testMethodAnnotation, testMethod);
+        AnnotatedObjectMethod annotatedObjectMethod = new AnnotatedObjectMethod(annotatedObject, annotatedMethod);
+
+        AnotherTestClass anotherTestClassObject = new AnotherTestClass();
+        NoneAnnotatedClass noneAnnotatedClassObject = new NoneAnnotatedClass();
+
+        return Stream.of(
+            Arguments.of(
+                Map.of(TestClass.class, testClassObject,
+                       AnotherTestClass.class, anotherTestClassObject,
+                       NoneAnnotatedClass.class, noneAnnotatedClassObject),
+                TestClassMethodAnnotation.class,
+                List.of(annotatedObjectMethod)
+            ),
+            Arguments.of(
+                Map.of(TestClass.class, testClassObject,
+                       AnotherTestClass.class, anotherTestClassObject,
+                       NoneAnnotatedClass.class, noneAnnotatedClassObject),
+                TestClassAnnotation.class,
                 Collections.emptyList()
             )
         );
@@ -275,13 +326,14 @@ class AnnotatedObjectRepositoryTest {
 
     @Retention(RUNTIME)
     @Target(TYPE)
-    private @interface TestAnnotation {
+    private @interface TestClassAnnotation {
 
 
     }
 
-    private @interface DoesNotUsedAnnotation {
-
+    @Retention(RUNTIME)
+    @Target({TYPE, METHOD})
+    private @interface TestClassMethodAnnotation {
 
     }
 
@@ -290,9 +342,11 @@ class AnnotatedObjectRepositoryTest {
 
     }
 
-    @TestAnnotation
+    @TestClassMethodAnnotation
+    @TestClassAnnotation
     public static class TestClass implements TestInterface {
 
+        @TestClassMethodAnnotation
         public void method(int param) {
 
         }
@@ -306,7 +360,8 @@ class AnnotatedObjectRepositoryTest {
         }
     }
 
-    @TestAnnotation
+    @TestClassMethodAnnotation
+    @TestClassAnnotation
     public static class AnotherTestClass {
 
         public void method(int param) {

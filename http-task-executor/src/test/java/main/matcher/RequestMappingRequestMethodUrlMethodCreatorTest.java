@@ -48,7 +48,6 @@ class RequestMappingRequestMethodUrlMethodCreatorTest {
 //    }
 
 
-    @RequestMapping(url = {"/testclass1", "/testclass2"})
     private static class TestAnnotatedClass {
 
         @RequestMapping(url = {"/testMethod1", "/testMethod2"}, method = {RequestMethod.GET, RequestMethod.POST})

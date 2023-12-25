@@ -56,7 +56,7 @@ class AnnotatedObjectRepositoryTest {
         AnnotatedObjectRepository repository = new AnnotatedObjectRepository(repositoryMap);
 
         //when
-        List<Class<?>> actuals = repository.findClassByAnnotationClass(findAnnotationClazz);
+        List<Class<?>> actuals = repository.findClassByClassAnnotatedClass(findAnnotationClazz);
 
         //then
         Assertions.assertThat(actuals).containsAll(result);
@@ -70,7 +70,7 @@ class AnnotatedObjectRepositoryTest {
                                                                                     AnotherTestClass.class, new AnotherTestClass()));
 
         //when
-        Throwable actual = Assertions.catchThrowable(() -> repository.findClassByAnnotationClass(TestClass.class));
+        Throwable actual = Assertions.catchThrowable(() -> repository.findClassByClassAnnotatedClass(TestClass.class));
 
         //then
         Assertions.assertThat(actual).isNotNull();
@@ -86,7 +86,7 @@ class AnnotatedObjectRepositoryTest {
         AnnotatedObjectRepository repository = new AnnotatedObjectRepository(repositoryMap);
 
         //when
-        List<AnnotatedObject> actuals = repository.findAnnotatedObjectByAnnotationClass(findAnnotationClazz);
+        List<AnnotatedObject> actuals = repository.findAnnotatedObjectByClassAnnotatedClazz(findAnnotationClazz);
 
         //then
         Assertions.assertThat(actuals).containsAll(result);
@@ -100,7 +100,7 @@ class AnnotatedObjectRepositoryTest {
                                                                                     AnotherTestClass.class, new AnotherTestClass()));
 
         //when
-        Throwable actual = Assertions.catchThrowable(() -> repository.findAnnotatedObjectByAnnotationClass(TestClass.class));
+        Throwable actual = Assertions.catchThrowable(() -> repository.findAnnotatedObjectByClassAnnotatedClazz(TestClass.class));
 
         //then
         Assertions.assertThat(actual).isNotNull();
@@ -117,7 +117,7 @@ class AnnotatedObjectRepositoryTest {
         AnnotatedObjectRepository repository = new AnnotatedObjectRepository(repositoryMap);
 
         //when
-        List<AnnotatedObject> actuals = repository.findAnnotatedObjectByClassAndAnnotationClass(findClazz, findAnnotationClazz);
+        List<AnnotatedObject> actuals = repository.findAnnotatedObjectByClassAndClassAnnotatedClass(findClazz, findAnnotationClazz);
 
         //then
         Assertions.assertThat(actuals).containsAll(result);
@@ -131,7 +131,7 @@ class AnnotatedObjectRepositoryTest {
                                                                                     AnotherTestClass.class, new AnotherTestClass()));
 
         //when
-        Throwable actual = Assertions.catchThrowable(() -> repository.findAnnotatedObjectByClassAndAnnotationClass(TestClass.class, TestClass.class));
+        Throwable actual = Assertions.catchThrowable(() -> repository.findAnnotatedObjectByClassAndClassAnnotatedClass(TestClass.class, TestClass.class));
 
         //then
         Assertions.assertThat(actual).isNotNull();
@@ -147,7 +147,28 @@ class AnnotatedObjectRepositoryTest {
         AnnotatedObjectRepository repository = new AnnotatedObjectRepository(repositoryMap);
 
         //when
-        List<AnnotatedObjectMethod> actuals = repository.findAnnotatedObjectMethodByAnnotationClass(findAnnotationClazz);
+        List<AnnotatedObjectMethod> actuals = repository.findAnnotatedObjectMethodByClassAndMethodAnnotatedClass(findAnnotationClazz);
+
+        //then
+        Assertions.assertThat(actuals).containsAll(result);
+    }
+
+    @DisplayName("annotated 된 object, method 쌍을 찾아옵니다.")
+    @ParameterizedTest
+    @MethodSource("provideFindAnnotatedObjectMethodByClassAnnotatedClassAndClassMethodAnnotatedClassTestSuite")
+    void Given_repository_When_findAnnotatedObjectMethodByClassAnnotatedClassAndClassMethodAnnotatedClass_Then_foundAnnotatedObjectMethods(Map<Class<?>, Object> repositoryMap,
+                                                                                                                                           Class<?> findClassAnnotationClazz,
+                                                                                                                                           Class<?> findClassMethodAnnotationClazz,
+                                                                                                                                           List<AnnotatedObjectMethod> result) throws Exception {
+        //given
+        AnnotatedObjectRepository repository = new AnnotatedObjectRepository(repositoryMap);
+
+        //when
+        List<AnnotatedObjectMethod> actuals = repository.findAnnotatedObjectMethodByClassAnnotatedClassAndMethodAnnotatedClass(findClassAnnotationClazz, findClassMethodAnnotationClazz);
+
+        System.out.println(result);
+        System.out.println(actuals);
+
 
         //then
         Assertions.assertThat(actuals).containsAll(result);
@@ -324,6 +345,36 @@ class AnnotatedObjectRepositoryTest {
         );
     }
 
+    private static Stream<Arguments> provideFindAnnotatedObjectMethodByClassAnnotatedClassAndClassMethodAnnotatedClassTestSuite() {
+        TestClass testClassObject = new TestClass();
+        Method testMethod = TestClass.getTestMethod();
+        TestClassAnnotation testClassAnnotation = AnnotationUtils.find(TestClass.class, TestClassAnnotation.class).orElseThrow();
+        TestClassMethodAnnotation testMethodAnnotation = AnnotationUtils.find(testMethod, TestClassMethodAnnotation.class).orElseThrow();
+
+        AnnotatedObject annotatedObject = new AnnotatedObject(testClassAnnotation, testClassObject);
+        AnnotatedMethod annotatedMethod = new AnnotatedMethod(testMethodAnnotation, testMethod);
+        AnnotatedObjectMethod annotatedObjectMethod = new AnnotatedObjectMethod(annotatedObject, annotatedMethod);
+
+        AnotherTestClass anotherTestClassObject = new AnotherTestClass();
+        NoneAnnotatedClass noneAnnotatedClassObject = new NoneAnnotatedClass();
+        TestClassOnlyAnnoatedClass testClassOnlyAnnoatedClass = new TestClassOnlyAnnoatedClass();
+        TestClassAnnotatedButNotMethodAnnoatedClass testClassAnnotatedButNotMethodAnnoatedClass = new TestClassAnnotatedButNotMethodAnnoatedClass();
+
+        return Stream.of(
+            Arguments.of(
+                Map.of(TestClass.class, testClassObject,
+                       AnotherTestClass.class, anotherTestClassObject,
+                       NoneAnnotatedClass.class, noneAnnotatedClassObject,
+                       TestClassOnlyAnnoatedClass.class, testClassOnlyAnnoatedClass,
+                       TestClassAnnotatedButNotMethodAnnoatedClass.class, testClassAnnotatedButNotMethodAnnoatedClass),
+                TestClassAnnotation.class,
+                TestClassMethodAnnotation.class,
+                List.of(annotatedObjectMethod)
+            )
+        );
+    }
+
+
     @Retention(RUNTIME)
     @Target(TYPE)
     private @interface TestClassAnnotation {
@@ -371,6 +422,39 @@ class AnnotatedObjectRepositoryTest {
         public static Method getTestMethod() {
             try {
                 return AnotherTestClass.class.getMethod("method", int.class);
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    @TestClassAnnotation
+    public static class TestClassOnlyAnnoatedClass {
+
+        public void method(int param) {
+
+        }
+
+        public static Method getTestMethod() {
+            try {
+                return TestClassOnlyAnnoatedClass.class.getMethod("method", int.class);
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    @TestClassMethodAnnotation
+    @TestClassAnnotation
+    public static class TestClassAnnotatedButNotMethodAnnoatedClass {
+
+        public void method(int param) {
+
+        }
+
+        public static Method getTestMethod() {
+            try {
+                return TestClassAnnotatedButNotMethodAnnoatedClass.class.getMethod("method", int.class);
             } catch (NoSuchMethodException e) {
                 throw new RuntimeException(e);
             }

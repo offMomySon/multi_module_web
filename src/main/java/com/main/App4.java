@@ -1,13 +1,10 @@
 package com.main;
 
 
-import annotation.AnnotationPropertyMapper;
-import annotation.AnnotationPropertyMappers;
 import annotation.Component;
 import annotation.Controller;
 import annotation.Domain;
 import annotation.PathVariable;
-import annotation.PostWebFilter;
 import annotation.PreWebFilter;
 import annotation.Repository;
 import annotation.RequestBody;
@@ -16,16 +13,14 @@ import annotation.RequestParam;
 import annotation.Service;
 import com.main.util.AnnotationUtils;
 import converter.CompositeValueTypeConverter;
-import executor.SocketHttpTaskExecutor;
-import instance.AnnotatedMethodProperties;
-import instance.AnnotatedObjectAndMethodProperties;
-import instance.AnnotatedObjectProperties;
 import instance.AnnotatedObjectRepository;
+import instance.AnnotatedObjectRepository.AnnotatedObjectMethod;
 import instance.AnnotatedObjectRepositoryCreator;
 import instance.AnnotationProperties;
 import instance.AnnotationPropertyGetter;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.net.InetAddress;
@@ -33,19 +28,14 @@ import java.net.UnknownHostException;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import matcher.PathMatcher;
 import matcher.RequestMethod;
 import matcher.creator.EndPointMethodInfo;
-import matcher.path.PathUrl;
 import parameter.extractor.HttpBodyParameterInfoExtractor.HttpBodyParameterInfo;
 import parameter.matcher.ParameterAndValueAssigneeType;
 import pretask.PostTaskInfo;
@@ -54,9 +44,7 @@ import task.PostTaskWorker;
 import task.PreTaskWorker;
 import task.worker.WorkerResultType;
 import vo.ContentType2;
-import static com.main.config.HttpConfig.INSTANCE;
-import static matcher.PathMatcher.MatchedElement;
-import static matcher.PathMatcher.Token;
+import static instance.AnnotatedObjectRepository.*;
 import static parameter.extractor.HttpUrlParameterInfoExtractor.HttpUrlParameterInfo;
 import static parameter.matcher.ParameterValueAssigneeType.BODY;
 import static parameter.matcher.ParameterValueAssigneeType.INPUT_STREAM;
@@ -79,54 +67,28 @@ public class App4 {
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
     private static final String RESOURCE_PREFIX = "/static";
     private static final String HOST_ADDRESS;
-    private static final AnnotationPropertyMappers ANNOTATION_PROPERTY_MAPPERS;
     private static final CompositeValueTypeConverter VALUE_TYPE_CONVERTER = new CompositeValueTypeConverter();
 
     static {
         SIMPLE_DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
         HOST_ADDRESS = getHostAddress();
-
-        AnnotationPropertyMapper preWebFilterPropertyMapper = new AnnotationPropertyMapper(PreWebFilter.class,
-                                                                                           Map.of("patterns", (a) -> ((PreWebFilter) a).patterns(),
-                                                                                                  "filterName", (a) -> ((PreWebFilter) a).filterName()));
-        AnnotationPropertyMapper postWebFilterPropertyMapper = new AnnotationPropertyMapper(PostWebFilter.class,
-                                                                                            Map.of("patterns", (a) -> ((PostWebFilter) a).patterns(),
-                                                                                                   "filterName", (a) -> ((PostWebFilter) a).filterName()));
-        AnnotationPropertyMapper pathVariablePropertyMapper = new AnnotationPropertyMapper(PathVariable.class,
-                                                                                           Map.of("name", (a) -> ((PathVariable) a).name(),
-                                                                                                  "required", (a) -> ((PathVariable) a).required()));
-        AnnotationPropertyMapper requestBodyPropertyMapper = new AnnotationPropertyMapper(RequestBody.class,
-                                                                                          Map.of("required", (a) -> ((RequestBody) a).required()));
-        AnnotationPropertyMapper requestMappingPropertyMapper = new AnnotationPropertyMapper(RequestMapping.class,
-                                                                                             Map.of("url", (a) -> ((RequestMapping) a).url(),
-                                                                                                    "httpMethod", (a) -> ((RequestMapping) a).method()));
-        AnnotationPropertyMapper requestParamPropertyMapper = new AnnotationPropertyMapper(RequestParam.class,
-                                                                                           Map.of("name", (a) -> ((RequestParam) a).name(),
-                                                                                                  "defaultValue", (a) -> ((RequestParam) a).defaultValue(),
-                                                                                                  "required", (a) -> ((RequestParam) a).required()));
-        ANNOTATION_PROPERTY_MAPPERS = new AnnotationPropertyMappers(Map.of(PreWebFilter.class, preWebFilterPropertyMapper,
-                                                                           PostWebFilter.class, postWebFilterPropertyMapper,
-                                                                           PathVariable.class, pathVariablePropertyMapper,
-                                                                           RequestBody.class, requestBodyPropertyMapper,
-                                                                           RequestMapping.class, requestMappingPropertyMapper,
-                                                                           RequestParam.class, requestParamPropertyMapper));
     }
 
     public static void main(String[] args) {
 //        // 1. annotating 된 class 의 instance 를 생성한다.
-//        AnnotatedObjectRepositoryCreator repositoryCreator = AnnotatedObjectRepositoryCreator
-//            .builder()
-//            .annotations(PreWebFilter.class,
-//                         Controller.class,
-//                         Component.class,
-//                         Domain.class,
-//                         Repository.class,
-//                         Service.class)
-//            .build();
-//        AnnotatedObjectRepository objectRepository = repositoryCreator.creaet(App4.class, "com.main");
-//
+        AnnotatedObjectRepositoryCreator repositoryCreator = AnnotatedObjectRepositoryCreator
+            .builder()
+            .annotations(PreWebFilter.class,
+                         Controller.class,
+                         Component.class,
+                         Domain.class,
+                         Repository.class,
+                         Service.class)
+            .build();
+        AnnotatedObjectRepository objectRepository = repositoryCreator.creaet(App4.class, "com.main");
+
 //        // 4. java http endpoint task 생성.
-//        List<Class<?>> controllerAnnotatedClasses = objectRepository.findClassByAnnotatedClass(Controller.class);
+        List<Class<?>> controllerAnnotatedClasses = objectRepository.findClassByClassAnnotatedClass(Controller.class);
 //        List<AnnotatedObjectAndMethodProperties> requestMappedProperties =
 //            objectRepository.findAnnotatedObjectAndMethodPropertiesByClassAndAnnotatedClassFocusOnMethod(controllerAnnotatedClasses, RequestMapping.class, List.of("url", "httpMethod"));
 //

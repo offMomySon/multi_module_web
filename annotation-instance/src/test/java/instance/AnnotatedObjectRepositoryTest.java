@@ -166,10 +166,6 @@ class AnnotatedObjectRepositoryTest {
         //when
         List<AnnotatedObjectMethod> actuals = repository.findAnnotatedObjectMethodByClassAnnotatedClassAndMethodAnnotatedClass(findClassAnnotationClazz, findClassMethodAnnotationClazz);
 
-        System.out.println(result);
-        System.out.println(actuals);
-
-
         //then
         Assertions.assertThat(actuals).containsAll(result);
     }

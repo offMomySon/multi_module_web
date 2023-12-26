@@ -1,6 +1,7 @@
 package com.main.finder;
 
 import com.main.util.FileSystemUtil;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -15,12 +16,12 @@ public class SystemResourceFinder2 {
     private final Path resourceDirectory;
     private final String prefix;
 
-    public SystemResourceFinder2(@NonNull Path resourceDirectory, @NonNull String prefix) {
+    private SystemResourceFinder2(@NonNull Path resourceDirectory, @NonNull String prefix) {
         this.resourceDirectory = resourceDirectory;
         this.prefix = prefix;
     }
 
-    public static SystemResourceFinder2 fromPackage(@NonNull Class <?> clazz, @NonNull String resourcePackage, @NonNull String prefix) {
+    public static SystemResourceFinder2 fromPackage(@NonNull Class<?> clazz, @NonNull String resourcePackage, @NonNull String prefix) {
         if (resourcePackage.isBlank()) {
             throw new RuntimeException("requestPackage is empty.");
         }
@@ -36,12 +37,12 @@ public class SystemResourceFinder2 {
 
     public Optional<Path> findFile(@NonNull Path path) {
         String pathUrl = path.toString();
-        if(!pathUrl.startsWith(prefix)){
+        if (!pathUrl.startsWith(prefix)) {
             return Optional.empty();
         }
         pathUrl = pathUrl.substring(prefix.length());
 
-        if(pathUrl.startsWith(DIRECTORY_DELIMITER)){
+        if (pathUrl.startsWith(DIRECTORY_DELIMITER)) {
             pathUrl = pathUrl.substring(1);
         }
 
@@ -67,5 +68,13 @@ public class SystemResourceFinder2 {
 
         log.info("Resource is exist.");
         return Optional.of(resource);
+    }
+
+    public static Method getFindFileMethod() {
+        try {
+            return SystemResourceFinder2.class.getMethod("findFile", Path.class);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

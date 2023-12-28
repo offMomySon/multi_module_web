@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -20,27 +21,24 @@ public class AnnotatedClassInstantiator {
         this.instantiateAnnotations = instantiateAnnotations;
     }
 
-    public ReadOnlyObjectGraph load(Class<?> clazz, ReadOnlyObjectGraph prevObjectGraph) {
-        if (Objects.isNull(clazz)) {
-            throw new RuntimeException("does not exist load clazz.");
-        }
-        if (Objects.isNull(prevObjectGraph)) {
-            prevObjectGraph = ReadOnlyObjectGraph.empty();
+    public ReadOnlyObjectGraph load(@NonNull Class<?> clazz, ReadOnlyObjectGraph baseObjectGraph) {
+        if (Objects.isNull(baseObjectGraph)) {
+            baseObjectGraph = ReadOnlyObjectGraph.empty();
         }
 
         boolean doesNotExistMatchTargetAnnotation = instantiateAnnotations.noneAnnotatedFrom(clazz);
         if (doesNotExistMatchTargetAnnotation) {
-            return prevObjectGraph;
+            return baseObjectGraph;
         }
 
         ObjectGraph objectGraph = ObjectGraph.empty();
         Set<Class<?>> alreadyVisitedClasses = new LinkedHashSet<>();
-        Object instantiate = instantiate(clazz, objectGraph, prevObjectGraph, alreadyVisitedClasses);
+        Object instantiate = instantiate(clazz, objectGraph, baseObjectGraph, alreadyVisitedClasses);
 
         objectGraph.put(clazz, instantiate);
 
         ReadOnlyObjectGraph newReadOnlyObjectGraph = objectGraph.lock();
-        return prevObjectGraph.merge(newReadOnlyObjectGraph);
+        return baseObjectGraph.merge(newReadOnlyObjectGraph);
     }
 
     private Object instantiate(Class<?> clazz, ObjectGraph newObjectGraph, ReadOnlyObjectGraph prevObjectGraph, Set<Class<?>> alreadyVisitedClasses) {

@@ -1,4 +1,4 @@
-package matcher.creator;
+package com.main.finder;
 
 import com.main.util.FileSystemUtil;
 import java.nio.file.Files;
@@ -12,18 +12,18 @@ import matcher.StaticResourceEndPointTaskMatcher;
 import matcher.segment.PathUrl2;
 
 @Slf4j
-public class StaticResourceEndPointCreator {
+public class ResourcePathFinder {
     private final Path resourceDirectory;
     private final String urlPrefix;
 
-    private StaticResourceEndPointCreator(Path resourceDirectory, String urlPrefix) {
+    private ResourcePathFinder(Path resourceDirectory, String urlPrefix) {
         Objects.requireNonNull(resourceDirectory);
         Objects.requireNonNull(urlPrefix);
         this.resourceDirectory = resourceDirectory.normalize();
         this.urlPrefix = urlPrefix;
     }
 
-    public static StaticResourceEndPointCreator from(Class<?> clazz, String resourcePackage, String urlPrefix) {
+    public static ResourcePathFinder from(Class<?> clazz, String resourcePackage, String urlPrefix) {
         Objects.requireNonNull(clazz);
         Objects.requireNonNull(urlPrefix);
         if (Objects.isNull(resourcePackage) || resourcePackage.isBlank()) {
@@ -36,7 +36,11 @@ public class StaticResourceEndPointCreator {
         log.info("clazzPath : {}", clazzPath);
         log.info("projectPackageDirectory : {}", projectPackageDirectory);
         log.info("resourceDirectory : {}", resourceDirectory);
-        return new StaticResourceEndPointCreator(resourceDirectory, urlPrefix);
+        return new ResourcePathFinder(resourceDirectory, urlPrefix);
+    }
+
+    public List<Path> find() {
+        return findFilePath(resourceDirectory);
     }
 
     public List<StaticResourceEndPointTaskMatcher> create() {
@@ -46,7 +50,7 @@ public class StaticResourceEndPointCreator {
             .collect(Collectors.toUnmodifiableList());
 
         return resourceUrls.stream()
-            .map(StaticResourceEndPointCreator::createStaticResourceEndPointMatcher)
+            .map(ResourcePathFinder::createStaticResourceEndPointMatcher)
             .peek(endPointTaskMatcher -> log.info("EndpointTaskMatcher : `{}`", endPointTaskMatcher))
             .collect(Collectors.toUnmodifiableList());
     }

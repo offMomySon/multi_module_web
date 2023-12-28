@@ -4,20 +4,38 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import lombok.NonNull;
 import matcher.path.PathUrl;
 import matcher.path.PathVariable;
+import matcher.segment.factory.SegmentChunkFactory;
 import static java.util.Objects.isNull;
 
 public class SegmentChunkChain {
     private final SegmentChunk segmentChunk;
     private SegmentChunkChain segmentChunkChain;
 
-    public SegmentChunkChain(SegmentChunk segmentChunk, SegmentChunkChain segmentChunkChain) {
-        if (isNull(segmentChunk)) {
-            throw new RuntimeException("Must segmentChunk not be null.");
-        }
+    public SegmentChunkChain(@NonNull SegmentChunk segmentChunk, SegmentChunkChain segmentChunkChain) {
         this.segmentChunk = segmentChunk;
         this.segmentChunkChain = segmentChunkChain;
+    }
+
+    public static SegmentChunkChain of(@NonNull PathUrl pathUrl) {
+        List<SegmentChunk> segmentChunks = SegmentChunkFactory.create(pathUrl);
+
+        SegmentChunk segmentChunk = segmentChunks.get(0);
+        SegmentChunkChain headSegmentChunkChain = SegmentChunkChain.open(segmentChunk);
+        SegmentChunkChain nextSegmentChunkChain = headSegmentChunkChain;
+        for (int i = 1; i < segmentChunks.size(); i++) {
+            segmentChunk = segmentChunks.get(i);
+            nextSegmentChunkChain = nextSegmentChunkChain.chaining(segmentChunk);
+        }
+        nextSegmentChunkChain.close();
+
+        return headSegmentChunkChain;
+    }
+
+    public static SegmentChunkChain open(@NonNull SegmentChunk segmentChunk) {
+        return new SegmentChunkChain(segmentChunk, null);
     }
 
     public SegmentChunkChain close() {
@@ -26,17 +44,13 @@ public class SegmentChunkChain {
         return endSegmentChunkChain;
     }
 
-    public SegmentChunkChain chaining(SegmentChunk segmentChunk) {
+    public SegmentChunkChain chaining(@NonNull SegmentChunk segmentChunk) {
         SegmentChunkChain nextSegmentChunkChain = new SegmentChunkChain(segmentChunk, null);
         this.segmentChunkChain = nextSegmentChunkChain;
         return nextSegmentChunkChain;
     }
 
-    public ConsumeResult consume(PathUrl requestPathUrl) {
-        if (isNull(requestPathUrl)) {
-            throw new RuntimeException("Must segmentChunk not be null.");
-        }
-
+    public ConsumeResult consume(@NonNull PathUrl requestPathUrl) {
         List<PathUrl> remainPathUrls = segmentChunk.consume(requestPathUrl);
 
         boolean doesNotPossibleConsume = remainPathUrls.isEmpty();
@@ -94,7 +108,7 @@ public class SegmentChunkChain {
             return Optional.empty();
         }
 
-        PathVariable nextChainPathVariable = nextConsumeResult.getPathVariableValue();
+        PathVariable nextChainPathVariable = nextConsumeResult.getPathVariable();
         NextChainConsumeResult nextChainConsumeResult = new NextChainConsumeResult(remainPathUrl, nextChainPathVariable);
         return Optional.of(nextChainConsumeResult);
     }
@@ -150,7 +164,7 @@ public class SegmentChunkChain {
             return !isAllConsumed();
         }
 
-        public PathVariable getPathVariableValue() {
+        public PathVariable getPathVariable() {
             return pathVariable;
         }
     }

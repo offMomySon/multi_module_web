@@ -45,7 +45,7 @@ import matcher.RequestMethod;
 import matcher.StaticResourceEndPointTaskMatcher;
 import matcher.creator.JavaMethodPathMatcherCreator;
 import matcher.creator.EndPointMethodInfo;
-import matcher.creator.StaticResourceEndPointCreator;
+import matcher.creator.ResourcePathFinder;
 import parameter.extractor.FunctionBodyParameterInfoExtractor;
 import parameter.extractor.FunctionHttpUrlParameterInfoExtractor;
 import parameter.extractor.HttpBodyParameterInfoExtractor;
@@ -155,8 +155,8 @@ public class App {
             .collect(Collectors.toUnmodifiableList());
 
         // 4. resource http endpoint task 생성.
-        StaticResourceEndPointCreator staticResourceEndPointCreator = StaticResourceEndPointCreator.from(App.class, "../../resources/main", "static");
-        List<StaticResourceEndPointTaskMatcher> staticResourceEndPointTaskMatchers = staticResourceEndPointCreator.create();
+        ResourcePathFinder resourcePathFinder = ResourcePathFinder.from(App.class, "../../resources/main", "static");
+        List<StaticResourceEndPointTaskMatcher> staticResourceEndPointTaskMatchers = resourcePathFinder.create();
 
         List<EndpointTaskMatcher> endpointTaskMatchers = Stream.concat(javaMethodEndpointTaskMatchers.stream(), staticResourceEndPointTaskMatchers.stream()).collect(Collectors.toUnmodifiableList());
         EndpointTaskMatcher endpointTaskMatcher = new CompositedEndpointTaskMatcher(endpointTaskMatchers);

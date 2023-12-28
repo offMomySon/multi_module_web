@@ -1,6 +1,7 @@
 package instance;
 
 import com.main.util.AnnotationUtils;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
@@ -10,6 +11,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -22,9 +24,7 @@ public class Annotations {
     //   생성시에만 중복체크를 하고 instance 는 list 로 순회 속도를 높이자!
     private final List<Class<?>> values;
 
-    public Annotations(List<Class<?>> values) {
-        Objects.requireNonNull(values);
-
+    public Annotations(@NonNull List<Class<?>> values) {
         this.values = values.stream()
             .filter(Class::isAnnotation)
             .distinct()

@@ -8,8 +8,9 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
-import java.util.Objects;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import static java.util.Objects.isNull;
 
 
 /**
@@ -26,38 +27,45 @@ import lombok.extern.slf4j.Slf4j;
 public class FileSystemUtil {
     private static final String JAR_SCHEME = "jar";
 
-    public static Path getClazzRootPath(Class<?> clazz) {
+    public static Path getClazzRootPath(@NonNull Class<?> clazz) {
+        URI classDirectoryUri = getResourceUri(clazz, "");
+
+        if (jarFileSystem(classDirectoryUri)) {
+            try (FileSystem jarFileSystem = FileSystems.newFileSystem(classDirectoryUri, Collections.emptyMap())) {
+                Path rootPath = jarFileSystem.getPath("/");
+                log.info("[jarfileSystem] rootPath : {}", rootPath);
+                return rootPath;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        URI rootUri = getResourceUri(clazz, "/");
+        Path rootPath = Paths.get(rootUri);
+        log.info("rootPath : {}", rootPath);
+        return rootPath;
+    }
+
+    private static URI getResourceUri(Class<?> clazz, String path) {
+        URL pathUrl = clazz.getResource(path);
+        if (isNull(pathUrl)) {
+            throw new RuntimeException("url is null.");
+        }
+
+        URI uri = convertUrlIntoUrI(pathUrl);
+        log.info("uri : {}", uri);
+        return uri;
+    }
+
+    private static URI convertUrlIntoUrI(URL classDirectoryUrl) {
         try {
-            URL classDirectoryUrl = clazz.getResource("");
-            if (Objects.isNull(classDirectoryUrl)) {
-                throw new RuntimeException("classDirectoryUrl is null.");
-            }
-            URI classDirectoryUri = classDirectoryUrl.toURI();
-            log.info("classDirectoryUri : {}", classDirectoryUri);
-
-            if (isJarFileSystem(classDirectoryUri)) {
-                try (FileSystem jarFileSystem = FileSystems.newFileSystem(classDirectoryUri, Collections.emptyMap())) {
-                    Path rootPath = jarFileSystem.getPath("/");
-                    log.info("rootPath : {}", rootPath);
-                    return rootPath;
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-            URL rootUrl = clazz.getResource("/");
-            if (Objects.isNull(rootUrl)) {
-                throw new RuntimeException("uri is null.");
-            }
-            URI rootUri = rootUrl.toURI();
-            log.info("rootUri : {}", rootUri);
-            return Paths.get(rootUri);
+            return classDirectoryUrl.toURI();
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static boolean isJarFileSystem(URI uri) {
+    private static boolean jarFileSystem(URI uri) {
         String scheme = uri.getScheme();
         log.info("scheme : {}", scheme);
         return JAR_SCHEME.equalsIgnoreCase(scheme);

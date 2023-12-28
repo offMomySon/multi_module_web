@@ -65,7 +65,7 @@ public class HttpConfig {
         return new HttpConfig(maxConnection, waitConnection, keepAliveTime, port);
     }
 
-    private static HttpConfig create() {
+    public static HttpConfig create() {
         InputStream resourceInputStream = HttpConfig.class.getResourceAsStream(PATH);
         try {
             JsonMapper jsonMapper = new JsonMapper();

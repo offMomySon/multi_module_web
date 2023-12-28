@@ -1,18 +1,18 @@
 package instance;
 
 import java.lang.annotation.Annotation;
-import java.util.Objects;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NonNull;
 
 @Getter
+@EqualsAndHashCode
 public class AnnotatedObject {
-    private final Object object;
     private final Annotation annotation;
+    private final Object object;
 
-    public AnnotatedObject(Object object, Annotation annotation) {
-        Objects.requireNonNull(object);
-        Objects.requireNonNull(annotation);
-        this.object = object;
+    public AnnotatedObject(@NonNull Annotation annotation, @NonNull Object object) {
         this.annotation = annotation;
+        this.object = object;
     }
 }

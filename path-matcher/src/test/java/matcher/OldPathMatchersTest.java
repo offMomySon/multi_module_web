@@ -9,17 +9,17 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class PathMatchersTest {
+class OldPathMatchersTest {
     @DisplayName("일치하는 path 가 존재하면 매치된 값을 가져온다.")
     @Test
     void test() throws Exception {
         //given
         PathUrl pathUrl = PathUrl.of("/GET/test");
         PathUrl requestPathUrl = PathUrl.of("/GET/test");
-        PathMatcher pathMatcher = PathMatcher.of(pathUrl);
+        OldPathMatcher oldPathMatcher = OldPathMatcher.of(pathUrl);
         Method method = TestClass.class.getDeclaredMethod("method");
 
-        Map<PathMatcher, Method> map = Map.of(pathMatcher, method);
+        Map<OldPathMatcher, Method> map = Map.of(oldPathMatcher, method);
         PathMatchers<Method> methodPathMatchers = new PathMatchers<Method>(map);
 
         //when
@@ -38,10 +38,10 @@ class PathMatchersTest {
         //given
         PathUrl pathUrl = PathUrl.of("/GET/test");
         PathUrl requestPathUrl = PathUrl.of("/GET/test/depth1");
-        PathMatcher pathMatcher = PathMatcher.of(pathUrl);
+        OldPathMatcher oldPathMatcher = OldPathMatcher.of(pathUrl);
         Method method = TestClass.class.getDeclaredMethod("method");
 
-        Map<PathMatcher, Method> map = Map.of(pathMatcher, method);
+        Map<OldPathMatcher, Method> map = Map.of(oldPathMatcher, method);
         PathMatchers<Method> methodPathMatchers = new PathMatchers<Method>(map);
 
         //when

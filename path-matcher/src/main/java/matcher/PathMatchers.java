@@ -10,9 +10,9 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 public class PathMatchers<T> {
-    private final Map<PathMatcher, T> values;
+    private final Map<OldPathMatcher, T> values;
 
-    public PathMatchers(Map<PathMatcher, T> values) {
+    public PathMatchers(Map<OldPathMatcher, T> values) {
         if (isNull(values)) {
             throw new RuntimeException("Ensure the parameter is not null.");
         }
@@ -28,10 +28,10 @@ public class PathMatchers<T> {
             throw new RuntimeException("Ensure the parameter is not null.");
         }
 
-        for (Map.Entry<PathMatcher, T> entry : values.entrySet()) {
-            PathMatcher pathMatcher = entry.getKey();
+        for (Map.Entry<OldPathMatcher, T> entry : values.entrySet()) {
+            OldPathMatcher oldPathMatcher = entry.getKey();
 
-            Optional<PathVariable> optionalPathVariable = pathMatcher.match(pathUrl);
+            Optional<PathVariable> optionalPathVariable = oldPathMatcher.match(pathUrl);
             boolean failMatch = optionalPathVariable.isEmpty();
             if (failMatch) {
                 continue;
@@ -73,17 +73,17 @@ public class PathMatchers<T> {
     }
 
     public static class Builder<T> {
-        private final Map<PathMatcher, T> values = new HashMap<>();
+        private final Map<OldPathMatcher, T> values = new HashMap<>();
 
         public Builder() {
         }
 
-        public Builder<T> append(PathMatcher pathMatcher, T t) {
-            if (isNull(pathMatcher) || isNull(t)) {
+        public Builder<T> append(OldPathMatcher oldPathMatcher, T t) {
+            if (isNull(oldPathMatcher) || isNull(t)) {
                 throw new RuntimeException("Ensure the parameter is not null.");
             }
 
-            values.put(pathMatcher, t);
+            values.put(oldPathMatcher, t);
             return this;
         }
 

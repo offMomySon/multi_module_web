@@ -115,7 +115,6 @@ class AnnotationUtilsTest {
     }
 
     @Controller
-    @RequestMapping
     private static class AnnotatedClass {
         @MethodAnnotation1
         @MethodAnnotation2

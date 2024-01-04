@@ -14,7 +14,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import parameter.BaseParameterValueConverter;
 
-class BaseParameterValueValueConverterTest {
+class BaseTaskParameterValueValueConverterTest {
 
     @DisplayName("ParameterValue 는 string 이 아니면 exception 이 발생합니다.")
     @Test

@@ -3,6 +3,7 @@ package com.main.task.executor;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import parameter.matcher.ParameterValueAssignees2;
 import task.worker.EndPointTaskWorker2;
@@ -12,13 +13,11 @@ import task.worker.EndPointWorkerResult;
 public class EndPointTaskExecutor {
     private final ParameterValueAssignees2 parameterValueAssignees;
 
-    public EndPointTaskExecutor(ParameterValueAssignees2 parameterValueAssignee) {
-        Objects.requireNonNull(parameterValueAssignee);
+    public EndPointTaskExecutor(@NonNull ParameterValueAssignees2 parameterValueAssignee) {
         this.parameterValueAssignees = parameterValueAssignee;
     }
 
-    public EndPointWorkerResult execute(EndPointTaskWorker2 endPointTaskWorker) {
-        Objects.requireNonNull(endPointTaskWorker);
+    public EndPointWorkerResult execute(@NonNull EndPointTaskWorker2 endPointTaskWorker) {
         log.info("ParameterTypeInfos: `{}`", Arrays.toString(endPointTaskWorker.getParameterTypeInfos()));
 
         Object[] parameterValues = Arrays.stream(endPointTaskWorker.getParameterTypeInfos())

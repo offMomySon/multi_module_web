@@ -11,7 +11,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import parameter.matcher.HttpBodyAnnotationAnnotatedParameterValueAssignee;
 
-class HttpBodyAnnotationAnnotatedParameterValueAssigneeTest {
+class HttpBodyAnnotationAnnotatedTaskParameterValueParameterValueAssigneeTest {
 
     @DisplayName("RequestBody annotation 이 존재하지 않으면 exception 이 발생합니다.")
     @Test

@@ -15,6 +15,7 @@ dependencies {
     api project(':http-task-executor')
     api project(':path-matcher')
     api project(':util')
+    api project(':method-invoker')
 
     //logback
     implementation 'ch.qos.logback:logback-core:1.2.3'

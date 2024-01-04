@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 import parameter.matcher.HttpUrlAnnotationAnnotatedParameterValueAssignee;
 import static parameter.matcher.HttpUrlAnnotationAnnotatedParameterValueAssignee.HttpUrlAnnotation;
 
-class HttpUrlParameterInfoAnnotatedAssignParameterValueAssigneeTest {
+class PathVariableParamValueParameterValueAssigneeTest {
 
     @DisplayName("parameter 로 부터 target annotation 을 찾지 못하면 exception 이 발생합니다.")
     @Test

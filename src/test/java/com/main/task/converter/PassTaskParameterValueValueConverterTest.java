@@ -8,7 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import parameter.PassParameterValueClazzConverter;
 
-class PassParameterValueValueConverterTest {
+class PassTaskParameterValueValueConverterTest {
 
     @DisplayName("빈값을 입력 받으면 빈값을 반환한다.")
     @Test

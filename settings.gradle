@@ -5,4 +5,5 @@ include 'http'
 include 'http-task-executor'
 include 'util'
 include 'path-matcher'
+include 'method-invoker'
 

@@ -12,15 +12,12 @@ import annotation.RequestMapping;
 import annotation.RequestParam;
 import annotation.Service;
 import com.main.finder.SystemResourceFinder2;
-import com.main.task.executor.EndPointTaskExecutor;
 import com.main.util.AnnotationUtils;
 import converter.CompositeValueTypeConverter;
 import executor.SocketHttpTaskExecutor;
 import instance.AnnotatedObjectRepository;
 import instance.AnnotatedObjectRepository.AnnotatedObjectMethod;
 import instance.AnnotatedObjectRepositoryCreator;
-import instance.AnnotationProperties;
-import instance.AnnotationPropertyGetter;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
@@ -31,8 +28,6 @@ import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.TimeZone;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -41,20 +36,10 @@ import matcher.PathMatcher;
 import matcher.PathMatcher.MatchedElement;
 import matcher.PathMatcher.Token;
 import matcher.RequestMethod;
-import matcher.creator.EndPointMethodInfo;
 import matcher.path.PathUrl;
 import parameter.UrlParameterValues;
 import parameter.extractor.HttpBodyParameterInfoExtractor.HttpBodyParameterInfo;
-import parameter.matcher.HttpBodyParameterValueAssignee;
-import parameter.matcher.HttpUrlParameterValueAssignee;
 import parameter.matcher.ParameterAndValueAssigneeType;
-import parameter.matcher.ParameterValueAssignees2;
-import pretask.PostTaskInfo;
-import pretask.PreTaskInfo;
-import task.PostTaskWorker;
-import task.PreTaskWorker;
-import task.worker.EndPointTaskWorker2;
-import task.worker.EndPointWorkerResult;
 import task.worker.WorkerResultType;
 import vo.ContentType2;
 import static com.main.config.HttpConfig.INSTANCE;
@@ -133,8 +118,8 @@ public class App4 {
         SystemResourceFinder2 systemResourceFinder2 = SystemResourceFinder2.fromPackage(App.class, "../../resources/main", RESOURCE_PREFIX);
         InstanceMethod systemResourceInstanceMethod = new InstanceMethod(systemResourceFinder2, SystemResourceFinder2.getFindFileMethod());
         PathMatcher<InstanceMethod> pathMatcher = controllerPathMatcher.add(new Token(GET.name()),
-                                      PathUrl.of(RESOURCE_PREFIX + "/**"),
-                                      systemResourceInstanceMethod);
+                                                                            PathUrl.of(RESOURCE_PREFIX + "/**"),
+                                                                            systemResourceInstanceMethod);
 
         // 8. execute service.
         SocketHttpTaskExecutor socketHttpTaskExecutor = SocketHttpTaskExecutor.create(INSTANCE.getPort(),
@@ -180,32 +165,6 @@ public class App4 {
         return convertToContentType(type);
     }
 
-    private static List<PreTaskInfo> createPreTaskInfos(PreTaskWorker preTaskWorker, String filterName, String[] patterns) {
-        return Arrays.stream(patterns)
-            .map(pattern -> new PreTaskInfo(filterName, pattern, preTaskWorker))
-            .collect(Collectors.toUnmodifiableList());
-    }
-
-    private static List<PostTaskInfo> createPostTaskInfos(PostTaskWorker postTaskWorker, String filterName, String[] patterns) {
-        return Arrays.stream(patterns)
-            .map(pattern -> new PostTaskInfo(filterName, pattern, postTaskWorker))
-            .collect(Collectors.toUnmodifiableList());
-    }
-
-    private static List<EndPointMethodInfo> createEndPointMethodInfos(RequestMethod[] requestMethods, String[] classUrls, String[] _methodUrls, Object object, Method javaMethod) {
-        List<String> clazzUrls = Arrays.stream(classUrls).collect(Collectors.toUnmodifiableList());
-        List<String> methodUrls = Arrays.stream(_methodUrls).collect(Collectors.toUnmodifiableList());
-        List<String> fullMethodUrls = clazzUrls.stream()
-            .flatMap(clazzUrl -> methodUrls.stream()
-                .map(methodUrl -> clazzUrl + methodUrl))
-            .collect(Collectors.toUnmodifiableList());
-
-        return Arrays.stream(requestMethods)
-            .flatMap(httpMethod -> fullMethodUrls.stream()
-                .map(methodUrl -> new EndPointMethodInfo(httpMethod, methodUrl, object, javaMethod)))
-            .collect(Collectors.toUnmodifiableList());
-    }
-
     private static String getHostAddress() {
         try {
             InetAddress localHost = InetAddress.getLocalHost();
@@ -215,38 +174,34 @@ public class App4 {
         }
     }
 
-    private static Function<Parameter, HttpUrlParameterInfo> requestParamHttpUrlParameterInfoFunction(AnnotationPropertyGetter annotationPropertyGetter) {
-        Objects.requireNonNull(annotationPropertyGetter);
+    private static Function<Parameter, HttpUrlParameterInfo> requestParamHttpUrlParameterInfoFunction() {
         return parameter -> {
-            AnnotationProperties annotationProperties = annotationPropertyGetter.getAnnotationProperties(parameter, RequestParam.class, List.of("name", "defaultValue", "required"));
+            RequestParam requestParam = AnnotationUtils.find(parameter, RequestParam.class).orElseThrow();
 
-            String parameterName = (String) annotationProperties.getValueOrDefault("name", parameter.getName());
-            String defaultValue = (String) annotationProperties.getValue("defaultValue");
-            boolean required = (boolean) annotationProperties.getValue("required");
+            String parameterName = requestParam.name();
+            String defaultValue = requestParam.defaultValue();
+            boolean required = requestParam.required();
 
             return new HttpUrlParameterInfo(parameterName, defaultValue, required);
         };
     }
 
-    private static Function<Parameter, HttpUrlParameterInfo> pathVariableHttpUrlParameterInfoFunction(AnnotationPropertyGetter annotationPropertyGetter) {
-        Objects.requireNonNull(annotationPropertyGetter);
+    private static Function<Parameter, HttpUrlParameterInfo> pathVariableHttpUrlParameterInfoFunction() {
         return parameter -> {
-            AnnotationProperties annotationProperties = annotationPropertyGetter.getAnnotationProperties(parameter, PathVariable.class, List.of("name", "required"));
+            PathVariable pathVariable = AnnotationUtils.find(parameter, PathVariable.class).orElseThrow();
 
-            String parameterName = (String) annotationProperties.getValueOrDefault("name", parameter.getName());
-            boolean required = (boolean) annotationProperties.getValue("required");
-            String defaultValue = null;
+            String parameterName = pathVariable.name();
+            boolean required = pathVariable.required();
 
-            return new HttpUrlParameterInfo(parameterName, defaultValue, required);
+            return new HttpUrlParameterInfo(parameterName, null, required);
         };
     }
 
-    private static Function<Parameter, HttpBodyParameterInfo> requestBodyHttpUrlParameterInfoFunction(AnnotationPropertyGetter annotationPropertyGetter) {
-        Objects.requireNonNull(annotationPropertyGetter);
+    private static Function<Parameter, HttpBodyParameterInfo> requestBodyHttpUrlParameterInfoFunction() {
         return parameter -> {
-            AnnotationProperties annotationProperties = annotationPropertyGetter.getAnnotationProperties(parameter, RequestBody.class, List.of("required"));
+            RequestBody requestBody = AnnotationUtils.find(parameter, RequestBody.class).orElseThrow();
 
-            boolean required = (boolean) annotationProperties.getValue("required");
+            boolean required = requestBody.required();
 
             return new HttpBodyParameterInfo(required);
         };

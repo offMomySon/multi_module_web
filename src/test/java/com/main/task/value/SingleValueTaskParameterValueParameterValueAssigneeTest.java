@@ -9,7 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import parameter.matcher.SingleValueParameterValueAssignee;
 
-class SingleValueParameterValueAssigneeTest {
+class SingleValueTaskParameterValueParameterValueAssigneeTest {
 
     @DisplayName("parameter class 에 value 를 할당할 수 있으면 값을 반환합니다.")
     @Test

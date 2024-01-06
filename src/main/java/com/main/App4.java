@@ -12,8 +12,9 @@ import annotation.RequestMapping;
 import annotation.RequestParam;
 import annotation.Service;
 import com.main.finder.SystemResourceFinder2;
+import com.main.task.executor.EndPointTaskExecutor;
 import com.main.util.AnnotationUtils;
-import converter.CompositeValueTypeConverter;
+import com.main.util.converter.CompositeValueTypeConverter;
 import executor.SocketHttpTaskExecutor;
 import instance.AnnotatedObjectRepository;
 import instance.AnnotatedObjectRepository.AnnotatedObjectMethod;
@@ -28,6 +29,7 @@ import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -39,7 +41,11 @@ import matcher.RequestMethod;
 import matcher.path.PathUrl;
 import parameter.UrlParameterValues;
 import parameter.extractor.HttpBodyParameterInfoExtractor.HttpBodyParameterInfo;
+import parameter.matcher.HttpBodyParameterValueAssignee;
+import parameter.matcher.HttpUrlParameterValueAssignee;
 import parameter.matcher.ParameterAndValueAssigneeType;
+import parameter.matcher.ParameterValueAssignees2;
+import task.worker.EndPointWorkerResult;
 import task.worker.WorkerResultType;
 import vo.ContentType2;
 import static com.main.config.HttpConfig.INSTANCE;
@@ -140,12 +146,12 @@ public class App4 {
             UrlParameterValues queryParamValues = new UrlParameterValues(request.getQueryParameters().getParameterMap());
             InputStream bodyInputStream = request.getBodyInputStream();
 
-//            ParameterValueAssignees2 parameterValueAssignees2 = new ParameterValueAssignees2(
-//                Map.of(URL, new HttpUrlParameterValueAssignee(pathVariableHttpUrlParameterInfoFunction(annotationPropertyGetter), pathVariableValue),
-//                       QUERY_PARAM, new HttpUrlParameterValueAssignee(requestParamHttpUrlParameterInfoFunction(annotationPropertyGetter), queryParamValues),
-//                       BODY, new HttpBodyParameterValueAssignee(requestBodyHttpUrlParameterInfoFunction(annotationPropertyGetter), bodyInputStream)));
-//            EndPointTaskExecutor endPointTaskExecutor = new EndPointTaskExecutor(parameterValueAssignees2);
-//            EndPointWorkerResult endPointWorkerResult = endPointTaskExecutor.execute(endPointTaskWorker);
+            ParameterValueAssignees2 parameterValueAssignees2 = new ParameterValueAssignees2(
+                Map.of(URL, new HttpUrlParameterValueAssignee(pathVariableHttpUrlParameterInfoFunction(annotationPropertyGetter), pathVariableValue),
+                       QUERY_PARAM, new HttpUrlParameterValueAssignee(requestParamHttpUrlParameterInfoFunction(annotationPropertyGetter), queryParamValues),
+                       BODY, new HttpBodyParameterValueAssignee(requestBodyHttpUrlParameterInfoFunction(annotationPropertyGetter), bodyInputStream)));
+            EndPointTaskExecutor endPointTaskExecutor = new EndPointTaskExecutor(parameterValueAssignees2);
+            EndPointWorkerResult endPointWorkerResult = endPointTaskExecutor.execute(endPointTaskWorker);
 //
 //            WorkerResultType type = endPointWorkerResult.getType();
 //            Object result = endPointWorkerResult.getResult();

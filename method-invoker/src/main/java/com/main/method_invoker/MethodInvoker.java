@@ -37,6 +37,14 @@ public class MethodInvoker {
         this.resourceValuesMap = Map.copyOf(resourceValuesMap);
     }
 
+    // string - pathvariable, query param
+    // inputstream - body
+    // 군집을 어떻게?  - http 요청 -> 구체적으로 -> 분류 ->
+    // http 설명
+    // 1. startline -
+    // 2. header
+    // 3. body.
+
     // object, method, param info (resource type, param name, default value).
     public Object invoke(@NonNull Object object, @NonNull Method method, @NonNull ParameterMeta[] parameterMetas) {
         boolean doesNotObjectMethod = Arrays.stream(object.getClass().getDeclaredMethods()).noneMatch(m -> m == method);

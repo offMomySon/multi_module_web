@@ -1,9 +1,12 @@
 package com.main.util.converter;
 
 import java.io.InputStream;
+import lombok.NonNull;
 
 public interface ValueConverter {
-    InputStream convertToInputStream(Object object);
+    InputStream convertToInputStream(@NonNull Object object);
 
-    Object convertToClazz(String value);
+    Object convertToClazz(@NonNull String value);
+
+    Object convertToClazz(@NonNull InputStream inputStream);
 }

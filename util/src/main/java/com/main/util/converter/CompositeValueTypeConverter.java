@@ -1,14 +1,18 @@
 package com.main.util.converter;
 
+import com.main.util.IoUtils;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
+import lombok.NonNull;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class CompositeValueTypeConverter {
@@ -18,7 +22,6 @@ public class CompositeValueTypeConverter {
     static {
         Map<Class<?>, ValueConverter> converters = new HashMap<>();
         // specific type.
-        converters.put(InputStream.class, new InputStreamValueConverter());
         converters.put(Path.class, new PathValueConverter());
         converters.put(File.class, new FileValueConverter());
 
@@ -41,29 +44,23 @@ public class CompositeValueTypeConverter {
         converters.put(Double.class, new ObjectValueConverter(Double.class));
         converters.put(String.class, new ObjectValueConverter(String.class));
 
-        CONVERTERS_MAP = converters.entrySet().stream()
-            .filter(entry -> Objects.nonNull(entry.getKey()))
-            .filter(entry -> Objects.nonNull(entry.getValue()))
-            .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (prev, curr) -> prev));
+        CONVERTERS_MAP = Map.copyOf(converters);
     }
 
-    public InputStream convertToInputStream(Object object) {
-        if (Objects.isNull(object)) {
-            return new ByteArrayInputStream(EMPTY_VALUE.getBytes(UTF_8));
-        }
-
+    public InputStream convertToInputStream(@NonNull Object object) {
         Class<?> convertClazz = object.getClass();
         ValueConverter foundValueConverter = findConverterOrDefault(convertClazz, objectConverterSupplier(convertClazz));
         return foundValueConverter.convertToInputStream(object);
     }
 
-    public <T> T convertToClazz(String value, Class<T> convertClazz) {
-        if (Objects.isNull(value) || Objects.isNull(convertClazz)) {
-            throw new RuntimeException("Invalid value. value is emtpy.");
-        }
-
+    public static Object convertToClazz(@NonNull InputStream inputStream, @NonNull Class<?> convertClazz) {
         ValueConverter foundValueConverter = findConverterOrDefault(convertClazz, objectConverterSupplier(convertClazz));
-        return (T) foundValueConverter.convertToClazz(value);
+        return foundValueConverter.convertToClazz(inputStream);
+    }
+
+    public static Object convertToClazz(@NonNull String value, @NonNull Class<?> convertClazz) {
+        ValueConverter foundValueConverter = findConverterOrDefault(convertClazz, objectConverterSupplier(convertClazz));
+        return foundValueConverter.convertToClazz(value);
     }
 
     private static ValueConverter findConverterOrDefault(Class<?> findClazz, Supplier<ValueConverter> converterSupplier) {

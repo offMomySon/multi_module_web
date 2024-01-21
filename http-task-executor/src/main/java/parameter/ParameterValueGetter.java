@@ -34,7 +34,7 @@ public class ParameterValueGetter {
 
         Class<?> paramType = parameter.getType();
         String matchedValue = (String) optionalMatchValue.get();
-        Object value = converter.convertToClazz(matchedValue, paramType);
+        Object value = CompositeValueTypeConverter.convertToClazz(matchedValue, paramType);
         return Optional.of(value);
     }
 }
